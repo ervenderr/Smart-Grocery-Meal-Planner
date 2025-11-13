@@ -8,7 +8,11 @@
       "Bash(npm test)",
       "Bash(npx jest:*)",
       "Bash(npm run prisma:seed:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
