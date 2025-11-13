@@ -13,11 +13,9 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Pantry', href: '/pantry', icon: Package },
   { name: 'Recipes', href: '/recipes', icon: UtensilsCrossed },
-  { name: 'Meal Plans', href: '/meal-plans', icon: Calendar },
+  { name: 'Meal Plans', href: '/mealplans', icon: Calendar },
   { name: 'Shopping Lists', href: '/shopping', icon: ShoppingBasket },
   { name: 'Budget', href: '/budget', icon: TrendingUp },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Alerts', href: '/alerts', icon: Bell },
 ];
 
 export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {

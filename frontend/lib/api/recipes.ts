@@ -24,48 +24,43 @@ export const recipeApi = {
     }
 
     const query = params.toString();
-    const url = query ? `/recipes?${query}` : '/recipes';
+    const url = query ? `/api/v1/recipes?${query}` : '/api/v1/recipes';
 
-    const response = await apiClient.get<RecipesResponse>(url);
-    return response.data;
+    return await apiClient.get<RecipesResponse>(url);
   },
 
   /**
    * Get recipe statistics
    */
   async getStats(): Promise<RecipeStats> {
-    const response = await apiClient.get<RecipeStats>('/recipes/stats');
-    return response.data;
+    return await apiClient.get<RecipeStats>('/api/v1/recipes/stats');
   },
 
   /**
    * Get a single recipe by ID
    */
   async getById(id: string): Promise<Recipe> {
-    const response = await apiClient.get<Recipe>(`/recipes/${id}`);
-    return response.data;
+    return await apiClient.get<Recipe>(`/api/v1/recipes/${id}`);
   },
 
   /**
    * Create a new recipe
    */
   async create(data: CreateRecipeData): Promise<Recipe> {
-    const response = await apiClient.post<Recipe>('/recipes', data);
-    return response.data;
+    return await apiClient.post<Recipe>('/api/v1/recipes', data);
   },
 
   /**
    * Update an existing recipe
    */
   async update(id: string, data: UpdateRecipeData): Promise<Recipe> {
-    const response = await apiClient.patch<Recipe>(`/recipes/${id}`, data);
-    return response.data;
+    return await apiClient.patch<Recipe>(`/api/v1/recipes/${id}`, data);
   },
 
   /**
    * Delete a recipe
    */
   async delete(id: string): Promise<void> {
-    await apiClient.delete(`/recipes/${id}`);
+    await apiClient.delete(`/api/v1/recipes/${id}`);
   },
 };

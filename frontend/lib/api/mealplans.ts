@@ -25,56 +25,50 @@ export const mealPlanApi = {
     }
 
     const query = params.toString();
-    const url = query ? `/mealplans?${query}` : '/mealplans';
+    const url = query ? `/api/v1/mealplans?${query}` : '/api/v1/mealplans';
 
-    const response = await apiClient.get<MealPlansResponse>(url);
-    return response.data;
+    return await apiClient.get<MealPlansResponse>(url);
   },
 
   /**
    * Get meal plan statistics
    */
   async getStats(): Promise<MealPlanStats> {
-    const response = await apiClient.get<MealPlanStats>('/mealplans/stats');
-    return response.data;
+    return await apiClient.get<MealPlanStats>('/api/v1/mealplans/stats');
   },
 
   /**
    * Get a single meal plan by ID
    */
   async getById(id: string): Promise<MealPlan> {
-    const response = await apiClient.get<MealPlan>(`/mealplans/${id}`);
-    return response.data;
+    return await apiClient.get<MealPlan>(`/api/v1/mealplans/${id}`);
   },
 
   /**
    * Create a new meal plan
    */
   async create(data: CreateMealPlanData): Promise<MealPlan> {
-    const response = await apiClient.post<MealPlan>('/mealplans', data);
-    return response.data;
+    return await apiClient.post<MealPlan>('/api/v1/mealplans', data);
   },
 
   /**
    * Update an existing meal plan
    */
   async update(id: string, data: UpdateMealPlanData): Promise<MealPlan> {
-    const response = await apiClient.patch<MealPlan>(`/mealplans/${id}`, data);
-    return response.data;
+    return await apiClient.patch<MealPlan>(`/api/v1/mealplans/${id}`, data);
   },
 
   /**
    * Delete a meal plan
    */
   async delete(id: string): Promise<void> {
-    await apiClient.delete(`/mealplans/${id}`);
+    await apiClient.delete(`/api/v1/mealplans/${id}`);
   },
 
   /**
    * Generate shopping list from meal plan
    */
   async getShoppingList(id: string): Promise<MealPlanShoppingList> {
-    const response = await apiClient.get<MealPlanShoppingList>(`/mealplans/${id}/shopping-list`);
-    return response.data;
+    return await apiClient.get<MealPlanShoppingList>(`/api/v1/mealplans/${id}/shopping-list`);
   },
 };
