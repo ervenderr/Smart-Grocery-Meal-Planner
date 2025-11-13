@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(sudo -u postgres psql:*)",
+      "Bash(curl:*)",
+      "Bash(npm test)",
+      "Bash(npx jest:*)",
+      "Bash(npm run prisma:seed:*)",
+      "Bash(npm test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

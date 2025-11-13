@@ -1,0 +1,449 @@
+// ============================================
+// Smart Grocery & Meal Planner - Database Schema
+// ============================================
+//
+// This schema defines all 11 tables with their relationships.
+//
+// WHY PRISMA?
+// - Type-safe database queries (compile-time checks)
+// - Auto-generated TypeScript types
+// - Easy migrations
+// - Clean API (no raw SQL needed)
+//
+// RELATIONSHIPS:
+// - Users have: pantry items, meal plans, shopping lists, alerts
+// - Meal plans contain: meal plan items (which reference recipes)
+// - Shopping lists contain: shopping list items
+// - All tables properly indexed for performance
+//
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 1. USERS TABLE
+// ============================================
+// Core user authentication and profile
+//
+// WHY UUID: More secure than auto-increment IDs
+// WHY created_at/updated_at: Audit trail, debugging
+// WHY is_active: Soft account deactivation (don't delete users)
+//
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash") // bcrypt hash, NEVER store plain password
+  firstName     String?  @map("first_name")
+  lastName      String?  @map("last_name")
+  avatarUrl     String?  @map("avatar_url")
+  isActive      Boolean  @default(true) @map("is_active")
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  lastLogin     DateTime? @map("last_login")
+
+  // Relationships (one user has many...)
+  preferences       UserPreference?
+  pantryItems       PantryItem[]
+  recipes           Recipe[]
+  mealPlans         MealPlan[]
+  shoppingLists     ShoppingList[]
+  shoppingHistory   ShoppingHistory[]
+  alerts            Alert[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================
+// 2. USER PREFERENCES TABLE
+// ============================================
+// User-specific settings for meal planning and budgeting
+//
+// WHY SEPARATE TABLE: Keeps users table clean, preferences can grow
+// WHY Json FOR dietaryRestrictions: Flexible array (vegan, gluten-free, etc.)
+// WHY cents: Avoid floating point errors (store ₱100 as 10000 cents)
+//
+model UserPreference {
+  id                          String   @id @default(uuid())
+  userId                      String   @unique @map("user_id")
+
+  // Budget settings
+  currency                    String   @default("PHP")
+  budgetPerWeekCents          Int      @default(10000) @map("budget_per_week_cents") // ₱100
+
+  // Alert settings
+  alertEnabled                Boolean  @default(true) @map("alert_enabled")
+  alertThresholdPercentage    Int      @default(90) @map("alert_threshold_percentage") // Alert at 90%
+  alertChannels               String[] @default(["in_app"]) @map("alert_channels") // ["email", "in_app", "push"]
+
+  // Meal planning preferences
+  mealsPerDay                 Int      @default(3) @map("meals_per_day")
+  dietaryRestrictions         String[] @default([]) @map("dietary_restrictions") // ["vegan", "gluten-free"]
+
+  // Shopping preferences
+  preferredUnit               String   @default("kg") @map("preferred_unit") // "kg" or "lb"
+
+  createdAt                   DateTime @default(now()) @map("created_at")
+  updatedAt                   DateTime @updatedAt @map("updated_at")
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_preferences")
+}
+
+// ============================================
+// 3. PANTRY ITEMS TABLE
+// ============================================
+// User's current ingredient inventory
+//
+// WHY track expiry: Prevent waste, suggest recipes before items expire
+// WHY category: Organize items, analytics by category
+// WHY purchase_price: Build price history, compare with market
+// WHY soft delete: Keep data for analytics even after item used
+//
+model PantryItem {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+
+  // Item details
+  ingredientName    String    @map("ingredient_name")
+  quantity          Decimal   @db.Decimal(10, 2)
+  unit              String    // "lbs", "kg", "grams", "cups", "ml", "pieces"
+  category          String    // "protein", "vegetable", "fruit", "dairy", "grains", "spices", "other"
+
+  // Tracking
+  expiryDate        DateTime? @map("expiry_date") @db.Date
+  purchaseDate      DateTime? @map("purchase_date") @db.Date
+  purchasePriceCents Int?     @map("purchase_price_cents")
+  location          String?   // "fridge", "freezer", "pantry", "counter"
+
+  notes             String?   @db.Text
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at") // Soft delete
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiryDate])
+  @@index([category])
+  @@index([userId, ingredientName]) // Composite index for finding user's specific ingredient
+  @@map("pantry_items")
+}
+
+// ============================================
+// 4. RECIPES TABLE
+// ============================================
+// Recipe library (can be seeded or from Spoonacular API)
+//
+// WHY JSONB for ingredients: Each recipe has different # ingredients
+// WHY externalId: Link to Spoonacular if using API
+// WHY estimatedTotalCostCents: Quick cost preview without calculating
+//
+model Recipe {
+  id                        String   @id @default(uuid())
+  userId                    String   @map("user_id")
+
+  // Metadata
+  title                     String
+  description               String?  @db.Text
+  category                  String   // breakfast, lunch, dinner, snack, dessert, beverage
+  difficulty                String   // easy, medium, hard
+  imageUrl                  String?  @map("image_url")
+  tags                      String[] @default([])
+  dietaryRestrictions       String[] @default([]) @map("dietary_restrictions")
+  isPublic                  Boolean  @default(false) @map("is_public")
+
+  // Timing & servings
+  prepTimeMinutes           Int      @default(0) @map("prep_time_minutes")
+  cookTimeMinutes           Int      @default(0) @map("cook_time_minutes")
+  servings                  Int      @default(1)
+
+  // Nutrition (per serving)
+  caloriesPerServing        Int?     @map("calories_per_serving")
+  proteinGrams              Decimal? @map("protein_grams") @db.Decimal(5, 2)
+  carbsGrams                Decimal? @map("carbs_grams") @db.Decimal(5, 2)
+  fatGrams                  Decimal? @map("fat_grams") @db.Decimal(5, 2)
+
+  // Ingredients (flexible JSONB array)
+  // Example: [{"ingredientName": "chicken", "quantity": 2, "unit": "lbs", "notes": "boneless"}]
+  ingredientsList           Json     @map("ingredients_list")
+
+  // Instructions (array of steps)
+  instructions              String[]
+
+  // Source tracking
+  source                    String?  // "local" or "spoonacular"
+  externalId                String?  @map("external_id") // Spoonacular recipe ID
+
+  isFavorite                Boolean  @default(false) @map("is_favorite")
+  estimatedTotalCostCents   Int?     @map("estimated_total_cost_cents")
+
+  deletedAt                 DateTime? @map("deleted_at")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
+
+  // Relationships
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealPlanItems MealPlanItem[]
+
+  @@index([title])
+  @@index([source])
+  @@index([userId])
+  @@index([category])
+  @@index([difficulty])
+  @@map("recipes")
+}
+
+// ============================================
+// 5. MEAL PLANS TABLE
+// ============================================
+// Weekly or custom meal plans
+//
+// WHY start_date/end_date: Flexible (not limited to weeks)
+// WHY total_cost: Cached calculation for quick display
+// WHY is_favorite: Users can save templates ("Budget Week", "Keto Week")
+//
+model MealPlan {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+
+  name              String
+  startDate         DateTime @map("start_date") @db.Date
+  endDate           DateTime @map("end_date") @db.Date
+
+  totalCostCents    Int?     @map("total_cost_cents")
+  totalCalories     Int?     @map("total_calories")
+
+  isFavorite        Boolean  @default(false) @map("is_favorite")
+  notes             String?  @db.Text
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at") // Soft delete
+
+  // Relationships
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealPlanItems MealPlanItem[]
+  shoppingLists ShoppingList[]
+
+  @@index([userId])
+  @@index([startDate, endDate])
+  @@map("meal_plans")
+}
+
+// ============================================
+// 6. MEAL PLAN ITEMS TABLE
+// ============================================
+// Individual meals within a meal plan
+//
+// WHY day_of_week: 0=Monday, 6=Sunday (consistent with JS Date.getDay)
+// WHY meal_type: breakfast, lunch, dinner, snack
+// WHY servings: User might cook 4 servings but recipe default is 2
+// WHY cost/calories: Cached values (servings × recipe values)
+//
+model MealPlanItem {
+  id            String   @id @default(uuid())
+  mealPlanId    String   @map("meal_plan_id")
+  recipeId      String   @map("recipe_id")
+
+  dayOfWeek     Int      @map("day_of_week") // 0=Monday, 6=Sunday
+  mealType      String   @map("meal_type")   // "breakfast", "lunch", "dinner", "snack"
+  servings      Int      @default(1)
+
+  costCents     Int?     @map("cost_cents")
+  calories      Int?
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe   Recipe   @relation(fields: [recipeId], references: [id])
+
+  @@index([mealPlanId])
+  @@index([recipeId])
+  @@index([dayOfWeek])
+  @@map("meal_plan_items")
+}
+
+// ============================================
+// 7. SHOPPING LISTS TABLE
+// ============================================
+// Generated from meal plans or created manually
+//
+// WHY meal_plan_id nullable: Can create standalone shopping lists
+// WHY total_gemini_units: Converted price for budget tracking
+// WHY is_completed: Track shopping trip completion
+//
+model ShoppingList {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  mealPlanId          String?   @map("meal_plan_id") // Optional link to meal plan
+
+  name                String
+  totalCostCents      Int?      @map("total_cost_cents")
+  totalGeminiUnits    Decimal?  @map("total_gemini_units") @db.Decimal(10, 2)
+
+  isCompleted         Boolean   @default(false) @map("is_completed")
+  completedAt         DateTime? @map("completed_at")
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at") // Soft delete
+
+  // Relationships
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealPlan          MealPlan? @relation(fields: [mealPlanId], references: [id])
+  shoppingListItems ShoppingListItem[]
+  shoppingHistory   ShoppingHistory[]
+
+  @@index([userId])
+  @@index([mealPlanId])
+  @@index([isCompleted])
+  @@map("shopping_lists")
+}
+
+// ============================================
+// 8. SHOPPING LIST ITEMS TABLE
+// ============================================
+// Individual items to buy
+//
+// WHY is_checked: User marks off while shopping
+// WHY actual_cost: Track what was actually paid vs estimate
+// WHY substitute_suggestion: AI can suggest cheaper alternatives
+//
+model ShoppingListItem {
+  id                    String   @id @default(uuid())
+  shoppingListId        String   @map("shopping_list_id")
+
+  itemName              String   @map("item_name")
+  quantity              Decimal  @db.Decimal(10, 2)
+  unit                  String
+
+  costEstimateCents     Int?     @map("cost_estimate_cents")
+  actualCostCents       Int?     @map("actual_cost_cents")
+  category              String?
+
+  isChecked             Boolean  @default(false) @map("is_checked")
+  substituteSuggestion  String?  @map("substitute_suggestion") @db.Text
+
+  notes                 String?  @db.Text
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relationship
+  shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+
+  @@index([shoppingListId])
+  @@index([isChecked])
+  @@map("shopping_list_items")
+}
+
+// ============================================
+// 9. SHOPPING HISTORY TABLE
+// ============================================
+// Record of actual shopping trips (for analytics)
+//
+// WHY store gemini_price: Price snapshot at time of purchase
+// WHY link to shopping_list: Can compare estimate vs actual
+// WHY total_gemini_units: For budget tracking and trends
+//
+model ShoppingHistory {
+  id                  String   @id @default(uuid())
+  userId              String   @map("user_id")
+  shoppingListId      String?  @map("shopping_list_id") // Optional link
+
+  receiptDate         DateTime @map("receipt_date") @db.Date
+  totalPhpCents       Int      @map("total_php_cents")
+
+  // Gemini conversion snapshot
+  geminiPrice         Decimal? @map("gemini_price") @db.Decimal(10, 4) // PHP price that day
+  totalGeminiUnits    Decimal? @map("total_gemini_units") @db.Decimal(10, 2)
+
+  notes               String?  @db.Text
+
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shoppingList ShoppingList? @relation(fields: [shoppingListId], references: [id])
+
+  @@index([userId])
+  @@index([receiptDate])
+  @@index([userId, receiptDate]) // Composite for user's history queries
+  @@map("shopping_history")
+}
+
+// ============================================
+// 10. MARKET PRICES TABLE
+// ============================================
+// Gemini API price history (global, not per-user)
+//
+// WHY global: PHP price is same for everyone
+// WHY store history: Trend analysis, price spike detection
+// WHY index on symbol+date: Fast queries for price at specific date
+//
+model MarketPrice {
+  id          String   @id @default(uuid())
+
+  symbol      String   // "PHP"
+  price       Decimal  @db.Decimal(10, 4)
+  bid         Decimal? @db.Decimal(10, 4)
+  ask         Decimal? @db.Decimal(10, 4)
+
+  fetchedAt   DateTime @default(now()) @map("fetched_at")
+
+  @@index([symbol, fetchedAt])
+  @@index([symbol])
+  @@map("market_prices")
+}
+
+// ============================================
+// 11. ALERTS TABLE
+// ============================================
+// User notifications (budget, expiry, trends)
+//
+// WHY alert_type: Different handling for different types
+// WHY threshold/actual_value: Show user why alert triggered
+// WHY is_read/dismissed: User can manage notifications
+//
+model Alert {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+
+  alertType     String    @map("alert_type") // "budget_exceeded", "item_expiring", "price_spike", "trend_alert"
+  title         String
+  message       String    @db.Text
+
+  threshold     Int?      // What was the threshold (e.g., 90% of budget)
+  actualValue   Int?      @map("actual_value") // What was actual (e.g., 95%)
+
+  isRead        Boolean   @default(false) @map("is_read")
+  readAt        DateTime? @map("read_at")
+  dismissedAt   DateTime? @map("dismissed_at")
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead]) // Composite for "unread alerts" query
+  @@index([alertType])
+  @@map("alerts")
+}
