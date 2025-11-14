@@ -30,17 +30,17 @@ export default function LoginPage() {
           {/* Logo */}
             <Link href="/" className="flex items-center">
             <Image
-              src="/kitcha-logo-name.svg"
+              src="/kitcha-logo-name.png"
               alt="Kitcha"
               width={160}
               height={56}
               priority
-              className="w-20"
+              className="w-35"
             />
           </Link>
 
           {/* Title */}
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="mt-7 text-3xl font-bold tracking-tight text-gray-900">
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-600">

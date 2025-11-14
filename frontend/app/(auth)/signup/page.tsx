@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ShoppingCart } from 'lucide-react';
 import { SignupForm } from '@/components/auth/signup-form';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import Image from 'next/image';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,12 +25,18 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Left Side - Form */}
-      <div className="flex w-full flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24 bg-white">
+      <div className="flex w-full flex-1 flex-col justify-center bg-white px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <ShoppingCart className="h-8 w-8 text-primary-500" />
-            <span className="text-2xl font-bold">Kitcha</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/kitcha-logo-name.png"
+              alt="Kitcha"
+              width={160}
+              height={56}
+              priority
+              className="w-35"
+            />
           </Link>
 
           {/* Title */}
@@ -49,11 +56,11 @@ export default function SignupPage() {
 
       {/* Right Side - Image/Illustration */}
       <div className="relative hidden lg:block lg:w-1/2">
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary-500 to-secondary-700">
+        <div className="from-secondary-500 to-secondary-700 absolute inset-0 bg-gradient-to-br">
           <div className="flex h-full items-center justify-center p-12">
             <div className="max-w-md text-white">
               <h3 className="text-3xl font-bold">Start your journey to smarter shopping</h3>
-              <p className="mt-4 text-lg text-secondary-100">
+              <p className="text-secondary-100 mt-4 text-lg">
                 Get personalized meal plans, track your pantry inventory, and never waste food
                 again.
               </p>
