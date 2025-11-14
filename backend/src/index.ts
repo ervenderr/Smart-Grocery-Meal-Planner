@@ -20,14 +20,19 @@ import { connectDatabase, disconnectDatabase } from './config/database.config';
  */
 async function startServer(): Promise<void> {
   try {
+    console.log('📊 Step 1: Connecting to database...');
     // 1. Connect to database first
     await connectDatabase();
+    console.log('✅ Database connection complete');
 
+    console.log('📊 Step 2: Creating Express app...');
     // 2. Create Express app
     const app = createApp();
+    console.log('✅ Express app creation complete');
 
+    console.log('📊 Step 3: Starting server on port', config.port);
     // 3. Start listening
-    const server = app.listen(config.port, () => {
+    const server = app.listen(config.port, '0.0.0.0', () => {
       logger.info('🚀 Server started successfully', {
         port: config.port,
         environment: config.env,

@@ -1,13 +1,14 @@
 services:
   - type: web
     name: kitcha-backend
-    env: node
+    env: docker
     region: oregon # or your preferred region
     plan: free # or starter/standard
     rootDirectory: backend
-    buildCommand: npm ci && npm run build && npm run prisma:deploy
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
     healthCheckPath: /health
+    preDeployCommand: npx prisma migrate deploy
     envVars:
       - key: NODE_ENV
         value: production

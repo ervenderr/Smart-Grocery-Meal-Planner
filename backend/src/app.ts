@@ -24,9 +24,11 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
  * Create and configure Express application
  */
 export function createApp(): Application {
+  console.log('🏗️  Creating Express application...');
   const app: Application = express();
 
   // ===== SECURITY MIDDLEWARE =====
+  console.log('🔒 Setting up security middleware...');
   /**
    * Helmet: Sets various HTTP headers for security
    * - Prevents clickjacking, XSS attacks, etc.
@@ -94,15 +96,36 @@ export function createApp(): Application {
   });
 
   // Import and register route modules
+  console.log('📦 Loading route modules...');
+
+  console.log('  - Loading auth routes...');
   const authRoutes = require('./modules/auth/auth.routes').default;
+
+  console.log('  - Loading users routes...');
   const usersRoutes = require('./modules/users/users.routes').default;
+
+  console.log('  - Loading pantry routes...');
   const pantryRoutes = require('./modules/pantry/pantry.routes').default;
+
+  console.log('  - Loading recipe routes...');
   const recipeRoutes = require('./modules/recipe/recipe.routes').default;
+
+  console.log('  - Loading mealplan routes...');
   const mealPlanRoutes = require('./modules/mealplan/mealplan.routes').default;
+
+  console.log('  - Loading marketprice routes...');
   const priceRoutes = require('./modules/marketprice/marketprice.routes').default;
+
+  console.log('  - Loading alert routes...');
   const alertRoutes = require('./modules/alert/alert.routes').default;
+
+  console.log('  - Loading analytics routes...');
   const analyticsRoutes = require('./modules/analytics/analytics.routes').default;
+
+  console.log('  - Loading AI routes...');
   const aiRoutes = require('./modules/ai/ai.routes').default;
+
+  console.log('✅ All route modules loaded successfully');
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
   app.use(`/api/${config.apiVersion}/users`, usersRoutes);
@@ -113,6 +136,8 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/alerts`, alertRoutes);
   app.use(`/api/${config.apiVersion}/analytics`, analyticsRoutes);
   app.use(`/api/${config.apiVersion}/ai`, aiRoutes);
+
+  console.log('✅ All routes registered successfully');
 
   // ===== ERROR HANDLING =====
   /**
@@ -125,5 +150,6 @@ export function createApp(): Application {
    */
   app.use(errorHandler);
 
+  console.log('✅ Express app created successfully');
   return app;
 }
