@@ -76,17 +76,6 @@ export function createApp(): Application {
     })
   );
 
-  /**
-   * CORS: Allow requests from frontend
-   * Supports multiple origins for different environments
-   */
-  const allowedOrigins = [
-    config.cors.origin,
-    process.env.FRONTEND_URL,
-    process.env.FRONTEND_URL_STAGING,
-    // Allow localhost in development
-    ...(config.env === 'development' ? ['http://localhost:3000'] : []),
-  ].filter(Boolean) as string[];
 
   app.use(
     cors({
