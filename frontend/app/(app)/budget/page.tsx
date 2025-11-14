@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TrendingUp, DollarSign, AlertCircle, TrendingDown, PiggyBank } from 'lucide-react';
+import { TrendingUp, Banknote, AlertCircle, TrendingDown, PiggyBank } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { analyticsApi } from '@/lib/api/analytics';
@@ -60,7 +60,7 @@ export default function BudgetPage() {
       case 'exceeded':
         return <TrendingUp className="h-8 w-8 text-red-600" />;
       default:
-        return <DollarSign className="h-8 w-8 text-gray-600" />;
+        return <Banknote className="h-8 w-8 text-gray-600" />;
     }
   };
 

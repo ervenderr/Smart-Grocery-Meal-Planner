@@ -102,6 +102,7 @@ export function createApp(): Application {
   const priceRoutes = require('./modules/marketprice/marketprice.routes').default;
   const alertRoutes = require('./modules/alert/alert.routes').default;
   const analyticsRoutes = require('./modules/analytics/analytics.routes').default;
+  const aiRoutes = require('./modules/ai/ai.routes').default;
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
   app.use(`/api/${config.apiVersion}/users`, usersRoutes);
@@ -111,6 +112,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/prices`, priceRoutes);
   app.use(`/api/${config.apiVersion}/alerts`, alertRoutes);
   app.use(`/api/${config.apiVersion}/analytics`, analyticsRoutes);
+  app.use(`/api/${config.apiVersion}/ai`, aiRoutes);
 
   // ===== ERROR HANDLING =====
   /**

@@ -1,21 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Calendar, ShoppingCart } from 'lucide-react';
+import { Plus, Calendar, ShoppingCart, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { AddMealPlanModal } from '@/components/mealplans/add-meal-plan-modal';
 import { MealPlanDetailModal } from '@/components/mealplans/meal-plan-detail-modal';
 import { MealPlanCard } from '@/components/mealplans/meal-plan-card';
+import { AIMealPlanModal } from '@/components/ai/ai-meal-plan-modal';
 import { mealPlanApi } from '@/lib/api/mealplans';
 import toast from 'react-hot-toast';
 import type { MealPlan } from '@/types/mealplan.types';
+import type { MealPlanSuggestion } from '@/lib/api/ai';
 
 export default function MealPlansPage() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAIMealPlanModal, setShowAIMealPlanModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedMealPlan, setSelectedMealPlan] = useState<MealPlan | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<MealPlan | null>(null);
@@ -81,6 +84,14 @@ export default function MealPlansPage() {
     }
   };
 
+  const handleAIMealPlanGenerated = (suggestion: MealPlanSuggestion) => {
+    toast.success('AI meal plan ready! Opening form to save...');
+    // For now, just show success and let user manually create
+    // In the future, could auto-populate the Add Meal Plan form
+    setShowAIMealPlanModal(false);
+    setShowAddModal(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -91,10 +102,16 @@ export default function MealPlansPage() {
             Plan your meals and generate shopping lists
           </p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>
-          <Plus className="h-4 w-4" />
-          Create Meal Plan
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowAIMealPlanModal(true)}>
+            <Sparkles className="h-4 w-4" />
+            AI Generate
+          </Button>
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="h-4 w-4" />
+            Create Meal Plan
+          </Button>
+        </div>
       </div>
 
       {/* Shopping List Modal */}
@@ -110,7 +127,7 @@ export default function MealPlansPage() {
                 <p className="text-sm text-primary-700">
                   {shoppingListData.items.length} items
                   {shoppingListData.totalEstimatedCostCents &&
-                    ` • Estimated: $${(shoppingListData.totalEstimatedCostCents / 100).toFixed(2)}`
+                    ` • Estimated: ₱${(shoppingListData.totalEstimatedCostCents / 100).toFixed(2)}`
                   }
                 </p>
               </div>
@@ -189,6 +206,12 @@ export default function MealPlansPage() {
           setSelectedMealPlan(null);
         }}
         mealPlan={selectedMealPlan}
+      />
+
+      <AIMealPlanModal
+        isOpen={showAIMealPlanModal}
+        onClose={() => setShowAIMealPlanModal(false)}
+        onMealPlanGenerated={handleAIMealPlanGenerated}
       />
     </div>
   );

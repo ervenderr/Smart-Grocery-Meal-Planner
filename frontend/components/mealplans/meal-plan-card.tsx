@@ -1,6 +1,6 @@
 'use client';
 
-import { Edit2, Trash2, Calendar, DollarSign, Flame, Heart, ShoppingCart } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Banknote, Flame, Heart, ShoppingCart } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import type { MealPlan } from '@/types/mealplan.types';
 
@@ -19,7 +19,7 @@ export function MealPlanCard({ mealPlan, onEdit, onDelete, onView, onGenerateSho
 
   const formatCost = (cents: number | null) => {
     if (cents === null) return '-';
-    return `$${(cents / 100).toFixed(2)}`;
+    return `₱${(cents / 100).toFixed(2)}`;
   };
 
   const getDaysDuration = () => {
@@ -57,7 +57,7 @@ export function MealPlanCard({ mealPlan, onEdit, onDelete, onView, onGenerateSho
         </div>
         <div className="text-center p-2 bg-green-50 rounded-lg">
           <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
-            <DollarSign className="h-3.5 w-3.5" />
+            <Banknote className="h-3.5 w-3.5" />
           </div>
           <p className="text-xs font-medium text-gray-900">{formatCost(mealPlan.totalCostCents)}</p>
           <p className="text-xs text-gray-500">Cost</p>

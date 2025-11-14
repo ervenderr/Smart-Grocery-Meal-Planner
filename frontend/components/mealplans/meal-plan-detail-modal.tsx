@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, DollarSign, Flame, Heart, Clock, Users } from 'lucide-react';
+import { Calendar, Banknote, Flame, Heart, Clock, Users } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import type { MealPlan, MealPlanItem } from '@/types/mealplan.types';
 
@@ -21,7 +21,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
 
   const formatCost = (cents: number | null) => {
     if (cents === null) return 'Not calculated';
-    return `$${(cents / 100).toFixed(2)}`;
+    return `₱${(cents / 100).toFixed(2)}`;
   };
 
   const getMealsByDay = () => {
@@ -77,7 +77,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
           </div>
           <div className="p-4 bg-green-50 rounded-lg text-center">
             <div className="flex items-center justify-center gap-2 text-green-600 mb-1">
-              <DollarSign className="h-4 w-4" />
+              <Banknote className="h-4 w-4" />
             </div>
             <p className="text-lg font-semibold text-gray-900">{formatCost(mealPlan.totalCostCents)}</p>
             <p className="text-xs text-gray-500">Total Cost</p>
@@ -147,8 +147,8 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
                                   )}
                                   {meal.costCents && (
                                     <div className="flex items-center gap-1">
-                                      <DollarSign className="h-3 w-3" />
-                                      <span>${(meal.costCents / 100).toFixed(2)}</span>
+                                      <Banknote className="h-3 w-3" />
+                                      <span>₱{(meal.costCents / 100).toFixed(2)}</span>
                                     </div>
                                   )}
                                 </div>

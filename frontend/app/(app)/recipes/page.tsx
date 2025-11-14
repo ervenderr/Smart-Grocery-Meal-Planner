@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, BookOpen } from 'lucide-react';
+import { Plus, Search, Filter, BookOpen, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { AddRecipeModal } from '@/components/recipes/add-recipe-modal';
 import { EditRecipeModal } from '@/components/recipes/edit-recipe-modal';
 import { RecipeDetailModal } from '@/components/recipes/recipe-detail-modal';
+import { AIRecipeSuggestionsModal } from '@/components/ai/ai-recipe-suggestions-modal';
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import { recipeApi } from '@/lib/api/recipes';
 import toast from 'react-hot-toast';
@@ -28,6 +29,7 @@ export default function RecipesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showAISuggestionsModal, setShowAISuggestionsModal] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Recipe | null>(null);
 
@@ -101,10 +103,16 @@ export default function RecipesPage() {
             Create and manage your recipe collection
           </p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>
-          <Plus className="h-4 w-4" />
-          Add Recipe
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowAISuggestionsModal(true)}>
+            <Sparkles className="h-4 w-4" />
+            AI Suggestions
+          </Button>
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="h-4 w-4" />
+            Add Recipe
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -224,6 +232,12 @@ export default function RecipesPage() {
           setSelectedRecipe(null);
         }}
         recipe={selectedRecipe}
+      />
+
+      <AIRecipeSuggestionsModal
+        isOpen={showAISuggestionsModal}
+        onClose={() => setShowAISuggestionsModal(false)}
+        onRecipeAdded={fetchRecipes}
       />
     </div>
   );
