@@ -10,17 +10,12 @@ services:
     restart: always
     ports:
       - "3001:10000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
       - PORT=10000
       - DATABASE_URL=postgresql://smart_user:smart_password@postgres:5432/smart_grocery_db?schema=public
-      - JWT_SECRET=super-secret-jwt-key-change-this-in-production-please-use-random-string
-      - JWT_EXPIRES_IN=7d
-      - API_VERSION=v1
-      - LOG_LEVEL=debug
-      - CORS_ORIGIN=http://localhost:3000
-      - GEMINI_AI_API_KEY=AIzaSyCiFu-2e2P4he0pdf-jUy21JFtTfiWoRt8
-      - SPOONACULAR_API_KEY=ef83e204e8044dc78926cb086a912490
     depends_on:
       postgres:
         condition: service_healthy
