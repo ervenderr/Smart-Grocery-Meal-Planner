@@ -56,30 +56,30 @@ export default function SignupPage() {
 
       {/* Right Side - Image/Illustration */}
       <div className="relative hidden lg:block lg:w-1/2">
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary-500 to-secondary-700">
+        <div className="from-primary-500 to-primary-700 absolute inset-0 bg-gradient-to-br">
           <div className="flex h-full items-center justify-center p-12">
             <div className="max-w-md text-white">
               <h3 className="text-3xl font-bold">Start your journey to smarter shopping</h3>
-              <p className="text-secondary-100 mt-4 text-lg">
+              <p className="text-primary-100 mt-4 text-lg">
                 Get personalized meal plans, track your pantry inventory, and never waste food
                 again.
               </p>
               <div className="mt-8 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                    <span className="text-xl">✓</span>
+                    <span className="text-xl">💳</span>
                   </div>
                   <span className="text-sm">Free forever - no credit card required</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                    <span className="text-xl">✓</span>
+                    <span className="text-xl">🤖</span>
                   </div>
                   <span className="text-sm">AI-powered meal suggestions</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                    <span className="text-xl">✓</span>
+                    <span className="text-xl">📝</span>
                   </div>
                   <span className="text-sm">Smart shopping lists and budget tracking</span>
                 </div>
