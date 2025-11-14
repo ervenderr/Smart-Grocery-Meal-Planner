@@ -96,10 +96,20 @@ async function startServer(): Promise<void> {
     });
 
   } catch (error) {
+    // Use console.error as fallback in case logger isn't initialized
+    console.error('❌ Failed to start server:', error);
     logger.error('Failed to start server', { error });
     process.exit(1);
   }
 }
 
-// Start the server
-startServer();
+// Start the server with better error handling
+console.log('🚀 Starting server...');
+console.log('Node version:', process.version);
+console.log('Environment:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+
+startServer().catch((error) => {
+  console.error('❌ Unhandled error during server startup:', error);
+  process.exit(1);
+});

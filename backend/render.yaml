@@ -26,12 +26,11 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: CORS_ORIGIN
-        value: https://your-frontend-url.onrender.com # Update this with your frontend URL
-      # Optional: Add these if you're using these services
-      # - key: GEMINI_AI_API_KEY
-      #   sync: false
-      # - key: SPOONACULAR_API_KEY
-      #   sync: false
+        value: "*" # Allow all origins for now - update with your frontend URL later
+      - key: GEMINI_AI_API_KEY
+        sync: false
+      - key: SPOONACULAR_API_KEY
+        sync: false
 
 databases:
   - name: kitcha-db

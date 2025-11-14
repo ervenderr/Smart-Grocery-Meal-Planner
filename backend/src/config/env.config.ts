@@ -10,9 +10,17 @@
 
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-// Load environment variables from .env file
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Load environment variables from .env file (development only)
+// In production (Render, etc.), environment variables are provided by the platform
+const envPath = path.join(__dirname, '../../.env');
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+} else {
+  // In production, just load from process.env
+  dotenv.config();
+}
 
 /**
  * Validates that required environment variables are present
@@ -23,15 +31,25 @@ function validateEnv(): void {
   const missing = required.filter(key => !process.env[key]);
 
   if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}\n` +
-      'Please copy .env.example to .env and fill in the values'
-    );
+    const errorMsg =
+      `❌ Missing required environment variables: ${missing.join(', ')}\n` +
+      `Environment: ${process.env.NODE_ENV || 'not set'}\n` +
+      `Available env vars: ${Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('PASSWORD')).join(', ')}\n` +
+      'Please ensure all required environment variables are set in your deployment platform or .env file';
+
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
 }
 
 // Validate on module load
-validateEnv();
+try {
+  validateEnv();
+  console.log('✅ Environment validation passed');
+} catch (error) {
+  console.error('❌ Environment validation failed:', error);
+  throw error;
+}
 
 /**
  * Export strongly-typed configuration object
