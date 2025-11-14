@@ -52,7 +52,7 @@ const consoleFormat = winston.format.combine(
 export const logger = winston.createLogger({
   level: config.logging.level,
   format: logFormat,
-  defaultMeta: { service: 'smart-grocery-api' },
+  defaultMeta: { service: 'kitcha-api' },
   transports: [
     // Console output (always enabled)
     new winston.transports.Console({

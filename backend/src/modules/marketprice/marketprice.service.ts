@@ -50,7 +50,7 @@ export class MarketPriceService {
       ask = price * 1.001; // Mock ask slightly higher
     } catch (error) {
       logger.warn('Failed to fetch price from external API, using mock data', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
         symbol,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -74,7 +74,7 @@ export class MarketPriceService {
     const change24h = await this.calculate24hChange(symbol, price);
 
     logger.info('Price fetched and stored', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       symbol,
       price,
     });

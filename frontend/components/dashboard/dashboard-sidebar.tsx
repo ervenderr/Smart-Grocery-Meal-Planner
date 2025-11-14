@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { X, ShoppingCart, Home, Package, UtensilsCrossed, Calendar, ShoppingBasket, TrendingUp, Bell, BarChart3 } from 'lucide-react';
+import { X, ShoppingCart, Home, Package, UtensilsCrossed, Calendar, ShoppingBasket, TrendingUp, Bell, BarChart3, Settings } from 'lucide-react';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -16,6 +16,8 @@ const navigation = [
   { name: 'Meal Plans', href: '/mealplans', icon: Calendar },
   { name: 'Shopping Lists', href: '/shopping', icon: ShoppingBasket },
   { name: 'Budget', href: '/budget', icon: TrendingUp },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
@@ -41,7 +43,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <ShoppingCart className="h-6 w-6 text-primary-500" />
-            <span className="text-lg font-bold text-gray-900">Smart Grocery</span>
+            <span className="text-lg font-bold text-gray-900">KITCHA</span>
           </Link>
           <button
             onClick={onClose}

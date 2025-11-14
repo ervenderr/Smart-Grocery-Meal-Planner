@@ -107,4 +107,33 @@ export class PantryController {
 
     res.status(200).json(stats);
   });
+
+  /**
+   * Get items expiring soon
+   * GET /api/v1/pantry/expiring-soon
+   */
+  getExpiringSoon = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const days = req.query.days ? parseInt(req.query.days as string) : 7;
+
+    const query: GetPantryItemsQuery = {
+      expiringSoon: true,
+      sortBy: 'expiryDate',
+      sortOrder: 'asc',
+    };
+
+    const result = await this.pantryService.getItems(userId, query);
+
+    // Filter items expiring within specified days
+    const now = new Date();
+    const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+    const expiringItems = result.items.filter(item => {
+      if (!item.expiryDate) return false;
+      const expiryDate = new Date(item.expiryDate);
+      return expiryDate >= now && expiryDate <= futureDate;
+    });
+
+    res.status(200).json(expiringItems);
+  });
 }

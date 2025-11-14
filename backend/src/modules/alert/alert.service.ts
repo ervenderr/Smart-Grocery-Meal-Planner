@@ -38,7 +38,7 @@ export class AlertService {
     });
 
     logger.info('Alert created', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       alertId: alert.id,
       alertType: alert.alertType,
@@ -184,7 +184,7 @@ export class AlertService {
     });
 
     logger.info('Alert dismissed', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       alertId,
     });
@@ -210,7 +210,7 @@ export class AlertService {
     });
 
     logger.info('Alert deleted', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       alertId,
     });

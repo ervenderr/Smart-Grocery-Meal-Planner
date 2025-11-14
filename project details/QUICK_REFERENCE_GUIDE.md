@@ -1,4 +1,4 @@
-# Smart Grocery & Meal Planner: Quick Reference & Feature Summary
+# Kitcha: Quick Reference & Feature Summary
 
 ## 🎯 Project at a Glance
 

@@ -117,7 +117,7 @@ export class MealPlanService {
     });
 
     logger.info('Meal plan created', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       mealPlanId: mealPlan.id,
       name: mealPlan.name,
@@ -386,7 +386,7 @@ export class MealPlanService {
     });
 
     logger.info('Meal plan updated', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       mealPlanId,
     });
@@ -418,7 +418,7 @@ export class MealPlanService {
     });
 
     logger.info('Meal plan deleted', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       mealPlanId,
     });

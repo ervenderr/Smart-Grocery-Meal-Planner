@@ -31,6 +31,13 @@ router.use(authenticate);
 router.get('/stats', pantryController.getStats);
 
 /**
+ * @route   GET /api/v1/pantry/expiring-soon
+ * @desc    Get items expiring soon
+ * @access  Private
+ */
+router.get('/expiring-soon', pantryController.getExpiringSoon);
+
+/**
  * @route   POST /api/v1/pantry
  * @desc    Create a new pantry item
  * @access  Private

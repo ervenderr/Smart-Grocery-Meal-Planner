@@ -66,7 +66,7 @@ export class AIService {
           },
         });
         logger.info('Gemini AI initialized successfully', {
-          service: 'smart-grocery-api',
+          service: 'kitcha-api',
           model: 'gemini-flash-latest',
           apiKeyLength: config.apis.geminiAI.length,
           apiKeyPrefix: config.apis.geminiAI.substring(0, 10) + '...',
@@ -101,7 +101,7 @@ export class AIService {
     const prompt = this.buildRecipeSuggestionPrompt(pantryItems, dietaryRestrictions, maxPrepTime);
 
     logger.debug('Sending prompt to Gemini AI', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       promptLength: prompt.length,
       pantryItemsCount: pantryItems.length,
     });
@@ -110,14 +110,14 @@ export class AIService {
       const result = await this.model.generateContent(prompt);
 
       logger.debug('Gemini response received, extracting text', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
       });
 
       const response = await result.response;
       const text = response.text();
 
       logger.debug('Received response from Gemini AI', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
         responseLength: text.length,
         preview: text.substring(0, 200),
       });
@@ -126,7 +126,7 @@ export class AIService {
       const suggestions = this.parseRecipeSuggestions(text, pantryItems);
 
       logger.info('Recipe suggestions parsed successfully', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
         count: suggestions.length,
       });
 

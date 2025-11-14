@@ -83,7 +83,7 @@ export function createApp(): Application {
    */
   app.get(`/api/${config.apiVersion}`, (_req: Request, res: Response) => {
     res.json({
-      message: 'Smart Grocery & Meal Planner API',
+      message: 'Kitcha API',
       version: config.apiVersion,
       documentation: `/api/${config.apiVersion}/docs`,
       endpoints: {

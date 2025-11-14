@@ -82,7 +82,7 @@ export class RecipeService {
     });
 
     logger.info('Recipe created', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       recipeId: recipe.id,
       title: recipe.title,
@@ -334,7 +334,7 @@ export class RecipeService {
     });
 
     logger.info('Recipe updated', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       recipeId,
     });
@@ -366,7 +366,7 @@ export class RecipeService {
     });
 
     logger.info('Recipe deleted', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       recipeId,
     });

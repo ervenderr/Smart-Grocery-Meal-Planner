@@ -1,4 +1,4 @@
-# Smart Grocery & Meal Planner - Frontend
+# Kitcha - Frontend
 
 Modern, mobile-first web application for meal planning, pantry management, and budget tracking.
 

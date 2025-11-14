@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Smart Grocery & Meal Planner',
+  title: 'Kitcha',
   description: 'Plan meals, track groceries, and manage your budget with ease',
   keywords: ['meal planning', 'grocery', 'budget tracking', 'pantry management'],
 };

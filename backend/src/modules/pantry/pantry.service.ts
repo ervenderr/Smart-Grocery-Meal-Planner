@@ -59,7 +59,7 @@ export class PantryService {
     });
 
     logger.info('Pantry item created', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       itemId: item.id,
       ingredientName: item.ingredientName,
@@ -249,7 +249,7 @@ export class PantryService {
     });
 
     logger.info('Pantry item updated', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       itemId,
     });
@@ -281,7 +281,7 @@ export class PantryService {
     });
 
     logger.info('Pantry item deleted', {
-      service: 'smart-grocery-api',
+      service: 'kitcha-api',
       userId,
       itemId,
     });

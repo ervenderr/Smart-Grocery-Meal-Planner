@@ -57,7 +57,7 @@ export class AIController {
       );
 
       logger.info('AI recipe suggestions generated', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
         userId,
         suggestionsCount: suggestions.length,
       });
@@ -99,7 +99,7 @@ export class AIController {
       );
 
       logger.info('AI substitution suggestions generated', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
         userId,
         suggestionsCount: suggestions.length,
       });
@@ -151,7 +151,7 @@ export class AIController {
       );
 
       logger.info('AI meal plan generated', {
-        service: 'smart-grocery-api',
+        service: 'kitcha-api',
         userId,
         daysCount,
         budget: budgetCents,

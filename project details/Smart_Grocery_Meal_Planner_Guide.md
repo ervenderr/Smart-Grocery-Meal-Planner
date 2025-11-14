@@ -1,4 +1,4 @@
-# Smart Grocery & Meal Planner: Complete Implementation Guide
+# Kitcha: Complete Implementation Guide
 
 ## Table of Contents
 1. [Project Overview & Architecture](#project-overview--architecture)

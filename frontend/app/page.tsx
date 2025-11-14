@@ -17,7 +17,7 @@ export default function Home() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <ShoppingCart className="h-6 w-6 text-primary-500" />
-            <span className="text-lg font-bold">Smart Grocery</span>
+            <span className="text-lg font-bold">Kitcha</span>
           </div>
           <div className="flex gap-3">
             <Link href="/login">
@@ -167,7 +167,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-          <p>&copy; 2025 Smart Grocery & Meal Planner. Built with ❤️ for better grocery management.</p>
+          <p>&copy; 2025 Kitcha. Built with ❤️ for better grocery management.</p>
         </div>
       </footer>
     </div>

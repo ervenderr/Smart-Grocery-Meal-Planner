@@ -1,7 +1,7 @@
 {
-  "name": "smart-grocery-meal-planner-backend",
+  "name": "kitcha-backend",
   "version": "1.0.0",
-  "description": "Backend API for Smart Grocery & Meal Planner",
+  "description": "Backend API for Kitcha",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",

@@ -1,6 +1,6 @@
-# Smart Grocery & Meal Planner - Backend API
+# Kitcha - Backend API
 
-Express.js + TypeScript backend for the Smart Grocery & Meal Planner application.
+Express.js + TypeScript backend for the Kitcha application.
 
 ## 🚀 Quick Start
 

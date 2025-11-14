@@ -4,7 +4,7 @@ import type { User, AuthState } from '@/types/auth.types';
 
 interface AuthStore extends AuthState {
   setAuth: (token: string, user: User) => void;
-  updateUser: (user: User) => void;
+  updateUser: (user: Partial<User>) => void;
   clearAuth: () => void;
 }
 
@@ -37,8 +37,9 @@ export const useAuthStore = create<AuthStore>()(
 
       /**
        * Update user data (e.g., after profile update)
+       * Accepts partial user data and merges with existing user
        */
-      updateUser: (user: User) => {
+      updateUser: (user: Partial<User>) => {
         set((state) => ({
           user: { ...state.user, ...user } as User,
         }));

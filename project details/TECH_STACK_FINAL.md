@@ -1,4 +1,4 @@
-# Smart Grocery & Meal Planner - Final Tech Stack
+# Kitcha - Final Tech Stack
 
 ## ✅ Confirmed Technology Choices
 
@@ -61,7 +61,7 @@
 ## Project Structure
 
 ```
-Smart-Grocery-Meal-Planner/
+Kitcha/
 ├── backend/                 # Express + TypeScript API
 │   ├── src/
 │   │   ├── config/         # Database, environment config

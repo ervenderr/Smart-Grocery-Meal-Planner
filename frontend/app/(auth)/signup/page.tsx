@@ -29,7 +29,7 @@ export default function SignupPage() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <ShoppingCart className="h-8 w-8 text-primary-500" />
-            <span className="text-2xl font-bold">Smart Grocery</span>
+            <span className="text-2xl font-bold">Kitcha</span>
           </Link>
 
           {/* Title */}

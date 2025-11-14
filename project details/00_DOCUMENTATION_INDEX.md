@@ -1,4 +1,4 @@
-# Smart Grocery & Meal Planner - Documentation Index
+# Kitcha - Documentation Index
 
 **Total Documentation**: 5,277 lines across 4 comprehensive guides
 

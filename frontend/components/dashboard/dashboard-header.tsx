@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Menu, Bell, Search, LogOut, User, Settings } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { authApi } from '@/lib/api/auth';
+import { NotificationsDropdown } from './notifications-dropdown';
 import toast from 'react-hot-toast';
 
 interface DashboardHeaderProps {
@@ -58,10 +59,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       {/* Right Side */}
       <div className="flex items-center gap-3">
         {/* Notifications */}
-        <button className="relative rounded-lg p-2 text-gray-600 hover:bg-gray-100">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500"></span>
-        </button>
+        <NotificationsDropdown />
 
         {/* User Menu */}
         <div className="relative">
