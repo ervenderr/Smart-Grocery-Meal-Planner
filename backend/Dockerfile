@@ -1,6 +1,9 @@
 # Use official Node.js LTS image
 FROM node:22-alpine AS base
 
+# Install OpenSSL for Prisma compatibility
+RUN apk add --no-cache openssl libc6-compat
+
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
