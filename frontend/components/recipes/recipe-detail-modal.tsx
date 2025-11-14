@@ -1,7 +1,10 @@
 'use client';
 
-import { Clock, Users, ChefHat, Calendar } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, Users, ChefHat, Calendar, Sparkles } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { AISubstitutionModal } from '@/components/ai/ai-substitution-modal';
 import type { Recipe } from '@/types/recipe.types';
 
 interface RecipeDetailModalProps {
@@ -11,6 +14,8 @@ interface RecipeDetailModalProps {
 }
 
 export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModalProps) {
+  const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
+
   if (!recipe) return null;
 
   const getCategoryColor = (category: string) => {
@@ -138,9 +143,20 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
 
         {/* Ingredients */}
         <div>
-          <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">
-            Ingredients
-          </h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+              Ingredients
+            </h4>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSubstitutionModal(true)}
+              className="gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              Find Substitutes
+            </Button>
+          </div>
           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
             {recipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex items-start gap-2">
@@ -184,6 +200,13 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
           </div>
         </div>
       </div>
+
+      {/* AI Substitution Modal */}
+      <AISubstitutionModal
+        isOpen={showSubstitutionModal}
+        onClose={() => setShowSubstitutionModal(false)}
+        ingredients={recipe.ingredients}
+      />
     </Modal>
   );
 }

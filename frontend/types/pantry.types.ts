@@ -68,9 +68,12 @@ export interface UpdatePantryItemData {
 
 export interface PantryItemsResponse {
   items: PantryItem[];
-  total: number;
-  page: number;
-  limit: number;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface ExpiringItem {

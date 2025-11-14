@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Sparkles } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { AISubstitutionModal } from '@/components/ai/ai-substitution-modal';
 import { recipeApi } from '@/lib/api/recipes';
 import toast from 'react-hot-toast';
 import type { Recipe, RecipeCategory, RecipeDifficulty, RecipeIngredientUnit, DietaryRestriction } from '@/types/recipe.types';
@@ -86,6 +87,7 @@ const dietaryRestrictions: { value: DietaryRestriction; label: string }[] = [
 export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditRecipeModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>([]);
+  const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
 
   const {
     register,
@@ -97,7 +99,7 @@ export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditReci
     resolver: zodResolver(recipeSchema),
   });
 
-  const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({
+  const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient, update: updateIngredient } = useFieldArray({
     control,
     name: 'ingredients',
   });
@@ -179,6 +181,21 @@ export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditReci
     setSelectedRestrictions(prev =>
       prev.includes(value) ? prev.filter(r => r !== value) : [...prev, value]
     );
+  };
+
+  const handleApplySubstitution = (original: string, substitute: string) => {
+    // Find and update the ingredient
+    const index = ingredientFields.findIndex(
+      field => field.ingredientName.toLowerCase() === original.toLowerCase()
+    );
+
+    if (index !== -1) {
+      const currentIngredient = ingredientFields[index];
+      updateIngredient(index, {
+        ...currentIngredient,
+        ingredientName: substitute,
+      });
+    }
   };
 
   return (
@@ -299,16 +316,28 @@ export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditReci
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
               Ingredients
             </h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => appendIngredient({ ingredientName: '', quantity: 0, unit: '', notes: '' })}
-              disabled={isLoading}
-            >
-              <Plus className="h-4 w-4" />
-              Add
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSubstitutionModal(true)}
+                disabled={isLoading || ingredientFields.length === 0}
+              >
+                <Sparkles className="h-4 w-4" />
+                Find Substitutes
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => appendIngredient({ ingredientName: '', quantity: 0, unit: '', notes: '' })}
+                disabled={isLoading}
+              >
+                <Plus className="h-4 w-4" />
+                Add
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -470,6 +499,14 @@ export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditReci
           </Button>
         </div>
       </form>
+
+      {/* AI Substitution Modal */}
+      <AISubstitutionModal
+        isOpen={showSubstitutionModal}
+        onClose={() => setShowSubstitutionModal(false)}
+        ingredients={ingredientFields.filter(f => f.ingredientName && f.quantity && f.unit)}
+        onApplySubstitution={handleApplySubstitution}
+      />
     </Modal>
   );
 }
