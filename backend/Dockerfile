@@ -45,6 +45,10 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
+# Copy entrypoint script
+COPY --chown=nodejs:nodejs entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Set user to nodejs
 USER nodejs
 
@@ -54,5 +58,5 @@ EXPOSE 10000
 # Set environment variable for port
 ENV PORT=10000
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with migrations
+CMD ["/usr/local/bin/entrypoint.sh"]
