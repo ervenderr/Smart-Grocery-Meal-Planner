@@ -51,7 +51,7 @@ export default function MealPlansPage() {
   };
 
   const handleEdit = (mealPlan: MealPlan) => {
-    toast.info('Edit functionality coming soon! Delete and recreate for now.');
+    toast('Edit functionality coming soon! Delete and recreate for now.');
   };
 
   const handleDelete = async (mealPlan: MealPlan) => {

@@ -51,7 +51,10 @@ export function AIRecipeSuggestionsModal({
         prepTimeMinutes: suggestion.prepTimeMinutes,
         cookTimeMinutes: suggestion.cookTimeMinutes,
         servings: 4, // Default servings
-        ingredients: suggestion.ingredients,
+        ingredients: suggestion.ingredients.map(ing => ({
+          ...ing,
+          unit: ing.unit as any, // AI may return various unit formats
+        })),
         instructions: suggestion.instructions,
         tags: ['AI Generated'],
         dietaryRestrictions: [],

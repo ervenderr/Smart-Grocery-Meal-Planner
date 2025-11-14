@@ -27,13 +27,13 @@ export default function DashboardPage() {
     try {
       const [analyticsData, pantryData, recipesData, mealPlansData] = await Promise.all([
         analyticsApi.getDashboard(30).catch(() => null),
-        pantryApi.getAll({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
-        recipeApi.getAll({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
-        mealPlanApi.getAll({ limit: 1 }).catch(() => ({ pagination: { total: 0 } })),
+        pantryApi.getAll({ limit: 1 }).catch(() => ({ items: [], total: 0, page: 1, limit: 1 })),
+        recipeApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
+        mealPlanApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
       ]);
 
       setAnalytics(analyticsData);
-      setPantryCount(pantryData.pagination?.total || 0);
+      setPantryCount(pantryData.total || 0);
       setRecipeCount(recipesData.pagination?.total || 0);
       setMealPlanCount(mealPlansData.pagination?.total || 0);
     } catch (error) {
