@@ -2,7 +2,8 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { X, ShoppingCart, Home, Package, UtensilsCrossed, Calendar, ShoppingBasket, TrendingUp, Bell, BarChart3, Settings } from 'lucide-react';
+import Image from 'next/image';
+import { X, Home, Package, UtensilsCrossed, Calendar, ShoppingBasket, TrendingUp, Bell, BarChart3, Settings } from 'lucide-react';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -42,8 +43,14 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
         {/* Logo & Close Button */}
         <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-primary-500" />
-            <span className="text-lg font-bold text-gray-900">KITCHA</span>
+            <Image
+              src="/kitcha-logo-name.svg"
+              alt="Kitcha"
+              width={120}
+              height={32}
+              priority
+              className="h-20 w-auto"
+            />
           </Link>
           <button
             onClick={onClose}

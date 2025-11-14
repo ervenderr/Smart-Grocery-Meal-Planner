@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ShoppingCart } from 'lucide-react';
 import { LoginForm } from '@/components/auth/login-form';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import Image from 'next/image'; 
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,13 +28,19 @@ export default function LoginPage() {
       <div className="flex w-full flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24 bg-white">
         <div className="mx-auto w-full max-w-sm">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <ShoppingCart className="h-8 w-8 text-primary-500" />
-            <span className="text-2xl font-bold">Kitcha</span>
+            <Link href="/" className="flex items-center">
+            <Image
+              src="/kitcha-logo-name.svg"
+              alt="Kitcha"
+              width={160}
+              height={56}
+              priority
+              className="w-20"
+            />
           </Link>
 
           {/* Title */}
-          <h2 className="mt-8 text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-gray-600">

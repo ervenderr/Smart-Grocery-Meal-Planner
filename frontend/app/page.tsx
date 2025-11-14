@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
   ShoppingCart,
@@ -15,10 +16,16 @@ export default function Home() {
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-primary-500" />
-            <span className="text-lg font-bold">Kitcha</span>
-          </div>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/kitcha-logo-name.svg"
+              alt="Kitcha"
+              width={120}
+              height={32}
+              priority
+              className="h-30 w-auto"
+            />
+          </Link>
           <div className="flex gap-3">
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900">
@@ -57,9 +64,16 @@ export default function Home() {
           <p className="mt-4 text-sm text-gray-500">No credit card required • Free forever</p>
         </div>
 
-        {/* Hero Image Placeholder */}
-        <div className="mt-16 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 p-8 shadow-2xl sm:p-12">
-          <div className="aspect-video rounded-lg bg-white/80 backdrop-blur-sm"></div>
+        {/* Hero Image */}
+        <div className="mt-16 rounded-2xl overflow-hidden shadow-2xl">
+          <Image
+            src="/top-view-tasty-food-devices.jpg"
+            alt="Delicious food and grocery planning"
+            width={1200}
+            height={675}
+            priority
+            className="w-full h-auto object-cover"
+          />
         </div>
       </section>
 
