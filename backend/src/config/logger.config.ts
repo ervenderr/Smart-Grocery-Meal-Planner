@@ -55,35 +55,29 @@ export const logger = winston.createLogger({
   defaultMeta: { service: 'kitcha-api' },
   transports: [
     // Console output (always enabled)
+    // In production/Docker, we only log to console
+    // Cloud platforms (Render, AWS, etc.) capture stdout/stderr automatically
     new winston.transports.Console({
       format: config.env === 'production' ? logFormat : consoleFormat,
     }),
-
-    // File outputs (production)
-    ...(config.env === 'production'
-      ? [
-          new winston.transports.File({
-            filename: 'logs/error.log',
-            level: 'error'
-          }),
-          new winston.transports.File({
-            filename: 'logs/combined.log'
-          }),
-        ]
-      : []),
   ],
 });
 
 /**
  * Log unhandled rejections and exceptions
- * This catches errors that would otherwise crash the app silently
+ * In production, log to console (captured by cloud platform)
+ * In development, you could add file logging here if needed
  */
 logger.exceptions.handle(
-  new winston.transports.File({ filename: 'logs/exceptions.log' })
+  new winston.transports.Console({
+    format: config.env === 'production' ? logFormat : consoleFormat,
+  })
 );
 
 logger.rejections.handle(
-  new winston.transports.File({ filename: 'logs/rejections.log' })
+  new winston.transports.Console({
+    format: config.env === 'production' ? logFormat : consoleFormat,
+  })
 );
 
 /**
