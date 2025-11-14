@@ -21,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="light">
-      <body className={`${inter.variable} font-sans antialiased bg-white text-gray-900`}>
+      <head>
+        <link rel="icon" href="/kitcha-logo.svg" />
+      </head>
+      <body className={`${inter.variable} bg-white font-sans text-gray-900 antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
