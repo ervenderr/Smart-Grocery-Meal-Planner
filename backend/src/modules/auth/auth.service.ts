@@ -112,22 +112,31 @@ export class AuthService {
   }
 
   /**
-   * Login existing user
+   * Login existing user with account lockout protection
    *
    * STEPS:
    * 1. Find user by email
    * 2. Check if user exists
-   * 3. Compare passwords
-   * 4. Update last login time
-   * 5. Generate JWT token
-   * 6. Return user + token
+   * 3. Check account lockout status
+   * 4. Compare passwords
+   * 5. Handle failed login (increment attempts, lock if needed)
+   * 6. Update last login time & reset failed attempts
+   * 7. Generate JWT token
+   * 8. Return user + token
+   *
+   * SECURITY:
+   * - Locks account for 30 minutes after 5 failed attempts
+   * - Prevents brute force password attacks
    *
    * @param data - Login credentials
    * @returns Promise<AuthResponse> - User info + JWT token
-   * @throws AppError if credentials are invalid
+   * @throws AppError if credentials are invalid or account is locked
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
     const { email, password } = data;
+
+    const LOCKOUT_DURATION_MINUTES = 30;
+    const MAX_FAILED_ATTEMPTS = 5;
 
     // 1. Find user by email
     const user = await prisma.user.findUnique({
@@ -139,6 +148,9 @@ export class AuthService {
         lastName: true,
         passwordHash: true,
         isActive: true,
+        failedLoginAttempts: true,
+        lastFailedLogin: true,
+        lockedUntil: true,
         createdAt: true,
       },
     });
@@ -155,20 +167,79 @@ export class AuthService {
       throw new AppError('Account is deactivated', 403);
     }
 
-    // 4. Compare passwords
+    // 4. Check if account is locked
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const remainingMinutes = Math.ceil(
+        (user.lockedUntil.getTime() - Date.now()) / (1000 * 60)
+      );
+      logger.warn('Login attempt on locked account', {
+        email: user.email,
+        remainingMinutes,
+      });
+      throw new AppError(
+        `Account is locked due to too many failed login attempts. Please try again in ${remainingMinutes} minute(s).`,
+        429
+      );
+    }
+
+    // 5. Reset lock if lockout period has expired
+    if (user.lockedUntil && user.lockedUntil <= new Date()) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          lockedUntil: null,
+          failedLoginAttempts: 0,
+        },
+      });
+    }
+
+    // 6. Compare passwords
     const isPasswordValid = await comparePassword(password, user.passwordHash);
 
     if (!isPasswordValid) {
+      // Increment failed login attempts
+      const newAttempts = user.failedLoginAttempts + 1;
+      const shouldLock = newAttempts >= MAX_FAILED_ATTEMPTS;
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: newAttempts,
+          lastFailedLogin: new Date(),
+          lockedUntil: shouldLock
+            ? new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60 * 1000)
+            : null,
+        },
+      });
+
+      logger.warn('Failed login attempt', {
+        email: user.email,
+        attempts: newAttempts,
+        locked: shouldLock,
+      });
+
+      if (shouldLock) {
+        throw new AppError(
+          `Too many failed login attempts. Account locked for ${LOCKOUT_DURATION_MINUTES} minutes.`,
+          429
+        );
+      }
+
       throw new AppError('Invalid email or password', 401);
     }
 
-    // 5. Update last login timestamp
+    // 7. Successful login - reset failed attempts and update last login
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLogin: new Date() },
+      data: {
+        lastLogin: new Date(),
+        failedLoginAttempts: 0,
+        lastFailedLogin: null,
+        lockedUntil: null,
+      },
     });
 
-    // 6. Generate JWT token
+    // 8. Generate JWT token
     const token = generateToken({
       userId: user.id,
       email: user.email,
@@ -179,7 +250,7 @@ export class AuthService {
       email: user.email,
     });
 
-    // 7. Return response (exclude password hash!)
+    // 9. Return response (exclude password hash!)
     return {
       user: {
         id: user.id,

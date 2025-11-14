@@ -40,6 +40,45 @@ function validateEnv(): void {
     console.error(errorMsg);
     throw new Error(errorMsg);
   }
+
+  // Validate JWT_SECRET strength
+  const jwtSecret = process.env.JWT_SECRET;
+  if (jwtSecret) {
+    // Check minimum length
+    if (jwtSecret.length < 32) {
+      const errorMsg =
+        '❌ JWT_SECRET must be at least 32 characters long for security.\n' +
+        'Generate a strong secret with: openssl rand -base64 48';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    // Check for default/weak secrets
+    const weakSecrets = [
+      'your-super-secret-jwt-key-change-this-in-production',
+      'change-this',
+      'secret',
+      'jwt-secret',
+      'default',
+    ];
+
+    const isWeak = weakSecrets.some(weak => jwtSecret.toLowerCase().includes(weak));
+    if (isWeak) {
+      const errorMsg =
+        '❌ JWT_SECRET appears to be a default or weak value.\n' +
+        'Please change it to a strong, randomly generated secret.\n' +
+        'Generate one with: openssl rand -base64 48';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+  }
+
+  // Warn about production environment without proper configuration
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.FRONTEND_URL) {
+      console.warn('⚠️  FRONTEND_URL not set in production. CORS may not work correctly.');
+    }
+  }
 }
 
 // Validate on module load

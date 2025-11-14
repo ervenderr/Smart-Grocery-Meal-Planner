@@ -19,6 +19,7 @@ import { authController } from './auth.controller';
 import { signupValidation, loginValidation, validate } from './auth.validation';
 import { authenticate } from '@/middleware/auth.middleware';
 import { asyncHandler } from '@/middleware/errorHandler';
+import { authLimiter } from '@/middleware/rateLimiter';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ const router = Router();
  * Register a new user
  *
  * PUBLIC (no auth required)
+ * RATE LIMITED: 5 attempts per 15 minutes
  *
  * Body:
  * {
@@ -45,6 +47,7 @@ const router = Router();
  */
 router.post(
   '/signup',
+  authLimiter,
   signupValidation,
   validate,
   asyncHandler(authController.signup.bind(authController))
@@ -55,6 +58,7 @@ router.post(
  * Login existing user
  *
  * PUBLIC (no auth required)
+ * RATE LIMITED: 5 attempts per 15 minutes
  *
  * Body:
  * {
@@ -71,6 +75,7 @@ router.post(
  */
 router.post(
   '/login',
+  authLimiter,
   loginValidation,
   validate,
   asyncHandler(authController.login.bind(authController))

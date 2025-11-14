@@ -17,23 +17,77 @@ import winston from 'winston';
 import { config } from './env.config';
 
 /**
- * Custom log format
+ * Sanitize log data to remove sensitive information
+ * Prevents passwords, tokens, and other secrets from appearing in logs
+ */
+function sanitizeLogData(data: any): any {
+  if (typeof data !== 'object' || data === null) {
+    return data;
+  }
+
+  // List of sensitive field names to redact
+  const sensitiveFields = [
+    'password',
+    'passwordHash',
+    'token',
+    'accessToken',
+    'refreshToken',
+    'authorization',
+    'cookie',
+    'secret',
+    'apiKey',
+    'creditCard',
+    'ssn',
+  ];
+
+  // Clone the object to avoid mutating the original
+  const sanitized = Array.isArray(data) ? [...data] : { ...data };
+
+  for (const key in sanitized) {
+    if (typeof key === 'string') {
+      const lowerKey = key.toLowerCase();
+
+      // Check if this field should be redacted
+      if (sensitiveFields.some(field => lowerKey.includes(field.toLowerCase()))) {
+        sanitized[key] = '[REDACTED]';
+      } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+        // Recursively sanitize nested objects
+        sanitized[key] = sanitizeLogData(sanitized[key]);
+      }
+    }
+  }
+
+  return sanitized;
+}
+
+/**
+ * Custom log format with sanitization
  * Development: Colorized, readable
  * Production: JSON for log aggregation tools
+ * SECURITY: Automatically redacts sensitive fields
  */
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
   winston.format.splat(),
+  // Sanitize sensitive data before logging
+  winston.format((info) => {
+    return sanitizeLogData(info);
+  })(),
   winston.format.json()
 );
 
 /**
  * Console format for development (easier to read)
+ * Also includes sanitization
  */
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
+  // Sanitize sensitive data before logging
+  winston.format((info) => {
+    return sanitizeLogData(info);
+  })(),
   winston.format.printf(({ timestamp, level, message, ...meta }) => {
     let msg = `${timestamp} [${level}]: ${message}`;
 

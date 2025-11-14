@@ -19,6 +19,7 @@ import morgan from 'morgan';
 import { config } from './config/env.config';
 import { morganStream } from './config/logger.config';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { apiLimiter } from './middleware/rateLimiter';
 
 /**
  * Create and configure Express application
@@ -29,30 +30,97 @@ export function createApp(): Application {
 
   // ===== SECURITY MIDDLEWARE =====
   console.log('🔒 Setting up security middleware...');
+
+  /**
+   * HTTPS Enforcement in Production
+   * Redirects HTTP to HTTPS
+   */
+  if (config.env === 'production') {
+    app.use((req, _res, next) => {
+      if (req.header('x-forwarded-proto') !== 'https') {
+        _res.redirect(`https://${req.header('host')}${req.url}`);
+      } else {
+        next();
+      }
+    });
+  }
+
   /**
    * Helmet: Sets various HTTP headers for security
    * - Prevents clickjacking, XSS attacks, etc.
+   * - Enhanced configuration with strict security policies
    */
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true,
+      },
+      referrerPolicy: { policy: 'same-origin' },
+      noSniff: true,
+      xssFilter: true,
+    })
+  );
 
   /**
    * CORS: Allow requests from frontend
-   * In production, this should be restricted to your frontend domain
+   * Supports multiple origins for different environments
    */
+  const allowedOrigins = [
+    config.cors.origin,
+    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL_STAGING,
+    // Allow localhost in development
+    ...(config.env === 'development' ? ['http://localhost:3000'] : []),
+  ].filter(Boolean) as string[];
+
   app.use(
     cors({
-      origin: config.cors.origin,
-      credentials: true, // Allow cookies
+      origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
+      credentials: true,
+      optionsSuccessStatus: 200,
+      maxAge: 86400, // Cache preflight for 24 hours
     })
   );
+
+  // ===== RATE LIMITING =====
+  /**
+   * Apply rate limiting to all API routes
+   * Prevents brute force attacks and API abuse
+   */
+  console.log('🚦 Setting up rate limiting...');
+  app.use('/api/', apiLimiter);
 
   // ===== BODY PARSING =====
   /**
    * Parse JSON request bodies
-   * Limit size to prevent DOS attacks
+   * Reduced limit from 10mb to 1mb to prevent DOS attacks
    */
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.json({ limit: '1mb', strict: true }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
   // ===== LOGGING =====
   /**
