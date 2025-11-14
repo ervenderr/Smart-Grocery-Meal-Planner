@@ -24,6 +24,9 @@ router.use(authenticate);
 // Statistics endpoint (must come before /:id)
 router.get('/stats', mealPlanController.getStats);
 
+// Create meal plan from AI suggestion (must come before / to avoid conflict)
+router.post('/from-ai', mealPlanController.createMealPlanFromAI);
+
 // CRUD routes
 router.post(
   '/',

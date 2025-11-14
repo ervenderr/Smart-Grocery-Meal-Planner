@@ -232,6 +232,8 @@ ${dietaryRestrictions.length > 0 ? `- Must respect these dietary restrictions: $
 ${maxPrepTime ? `- Total prep + cook time should not exceed ${maxPrepTime} minutes` : ''}
 - Include exact quantities and units for ALL ingredients
 - Provide clear, step-by-step instructions
+- IMPORTANT: For ingredient units, you MUST ONLY use these exact values: lbs, kg, grams, oz, cups, ml, liters, tsp, tbsp, fl_oz, pieces, items
+- Do NOT use any other units like "unit", "clove", "pinch", "dash", etc. Convert them to the allowed units
 
 Format your response as a JSON array with this structure:
 [
@@ -337,6 +339,69 @@ Day 0 = Monday, 6 = Sunday. Respond ONLY with valid JSON.`;
   }
 
   /**
+   * Normalize ingredient unit to match PantryUnit enum
+   */
+  private normalizeUnit(unit: string): string {
+    const unitLower = unit.toLowerCase().trim();
+
+    // Direct matches
+    const validUnits = ['lbs', 'kg', 'grams', 'oz', 'cups', 'ml', 'liters', 'tsp', 'tbsp', 'fl_oz', 'pieces', 'items'];
+    if (validUnits.includes(unitLower)) {
+      return unitLower;
+    }
+
+    // Common conversions
+    const unitMap: Record<string, string> = {
+      'lb': 'lbs',
+      'pound': 'lbs',
+      'pounds': 'lbs',
+      'kilogram': 'kg',
+      'kilograms': 'kg',
+      'gram': 'grams',
+      'g': 'grams',
+      'ounce': 'oz',
+      'ounces': 'oz',
+      'cup': 'cups',
+      'c': 'cups',
+      'milliliter': 'ml',
+      'milliliters': 'ml',
+      'liter': 'liters',
+      'l': 'liters',
+      'teaspoon': 'tsp',
+      'teaspoons': 'tsp',
+      't': 'tsp',
+      'tablespoon': 'tbsp',
+      'tablespoons': 'tbsp',
+      'tbsp.': 'tbsp',
+      'tbs': 'tbsp',
+      'T': 'tbsp',
+      'fluid ounce': 'fl_oz',
+      'fluid ounces': 'fl_oz',
+      'fl oz': 'fl_oz',
+      'floz': 'fl_oz',
+      'piece': 'pieces',
+      'pcs': 'pieces',
+      'pc': 'pieces',
+      'item': 'items',
+      'unit': 'pieces',
+      'units': 'pieces',
+      'whole': 'pieces',
+      'clove': 'pieces',
+      'cloves': 'pieces',
+      'pinch': 'tsp',
+      'dash': 'tsp',
+      'can': 'items',
+      'cans': 'items',
+      'bottle': 'items',
+      'bottles': 'items',
+      'package': 'items',
+      'packages': 'items',
+    };
+
+    return unitMap[unitLower] || 'pieces'; // Default to pieces if unknown
+  }
+
+  /**
    * Parse AI response into recipe suggestions
    */
   private parseRecipeSuggestions(aiResponse: string, pantryItems: any[]): RecipeSuggestion[] {
@@ -357,13 +422,19 @@ Day 0 = Monday, 6 = Sunday. Respond ONLY with valid JSON.`;
           pantryItems
         );
 
+        // Normalize ingredient units
+        const normalizedIngredients = recipe.ingredients.map((ing: any) => ({
+          ...ing,
+          unit: this.normalizeUnit(ing.unit),
+        }));
+
         return {
           name: recipe.name,
           description: recipe.description,
           difficulty: recipe.difficulty,
           prepTimeMinutes: recipe.prepTimeMinutes,
           cookTimeMinutes: recipe.cookTimeMinutes,
-          ingredients: recipe.ingredients,
+          ingredients: normalizedIngredients,
           instructions: recipe.instructions,
           matchPercentage,
         };

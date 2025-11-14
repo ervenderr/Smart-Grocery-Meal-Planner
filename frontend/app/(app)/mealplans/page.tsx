@@ -84,12 +84,8 @@ export default function MealPlansPage() {
     }
   };
 
-  const handleAIMealPlanGenerated = (suggestion: MealPlanSuggestion) => {
-    toast.success('AI meal plan ready! Opening form to save...');
-    // For now, just show success and let user manually create
-    // In the future, could auto-populate the Add Meal Plan form
-    setShowAIMealPlanModal(false);
-    setShowAddModal(true);
+  const handleAIMealPlanSaved = () => {
+    fetchMealPlans();
   };
 
   return (
@@ -211,7 +207,7 @@ export default function MealPlansPage() {
       <AIMealPlanModal
         isOpen={showAIMealPlanModal}
         onClose={() => setShowAIMealPlanModal(false)}
-        onMealPlanGenerated={handleAIMealPlanGenerated}
+        onMealPlanSaved={handleAIMealPlanSaved}
       />
     </div>
   );

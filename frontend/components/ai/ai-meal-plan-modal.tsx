@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Sparkles, Calendar, Banknote, Utensils } from 'lucide-react';
+import { X, Sparkles, Calendar, Banknote, Utensils, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type MealPlanSuggestion } from '@/lib/api/ai';
+import { mealPlanApi } from '@/lib/api/mealplans';
 import toast from 'react-hot-toast';
 
 const aiMealPlanSchema = z.object({
@@ -22,8 +24,16 @@ type AIFormData = z.infer<typeof aiMealPlanSchema>;
 interface AIMealPlanModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onMealPlanGenerated?: (suggestion: MealPlanSuggestion) => void;
+  onMealPlanSaved?: () => void;
 }
+
+const saveMealPlanSchema = z.object({
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
+  notes: z.string().optional(),
+});
+
+type SaveMealPlanFormData = z.infer<typeof saveMealPlanSchema>;
 
 const DIETARY_OPTIONS = [
   'vegetarian',
@@ -38,11 +48,13 @@ const DIETARY_OPTIONS = [
 export function AIMealPlanModal({
   isOpen,
   onClose,
-  onMealPlanGenerated,
+  onMealPlanSaved,
 }: AIMealPlanModalProps) {
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [suggestion, setSuggestion] = useState<MealPlanSuggestion | null>(null);
   const [pantryItemsUsed, setPantryItemsUsed] = useState(0);
+  const [showSaveForm, setShowSaveForm] = useState(false);
 
   const {
     register,
@@ -57,6 +69,19 @@ export function AIMealPlanModal({
       budgetCents: 200000, // ₱2000
       dietaryRestrictions: [],
       usePantry: true,
+    },
+  });
+
+  const {
+    register: registerSave,
+    handleSubmit: handleSubmitSave,
+    formState: { errors: saveErrors },
+    reset: resetSave,
+  } = useForm<SaveMealPlanFormData>({
+    resolver: zodResolver(saveMealPlanSchema),
+    defaultValues: {
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     },
   });
 
@@ -84,18 +109,38 @@ export function AIMealPlanModal({
   };
 
   const handleUse = () => {
-    if (suggestion) {
-      onMealPlanGenerated?.(suggestion);
-      onClose();
-      reset();
-      setSuggestion(null);
+    setShowSaveForm(true);
+  };
+
+  const handleSave = async (data: SaveMealPlanFormData) => {
+    if (!suggestion) return;
+
+    setSaving(true);
+    try {
+      await mealPlanApi.createFromAI({
+        aiSuggestion: suggestion,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        notes: data.notes,
+      });
+
+      toast.success('Meal plan saved successfully!');
+      onMealPlanSaved?.();
+      handleCancel();
+    } catch (error: any) {
+      console.error('Save meal plan error:', error);
+      toast.error(error.response?.data?.error || 'Failed to save meal plan');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleCancel = () => {
     onClose();
     reset();
+    resetSave();
     setSuggestion(null);
+    setShowSaveForm(false);
   };
 
   if (!isOpen) return null;
@@ -212,6 +257,77 @@ export function AIMealPlanModal({
                   </>
                 )}
               </Button>
+            </form>
+          ) : showSaveForm ? (
+            <form onSubmit={handleSubmitSave(handleSave)} className="space-y-6">
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <h3 className="font-semibold text-purple-900 mb-1">{suggestion.name}</h3>
+                <p className="text-sm text-purple-700">
+                  {suggestion.meals.length} meals • ₱{(suggestion.estimatedCostCents / 100).toFixed(2)}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                  Schedule Your Meal Plan
+                </h3>
+
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                  <Input
+                    label="Start Date"
+                    type="date"
+                    error={saveErrors.startDate?.message}
+                    disabled={saving}
+                    required
+                    {...registerSave('startDate')}
+                  />
+
+                  <Input
+                    label="End Date"
+                    type="date"
+                    error={saveErrors.endDate?.message}
+                    disabled={saving}
+                    required
+                    {...registerSave('endDate')}
+                  />
+                </div>
+
+                <div>
+                  <textarea
+                    placeholder="Add notes about this meal plan..."
+                    rows={2}
+                    disabled={saving}
+                    className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                    {...registerSave('notes')}
+                  />
+                  {saveErrors.notes && <p className="mt-1 text-sm text-red-500">{saveErrors.notes.message}</p>}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowSaveForm(false)}
+                  disabled={saving}
+                  className="flex-1"
+                >
+                  Back
+                </Button>
+                <Button type="submit" disabled={saving} className="flex-1">
+                  {saving ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save Meal Plan
+                    </>
+                  )}
+                </Button>
+              </div>
             </form>
           ) : (
             <div className="space-y-6">

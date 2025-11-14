@@ -19,6 +19,7 @@ import {
   MealPlanItemInput,
 } from '../../types/mealplan.types';
 import { RecipeIngredient } from '../../types/recipe.types';
+import { RecipeCategory, RecipeDifficulty } from '../../types/recipe.types';
 
 export class MealPlanService {
   /**
@@ -613,6 +614,160 @@ export class MealPlanService {
       totalCostCents: hasAnyCost ? totalCostCents : null,
       totalCalories: hasAnyCalories ? totalCalories : null,
     };
+  }
+
+  /**
+   * Create meal plan from AI suggestion
+   * This will automatically create recipes from the AI-generated meal plan
+   */
+  async createMealPlanFromAI(
+    userId: string,
+    aiSuggestion: {
+      name: string;
+      meals: Array<{
+        day: number;
+        mealType: string;
+        recipeName: string;
+        ingredients: string[];
+      }>;
+      estimatedCostCents: number;
+      totalCalories: number;
+    },
+    startDate: string,
+    endDate: string,
+    notes?: string
+  ): Promise<MealPlanResponse> {
+    // Validate dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new AppError('Invalid date format', 400);
+    }
+
+    if (start > end) {
+      throw new AppError('Start date must be before end date', 400);
+    }
+
+    // Create recipes for each unique meal
+    const recipeMap = new Map<string, string>(); // recipeName -> recipeId
+
+    for (const meal of aiSuggestion.meals) {
+      if (!recipeMap.has(meal.recipeName)) {
+        // Parse ingredients from string array to structured format
+        const ingredients = meal.ingredients.map((ing: string) => {
+          // Parse "2 cups flour" format
+          const parts = ing.trim().split(' ');
+          const quantity = parseFloat(parts[0]) || 1;
+          const unit = parts[1] || 'pieces';
+          const ingredientName = parts.slice(2).join(' ') || parts.join(' ');
+
+          return {
+            ingredientName,
+            quantity,
+            unit,
+          };
+        });
+
+        // Create recipe
+        const recipe = await prisma.recipe.create({
+          data: {
+            userId,
+            title: meal.recipeName,
+            description: `AI-generated recipe from meal plan: ${aiSuggestion.name}`,
+            category: this.getCategoryForMealType(meal.mealType),
+            difficulty: RecipeDifficulty.MEDIUM,
+            prepTimeMinutes: 15,
+            cookTimeMinutes: 30,
+            servings: 4,
+            ingredientsList: ingredients,
+            instructions: [
+              'Follow standard cooking procedures for this dish.',
+              'Adjust seasoning to taste.',
+              'Serve hot and enjoy!',
+            ],
+            isPublic: false,
+          },
+        });
+
+        recipeMap.set(meal.recipeName, recipe.id);
+
+        logger.info('AI recipe created', {
+          service: 'kitcha-api',
+          userId,
+          recipeId: recipe.id,
+          recipeName: meal.recipeName,
+        });
+      }
+    }
+
+    // Now create the meal plan with the created recipes
+    const meals: MealPlanItemInput[] = aiSuggestion.meals.map((meal) => ({
+      recipeId: recipeMap.get(meal.recipeName)!,
+      dayOfWeek: meal.day,
+      mealType: meal.mealType,
+      servings: 4,
+    }));
+
+    // Create meal plan
+    const mealPlan = await prisma.mealPlan.create({
+      data: {
+        userId,
+        name: aiSuggestion.name,
+        startDate: start,
+        endDate: end,
+        notes: notes?.trim() || `AI-generated meal plan with ${aiSuggestion.meals.length} meals`,
+        totalCostCents: aiSuggestion.estimatedCostCents,
+        totalCalories: aiSuggestion.totalCalories,
+        mealPlanItems: {
+          create: meals.map((meal) => ({
+            recipeId: meal.recipeId,
+            dayOfWeek: meal.dayOfWeek,
+            mealType: meal.mealType,
+            servings: meal.servings || 4,
+            costCents: null,
+            calories: null,
+          })),
+        },
+      },
+      include: {
+        mealPlanItems: {
+          include: {
+            recipe: {
+              select: {
+                id: true,
+                title: true,
+                imageUrl: true,
+                prepTimeMinutes: true,
+                cookTimeMinutes: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    logger.info('Meal plan created from AI suggestion', {
+      service: 'kitcha-api',
+      userId,
+      mealPlanId: mealPlan.id,
+      name: mealPlan.name,
+      recipesCreated: recipeMap.size,
+    });
+
+    return this.formatMealPlan(mealPlan);
+  }
+
+  /**
+   * Get recipe category based on meal type
+   */
+  private getCategoryForMealType(mealType: string): string {
+    const mealTypeLower = mealType.toLowerCase();
+    if (mealTypeLower === 'breakfast') return RecipeCategory.BREAKFAST;
+    if (mealTypeLower === 'lunch') return RecipeCategory.LUNCH;
+    if (mealTypeLower === 'dinner') return RecipeCategory.DINNER;
+    if (mealTypeLower === 'snack') return RecipeCategory.SNACK;
+    return RecipeCategory.DINNER; // Default
   }
 
   /**

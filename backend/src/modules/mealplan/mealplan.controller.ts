@@ -111,4 +111,23 @@ export class MealPlanController {
     const shoppingList = await this.mealPlanService.generateShoppingList(userId, id);
     res.status(200).json(shoppingList);
   });
+
+  /**
+   * Create meal plan from AI suggestion
+   * POST /api/v1/mealplans/from-ai
+   */
+  createMealPlanFromAI = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const { aiSuggestion, startDate, endDate, notes } = req.body;
+
+    const mealPlan = await this.mealPlanService.createMealPlanFromAI(
+      userId,
+      aiSuggestion,
+      startDate,
+      endDate,
+      notes
+    );
+
+    res.status(201).json(mealPlan);
+  });
 }

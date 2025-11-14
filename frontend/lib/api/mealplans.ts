@@ -8,6 +8,7 @@ import type {
   MealPlanShoppingList,
   MealPlanFilters,
 } from '@/types/mealplan.types';
+import type { MealPlanSuggestion } from './ai';
 
 export const mealPlanApi = {
   /**
@@ -70,5 +71,17 @@ export const mealPlanApi = {
    */
   async getShoppingList(id: string): Promise<MealPlanShoppingList> {
     return await apiClient.get<MealPlanShoppingList>(`/api/v1/mealplans/${id}/shopping-list`);
+  },
+
+  /**
+   * Create meal plan from AI suggestion
+   */
+  async createFromAI(data: {
+    aiSuggestion: MealPlanSuggestion;
+    startDate: string;
+    endDate: string;
+    notes?: string;
+  }): Promise<MealPlan> {
+    return await apiClient.post<MealPlan>('/api/v1/mealplans/from-ai', data);
   },
 };
