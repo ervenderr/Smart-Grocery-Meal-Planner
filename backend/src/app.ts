@@ -91,6 +91,10 @@ export function createApp(): Application {
   app.use(
     cors({
       origin: (origin, callback) => {
+        const allowedOrigins = Array.isArray(config.cors.origin)
+          ? config.cors.origin
+          : [config.cors.origin];
+
         // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
 
