@@ -104,7 +104,7 @@ export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditReci
 
   const { fields: instructionFields, append: appendInstruction, remove: removeInstruction } = useFieldArray({
     control,
-    name: 'instructions',
+    name: 'instructions' as any,
   });
 
   useEffect(() => {
@@ -374,7 +374,7 @@ export function EditRecipeModal({ isOpen, onClose, onSuccess, recipe }: EditReci
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendInstruction('')}
+              onClick={() => (appendInstruction as any)('')}
               disabled={isLoading}
             >
               <Plus className="h-4 w-4" />

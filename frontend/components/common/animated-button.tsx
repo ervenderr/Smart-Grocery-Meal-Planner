@@ -4,7 +4,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { ReactNode, ButtonHTMLAttributes } from 'react';
 import { Loader2 } from 'lucide-react';
 
-interface AnimatedButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface AnimatedButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd'> {
   children: ReactNode;
   isLoading?: boolean;
   loadingText?: string;
@@ -65,7 +65,7 @@ export function AnimatedButton({
   );
 }
 
-export function PulseButton({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
+export function PulseButton({ children, ...props }: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onDrag' | 'onDragStart' | 'onDragEnd' | 'onAnimationStart' | 'onAnimationEnd'>) {
   return (
     <motion.button
       animate={{
