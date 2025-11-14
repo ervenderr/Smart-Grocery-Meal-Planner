@@ -56,7 +56,7 @@ export default function SignupPage() {
 
       {/* Right Side - Image/Illustration */}
       <div className="relative hidden lg:block lg:w-1/2">
-        <div className="from-secondary-500 to-secondary-700 absolute inset-0 bg-gradient-to-br">
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary-500 to-secondary-700">
           <div className="flex h-full items-center justify-center p-12">
             <div className="max-w-md text-white">
               <h3 className="text-3xl font-bold">Start your journey to smarter shopping</h3>

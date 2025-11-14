@@ -41,7 +41,17 @@ export function createApp(): Application {
    */
   app.use(
     cors({
-      origin: config.cors.origin,
+      origin: (origin, callback) => {
+        const allowedOrigins = Array.isArray(config.cors.origin) 
+          ? config.cors.origin 
+          : [config.cors.origin];
+        
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true, // Allow cookies
     })
   );
