@@ -62,7 +62,8 @@ model User {
   mealPlans         MealPlan[]
   shoppingLists     ShoppingList[]
   shoppingHistory   ShoppingHistory[]
-  alerts            Alert[]
+  notifications     Notification[] @relation("UserNotifications")
+  alerts            Alert[] @relation("UserAlerts")
 
   @@index([email])
   @@map("users")
@@ -420,24 +421,68 @@ model MarketPrice {
 }
 
 // ============================================
-// 11. ALERTS TABLE
+// 11. NOTIFICATIONS TABLE
 // ============================================
-// User notifications (budget, expiry, trends)
+// User notifications (budget, expiry, reminders, trends)
 //
-// WHY alert_type: Different handling for different types
-// WHY threshold/actual_value: Show user why alert triggered
-// WHY is_read/dismissed: User can manage notifications
+// WHY notification_type: Different handling for different types
+// WHY priority: High-priority notifications shown first
+// WHY actionUrl: Deep links for quick navigation (e.g., /pantry, /budget)
+// WHY metadata: JSON for type-specific data (item ID, budget amount, etc.)
+// WHY scheduledFor: Support for future reminders (meal prep, shopping day)
+// WHY isRead/dismissed: User can manage notification state
 //
+model Notification {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+
+  notificationType  String    @map("notification_type")
+  // Types: "ingredient_expiring", "ingredient_expired", "budget_warning",
+  //        "budget_exceeded", "meal_prep_reminder", "shopping_day_reminder",
+  //        "low_stock", "price_drop", "meal_plan_due"
+
+  title             String
+  message           String    @db.Text
+  priority          String    @default("normal") // "low", "normal", "high", "urgent"
+
+  actionUrl         String?   @map("action_url") // Deep link for click action
+  metadata          String?   @db.Text // JSON string for extra data
+
+  // Scheduling
+  scheduledFor      DateTime? @map("scheduled_for") // For future reminders
+  sentAt            DateTime? @map("sent_at") // When notification was delivered
+
+  // User interaction
+  isRead            Boolean   @default(false) @map("is_read")
+  readAt            DateTime? @map("read_at")
+  isDismissed       Boolean   @default(false) @map("is_dismissed")
+  dismissedAt       DateTime? @map("dismissed_at")
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relationship
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead, isDismissed]) // Composite for active notifications query
+  @@index([notificationType])
+  @@index([scheduledFor]) // For cron jobs sending scheduled notifications
+  @@index([priority])
+  @@map("notifications")
+}
+
+// Keep old Alert table for backward compatibility (can migrate later)
 model Alert {
   id            String    @id @default(uuid())
   userId        String    @map("user_id")
 
-  alertType     String    @map("alert_type") // "budget_exceeded", "item_expiring", "price_spike", "trend_alert"
+  alertType     String    @map("alert_type")
   title         String
   message       String    @db.Text
 
-  threshold     Int?      // What was the threshold (e.g., 90% of budget)
-  actualValue   Int?      @map("actual_value") // What was actual (e.g., 95%)
+  threshold     Int?
+  actualValue   Int?      @map("actual_value")
 
   isRead        Boolean   @default(false) @map("is_read")
   readAt        DateTime? @map("read_at")
@@ -445,11 +490,10 @@ model Alert {
 
   createdAt     DateTime  @default(now()) @map("created_at")
 
-  // Relationship
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation("UserAlerts", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([userId, isRead]) // Composite for "unread alerts" query
+  @@index([userId, isRead])
   @@index([alertType])
   @@map("alerts")
 }

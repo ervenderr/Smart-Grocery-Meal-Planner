@@ -72,4 +72,15 @@ export const API_ROUTES = {
     DASHBOARD: `/api/${API_VERSION}/analytics/dashboard`,
     TRENDS: `/api/${API_VERSION}/analytics/spending-trends`,
   },
+
+  // Notifications
+  NOTIFICATIONS: {
+    BASE: `/api/${API_VERSION}/notifications`,
+    BY_ID: (id: string) => `/api/${API_VERSION}/notifications/${id}`,
+    MARK_READ: (id: string) => `/api/${API_VERSION}/notifications/${id}/read`,
+    DISMISS: (id: string) => `/api/${API_VERSION}/notifications/${id}/dismiss`,
+    READ_ALL: `/api/${API_VERSION}/notifications/read-all`,
+    STATS: `/api/${API_VERSION}/notifications/stats`,
+    GENERATE: `/api/${API_VERSION}/notifications/generate`,
+  },
 } as const;

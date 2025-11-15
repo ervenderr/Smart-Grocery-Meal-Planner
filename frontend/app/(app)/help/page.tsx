@@ -112,7 +112,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Why do AI requests take time?',
-    answer: 'AI generation requires processing by Google Gemini AI, which can take 30-60 seconds depending on the complexity. We show a loading indicator while the AI works on your request.',
+    answer: 'AI generation requires advanced processing, which can take 30-60 seconds depending on the complexity. We show a loading indicator while the AI analyzes your data and generates personalized suggestions.',
     category: 'ai',
   },
   {

@@ -88,7 +88,7 @@ export function AIRecipeSuggestionsModal({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">AI Recipe Suggestions</h2>
-              <p className="text-sm text-gray-600">Powered by Google Gemini AI</p>
+              <p className="text-sm text-gray-600">AI-powered recipe recommendations</p>
             </div>
           </div>
           <button onClick={onClose} className="rounded-lg p-2 hover:bg-gray-100">

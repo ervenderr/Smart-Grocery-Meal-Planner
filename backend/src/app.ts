@@ -184,6 +184,9 @@ export function createApp(): Application {
   console.log('  - Loading AI routes...');
   const aiRoutes = require('./modules/ai/ai.routes').default;
 
+  console.log('  - Loading notification routes...');
+  const notificationRoutes = require('./modules/notification/notification.routes').default;
+
   console.log('✅ All route modules loaded successfully');
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
@@ -195,6 +198,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/alerts`, alertRoutes);
   app.use(`/api/${config.apiVersion}/analytics`, analyticsRoutes);
   app.use(`/api/${config.apiVersion}/ai`, aiRoutes);
+  app.use(`/api/${config.apiVersion}/notifications`, notificationRoutes);
 
   console.log('✅ All routes registered successfully');
 

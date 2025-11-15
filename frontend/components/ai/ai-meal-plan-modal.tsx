@@ -162,7 +162,7 @@ export function AIMealPlanModal({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">AI Meal Plan Generator</h2>
-              <p className="text-sm text-gray-600">Powered by Google Gemini AI</p>
+              <p className="text-sm text-gray-600">Intelligent meal planning for your week</p>
             </div>
           </div>
           <button onClick={handleCancel} className="rounded-lg p-2 hover:bg-gray-100">
