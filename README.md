@@ -686,7 +686,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**Erven Dess**
+**Ervenderr**
 - Email: ervenderr@yopmail.com
 - GitHub: [@ervenderr](https://github.com/ervenderr)
 - LinkedIn: [ErvenDerr](https://linkedin.com/in/ervenderr)
@@ -707,7 +707,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### ⭐ Star this repository if you find it helpful!
 
-**Built with ❤️ by Erven Dess**
+**Built with ❤️ by Ervenderr**
 
 *Showcasing modern full-stack development with AI integration*
 
