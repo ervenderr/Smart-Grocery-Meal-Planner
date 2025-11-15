@@ -127,9 +127,9 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-25" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-25 animate-fadeIn" onClick={onClose}>
       <div
-        className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl"
+        className="absolute right-0 top-0 h-full w-full sm:w-96 md:w-[450px] bg-white shadow-2xl animate-slideInRight"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
