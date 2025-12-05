@@ -5,6 +5,7 @@ Express.js + TypeScript backend for the Kitcha application.
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - PostgreSQL (v15 or higher)
 - npm or pnpm
@@ -62,7 +63,8 @@ backend/
 │   │   ├── meal-plans/      # Meal planning
 │   │   ├── shopping/        # Shopping lists
 │   │   ├── budget/          # Budget tracking
-│   │   └── analytics/       # Dashboard analytics
+│   │   ├── analytics/       # Dashboard analytics
+│   │   └── zapier/          # Zapier automation webhooks
 │   │
 │   ├── services/            # External services
 │   │   └── gemini.service.ts # Gemini API integration
@@ -91,11 +93,13 @@ backend/
 ### Base URL: `http://localhost:3001/api/v1`
 
 ### Health Check
+
 ```
 GET /health
 ```
 
 ### Authentication (Phase 1)
+
 ```
 POST /api/v1/auth/signup      # Register new user
 POST /api/v1/auth/login       # Login user
@@ -103,6 +107,7 @@ POST /api/v1/auth/logout      # Logout user
 ```
 
 ### Users (Phase 1)
+
 ```
 GET    /api/v1/users/profile       # Get user profile
 PATCH  /api/v1/users/profile       # Update user profile
@@ -110,6 +115,7 @@ PATCH  /api/v1/users/preferences   # Update preferences
 ```
 
 ### Pantry (Phase 2)
+
 ```
 GET    /api/v1/pantry              # List all pantry items
 POST   /api/v1/pantry              # Add item to pantry
@@ -121,9 +127,65 @@ GET    /api/v1/pantry/expiring-soon # Items expiring in 7 days
 
 _More endpoints will be added in subsequent phases..._
 
+### Zapier Integration
+
+```
+GET    /api/v1/zapier/events           # List available events
+POST   /api/v1/zapier/webhooks         # Register a webhook
+GET    /api/v1/zapier/webhooks         # List user's webhooks
+DELETE /api/v1/zapier/webhooks/:id     # Delete a webhook
+POST   /api/v1/zapier/test/:eventType  # Test a webhook event
+```
+
+## 🔗 Zapier Automation
+
+Kitcha integrates with Zapier for workflow automation. Events are dispatched automatically when certain actions occur.
+
+### Supported Events
+
+| Event                   | Trigger                       | Payload                       |
+| ----------------------- | ----------------------------- | ----------------------------- |
+| `meal_plan_created`     | New meal plan created         | Plan name, dates, meals, cost |
+| `item_expiring`         | Pantry item expiring soon     | Item name, days until expiry  |
+| `item_expired`          | Pantry item has expired       | Item name, message            |
+| `stock_low`             | Item quantity below threshold | Item name, current quantity   |
+| `budget_warning`        | 80%+ of weekly budget used    | Budget, spent, percentage     |
+| `budget_exceeded`       | Weekly budget exceeded        | Budget, spent, percentage     |
+| `shopping_list_created` | New shopping list generated   | List name, item count         |
+| `weekly_summary`        | Weekly meal planning summary  | Stats for the week            |
+
+### Setup
+
+1. Add your Zapier webhook URL to `.env`:
+
+   ```env
+   ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/xxxxx/xxxxx
+   ```
+
+2. Create a Zap in Zapier:
+   - Trigger: **Webhooks by Zapier** → **Catch Hook**
+   - Copy the webhook URL to your `.env`
+
+3. Configure actions in Zapier (examples):
+   - Send email when budget exceeded
+   - Add to Google Calendar when meal plan created
+   - Send Slack notification for expiring items
+   - Create Todoist task for low stock items
+
+### Testing
+
+Use the test endpoint to verify your webhook:
+
+```bash
+curl -X POST http://localhost:3001/api/v1/zapier/test/meal_plan_created \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json"
+```
+
 ## 🗄️ Database
 
 ### Schema Overview
+
 - **users** - User accounts
 - **user_preferences** - User settings (budget, dietary restrictions)
 - **pantry_items** - Inventory tracking
@@ -137,6 +199,7 @@ _More endpoints will be added in subsequent phases..._
 - **alerts** - Budget/expiry alerts
 
 ### Prisma Commands
+
 ```bash
 npm run prisma:generate  # Generate Prisma Client
 npm run prisma:migrate   # Run migrations
@@ -147,6 +210,7 @@ npx prisma migrate reset # Reset database (dev only)
 ## 🔒 Authentication
 
 Uses JWT (JSON Web Tokens):
+
 1. User signs up/logs in
 2. Server generates JWT token
 3. Client stores token (localStorage/cookies)
@@ -181,16 +245,19 @@ DATABASE_URL=postgresql://...
 JWT_SECRET=your-secret-key
 JWT_EXPIRES_IN=7d
 CORS_ORIGIN=http://localhost:3000
+ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/xxxxx/xxxxx  # Optional
 ```
 
 ## 🐛 Debugging
 
 ### Logs
+
 - Console logs in development
 - File logs in production (`logs/` folder)
 - Winston handles all logging
 
 ### Database Issues
+
 ```bash
 # View current database
 npx prisma studio
@@ -205,37 +272,45 @@ npx prisma migrate reset
 ### Common Errors
 
 **"DATABASE_URL is not defined"**
+
 - Copy `.env.example` to `.env`
 - Add your PostgreSQL connection string
 
 **"Port 3001 already in use"**
+
 - Change `PORT` in `.env`
 - Or kill process: `lsof -ti:3001 | xargs kill`
 
 **"Cannot find module @/config/..."**
+
 - Run `npm install`
 - Ensure `tsconfig.json` paths are correct
 
 ## 📦 Dependencies
 
 ### Core
+
 - **express** - Web framework
 - **typescript** - Type safety
 - **prisma** - Database ORM
 - **jsonwebtoken** - JWT authentication
 - **bcryptjs** - Password hashing
+- **node-cron** - Scheduled tasks (Zapier automation)
 
 ### Middleware
+
 - **cors** - Cross-origin requests
 - **helmet** - Security headers
 - **morgan** - HTTP logging
 - **express-validator** - Input validation
 
 ### Logging & Errors
+
 - **winston** - Structured logging
 - **dotenv** - Environment variables
 
 ### Development
+
 - **nodemon** - Auto-restart on changes
 - **ts-node** - Run TypeScript directly
 - **jest** - Testing framework
@@ -244,12 +319,14 @@ npx prisma migrate reset
 ## 🚀 Deployment
 
 ### Build for Production
+
 ```bash
 npm run build
 NODE_ENV=production npm start
 ```
 
 ### Deploy to Render/Railway
+
 1. Connect GitHub repository
 2. Set environment variables
 3. Set build command: `npm run build`
