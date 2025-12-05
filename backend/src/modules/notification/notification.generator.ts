@@ -4,10 +4,11 @@
  * Automatically generates notifications for various system events
  */
 
-import { prisma } from '../../config/database.config';
-import { logger } from '../../config/logger.config';
-import { NotificationService } from './notification.service';
-import type { CreateNotificationRequest } from './notification.types';
+import { prisma } from "../../config/database.config";
+import { logger } from "../../config/logger.config";
+import { NotificationService } from "./notification.service";
+import type { CreateNotificationRequest } from "./notification.types";
+import { zapierService } from "../zapier";
 
 export class NotificationGenerator {
   private notificationService: NotificationService;
@@ -42,7 +43,7 @@ export class NotificationGenerator {
         },
       },
       orderBy: {
-        expiryDate: 'asc',
+        expiryDate: "asc",
       },
     });
 
@@ -51,7 +52,7 @@ export class NotificationGenerator {
       where: {
         userId,
         notificationType: {
-          in: ['ingredient_expiring', 'ingredient_expired'],
+          in: ["ingredient_expiring", "ingredient_expired"],
         },
         createdAt: {
           gte: today,
@@ -66,7 +67,7 @@ export class NotificationGenerator {
       existingNotifications
         .map((n) => {
           try {
-            const metadata = JSON.parse(n.metadata || '{}');
+            const metadata = JSON.parse(n.metadata || "{}");
             return metadata.itemId;
           } catch {
             return null;
@@ -84,33 +85,34 @@ export class NotificationGenerator {
       }
 
       const daysUntilExpiry = Math.ceil(
-        (new Date(item.expiryDate!).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        (new Date(item.expiryDate!).getTime() - today.getTime()) /
+          (1000 * 60 * 60 * 24)
       );
 
-      let priority: 'high' | 'urgent' = 'high';
-      let title = '';
-      let message = '';
+      let priority: "high" | "urgent" = "high";
+      let title = "";
+      let message = "";
 
       if (daysUntilExpiry <= 1) {
-        priority = 'urgent';
-        title = `${item.ingredientName} expires ${daysUntilExpiry === 0 ? 'today' : 'tomorrow'}!`;
+        priority = "urgent";
+        title = `${item.ingredientName} expires ${daysUntilExpiry === 0 ? "today" : "tomorrow"}!`;
         message = `Use ${item.quantity} ${item.unit} of ${item.ingredientName} soon to avoid waste.`;
       } else if (daysUntilExpiry <= 3) {
-        priority = 'urgent';
+        priority = "urgent";
         title = `${item.ingredientName} expires in ${daysUntilExpiry} days`;
         message = `You have ${item.quantity} ${item.unit} of ${item.ingredientName} expiring soon.`;
       } else {
-        priority = 'high';
+        priority = "high";
         title = `${item.ingredientName} expires in ${daysUntilExpiry} days`;
         message = `Plan to use ${item.quantity} ${item.unit} of ${item.ingredientName} this week.`;
       }
 
       notifications.push({
-        notificationType: 'ingredient_expiring',
+        notificationType: "ingredient_expiring",
         title,
         message,
         priority,
-        actionUrl: '/pantry',
+        actionUrl: "/pantry",
         metadata: {
           itemId: item.id,
           itemName: item.ingredientName,
@@ -121,13 +123,39 @@ export class NotificationGenerator {
 
     // Create all notifications
     if (notifications.length > 0) {
-      await this.notificationService.createBulkNotifications(userId, notifications);
+      await this.notificationService.createBulkNotifications(
+        userId,
+        notifications
+      );
 
-      logger.info('Expiring item notifications generated', {
-        service: 'kitcha-api',
+      logger.info("Expiring item notifications generated", {
+        service: "kitcha-api",
         userId,
         count: notifications.length,
       });
+
+      // Dispatch Zapier events for expiring items
+      for (const notification of notifications) {
+        const metadata = notification.metadata as {
+          itemId: string;
+          itemName: string;
+          daysUntilExpiry: number;
+        };
+        zapierService
+          .dispatchEvent(userId, "item_expiring", {
+            itemId: metadata.itemId,
+            itemName: metadata.itemName,
+            daysUntilExpiry: metadata.daysUntilExpiry,
+            message: notification.message,
+          })
+          .catch((error) => {
+            logger.warn("Failed to dispatch Zapier event for expiring item", {
+              service: "kitcha-api",
+              error: error instanceof Error ? error.message : "Unknown error",
+              itemId: metadata.itemId,
+            });
+          });
+      }
     }
 
     return notifications.length;
@@ -155,7 +183,7 @@ export class NotificationGenerator {
     const existingNotifications = await prisma.notification.findMany({
       where: {
         userId,
-        notificationType: 'ingredient_expired',
+        notificationType: "ingredient_expired",
         createdAt: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
         },
@@ -169,7 +197,7 @@ export class NotificationGenerator {
       existingNotifications
         .map((n) => {
           try {
-            const metadata = JSON.parse(n.metadata || '{}');
+            const metadata = JSON.parse(n.metadata || "{}");
             return metadata.itemId;
           } catch {
             return null;
@@ -187,11 +215,11 @@ export class NotificationGenerator {
       }
 
       notifications.push({
-        notificationType: 'ingredient_expired',
+        notificationType: "ingredient_expired",
         title: `${item.ingredientName} has expired`,
         message: `Remove expired ${item.ingredientName} from your pantry.`,
-        priority: 'normal',
-        actionUrl: '/pantry',
+        priority: "normal",
+        actionUrl: "/pantry",
         metadata: {
           itemId: item.id,
           itemName: item.ingredientName,
@@ -201,13 +229,37 @@ export class NotificationGenerator {
 
     // Create all notifications
     if (notifications.length > 0) {
-      await this.notificationService.createBulkNotifications(userId, notifications);
+      await this.notificationService.createBulkNotifications(
+        userId,
+        notifications
+      );
 
-      logger.info('Expired item notifications generated', {
-        service: 'kitcha-api',
+      logger.info("Expired item notifications generated", {
+        service: "kitcha-api",
         userId,
         count: notifications.length,
       });
+
+      // Dispatch Zapier events for expired items
+      for (const notification of notifications) {
+        const metadata = notification.metadata as {
+          itemId: string;
+          itemName: string;
+        };
+        zapierService
+          .dispatchEvent(userId, "item_expired", {
+            itemId: metadata.itemId,
+            itemName: metadata.itemName,
+            message: notification.message,
+          })
+          .catch((error) => {
+            logger.warn("Failed to dispatch Zapier event for expired item", {
+              service: "kitcha-api",
+              error: error instanceof Error ? error.message : "Unknown error",
+              itemId: metadata.itemId,
+            });
+          });
+      }
     }
 
     return notifications.length;
@@ -261,7 +313,7 @@ export class NotificationGenerator {
       where: {
         userId,
         notificationType: {
-          in: ['budget_warning', 'budget_exceeded'],
+          in: ["budget_warning", "budget_exceeded"],
         },
         createdAt: {
           gte: notificationCheckDate,
@@ -278,11 +330,11 @@ export class NotificationGenerator {
     // Budget exceeded (100%+)
     if (percentageUsed >= 100) {
       notifications.push({
-        notificationType: 'budget_exceeded',
-        title: 'Budget exceeded!',
+        notificationType: "budget_exceeded",
+        title: "Budget exceeded!",
         message: `You've spent ₱${(totalSpent / 100).toFixed(2)} of your ₱${(budgetCents / 100).toFixed(2)} weekly budget (${percentageUsed.toFixed(0)}%).`,
-        priority: 'urgent',
-        actionUrl: '/budget',
+        priority: "urgent",
+        actionUrl: "/budget",
         metadata: {
           budgetAmount: budgetCents,
           spentAmount: totalSpent,
@@ -293,11 +345,11 @@ export class NotificationGenerator {
     // Budget warning (80%+)
     else if (percentageUsed >= 80) {
       notifications.push({
-        notificationType: 'budget_warning',
-        title: 'Budget warning',
+        notificationType: "budget_warning",
+        title: "Budget warning",
         message: `You've used ${percentageUsed.toFixed(0)}% of your weekly budget. ₱${((budgetCents - totalSpent) / 100).toFixed(2)} remaining.`,
-        priority: 'high',
-        actionUrl: '/budget',
+        priority: "high",
+        actionUrl: "/budget",
         metadata: {
           budgetAmount: budgetCents,
           spentAmount: totalSpent,
@@ -308,13 +360,44 @@ export class NotificationGenerator {
 
     // Create notifications
     if (notifications.length > 0) {
-      await this.notificationService.createBulkNotifications(userId, notifications);
+      await this.notificationService.createBulkNotifications(
+        userId,
+        notifications
+      );
 
-      logger.info('Budget notifications generated', {
-        service: 'kitcha-api',
+      logger.info("Budget notifications generated", {
+        service: "kitcha-api",
         userId,
         count: notifications.length,
       });
+
+      // Dispatch Zapier events for budget alerts
+      for (const notification of notifications) {
+        const metadata = notification.metadata as {
+          budgetAmount: number;
+          spentAmount: number;
+          percentageUsed: number;
+        };
+        const eventType =
+          notification.notificationType === "budget_exceeded"
+            ? "budget_exceeded"
+            : "budget_warning";
+        zapierService
+          .dispatchEvent(userId, eventType, {
+            budgetAmount: metadata.budgetAmount / 100,
+            spentAmount: metadata.spentAmount / 100,
+            percentageUsed: metadata.percentageUsed,
+            remaining: (metadata.budgetAmount - metadata.spentAmount) / 100,
+            message: notification.message,
+          })
+          .catch((error) => {
+            logger.warn("Failed to dispatch Zapier event for budget alert", {
+              service: "kitcha-api",
+              error: error instanceof Error ? error.message : "Unknown error",
+              eventType,
+            });
+          });
+      }
     }
 
     return notifications.length;

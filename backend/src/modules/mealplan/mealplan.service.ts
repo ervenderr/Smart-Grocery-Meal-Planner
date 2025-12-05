@@ -4,9 +4,9 @@
  * Business logic for meal planning functionality.
  */
 
-import { prisma } from '../../config/database.config';
-import { logger } from '../../config/logger.config';
-import { AppError } from '../../middleware/errorHandler';
+import { prisma } from "../../config/database.config";
+import { logger } from "../../config/logger.config";
+import { AppError } from "../../middleware/errorHandler";
 import {
   CreateMealPlanRequest,
   UpdateMealPlanRequest,
@@ -17,9 +17,10 @@ import {
   ShoppingListFromMealPlan,
   MealPlanItemResponse,
   MealPlanItemInput,
-} from '../../types/mealplan.types';
-import { RecipeIngredient } from '../../types/recipe.types';
-import { RecipeCategory, RecipeDifficulty } from '../../types/recipe.types';
+} from "../../types/mealplan.types";
+import { RecipeIngredient } from "../../types/recipe.types";
+import { RecipeCategory, RecipeDifficulty } from "../../types/recipe.types";
+import { zapierService } from "../zapier";
 
 export class MealPlanService {
   /**
@@ -36,16 +37,16 @@ export class MealPlanService {
     const end = new Date(endDate);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new AppError('Invalid date format', 400);
+      throw new AppError("Invalid date format", 400);
     }
 
     if (start > end) {
-      throw new AppError('Start date must be before end date', 400);
+      throw new AppError("Start date must be before end date", 400);
     }
 
     // Validate meals
     if (!meals || meals.length === 0) {
-      throw new AppError('Meal plan must have at least one meal', 400);
+      throw new AppError("Meal plan must have at least one meal", 400);
     }
 
     // Check if all recipes exist
@@ -59,14 +60,12 @@ export class MealPlanService {
     });
 
     if (recipes.length !== recipeIds.length) {
-      throw new AppError('One or more recipes not found', 404);
+      throw new AppError("One or more recipes not found", 404);
     }
 
     // Calculate total cost and calories
-    const { totalCostCents, totalCalories } = await this.calculateMealPlanTotals(
-      meals,
-      recipes
-    );
+    const { totalCostCents, totalCalories } =
+      await this.calculateMealPlanTotals(meals, recipes);
 
     // Create meal plan with items
     const mealPlan = await prisma.mealPlan.create({
@@ -90,7 +89,8 @@ export class MealPlanService {
               servings,
               costCents: recipe.estimatedTotalCostCents
                 ? Math.round(
-                    (recipe.estimatedTotalCostCents / recipe.servings) * servings
+                    (recipe.estimatedTotalCostCents / recipe.servings) *
+                      servings
                   )
                 : null,
               calories: recipe.caloriesPerServing
@@ -117,14 +117,34 @@ export class MealPlanService {
       },
     });
 
-    logger.info('Meal plan created', {
-      service: 'kitcha-api',
+    logger.info("Meal plan created", {
+      service: "kitcha-api",
       userId,
       mealPlanId: mealPlan.id,
       name: mealPlan.name,
     });
 
-    return this.formatMealPlan(mealPlan);
+    // Dispatch Zapier event for meal plan created
+    const formattedMealPlan = this.formatMealPlan(mealPlan);
+    zapierService
+      .dispatchEvent(userId, "meal_plan_created", {
+        mealPlanId: mealPlan.id,
+        name: mealPlan.name,
+        startDate: mealPlan.startDate.toISOString(),
+        endDate: mealPlan.endDate.toISOString(),
+        totalMeals: mealPlan.mealPlanItems.length,
+        totalCost: mealPlan.totalCostCents ? mealPlan.totalCostCents / 100 : 0,
+        totalCalories: mealPlan.totalCalories || 0,
+      })
+      .catch((error) => {
+        logger.warn("Failed to dispatch Zapier event for meal plan created", {
+          service: "kitcha-api",
+          error: error instanceof Error ? error.message : "Unknown error",
+          mealPlanId: mealPlan.id,
+        });
+      });
+
+    return formattedMealPlan;
   }
 
   /**
@@ -138,8 +158,8 @@ export class MealPlanService {
       startDate,
       endDate,
       isFavorite,
-      sortBy = 'startDate',
-      sortOrder = 'desc',
+      sortBy = "startDate",
+      sortOrder = "desc",
       page = 1,
       limit = 50,
     } = query;
@@ -171,11 +191,11 @@ export class MealPlanService {
 
     // Build orderBy clause
     const orderBy: any = {};
-    if (sortBy === 'name') {
+    if (sortBy === "name") {
       orderBy.name = sortOrder;
-    } else if (sortBy === 'totalCost') {
+    } else if (sortBy === "totalCost") {
       orderBy.totalCostCents = sortOrder;
-    } else if (sortBy === 'startDate') {
+    } else if (sortBy === "startDate") {
       orderBy.startDate = sortOrder;
     } else {
       orderBy.createdAt = sortOrder;
@@ -218,7 +238,10 @@ export class MealPlanService {
   /**
    * Get a single meal plan by ID
    */
-  async getMealPlanById(userId: string, mealPlanId: string): Promise<MealPlanResponse> {
+  async getMealPlanById(
+    userId: string,
+    mealPlanId: string
+  ): Promise<MealPlanResponse> {
     const mealPlan = await prisma.mealPlan.findFirst({
       where: {
         id: mealPlanId,
@@ -243,7 +266,7 @@ export class MealPlanService {
     });
 
     if (!mealPlan) {
-      throw new AppError('Meal plan not found', 404);
+      throw new AppError("Meal plan not found", 404);
     }
 
     return this.formatMealPlan(mealPlan);
@@ -267,7 +290,7 @@ export class MealPlanService {
     });
 
     if (!existingMealPlan) {
-      throw new AppError('Meal plan not found', 404);
+      throw new AppError("Meal plan not found", 404);
     }
 
     // Validate dates if provided
@@ -275,17 +298,19 @@ export class MealPlanService {
       const start = data.startDate
         ? new Date(data.startDate)
         : existingMealPlan.startDate;
-      const end = data.endDate ? new Date(data.endDate) : existingMealPlan.endDate;
+      const end = data.endDate
+        ? new Date(data.endDate)
+        : existingMealPlan.endDate;
 
       if (
         (data.startDate && isNaN(start.getTime())) ||
         (data.endDate && isNaN(end.getTime()))
       ) {
-        throw new AppError('Invalid date format', 400);
+        throw new AppError("Invalid date format", 400);
       }
 
       if (start > end) {
-        throw new AppError('Start date must be before end date', 400);
+        throw new AppError("Start date must be before end date", 400);
       }
     }
 
@@ -311,7 +336,7 @@ export class MealPlanService {
     // If meals are being updated, delete old ones and create new ones
     if (data.meals !== undefined) {
       if (data.meals.length === 0) {
-        throw new AppError('Meal plan must have at least one meal', 400);
+        throw new AppError("Meal plan must have at least one meal", 400);
       }
 
       // Check if all recipes exist
@@ -325,14 +350,12 @@ export class MealPlanService {
       });
 
       if (recipes.length !== recipeIds.length) {
-        throw new AppError('One or more recipes not found', 404);
+        throw new AppError("One or more recipes not found", 404);
       }
 
       // Calculate new totals
-      const { totalCostCents, totalCalories } = await this.calculateMealPlanTotals(
-        data.meals,
-        recipes
-      );
+      const { totalCostCents, totalCalories } =
+        await this.calculateMealPlanTotals(data.meals, recipes);
 
       updateData.totalCostCents = totalCostCents;
       updateData.totalCalories = totalCalories;
@@ -386,8 +409,8 @@ export class MealPlanService {
       },
     });
 
-    logger.info('Meal plan updated', {
-      service: 'kitcha-api',
+    logger.info("Meal plan updated", {
+      service: "kitcha-api",
       userId,
       mealPlanId,
     });
@@ -409,7 +432,7 @@ export class MealPlanService {
     });
 
     if (!existingMealPlan) {
-      throw new AppError('Meal plan not found', 404);
+      throw new AppError("Meal plan not found", 404);
     }
 
     // Soft delete
@@ -418,8 +441,8 @@ export class MealPlanService {
       data: { deletedAt: new Date() },
     });
 
-    logger.info('Meal plan deleted', {
-      service: 'kitcha-api',
+    logger.info("Meal plan deleted", {
+      service: "kitcha-api",
       userId,
       mealPlanId,
     });
@@ -463,7 +486,10 @@ export class MealPlanService {
     // Calculate averages
     const plansWithCost = mealPlans.filter((p) => p.totalCostCents !== null);
     if (plansWithCost.length > 0) {
-      const totalCost = plansWithCost.reduce((sum, p) => sum + (p.totalCostCents || 0), 0);
+      const totalCost = plansWithCost.reduce(
+        (sum, p) => sum + (p.totalCostCents || 0),
+        0
+      );
       stats.averageCostCents = Math.round(totalCost / plansWithCost.length);
     }
 
@@ -473,7 +499,9 @@ export class MealPlanService {
         (sum, p) => sum + (p.totalCalories || 0),
         0
       );
-      stats.averageCalories = Math.round(totalCalories / plansWithCalories.length);
+      stats.averageCalories = Math.round(
+        totalCalories / plansWithCalories.length
+      );
     }
 
     // Count meals by type
@@ -482,7 +510,8 @@ export class MealPlanService {
     mealPlans.forEach((plan) => {
       plan.mealPlanItems.forEach((item) => {
         // Count by meal type
-        stats.mealsByType[item.mealType] = (stats.mealsByType[item.mealType] || 0) + 1;
+        stats.mealsByType[item.mealType] =
+          (stats.mealsByType[item.mealType] || 0) + 1;
 
         // Count recipe usage
         const existing = recipeUsageMap.get(item.recipeId);
@@ -533,7 +562,7 @@ export class MealPlanService {
     });
 
     if (!mealPlan) {
-      throw new AppError('Meal plan not found', 404);
+      throw new AppError("Meal plan not found", 404);
     }
 
     // Aggregate ingredients across all recipes
@@ -566,7 +595,7 @@ export class MealPlanService {
 
     // Convert to array
     const items = Array.from(ingredientMap.entries()).map(([key, data]) => {
-      const ingredientName = key.split(':')[0];
+      const ingredientName = key.split(":")[0];
       return {
         ingredientName,
         quantity: Math.round(data.quantity * 100) / 100, // Round to 2 decimal places
@@ -642,11 +671,11 @@ export class MealPlanService {
     const end = new Date(endDate);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new AppError('Invalid date format', 400);
+      throw new AppError("Invalid date format", 400);
     }
 
     if (start > end) {
-      throw new AppError('Start date must be before end date', 400);
+      throw new AppError("Start date must be before end date", 400);
     }
 
     // Create recipes for each unique meal
@@ -657,10 +686,10 @@ export class MealPlanService {
         // Parse ingredients from string array to structured format
         const ingredients = meal.ingredients.map((ing: string) => {
           // Parse "2 cups flour" format
-          const parts = ing.trim().split(' ');
+          const parts = ing.trim().split(" ");
           const quantity = parseFloat(parts[0]) || 1;
-          const unit = parts[1] || 'pieces';
-          const ingredientName = parts.slice(2).join(' ') || parts.join(' ');
+          const unit = parts[1] || "pieces";
+          const ingredientName = parts.slice(2).join(" ") || parts.join(" ");
 
           return {
             ingredientName,
@@ -682,9 +711,9 @@ export class MealPlanService {
             servings: 4,
             ingredientsList: ingredients,
             instructions: [
-              'Follow standard cooking procedures for this dish.',
-              'Adjust seasoning to taste.',
-              'Serve hot and enjoy!',
+              "Follow standard cooking procedures for this dish.",
+              "Adjust seasoning to taste.",
+              "Serve hot and enjoy!",
             ],
             isPublic: false,
           },
@@ -692,8 +721,8 @@ export class MealPlanService {
 
         recipeMap.set(meal.recipeName, recipe.id);
 
-        logger.info('AI recipe created', {
-          service: 'kitcha-api',
+        logger.info("AI recipe created", {
+          service: "kitcha-api",
           userId,
           recipeId: recipe.id,
           recipeName: meal.recipeName,
@@ -716,7 +745,9 @@ export class MealPlanService {
         name: aiSuggestion.name,
         startDate: start,
         endDate: end,
-        notes: notes?.trim() || `AI-generated meal plan with ${aiSuggestion.meals.length} meals`,
+        notes:
+          notes?.trim() ||
+          `AI-generated meal plan with ${aiSuggestion.meals.length} meals`,
         totalCostCents: aiSuggestion.estimatedCostCents,
         totalCalories: aiSuggestion.totalCalories,
         mealPlanItems: {
@@ -747,8 +778,8 @@ export class MealPlanService {
       },
     });
 
-    logger.info('Meal plan created from AI suggestion', {
-      service: 'kitcha-api',
+    logger.info("Meal plan created from AI suggestion", {
+      service: "kitcha-api",
       userId,
       mealPlanId: mealPlan.id,
       name: mealPlan.name,
@@ -763,10 +794,10 @@ export class MealPlanService {
    */
   private getCategoryForMealType(mealType: string): string {
     const mealTypeLower = mealType.toLowerCase();
-    if (mealTypeLower === 'breakfast') return RecipeCategory.BREAKFAST;
-    if (mealTypeLower === 'lunch') return RecipeCategory.LUNCH;
-    if (mealTypeLower === 'dinner') return RecipeCategory.DINNER;
-    if (mealTypeLower === 'snack') return RecipeCategory.SNACK;
+    if (mealTypeLower === "breakfast") return RecipeCategory.BREAKFAST;
+    if (mealTypeLower === "lunch") return RecipeCategory.LUNCH;
+    if (mealTypeLower === "dinner") return RecipeCategory.DINNER;
+    if (mealTypeLower === "snack") return RecipeCategory.SNACK;
     return RecipeCategory.DINNER; // Default
   }
 
@@ -778,30 +809,32 @@ export class MealPlanService {
       id: mealPlan.id,
       userId: mealPlan.userId,
       name: mealPlan.name,
-      startDate: mealPlan.startDate.toISOString().split('T')[0],
-      endDate: mealPlan.endDate.toISOString().split('T')[0],
+      startDate: mealPlan.startDate.toISOString().split("T")[0],
+      endDate: mealPlan.endDate.toISOString().split("T")[0],
       totalCostCents: mealPlan.totalCostCents,
       totalCalories: mealPlan.totalCalories,
       isFavorite: mealPlan.isFavorite,
       notes: mealPlan.notes,
-      meals: mealPlan.mealPlanItems.map((item: any): MealPlanItemResponse => ({
-        id: item.id,
-        recipeId: item.recipeId,
-        dayOfWeek: item.dayOfWeek,
-        mealType: item.mealType,
-        servings: item.servings,
-        costCents: item.costCents,
-        calories: item.calories,
-        recipe: item.recipe
-          ? {
-              id: item.recipe.id,
-              name: item.recipe.title,
-              imageUrl: item.recipe.imageUrl,
-              prepTimeMinutes: item.recipe.prepTimeMinutes,
-              cookTimeMinutes: item.recipe.cookTimeMinutes,
-            }
-          : undefined,
-      })),
+      meals: mealPlan.mealPlanItems.map(
+        (item: any): MealPlanItemResponse => ({
+          id: item.id,
+          recipeId: item.recipeId,
+          dayOfWeek: item.dayOfWeek,
+          mealType: item.mealType,
+          servings: item.servings,
+          costCents: item.costCents,
+          calories: item.calories,
+          recipe: item.recipe
+            ? {
+                id: item.recipe.id,
+                name: item.recipe.title,
+                imageUrl: item.recipe.imageUrl,
+                prepTimeMinutes: item.recipe.prepTimeMinutes,
+                cookTimeMinutes: item.recipe.cookTimeMinutes,
+              }
+            : undefined,
+        })
+      ),
       createdAt: mealPlan.createdAt.toISOString(),
       updatedAt: mealPlan.updatedAt.toISOString(),
     };

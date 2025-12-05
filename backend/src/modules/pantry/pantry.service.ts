@@ -4,9 +4,9 @@
  * Business logic for pantry item management.
  */
 
-import { prisma } from '../../config/database.config';
-import { logger } from '../../config/logger.config';
-import { AppError } from '../../middleware/errorHandler';
+import { prisma } from "../../config/database.config";
+import { logger } from "../../config/logger.config";
+import { AppError } from "../../middleware/errorHandler";
 import {
   CreatePantryItemRequest,
   UpdatePantryItemRequest,
@@ -14,8 +14,12 @@ import {
   GetPantryItemsQuery,
   PaginatedPantryResponse,
   PantryStats,
-} from '../../types/pantry.types';
-import { Decimal } from '@prisma/client/runtime/library';
+} from "../../types/pantry.types";
+import { Decimal } from "@prisma/client/runtime/library";
+import { zapierService } from "../zapier";
+
+// Low stock threshold - items below this quantity trigger alerts
+const LOW_STOCK_THRESHOLD = 2;
 
 export class PantryService {
   /**
@@ -39,7 +43,7 @@ export class PantryService {
 
     // Validate quantity
     if (quantity <= 0) {
-      throw new AppError('Quantity must be greater than 0', 400);
+      throw new AppError("Quantity must be greater than 0", 400);
     }
 
     // Create the pantry item
@@ -58,8 +62,8 @@ export class PantryService {
       },
     });
 
-    logger.info('Pantry item created', {
-      service: 'kitcha-api',
+    logger.info("Pantry item created", {
+      service: "kitcha-api",
       userId,
       itemId: item.id,
       ingredientName: item.ingredientName,
@@ -81,8 +85,8 @@ export class PantryService {
       expiringSoon,
       expired,
       search,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
+      sortBy = "createdAt",
+      sortOrder = "desc",
       page = 1,
       limit = 50,
     } = query;
@@ -104,7 +108,7 @@ export class PantryService {
     if (search) {
       where.ingredientName = {
         contains: search,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
@@ -137,11 +141,11 @@ export class PantryService {
 
     // Build orderBy clause
     const orderBy: any = {};
-    if (sortBy === 'name') {
+    if (sortBy === "name") {
       orderBy.ingredientName = sortOrder;
-    } else if (sortBy === 'expiryDate') {
+    } else if (sortBy === "expiryDate") {
       orderBy.expiryDate = sortOrder;
-    } else if (sortBy === 'quantity') {
+    } else if (sortBy === "quantity") {
       orderBy.quantity = sortOrder;
     } else {
       orderBy.createdAt = sortOrder;
@@ -169,7 +173,10 @@ export class PantryService {
   /**
    * Get a single pantry item by ID
    */
-  async getItemById(userId: string, itemId: string): Promise<PantryItemResponse> {
+  async getItemById(
+    userId: string,
+    itemId: string
+  ): Promise<PantryItemResponse> {
     const item = await prisma.pantryItem.findFirst({
       where: {
         id: itemId,
@@ -179,7 +186,7 @@ export class PantryService {
     });
 
     if (!item) {
-      throw new AppError('Pantry item not found', 404);
+      throw new AppError("Pantry item not found", 404);
     }
 
     return this.formatItem(item);
@@ -203,12 +210,12 @@ export class PantryService {
     });
 
     if (!existingItem) {
-      throw new AppError('Pantry item not found', 404);
+      throw new AppError("Pantry item not found", 404);
     }
 
     // Validate quantity if provided
     if (data.quantity !== undefined && data.quantity <= 0) {
-      throw new AppError('Quantity must be greater than 0', 400);
+      throw new AppError("Quantity must be greater than 0", 400);
     }
 
     // Prepare update data
@@ -227,10 +234,14 @@ export class PantryService {
       updateData.category = data.category;
     }
     if (data.expiryDate !== undefined) {
-      updateData.expiryDate = data.expiryDate ? new Date(data.expiryDate) : null;
+      updateData.expiryDate = data.expiryDate
+        ? new Date(data.expiryDate)
+        : null;
     }
     if (data.purchaseDate !== undefined) {
-      updateData.purchaseDate = data.purchaseDate ? new Date(data.purchaseDate) : null;
+      updateData.purchaseDate = data.purchaseDate
+        ? new Date(data.purchaseDate)
+        : null;
     }
     if (data.purchasePriceCents !== undefined) {
       updateData.purchasePriceCents = data.purchasePriceCents;
@@ -248,11 +259,32 @@ export class PantryService {
       data: updateData,
     });
 
-    logger.info('Pantry item updated', {
-      service: 'kitcha-api',
+    logger.info("Pantry item updated", {
+      service: "kitcha-api",
       userId,
       itemId,
     });
+
+    // Check for low stock and dispatch Zapier event
+    const currentQuantity = Number(item.quantity);
+    if (currentQuantity <= LOW_STOCK_THRESHOLD && currentQuantity > 0) {
+      zapierService
+        .dispatchEvent(userId, "stock_low", {
+          itemId: item.id,
+          itemName: item.ingredientName,
+          currentQuantity,
+          unit: item.unit,
+          threshold: LOW_STOCK_THRESHOLD,
+          message: `${item.ingredientName} is running low (${currentQuantity} ${item.unit} remaining)`,
+        })
+        .catch((error) => {
+          logger.warn("Failed to dispatch Zapier event for low stock", {
+            service: "kitcha-api",
+            error: error instanceof Error ? error.message : "Unknown error",
+            itemId: item.id,
+          });
+        });
+    }
 
     return this.formatItem(item);
   }
@@ -271,7 +303,7 @@ export class PantryService {
     });
 
     if (!existingItem) {
-      throw new AppError('Pantry item not found', 404);
+      throw new AppError("Pantry item not found", 404);
     }
 
     // Soft delete
@@ -280,8 +312,8 @@ export class PantryService {
       data: { deletedAt: new Date() },
     });
 
-    logger.info('Pantry item deleted', {
-      service: 'kitcha-api',
+    logger.info("Pantry item deleted", {
+      service: "kitcha-api",
       userId,
       itemId,
     });
@@ -317,8 +349,9 @@ export class PantryService {
           item.expiryDate >= today &&
           item.expiryDate <= sevenDaysFromNow
       ).length,
-      expired: items.filter((item) => item.expiryDate && item.expiryDate < today)
-        .length,
+      expired: items.filter(
+        (item) => item.expiryDate && item.expiryDate < today
+      ).length,
       byCategory: {},
       byLocation: {},
     };
@@ -369,9 +402,11 @@ export class PantryService {
       quantity: item.quantity.toString(),
       unit: item.unit,
       category: item.category,
-      expiryDate: item.expiryDate ? item.expiryDate.toISOString().split('T')[0] : null,
+      expiryDate: item.expiryDate
+        ? item.expiryDate.toISOString().split("T")[0]
+        : null,
       purchaseDate: item.purchaseDate
-        ? item.purchaseDate.toISOString().split('T')[0]
+        ? item.purchaseDate.toISOString().split("T")[0]
         : null,
       purchasePriceCents: item.purchasePriceCents,
       location: item.location,
