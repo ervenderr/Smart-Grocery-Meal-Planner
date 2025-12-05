@@ -12,7 +12,6 @@ import { logger } from "../../config/logger.config";
 import { AppError } from "../../middleware/errorHandler";
 import {
   ZapierEventType,
-  ZapierEventPayload,
   WebhookDispatchResult,
   WebhookDispatchSummary,
   CreateWebhookRequest,
@@ -42,15 +41,15 @@ export class ZapierService {
   async dispatchEvent(
     userId: string,
     eventType: ZapierEventType,
-    payload: Omit<ZapierEventPayload, "eventType" | "timestamp" | "userId">
+    payload: Record<string, unknown>
   ): Promise<WebhookDispatchSummary> {
     const results: WebhookDispatchResult[] = [];
-    const fullPayload: ZapierEventPayload = {
+    const fullPayload = {
       ...payload,
       eventType,
       timestamp: new Date().toISOString(),
       userId,
-    } as ZapierEventPayload;
+    };
 
     // Get user email for payload enrichment
     const user = await prisma.user.findUnique({
@@ -113,10 +112,11 @@ export class ZapierService {
    */
   private async sendWebhook(
     webhookUrl: string,
-    payload: ZapierEventPayload,
+    payload: Record<string, unknown>,
     webhookId: string
   ): Promise<WebhookDispatchResult> {
     let lastError: string | undefined;
+    const eventType = payload.eventType as ZapierEventType;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -125,7 +125,7 @@ export class ZapierService {
           headers: {
             "Content-Type": "application/json",
             "User-Agent": "Kitcha-API/1.0",
-            "X-Webhook-Event": payload.eventType,
+            "X-Webhook-Event": eventType,
           },
         });
 
@@ -134,7 +134,7 @@ export class ZapierService {
 
         return {
           success: true,
-          eventType: payload.eventType,
+          eventType,
           webhookUrl: this.maskUrl(webhookUrl),
           statusCode: response.status,
           timestamp: new Date().toISOString(),
@@ -167,7 +167,7 @@ export class ZapierService {
 
     return {
       success: false,
-      eventType: payload.eventType,
+      eventType,
       webhookUrl: this.maskUrl(webhookUrl),
       error: lastError,
       timestamp: new Date().toISOString(),
@@ -179,19 +179,20 @@ export class ZapierService {
    */
   private async logWebhookResult(
     webhookId: string,
-    payload: ZapierEventPayload,
+    payload: Record<string, unknown>,
     statusCode: number | undefined,
     success: boolean,
     error?: string
   ): Promise<void> {
     // For now, just log to application logs
     // Could be extended to store in DB for audit trail
+    const eventType = payload.eventType as string;
     if (success) {
       logger.debug("Webhook delivered successfully", {
         service: "kitcha-api",
         module: "zapier",
         webhookId,
-        eventType: payload.eventType,
+        eventType,
         statusCode,
       });
     } else {
@@ -199,7 +200,7 @@ export class ZapierService {
         service: "kitcha-api",
         module: "zapier",
         webhookId,
-        eventType: payload.eventType,
+        eventType,
         error,
       });
     }
@@ -383,13 +384,13 @@ export class ZapierService {
       throw new AppError("Invalid event type", 400);
     }
 
-    const samplePayload = {
+    const samplePayload: Record<string, unknown> = {
       ...eventDef.samplePayload,
       eventType,
       timestamp: new Date().toISOString(),
       userId,
       _test: true,
-    } as unknown as ZapierEventPayload;
+    };
 
     const results: WebhookDispatchResult[] = [];
 
