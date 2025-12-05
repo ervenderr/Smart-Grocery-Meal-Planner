@@ -64,6 +64,7 @@ model User {
   shoppingHistory   ShoppingHistory[]
   notifications     Notification[] @relation("UserNotifications")
   alerts            Alert[] @relation("UserAlerts")
+  zapierWebhooks    ZapierWebhook[]
 
   @@index([email])
   @@map("users")
@@ -496,4 +497,38 @@ model Alert {
   @@index([userId, isRead])
   @@index([alertType])
   @@map("alerts")
+}
+
+// ============================================
+// 12. ZAPIER WEBHOOKS TABLE
+// ============================================
+// User-configured webhook URLs for Zapier automation
+//
+// WHY per-user webhooks: Each user can configure their own automations
+// WHY eventType: Different webhooks for different event types
+// WHY isActive: Allow disabling without deleting
+//
+model ZapierWebhook {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+
+  eventType   String   @map("event_type")
+  // Types: "meal_plan_created", "meal_plan_updated", "grocery_list_generated",
+  //        "stock_low", "item_expiring", "item_expired", "budget_warning",
+  //        "budget_exceeded", "purchase_logged", "weekly_summary"
+
+  webhookUrl  String   @map("webhook_url")
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventType]) // One webhook per event type per user
+  @@index([userId])
+  @@index([eventType])
+  @@index([userId, eventType, isActive])
+  @@map("zapier_webhooks")
 }

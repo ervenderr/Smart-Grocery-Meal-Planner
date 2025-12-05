@@ -49,6 +49,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "node-cron": "^4.2.1",
     "prisma": "^5.7.1",
     "tsc-alias": "^1.8.8",
     "tsconfig-paths": "^4.2.0",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/mocha": "^10.0.10",
+    "@types/node-cron": "^3.0.11",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
