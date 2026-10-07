@@ -5,11 +5,12 @@
  * Keeping this separate from index.ts makes testing easier.
  *
  * MIDDLEWARE ORDER MATTERS:
- * 1. Security (helmet, cors)
- * 2. Body parsing (express.json)
- * 3. Logging (morgan)
- * 4. Routes
- * 5. Error handling (must be last)
+ * 1. trust proxy (Railway edge), then /health (DB-free, never redirected)
+ * 2. HTTPS redirect (production), helmet
+ * 3. Origin guard (403) and CORS
+ * 4. Rate limiting, body parsing, logging
+ * 5. Routes
+ * 6. Error handling (must be last)
  */
 
 import express, { Application, Request, Response } from "express";
@@ -20,6 +21,11 @@ import { config } from "./config/env.config";
 import { morganStream } from "./config/logger.config";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { apiLimiter } from "./middleware/rateLimiter";
+import {
+  buildCorsOptions,
+  buildOriginPredicate,
+  originGuard,
+} from "./config/cors.config";
 
 /**
  * Create and configure Express application
@@ -27,6 +33,24 @@ import { apiLimiter } from "./middleware/rateLimiter";
 export function createApp(): Application {
   console.log("🏗️  Creating Express application...");
   const app: Application = express();
+
+  /**
+   * Trust exactly one proxy hop (Railway edge). Never `true`: the leftmost
+   * X-Forwarded-For entry is client-controlled and would defeat rate limits.
+   */
+  app.set("trust proxy", 1);
+
+  /**
+   * Health check: registered before the HTTPS redirect and origin guard so
+   * Railway's plain-HTTP probe always gets 200. No DB access, no env details.
+   */
+  app.get("/health", (_req: Request, res: Response) => {
+    res.status(200).json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    });
+  });
 
   // ===== SECURITY MIDDLEWARE =====
   console.log("🔒 Setting up security middleware...");
@@ -36,11 +60,11 @@ export function createApp(): Application {
    * Redirects HTTP to HTTPS
    */
   if (config.env === "production") {
-    app.use((req, _res, next) => {
-      if (req.header("x-forwarded-proto") !== "https") {
-        _res.redirect(`https://${req.header("host")}${req.url}`);
-      } else {
+    app.use((req, res, next) => {
+      if (req.secure) {
         next();
+      } else {
+        res.redirect(301, `https://${req.header("host")}${req.originalUrl}`);
       }
     });
   }
@@ -76,24 +100,13 @@ export function createApp(): Application {
     })
   );
 
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        const allowedOrigins = Array.isArray(config.cors.origin)
-          ? config.cors.origin
-          : [config.cors.origin];
-
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
-        }
-      },
-      credentials: true,
-      optionsSuccessStatus: 200,
-      maxAge: 86400, // Cache preflight for 24 hours
-    })
-  );
+  const isAllowed = buildOriginPredicate({
+    origins: config.cors.origin,
+    previewProject: config.cors.previewProject,
+    previewScope: config.cors.previewScope,
+  });
+  app.use(originGuard(isAllowed));
+  app.use(cors(buildCorsOptions(isAllowed)));
 
   // ===== RATE LIMITING =====
   /**
@@ -121,20 +134,6 @@ export function createApp(): Application {
   } else {
     app.use(morgan("combined", { stream: morganStream }));
   }
-
-  // ===== HEALTH CHECK =====
-  /**
-   * Simple health check endpoint
-   * Used by monitoring tools to check if server is alive
-   */
-  app.get("/health", (_req: Request, res: Response) => {
-    res.status(200).json({
-      status: "ok",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: config.env,
-    });
-  });
 
   // ===== API ROUTES =====
   /**
