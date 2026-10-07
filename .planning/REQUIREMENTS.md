@@ -7,15 +7,15 @@
 
 ### Platform & Deploy (DEP)
 
-- [ ] **DEP-01**: Frontend runs on a patched Next.js (16.4.0+) with matching React and eslint-config-next, and builds cleanly
+- [x] **DEP-01**: Frontend runs on a patched Next.js (16.4.0+) with matching React and eslint-config-next, and builds cleanly
 - [ ] **DEP-02**: Backend API is live on Railway (Hobby) with Railway Postgres, deployed via the Railway CLI, with a spend cap set
 - [ ] **DEP-03**: Railway healthcheck passes: `/health` responds 200 without DB access and is not redirected to HTTPS
 - [ ] **DEP-04**: Rate limits apply per real client IP behind Railway's proxy (`trust proxy` configured)
 - [ ] **DEP-05**: Backend accepts requests only from an allowlist of frontend origins (including Vercel preview pattern) and fails fast on missing/invalid env vars
 - [ ] **DEP-06**: Migrations run on deploy without `npx`, and the app runs as PID 1 via `exec node` so it shuts down cleanly
 - [ ] **DEP-07**: Frontend production build fails if `NEXT_PUBLIC_API_URL` is missing; deployed frontend talks to the Railway API end to end (register, login, pantry CRUD)
-- [ ] **DEP-08**: The seed script refuses to run against production; `render.yaml` is removed; `.env.example` documents every variable
-- [ ] **DEP-09**: CI runs lint, type-check and tests for backend and frontend on every push
+- [x] **DEP-08**: The seed script refuses to run against production; `render.yaml` is removed; `.env.example` documents every variable
+- [x] **DEP-09**: CI runs lint, type-check and tests for backend and frontend on every push
 
 ### AI Suggestions (AI)
 

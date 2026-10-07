@@ -33,7 +33,7 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
 **Plans**: 6 plans
 Plans:
 - [ ] 01-01-PLAN.md — Backend CI baseline + deploy artefacts (lint config, pantry date fix, prisma pin, entrypoint exec, Dockerfile PORT, seed guard, render.yaml removed)
-- [ ] 01-02-PLAN.md — Next.js 16.4.0 / React 19.3.0 upgrade, warn-level lint, frontend .env.example
+- [x] 01-02-PLAN.md — Next.js 16.4.0 / React 19.3.0 upgrade, warn-level lint, frontend .env.example
 - [ ] 01-03-PLAN.md — Tests-first backend hardening: Zod env, CORS allowlist + 403 guard + preview regex, trust proxy, early DB-free /health
 - [ ] 01-04-PLAN.md — GitHub Actions CI (backend, frontend, docker-build), push, green on main
 - [ ] 01-05-PLAN.md — Smoke test first, minimum Railway spend cap, provision `kitcha` + deploy kitcha-api, live API verified
@@ -117,7 +117,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Secure Foundation & Railway Deploy | 0/TBD | Not started | - |
+| 1. Secure Foundation & Railway Deploy | 1/6 | In Progress|  |
 | 2. Reliable AI Suggestions | 0/TBD | Not started | - |
 | 3. Mobile-First Shell | 0/TBD | Not started | - |
 | 4. Persistent Shopping List | 0/TBD | Not started | - |
