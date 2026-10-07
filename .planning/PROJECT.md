@@ -43,7 +43,7 @@ Someone standing in a kitchen or grocery aisle with a phone can quickly see what
 
 ## Context
 
-- Brownfield repo: `backend/` (Express 4, Prisma 5.22, TypeScript, Jest, Winston, Dockerfile + `entrypoint.sh` running `prisma migrate deploy`, `render.yaml` from a previous Render target), `frontend/` (Next.js 16, Tailwind 3.4, Zustand, React Hook Form, Zod, Axios, Lucide), `project details/` (original specs).
+- Brownfield repo: `backend/` (Express 4, Prisma 5.22, TypeScript, Jest, Winston, Dockerfile + `entrypoint.sh` running `prisma migrate deploy`, `render.yaml` from a previous Render target), `frontend/` (Next.js 16.0.2 pinned, vulnerable, must upgrade; Tailwind 4, Zustand, React Hook Form, Zod, Axios, Lucide), `project details/` (original specs).
 - Backend modules: ai, alert, analytics, auth, marketprice, mealplan, notification, pantry, recipe, users, zapier. AI lives in `backend/src/services/ai.service.ts` and `backend/src/modules/ai/`.
 - Backend listens on `PORT` (Dockerfile defaults to 10000); required env: `DATABASE_URL`, `JWT_SECRET`, `PORT`; optional `GEMINI_AI_API_KEY`, `SPOONACULAR_API_KEY`, `FRONTEND_URL`, `CORS_ORIGIN`.
 - Railway CLI is installed and logged in (account: Erven Idjad). Deployment will be done through it.
@@ -51,7 +51,7 @@ Someone standing in a kitchen or grocery aisle with a phone can quickly see what
 
 ## Constraints
 
-- **Budget**: Free tiers only for AI and data APIs; Railway usage kept minimal.
+- **Budget**: Free tiers for AI and data APIs; Railway Hobby (~$5/mo, spend cap set) is the one accepted cost.
 - **Traffic**: Very low AI call volume, so aggressive caching and simple quota guards are enough.
 - **Tech stack**: Keep the existing Next.js + Express + Prisma + Postgres stack; no rewrite.
 - **Coding rules**: Immutability, small files (<800 lines), validation at boundaries, tests with 80% coverage target (user global rules).
