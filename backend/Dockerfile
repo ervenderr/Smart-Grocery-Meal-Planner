@@ -34,6 +34,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV CHECKPOINT_DISABLE=1 PRISMA_HIDE_UPDATE_MESSAGE=1
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
@@ -52,11 +53,6 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Set user to nodejs
 USER nodejs
 
-# Expose the port
-EXPOSE 10000
-
-# Set environment variable for port
-ENV PORT=10000
-
+# PORT is injected by the platform (Railway); do not hard-code it
 # Start the application with migrations
 CMD ["/usr/local/bin/entrypoint.sh"]
