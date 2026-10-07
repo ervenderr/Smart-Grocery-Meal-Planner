@@ -7,6 +7,13 @@
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../src/utils/password.util';
 
+if (process.env.NODE_ENV === 'production') {
+  console.error(
+    'Refusing to seed: NODE_ENV=production. The seed creates a demo user with a known password.'
+  );
+  process.exit(1);
+}
+
 const prisma = new PrismaClient();
 
 async function main() {

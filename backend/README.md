@@ -325,12 +325,19 @@ npm run build
 NODE_ENV=production npm start
 ```
 
-### Deploy to Render/Railway
+### Deploy to Railway
 
-1. Connect GitHub repository
-2. Set environment variables
-3. Set build command: `npm run build`
-4. Set start command: `npm start`
+- Project `kitcha` with two services: `kitcha-api` (this Dockerfile) and `Postgres`.
+- Deploys are manual (no GitHub auto-deploy). From `backend/` run:
+  `railway up --service kitcha-api --detach`
+- Migrations run automatically in `entrypoint.sh` (`prisma migrate deploy` with retry), then node starts as PID 1.
+- Healthcheck path: `/health`.
+- Never set `PORT`; Railway injects it.
+- `DATABASE_URL` is the reference variable `${{Postgres.DATABASE_URL}}`.
+- Generate `JWT_SECRET` without echoing it:
+  `openssl rand -hex 32 | railway variable set JWT_SECRET --stdin`
+- Never run the seed in production (it refuses when `NODE_ENV=production`).
+- Keep replicas at 1: the Zapier cron runs in-process.
 
 ## 📚 Next Steps
 
