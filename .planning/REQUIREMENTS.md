@@ -8,7 +8,7 @@
 ### Platform & Deploy (DEP)
 
 - [x] **DEP-01**: Frontend runs on a patched Next.js (16.4.0+) with matching React and eslint-config-next, and builds cleanly
-- [ ] **DEP-02**: Backend API is live on Railway (Hobby) with Railway Postgres, deployed via the Railway CLI, with a spend cap set
+- [x] **DEP-02**: Backend API is live on Railway (Hobby) with Railway Postgres, deployed via the Railway CLI, with a spend cap set
 - [x] **DEP-03**: Railway healthcheck passes: `/health` responds 200 without DB access and is not redirected to HTTPS
 - [x] **DEP-04**: Rate limits apply per real client IP behind Railway's proxy (`trust proxy` configured)
 - [x] **DEP-05**: Backend accepts requests only from an allowlist of frontend origins (including Vercel preview pattern) and fails fast on missing/invalid env vars
