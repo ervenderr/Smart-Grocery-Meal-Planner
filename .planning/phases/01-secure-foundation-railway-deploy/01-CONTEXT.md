@@ -34,6 +34,9 @@ A patched frontend (Next.js 16.4.0+) talks to a live, correctly configured Railw
 - GitHub Actions: lint, type-check and tests for backend and frontend on every push/PR.
 - End-to-end production smoke test after deploy: register, login, pantry create/read/update/delete against the Railway URL from the Vercel frontend.
 
+### Spend cap (user decision)
+- User only pays the basic $5 Hobby plan and wants the LOWEST possible cap. Set `railway usage limit set --target workspace` with the minimum hard limit Railway allows (research says $10) and a soft limit below it (e.g. $5). No further confirmation needed on values; the executor should just apply the minimum and report what Railway accepted. Note the limit is workspace-wide (covers the user's other projects too).
+
 ### Claude's Discretion
 Dockerfile/entrypoint details, CI workflow structure, Zod env schema layout, CORS preview-URL pattern, exact Railway variable references (verify `${{Postgres.DATABASE_URL}}` syntax with the CLI/docs first).
 
