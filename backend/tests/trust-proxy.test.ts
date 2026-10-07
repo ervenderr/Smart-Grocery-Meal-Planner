@@ -10,16 +10,17 @@ const remaining = async (xff: string): Promise<number> => {
 };
 
 describe("trust proxy and rate-limit keying", () => {
-  it("sets trust proxy to 1", () => {
-    expect(app.get("trust proxy")).toBe(1);
+  it("sets trust proxy to 2", () => {
+    expect(app.get("trust proxy")).toBe(2);
   });
 
-  it("keys buckets on the rightmost X-Forwarded-For entry", async () => {
-    const first = await remaining("1.1.1.1, 203.0.113.7");
-    const second = await remaining("2.2.2.2, 203.0.113.7");
+  it("keys buckets on the client entry (second from right) of X-Forwarded-For", async () => {
+    // Railway format: "<real client>, <edge ip>"; the edge ip varies per request
+    const first = await remaining("198.51.100.1, 203.0.113.7");
+    const second = await remaining("198.51.100.1, 203.0.113.8");
     expect(second).toBe(first - 1);
 
-    const other = await remaining("1.1.1.1, 203.0.113.8");
+    const other = await remaining("198.51.100.2, 203.0.113.7");
     expect(other).toBeGreaterThan(second);
   });
 });

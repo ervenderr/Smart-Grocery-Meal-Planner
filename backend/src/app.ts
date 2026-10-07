@@ -35,10 +35,13 @@ export function createApp(): Application {
   const app: Application = express();
 
   /**
-   * Trust exactly one proxy hop (Railway edge). Never `true`: the leftmost
-   * X-Forwarded-For entry is client-controlled and would defeat rate limits.
+   * Trust exactly two proxy hops (Railway edge + its internal proxy).
+   * Railway overwrites X-Forwarded-For with "<real client>, <edge ip>" (the
+   * edge IP varies per request), so with 2 hops req.ip is the real client and
+   * client-supplied values are stripped upstream. Never `true`.
+   * Verified against the live deployment in plan 01-05.
    */
-  app.set("trust proxy", 1);
+  app.set("trust proxy", 2);
 
   /**
    * Health check: registered before the HTTPS redirect and origin guard so
