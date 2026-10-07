@@ -2,8 +2,8 @@
 phase: 1
 slug: secure-foundation-railway-deploy
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-10-08
 ---
 
@@ -34,27 +34,26 @@ See `01-RESEARCH.md` → "Phase Requirements -> Test Map" (DEP-01..DEP-09). Plan
 
 ## Wave 0 Requirements
 
-- [ ] `backend/tests/health.test.ts` — DEP-03
-- [ ] `backend/tests/trust-proxy.test.ts` — DEP-04
-- [ ] `backend/tests/env.schema.test.ts` — DEP-05
-- [ ] `backend/tests/cors.test.ts` — DEP-05
-- [ ] `scripts/smoke-prod.sh` — DEP-02, DEP-07
-- [ ] Pantry test uses relative dates (baseline fix) — DEP-09
+- [x] `backend/tests/health.test.ts` — DEP-03
+- [x] `backend/tests/trust-proxy.test.ts` — DEP-04
+- [x] `backend/tests/env.schema.test.ts` — DEP-05
+- [x] `backend/tests/cors.test.ts` — DEP-05
+- [x] `scripts/smoke-prod.sh` — DEP-02, DEP-07
+- [x] Pantry test uses relative dates (baseline fix) — DEP-09
 
 ## Manual-Only Verifications
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Spend-cap values confirmed | DEP-02 | Workspace-wide limit also affects other projects | User confirms soft/hard values before `railway usage limit set` |
 | Vercel env var set (Production + Preview) | DEP-07 | `vercel` CLI not installed/logged in | Dashboard: Settings → Environment Variables → `NEXT_PUBLIC_API_URL` |
 
 ## Validation Sign-Off
 
-- [ ] All tasks have automated verify or Wave 0 dependencies
-- [ ] No 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 120s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have automated verify or Wave 0 dependencies
+- [x] No 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 120s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-10-08

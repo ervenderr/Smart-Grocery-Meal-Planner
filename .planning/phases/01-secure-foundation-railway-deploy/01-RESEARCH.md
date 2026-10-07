@@ -591,18 +591,18 @@ Executed in a scratch copy (`npm ci`, then `npm install --save-exact next@16.4.0
 | A8 | Vercel Root Directory is already `frontend` and Production env var is currently unset/wrong | Vercel steps | Dashboard check resolves it |
 | A9 | `environment edit --service-config <svc> deploy.healthcheckPath <path>` works as written | Runbook step 6 | Use GraphQL `serviceInstanceUpdate` or dashboard fallback |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Spend-cap values**
+1. **Spend-cap values** — RESOLVED: user chose the lowest allowed cap (hard $10 / soft $5), applied automatically by plan 01-05; no checkpoint.
    - Known: CLI can set it; workspace-wide; min hard $10; Hobby includes $5 usage.
    - Unclear: user's tolerance; whether capping the shared workspace is acceptable given 4 other projects.
    - Recommendation: human checkpoint with proposed soft $8 / hard $20; planner runs `railway usage limit set` after the user confirms numbers (CONTEXT said dashboard-only; the CLI route is strictly easier).
-2. **Existing `NEXT_PUBLIC_API_URL` in Vercel and Root Directory**
+2. **Existing `NEXT_PUBLIC_API_URL` in Vercel and Root Directory** — RESOLVED: handled by the blocking checkpoint in plan 01-06 Task 1.
    - Unclear without Vercel access. Recommendation: first task of the Vercel checkpoint is "report current value and root directory".
-3. **Frontend "tests" for DEP-09**
+3. **Frontend "tests" for DEP-09** — RESOLVED: lint + type-check + production build is the frontend gate.
    - No test framework or files exist in `frontend/`. Recommendation: accept lint + type-check + production build as the frontend gate; defer a test runner.
-4. **Region move for Postgres** (A1): decide at execution; acceptable to skip Singapore for the DB if it is awkward (CONTEXT says "if available").
-5. **Custom domain later** would be a new CORS origin; out of scope, but `CORS_ORIGIN` is comma-separated for that reason.
+4. **Region move for Postgres** (A1) — RESOLVED: decided at execution in plan 01-05 step (e): decide at execution; acceptable to skip Singapore for the DB if it is awkward (CONTEXT says "if available").
+5. **Custom domain later** — RESOLVED: out of scope: would be a new CORS origin; out of scope, but `CORS_ORIGIN` is comma-separated for that reason.
 
 ## Environment Availability
 
