@@ -30,7 +30,14 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
   3. The Railway healthcheck passes on `/health` (200, no DB access, no HTTPS redirect) and the service restarts and shuts down cleanly on deploy
   4. Requests from non-allowlisted origins are rejected, the API refuses to start on missing or invalid env vars, and rate limits count per real client IP
   5. Every push runs lint, type-check and tests for backend and frontend in CI; `render.yaml` is gone, the seed script refuses production, and `.env.example` documents every variable
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+- [ ] 01-01-PLAN.md — Backend CI baseline + deploy artefacts (lint config, pantry date fix, prisma pin, entrypoint exec, Dockerfile PORT, seed guard, render.yaml removed)
+- [ ] 01-02-PLAN.md — Next.js 16.4.0 / React 19.3.0 upgrade, warn-level lint, frontend .env.example
+- [ ] 01-03-PLAN.md — Tests-first backend hardening: Zod env, CORS allowlist + 403 guard + preview regex, trust proxy, early DB-free /health
+- [ ] 01-04-PLAN.md — GitHub Actions CI (backend, frontend, docker-build), push, green on main
+- [ ] 01-05-PLAN.md — Smoke test first, minimum Railway spend cap, provision `kitcha` + deploy kitcha-api, live API verified
+- [ ] 01-06-PLAN.md — Vercel NEXT_PUBLIC_API_URL (checkpoint), production build guard, full smoke + browser pass
 **UI hint**: yes
 
 ### Phase 2: Reliable AI Suggestions
