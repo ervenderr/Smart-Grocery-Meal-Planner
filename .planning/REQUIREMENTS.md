@@ -89,16 +89,17 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEP-01..09 | TBD | Pending |
-| AI-01..07 | TBD | Pending |
-| MOB-01..06 | TBD | Pending |
-| SHOP-01..05 | TBD | Pending |
-| INT-01..05 | TBD | Pending |
-| CAP-01..05 | TBD | Pending |
+| DEP-01..09 | Phase 1 | Pending |
+| AI-01..07 | Phase 2 | Pending |
+| MOB-01..06 | Phase 3 | Pending |
+| SHOP-01..05 | Phase 4 | Pending |
+| INT-01..05 | Phase 5 | Pending |
+| CAP-01..05 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 37 total
-- Mapped to phases: 0 (filled by roadmap)
+- Mapped to phases: 37
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-10-08*
