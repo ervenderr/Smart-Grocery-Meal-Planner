@@ -11,9 +11,10 @@
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import { parseEnv, ParsedEnv } from "./env.schema";
 
 // Load environment variables from .env file (development only)
-// In production (Render, etc.), environment variables are provided by the platform
+// In production (Railway, etc.), environment variables are provided by the platform
 const envPath = path.join(__dirname, "../../.env");
 if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
@@ -22,77 +23,11 @@ if (fs.existsSync(envPath)) {
   dotenv.config();
 }
 
-/**
- * Validates that required environment variables are present
- * Throws error if any are missing - fail fast on startup
- */
-function validateEnv(): void {
-  const required = ["DATABASE_URL", "JWT_SECRET", "PORT"];
-  const missing = required.filter((key) => !process.env[key]);
-
-  if (missing.length > 0) {
-    const errorMsg =
-      `❌ Missing required environment variables: ${missing.join(", ")}\n` +
-      `Environment: ${process.env.NODE_ENV || "not set"}\n` +
-      `Available env vars: ${Object.keys(process.env)
-        .filter((k) => !k.includes("SECRET") && !k.includes("PASSWORD"))
-        .join(", ")}\n` +
-      "Please ensure all required environment variables are set in your deployment platform or .env file";
-
-    console.error(errorMsg);
-    throw new Error(errorMsg);
-  }
-
-  // Validate JWT_SECRET strength
-  const jwtSecret = process.env.JWT_SECRET;
-  if (jwtSecret) {
-    // Check minimum length
-    if (jwtSecret.length < 32) {
-      const errorMsg =
-        "❌ JWT_SECRET must be at least 32 characters long for security.\n" +
-        "Generate a strong secret with: openssl rand -base64 48";
-      console.error(errorMsg);
-      throw new Error(errorMsg);
-    }
-
-    // Check for default/weak secrets
-    const weakSecrets = [
-      "your-super-secret-jwt-key-change-this-in-production",
-      "change-this",
-      "secret",
-      "jwt-secret",
-      "default",
-    ];
-
-    const isWeak = weakSecrets.some((weak) =>
-      jwtSecret.toLowerCase().includes(weak)
-    );
-    if (isWeak) {
-      const errorMsg =
-        "❌ JWT_SECRET appears to be a default or weak value.\n" +
-        "Please change it to a strong, randomly generated secret.\n" +
-        "Generate one with: openssl rand -base64 48";
-      console.error(errorMsg);
-      throw new Error(errorMsg);
-    }
-  }
-
-  // Warn about production environment without proper configuration
-  if (process.env.NODE_ENV === "production") {
-    if (!process.env.FRONTEND_URL) {
-      console.warn(
-        "⚠️  FRONTEND_URL not set in production. CORS may not work correctly."
-      );
-    }
-  }
-}
-
-// Validate on module load
+let parsed: ParsedEnv;
 try {
-  validateEnv();
-  console.log("✅ Environment validation passed");
+  parsed = parseEnv(process.env);
 } catch (error) {
-  console.error("❌ Environment validation failed:", error);
+  console.error((error as Error).message);
   throw error;
 }
 
@@ -100,46 +35,54 @@ try {
  * Export strongly-typed configuration object
  * All environment variables accessed through this object
  */
-export const config = {
+export const config = Object.freeze({
   // Server
-  env: process.env.NODE_ENV || "development",
-  port: parseInt(process.env.PORT || "3001", 10),
-  apiVersion: process.env.API_VERSION || "v1",
+  env: parsed.NODE_ENV as string,
+  port: parsed.PORT ?? 3001,
+  apiVersion: parsed.API_VERSION,
 
   // Database
-  database: {
-    url: process.env.DATABASE_URL!,
-  },
+  database: Object.freeze({ url: parsed.DATABASE_URL }),
 
   // JWT
-  jwt: {
-    secret: process.env.JWT_SECRET!,
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  },
+  jwt: Object.freeze({
+    secret: parsed.JWT_SECRET,
+    expiresIn: parsed.JWT_EXPIRES_IN,
+  }),
 
   // CORS
-  cors: {
-    origin: (process.env.CORS_ORIGIN || "http://localhost:3000")
-      .split(",")
-      .map((origin) => origin.trim()),
-  },
+  cors: Object.freeze({
+    origin: Object.freeze([...parsed.CORS_ORIGIN]) as readonly string[] as string[],
+    previewProject: parsed.VERCEL_PREVIEW_PROJECT,
+    previewScope: parsed.VERCEL_PREVIEW_SCOPE,
+  }),
 
   // Logging
-  logging: {
-    level: process.env.LOG_LEVEL || "info",
-  },
+  logging: Object.freeze({ level: parsed.LOG_LEVEL }),
 
-  // Optional APIs (for later phases)
-  apis: {
-    geminiAI: process.env.GEMINI_AI_API_KEY,
-    spoonacular: process.env.SPOONACULAR_API_KEY,
-  },
+  // Optional APIs
+  apis: Object.freeze({
+    geminiAI: parsed.GEMINI_AI_API_KEY,
+    spoonacular: parsed.SPOONACULAR_API_KEY,
+  }),
 
   // Zapier Integration
-  zapier: {
-    webhookUrl: process.env.ZAPIER_WEBHOOK_URL,
-  },
-} as const;
+  zapier: Object.freeze({ webhookUrl: parsed.ZAPIER_WEBHOOK_URL }),
+}) as {
+  readonly env: string;
+  readonly port: number;
+  readonly apiVersion: string;
+  readonly database: { readonly url: string };
+  readonly jwt: { readonly secret: string; readonly expiresIn: string };
+  readonly cors: {
+    readonly origin: string[];
+    readonly previewProject: string;
+    readonly previewScope?: string;
+  };
+  readonly logging: { readonly level: string };
+  readonly apis: { readonly geminiAI?: string; readonly spoonacular?: string };
+  readonly zapier: { readonly webhookUrl?: string };
+};
 
 // Export helper to check if we're in production
 export const isProduction = config.env === "production";
