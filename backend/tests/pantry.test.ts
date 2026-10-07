@@ -20,6 +20,10 @@ import { prisma } from '../src/config/database.config';
 
 const app = createApp();
 
+/** Returns a YYYY-MM-DD string offset from now by the given number of days. */
+const dateOffsetDays = (days: number): string =>
+  new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
 describe('Pantry Endpoints', () => {
   const testUser = {
     email: 'pantry-test@example.com',
@@ -59,8 +63,8 @@ describe('Pantry Endpoints', () => {
         quantity: 2.5,
         unit: 'lbs',
         category: 'protein',
-        expiryDate: '2025-12-31',
-        purchaseDate: '2025-11-01',
+        expiryDate: dateOffsetDays(30),
+        purchaseDate: dateOffsetDays(-1),
         purchasePriceCents: 1250,
         location: 'freezer',
         notes: 'Organic chicken',
