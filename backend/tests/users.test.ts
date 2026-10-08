@@ -265,3 +265,58 @@ describe("Users Endpoints", () => {
     });
   });
 });
+
+describe("Users currency validation", () => {
+  let token: string;
+
+  beforeAll(async () => {
+    const response = await request(app).post("/api/v1/auth/signup").send({
+      email: "users-test-currency@example.com",
+      password: "TestPass123",
+      firstName: "Currency",
+      lastName: "Test",
+    });
+    token = response.body.token;
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({
+      where: { email: { contains: "users-test-currency" } },
+    });
+  });
+
+  const patch = (body: Record<string, unknown>) =>
+    request(app)
+      .patch("/api/v1/users/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send(body);
+
+  it("rejects XXX", async () => {
+    await patch({ currency: "XXX" }).expect(400);
+  });
+
+  it("rejects ZZZ", async () => {
+    await patch({ currency: "ZZZ" }).expect(400);
+  });
+
+  it("rejects a non-string currency", async () => {
+    await patch({ currency: 123 }).expect(400);
+  });
+
+  it("accepts lower-case jpy and stores JPY", async () => {
+    const response = await patch({ currency: "jpy" }).expect(200);
+    expect(response.body.currency).toBe("JPY");
+  });
+
+  it("accepts USD", async () => {
+    const response = await patch({ currency: "USD" }).expect(200);
+    expect(response.body.currency).toBe("USD");
+  });
+
+  it("exposes exactly 16 supported currencies, PHP first", () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { SUPPORTED_CURRENCIES } = require("../src/constants/currencies");
+    expect(SUPPORTED_CURRENCIES).toHaveLength(16);
+    expect(SUPPORTED_CURRENCIES[0]).toBe("PHP");
+  });
+});
