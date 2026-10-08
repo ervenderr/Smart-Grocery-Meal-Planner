@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_MORE_ICON, NAV_PRIMARY, isActive, isMoreActive } from '@/lib/navigation';
-import { isTextEntry } from '@/lib/dom/is-text-entry';
+import { useKeyboardOpen } from '@/lib/hooks/use-keyboard-open';
 import { useNotificationStats } from '@/lib/notifications/use-notification-stats';
 import { MoreSheet } from './more-sheet';
 
@@ -55,22 +55,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { unread } = useNotificationStats();
   const [moreOpen, setMoreOpen] = useState(false);
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
-
-  useEffect(() => {
-    const onFocusIn = (event: FocusEvent) => {
-      if (isTextEntry(event.target as Element | null)) setKeyboardOpen(true);
-    };
-    const onFocusOut = (event: FocusEvent) => {
-      if (!isTextEntry(event.relatedTarget as Element | null)) setKeyboardOpen(false);
-    };
-    document.addEventListener('focusin', onFocusIn);
-    document.addEventListener('focusout', onFocusOut);
-    return () => {
-      document.removeEventListener('focusin', onFocusIn);
-      document.removeEventListener('focusout', onFocusOut);
-    };
-  }, []);
+  const keyboardOpen = useKeyboardOpen(pathname);
 
   const moreActive = moreOpen || isMoreActive(pathname);
 
