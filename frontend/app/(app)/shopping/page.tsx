@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { ShoppingBasket, Calendar, AlertCircle, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/common/empty-state';
+import { useCurrency } from '@/lib/currency/currency-provider';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { mealPlanApi } from '@/lib/api/mealplans';
 import toast from 'react-hot-toast';
@@ -12,11 +14,14 @@ import type { MealPlan } from '@/types/mealplan.types';
 
 export default function ShoppingPage() {
   const router = useRouter();
+  const { format } = useCurrency();
+  const [loadError, setLoadError] = useState(false);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchMealPlans = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const response = await mealPlanApi.getAll({
         sortBy: 'startDate',
@@ -26,6 +31,7 @@ export default function ShoppingPage() {
       setMealPlans(response.items || []);
     } catch (error) {
       console.error('Failed to fetch meal plans:', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -76,7 +82,7 @@ export default function ShoppingPage() {
 
   const formatCost = (cents: number | null) => {
     if (cents === null) return 'N/A';
-    return `₱${(cents / 100).toFixed(2)}`;
+    return format(cents);
   };
 
   if (loading) {
@@ -97,7 +103,7 @@ export default function ShoppingPage() {
             Generate shopping lists from your meal plans
           </p>
         </div>
-        <Button onClick={() => router.push('/mealplans')}>
+        <Button className="w-full sm:w-auto" onClick={() => router.push('/mealplans')}>
           <Plus className="h-4 w-4" />
           Create Meal Plan
         </Button>
@@ -118,7 +124,7 @@ export default function ShoppingPage() {
             </div>
             <button
               onClick={handleClearList}
-              className="text-sm text-primary-600 hover:text-primary-700"
+              className="min-h-11 min-w-11 text-sm text-primary-600 hover:text-primary-700"
             >
               Clear
             </button>
@@ -127,25 +133,27 @@ export default function ShoppingPage() {
           <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto">
             <div className="space-y-3">
               {currentList.items.map((item: any, index: number) => (
-                <div key={index} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-medium text-gray-900">
+                <label key={index} className="flex min-h-14 cursor-pointer items-center gap-2 rounded-lg border border-gray-200 p-2 hover:bg-gray-50">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                  </span>
+                  <div className="min-w-0 flex-1 break-words">
+                    <div className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-semibold text-gray-900">
                         {item.quantity} {item.unit}
                       </span>
                       <span className="text-gray-700">{item.ingredientName}</span>
                     </div>
                     {item.recipes && item.recipes.length > 0 && (
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 mt-1">
                         Used in: {item.recipes.join(', ')}
                       </p>
                     )}
                   </div>
-                </div>
+                </label>
               ))}
             </div>
 
@@ -173,9 +181,9 @@ export default function ShoppingPage() {
             {mealPlans.map((plan) => (
               <div
                 key={plan.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                className="flex flex-col gap-2 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2">
                   <Calendar className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-900">{plan.name}</p>
@@ -187,6 +195,7 @@ export default function ShoppingPage() {
                 </div>
                 <Button
                   size="sm"
+                  className="w-full sm:w-auto"
                   onClick={() => handleGenerateShoppingList(plan)}
                 >
                   Generate List
@@ -195,20 +204,26 @@ export default function ShoppingPage() {
             ))}
           </div>
         </Card>
-      ) : (
-        <Card className="flex flex-col items-center justify-center p-12 text-center">
-          <div className="rounded-full bg-gray-100 p-4">
-            <AlertCircle className="h-12 w-12 text-gray-400" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">No Meal Plans Yet</h3>
-          <p className="mt-2 text-sm text-gray-600 max-w-sm">
-            Create a meal plan first to generate shopping lists automatically
-          </p>
-          <Button onClick={() => router.push('/mealplans')} className="mt-4">
-            <Plus className="h-4 w-4" />
-            Create Your First Meal Plan
-          </Button>
-        </Card>
+      ) : null}
+
+      {!currentList && mealPlans.length === 0 && (
+        loadError ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="Couldn't load your shopping list"
+            description="Check your connection and try again."
+            actionLabel="Try again"
+            onAction={fetchMealPlans}
+          />
+        ) : (
+          <EmptyState
+            icon={ShoppingBasket}
+            title="Your shopping list is empty"
+            description="Add items you need, or build a list from a meal plan."
+            actionLabel="Go to meal plans"
+            onAction={() => router.push('/mealplans')}
+          />
+        )
       )}
 
       {/* Info Card */}
