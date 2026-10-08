@@ -16,6 +16,7 @@ import {
 } from './shopping.constants';
 import { normalizeUnit } from './shopping.units';
 
+// eslint-disable-next-line no-control-regex -- intentionally strips control characters
 const CONTROL_CHARS = /[\u0000-\u001F\u007F]/g;
 const UNIT_MESSAGE = 'Unit must be a known unit or up to 20 letters, digits, spaces or . % / -';
 const UPDATABLE_FIELDS = [
