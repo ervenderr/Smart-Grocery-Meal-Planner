@@ -103,7 +103,20 @@ Plans:
   3. User can generate a list from a meal plan and it is saved as a list
   4. Items appear grouped by store category, and shopping mode keeps the screen awake with large check targets
   5. User sees estimated vs actual spend for a list
-**Plans**: TBD
+**Plans**: 12 plans
+Plans:
+- [ ] 04-01-PLAN.md — Backend: one-active-list migration (dedupe + partial unique index), shopping contracts, lazy GET /shopping/list
+- [ ] 04-02-PLAN.md — Frontend pure helpers: shared vocab, category grouping, estimated vs actual totals, strict item input parsing
+- [ ] 04-03-PLAN.md — Frontend contract: shopping types, API client, query keys, immutable cache helpers
+- [ ] 04-04-PLAN.md — Backend: item POST/PATCH/DELETE with ownership, bounds, 300 cap, inferCategory, per-user shopping limiter
+- [ ] 04-05-PLAN.md — Frontend: persisted list page with quick-add, optimistic check-off, category sections, edit sheet, undo
+- [ ] 04-06-PLAN.md — Backend: fixed meal plan aggregation, pure merge, POST /shopping/generate
+- [ ] 04-07-PLAN.md — Frontend: add a meal plan to the list from Shopping and Meal Plans pages
+- [ ] 04-08-PLAN.md — Backend: finish shopping (carry/discard) into history, GET /shopping/history
+- [ ] 04-09-PLAN.md — Frontend: sticky estimated vs actual bar, finish sheet, past trips
+- [ ] 04-10-PLAN.md — Frontend: shopping mode with Screen Wake Lock and 56px check rows
+- [ ] 04-11-PLAN.md — Ship: smoke check 12, gates, Railway deploy first, then push main (CI + Vercel)
+- [ ] 04-12-PLAN.md — Real-phone shopping mode and cross-device check (deferrable checkpoint)
 **UI hint**: yes
 
 ### Phase 5: Pantry-Aware Intelligence
