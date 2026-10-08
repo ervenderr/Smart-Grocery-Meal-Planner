@@ -273,9 +273,9 @@ export function SignupForm() {
       )}
 
       {/* Sign In Link */}
-      <p className="text-center text-sm text-gray-600">
-        Already have an account?{' '}
-        <Link href="/login" className="font-medium text-primary-500 hover:text-primary-600">
+      <p className="flex flex-wrap items-center justify-center gap-x-1 text-center text-sm text-gray-600">
+        Already have an account?
+        <Link href="/login" className="inline-flex min-h-11 items-center font-medium text-primary-500 hover:text-primary-600">
           Sign in
         </Link>
       </p>

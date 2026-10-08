@@ -23,7 +23,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-dvh bg-white">
       {/* Left Side - Form */}
       <div className="flex w-full flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24 bg-white">
         <div className="mx-auto w-full max-w-sm">

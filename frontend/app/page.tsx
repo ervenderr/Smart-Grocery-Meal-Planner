@@ -12,7 +12,7 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
+    <div className="min-h-dvh bg-gradient-to-b from-primary-50 to-white">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -49,13 +49,13 @@ export default function Home() {
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 sm:text-xl">
             The smart way to manage your pantry, plan weekly meals, and track your grocery spending with real-time budget insights.
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link href="/signup">
+          <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+            <Link href="/signup" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto">
                 Start Free Today
               </Button>
             </Link>
-            <Link href="#features">
+            <Link href="#features" className="w-full sm:w-auto">
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
                 Learn More
               </Button>
@@ -168,9 +168,9 @@ export default function Home() {
           <p className="mt-4 text-lg text-primary-100">
             Join thousands of users who are saving money and reducing food waste.
           </p>
-          <div className="mt-8">
-            <Link href="/signup">
-              <Button size="lg" variant="secondary" className="bg-white text-primary-500 hover:bg-gray-100">
+          <div className="mt-8 flex flex-col items-stretch sm:flex-row sm:justify-center">
+            <Link href="/signup" className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" className="w-full bg-white sm:w-auto text-primary-500 hover:bg-gray-100">
                 Get Started for Free
               </Button>
             </Link>

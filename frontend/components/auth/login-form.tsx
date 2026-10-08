@@ -107,15 +107,15 @@ export function LoginForm() {
       </div>
 
       {/* Remember Me & Forgot Password */}
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-4">
+        <label className="flex min-h-11 items-center gap-2">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+            className="h-5 w-5 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
           />
           <span className="text-sm text-gray-600">Remember me</span>
         </label>
-        <Link href="/forgot-password" className="text-sm text-primary-500 hover:text-primary-600">
+        <Link href="/forgot-password" className="inline-flex min-h-11 items-center text-sm text-primary-500 hover:text-primary-600">
           Forgot password?
         </Link>
       </div>
@@ -126,9 +126,9 @@ export function LoginForm() {
       </Button>
 
       {/* Sign Up Link */}
-      <p className="text-center text-sm text-gray-600">
-        Don't have an account?{' '}
-        <Link href="/signup" className="font-medium text-primary-500 hover:text-primary-600">
+      <p className="flex flex-wrap items-center justify-center gap-x-1 text-center text-sm text-gray-600">
+        Don't have an account?
+        <Link href="/signup" className="inline-flex min-h-11 items-center font-medium text-primary-500 hover:text-primary-600">
           Sign up for free
         </Link>
       </p>
