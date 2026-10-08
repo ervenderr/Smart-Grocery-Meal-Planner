@@ -55,15 +55,19 @@ Multiples of 4 only (Tailwind default scale; project extras `18`, `88`, `128` ar
 | lg | 24px | 6 | Section spacing (`space-y-6`), page gutter from `sm` |
 | xl | 32px | 8 | Page gutter at `lg`, large layout gaps |
 | 2xl | 48px | 12 | Empty-state vertical padding (`py-12`) |
-| 3xl | 64px | 16 | Bottom nav bar content height, header height |
+| 3xl | 64px | 16 | Bottom nav bar content height; header height at `lg` |
 
 Exceptions (each justified):
 - Touch targets: 44px minimum (`min-h-11 min-w-11`) even where visual glyph is smaller [MOB-02].
-- Bottom nav bar content height is 64px (see Bottom Navigation).
-- Safe-area insets (`env(safe-area-inset-*)`) are added on top of tokens, not rounded.
+- Bottom nav bar content height is 64px = 3xl token (see Bottom Navigation). More-sheet and menu rows are 48px = 2xl token.
+- 56px (`h-14`): mobile header height below `lg`, and `min-h-14` shopping item rows. Justified: 56px is the standard compact app-bar height, 8px under the 64px desktop header, and fits the 44px bell target plus 6px padding each side.
+- 56px (`w-14`) x 32px (`h-8`): bottom-nav active icon pill. Justified: the pill must be wider than the 24px icon and 32px tall for a visible active shape; both are multiples of 4 and sit between tokens.
+- 80px (`5rem`): main-content bottom padding = 64px bar + 16px (md) breathing room, expressed as a token sum, then plus the safe-area inset.
+- 44px (`h-11`, `min-h-11`, `min-w-11`): touch-target exception above.
+- No 12px values: use 8px or 16px (`gap-2` / `gap-4`, `inset-x-4`). Existing `gap-3` in untouched code is out of contract.- Safe-area insets (`env(safe-area-inset-*)`) are added on top of tokens, not rounded.
 
 ### Main content bottom padding (below `lg`)
-`main` gets `pb-[calc(5rem+env(safe-area-inset-bottom))]` (64px bar + 16px breathing room + inset). At `lg` revert to `lg:pb-8`. Toasts (react-hot-toast) and any floating buttons must sit above the bar: offset `bottom: calc(4rem + env(safe-area-inset-bottom) + 0.5rem)`.
+`main` gets `pb-[calc(5rem+env(safe-area-inset-bottom))]` (64px bar + 16px md breathing room = 80px, plus inset). At `lg` revert to `lg:pb-8`. Toasts (react-hot-toast) and any floating buttons must sit above the bar: offset `bottom: calc(4rem + env(safe-area-inset-bottom) + 0.5rem)`.
 
 ---
 
@@ -75,15 +79,15 @@ Reuse the sizes already defined in `tailwind.config.ts` fontSize. This phase use
 |------|------|--------|-------------|----------|
 | Body / inputs | 16px | 400 | 1.5 | `text-base` |
 | Label / secondary / nav labels | 14px | 600 (labels), 400 (secondary) | 1.43 (20px) | `text-sm` |
-| Heading (page title mobile, sheet titles, empty-state title) | 20px | 600 | 1.4 (28px) | `text-xl` |
-| Display (page title at `sm`+, onboarding step title, dashboard stat figures) | 24px | 600 | 1.33 (32px) | `text-2xl` |
+| Heading (mobile header title, sheet titles, empty-state title) | 20px | 600 | 1.4 (28px) | `text-xl` |
+| Display (onboarding step title) | 24px | 600 | 1.33 (32px) | `text-2xl` |
 
-Weights: regular 400 and semibold 600 only. Replace `font-bold`/`font-medium` introduced by this phase's new components with `font-semibold`/`font-normal`. Existing pages keep their current weights unless touched.
+Weights: regular 400 and semibold 600 only. Replace `font-bold`/`font-medium` introduced by this phase's new components with `font-semibold`/`font-normal`. `ui/input.tsx` and `ui/select.tsx` field labels change from `font-medium` to `font-semibold`. Untouched legacy pages and components keep their current look and are out of this typography contract (only the 4 sizes and 2 weights above apply to new and changed UI).
 
 Rules:
 - No new 12px (`text-xs`) text in this phase's components: nav labels, badges and chips use 14px (`text-sm`). Existing `text-xs` on touched controls (e.g. meal-plan-card buttons) is upgraded to `text-sm`, see Touch Targets.
 - All `<input>`, `<select>`, `<textarea>` render at 16px below `lg` to prevent iOS focus-zoom [CTX, MOB-02]. Implementation: `ui/input.tsx` and `ui/select.tsx` change `text-sm` to `text-base lg:text-sm`; add global CSS fallback in globals.css: `@media (max-width: 1023px) { input, select, textarea { font-size: 16px; } }` so the 41 raw `<input|select|textarea>` usages outside `ui/*` (header search, modals, forms) are covered [AUDIT].
-- Page `h1`: `text-xl sm:text-2xl font-semibold` (currently `text-2xl sm:text-3xl font-bold`; normalize on touched pages only).
+- Page `h1` styles are NOT normalized (keep the current look); only the new mobile header title uses `text-xl font-semibold`.
 - Never set `maximum-scale=1` / `user-scalable=no` (accessibility).
 
 ---
@@ -100,7 +104,7 @@ Unchanged palette [CTX]. 60/30/10:
 | Destructive | `red-500` `#ef4444` / `red-600` text | Log Out row, delete actions only |
 
 Accent reserved for (and only these in new/changed UI):
-1. Active bottom-nav tab: icon + label `primary-600` `#0284c7` (text contrast on white 4.1:1 for icon; label uses `primary-700` `#0369a1` for 5.9:1 to meet AA), plus a 3px top indicator bar `primary-500`.
+1. Active bottom-nav tab: icon + label `primary-600` `#0284c7` (text contrast on white 4.1:1 for icon; label uses `primary-700` `#0369a1` for 5.9:1 to meet AA), plus a 4px top indicator bar `primary-500`.
 2. Primary CTA buttons (`Button variant="primary"`).
 3. Selected state of chips in onboarding (dietary, currency) and focus rings (`focus-visible:ring-primary-500`).
 4. Onboarding progress dots (current/completed) and the iOS hint's Share icon.
@@ -164,8 +168,8 @@ Applied to: bottom nav (bottom), More sheet (bottom), bottom-sheet Modal footer/
 ```
 The sidebar drawer + backdrop + hamburger (`onMenuClick`, `sidebarOpen` state) are removed below `lg`: the sidebar is `hidden lg:flex lg:relative lg:w-64`. The hamburger button is deleted. Keep sidebar content and its nav list for `lg`; sidebar `navigation` array is extracted to `lib/navigation.ts` and shared with the More sheet (single source of nav truth).
 
-### Compact mobile header (h-14 below `lg`, h-16 at `lg`)
-- Height 56px (`h-14`) + `pt-safe`; sticky top, white, `border-b border-gray-200`, drop `shadow-sm` on mobile.
+### Compact mobile header (`h-14` = 56px below `lg`, `lg:h-16` = 64px at `lg`)
+- Height 56px (`h-14`, see spacing exceptions) + `pt-safe`; sticky top, white, `border-b border-gray-200`, drop `shadow-sm` on mobile.
 - Left: brand logo `kitcha-logo.svg` mark, 32x32 (link to `/dashboard`) followed by page title (`text-xl font-semibold`, truncate) derived from route: Dashboard, Pantry, Recipes, Meal Plans, Shopping, Budget, Analytics, Alerts, Settings, Profile, Help. Title is an `<h1>`-adjacent visual only; each page keeps its own `h1` (header title is `aria-hidden`, to avoid duplicate headings).
 - Right: Notifications bell (44x44 target, existing `NotificationsDropdown`; badge as before). The user avatar menu is hidden below `lg` (Profile, Settings, Logout live in More sheet). Search input is `hidden sm:block` today; below `lg` it is removed (non-functional placeholder) [AUDIT, DEFAULT].
 - Notification panel (`notification-panel.tsx`) already full-width `w-full sm:w-96`; verify header and list rows have 44px close/mark-read targets and apply `pt-safe`/`pb-safe`.
@@ -184,23 +188,35 @@ The sidebar drawer + backdrop + hamburger (`onMenuClick`, `sidebarOpen` state) a
 | 4 | Shopping | `/shopping` | `ShoppingBasket` | startsWith `/shopping` |
 | 5 | More | opens sheet (`button`) | `Menu` (or `Ellipsis`) | sheet open OR pathname under any More item |
 
-- States: inactive icon+label `text-gray-500`; active icon `text-primary-600`, label `text-primary-700`, 3px indicator bar (`h-[3px] w-8 rounded-b-full bg-primary-500`) at the top edge of the slot, plus `bg-primary-50` only on the icon pill (`h-8 w-14 rounded-full` behind icon) for clear active state not dependent on color alone. Pressed: `active:bg-gray-100`. Active slot gets `aria-current="page"`; More button gets `aria-haspopup="dialog"` and `aria-expanded`.
+- States: inactive icon+label `text-gray-500`; active icon `text-primary-600`, label `text-primary-700`, 4px indicator bar (`h-1 w-8 rounded-b-full bg-primary-500`) at the top edge of the slot, plus `bg-primary-50` only on the icon pill (`h-8 w-14 rounded-full` (32x56px, spacing exception) behind icon) for clear active state not dependent on color alone. Pressed: `active:bg-gray-100`. Active slot gets `aria-current="page"`; More button gets `aria-haspopup="dialog"` and `aria-expanded`.
 - When More is highlighted because the current route is under it (e.g. `/budget`), the More tab shows active styling so the user always has a lit tab.
 - Unread alerts: a 8px `bg-red-500` dot on the More icon when unread notifications > 0 (reuse `notificationApi.getStats()`; no polling beyond the bell's 30s).
-- Hide bar while a bottom-sheet Modal or More sheet is open (sheets overlay with z-50 and backdrop; no manual hiding needed). Keyboard open: the bar is `fixed` and may float above the keyboard on some Android browsers; acceptable. Hide it when an input in `main` has focus on viewports < 480px high via `@media (max-height: 480px) { .bottom-nav { display:none } }` [DEFAULT].
+- Hide bar while a bottom-sheet Modal or More sheet is open (sheets overlay with z-50 and backdrop; no manual hiding needed). Keyboard open: hide the bar while a text field is focused. `BottomNav` listens to `focusin`/`focusout` on `document`; when the target is an `input` (non-checkbox/radio), `textarea` or `select`, it toggles a `hidden` class on the nav (restored on `focusout`). Never hide on viewport height alone, so landscape phones keep the bar. Main bottom padding stays unchanged (harmless extra space) [DEFAULT].
 
 ### More Sheet [CTX]
-- Bottom sheet, `role="dialog" aria-modal="true" aria-label="More"`, full width, `rounded-t-2xl bg-white`, `max-h-[85dvh] overflow-y-auto`, `pb-safe`, uses `animate-slide-up`; backdrop `bg-gray-900/50` tap to close; drag handle visual bar (`h-1 w-10 rounded-full bg-gray-300`, decorative) at top; explicit close `X` button 44x44 top-right. `Escape` closes. Focus moves to the sheet heading on open and returns to the More button on close; Tab is trapped inside. Closes on any item navigation.
+- Bottom sheet, `role="dialog" aria-modal="true" aria-label="More"`, full width, `rounded-t-2xl bg-white`, `max-h-[85dvh] overflow-y-auto`, `pb-safe`, uses `animate-slide-up`; backdrop `bg-gray-900/50` tap to close; drag handle visual bar (`h-1 w-12 rounded-full bg-gray-300`, decorative) at top; explicit close `X` button 44x44 top-right. `Escape` closes. Focus moves to the sheet heading on open and returns to the More button on close; Tab is trapped inside. Closes on any item navigation.
 - Contents, grouped rows (each row `min-h-12` (48px), full width, icon 20px + `text-base` label + right chevron for routes, 16px horizontal padding):
 
 | Group | Items (icon) |
 |-------|--------------|
-| Explore | Recipes (`UtensilsCrossed`) `/recipes`, AI features (`Sparkles`) `/recipes?ai=1`, see note, Budget (`TrendingUp`) `/budget`, Analytics (`BarChart3`) `/analytics`, Alerts (`Bell`, shows unread count pill) `/alerts` |
+| Explore | Recipes (`UtensilsCrossed`) `/recipes`, AI features (`Sparkles`) `/recipes?ai=suggestions`, see note, Budget (`TrendingUp`) `/budget`, Analytics (`BarChart3`) `/analytics`, Alerts (`Bell`, shows unread count pill) `/alerts` |
 | Account | Settings (`Settings`) `/settings`, Profile (`User`) `/profile`, Help (`HelpCircle`) `/help` |
 | Session | Log Out (`LogOut`, `text-red-600`), separated by a top border |
 
-  Note: "AI features" has no dedicated route today; AI actions live as modals inside recipes and mealplans [AUDIT]. The row routes to `/recipes` and opens the existing AI suggestions modal via query param `?ai=suggestions`; if planner finds this costly, fall back to a non-navigating row that lists "AI recipe suggestions -> /recipes" and "AI meal plan -> /mealplans" as two sub-rows. Either way the row label is "AI features" [CTX].
+  Note: "AI features" has no dedicated route today; AI actions live as modals inside recipes and mealplans [AUDIT]. The row routes to the single URL `/recipes?ai=suggestions`. Scope addition: the recipes page reads the `ai` search param on mount (`useSearchParams`) and, when it equals `suggestions`, opens `AIRecipeSuggestionsModal`, then removes the param via `router.replace('/recipes')` so reload or back does not reopen it. Row label is "AI features" [CTX].
 - Log Out reuses the existing `handleLogout` (call `authApi.logout`, `clearAuth`, `router.push('/login')`); no confirm dialog (non-destructive, matches current behavior).
+
+---
+
+## Focal Points (first screen at 375px)
+
+| Screen | Focal point |
+|--------|-------------|
+| Dashboard | Weekly budget card (spend vs. budget, status color) is first and largest; stat tiles follow |
+| Pantry | First pantry item card (expiry-soonest first as currently sorted); the "Add" button is secondary in weight to the list |
+| Recipes / Meal Plans / Shopping | First card/row; page primary button directly above it |
+| Onboarding | Step title (display 24px) and the full-width primary CTA pinned at the bottom |
+| Empty states | Icon and title, then the primary action button |
 
 ---
 
@@ -209,19 +225,19 @@ The sidebar drawer + backdrop + hamburger (`onMenuClick`, `sidebarOpen` state) a
 Audit result [AUDIT]: there are no `<table>` elements anywhere, so no table-to-card conversion is needed. Real problems: fixed `h-screen`, sidebar drawer, header width, 41 raw inputs at 14px, sub-44px controls (listed below), 1-column grids that need `sm:` breakpoints, charts at fixed height 300, dense card action rows, modals with `grid-cols-2`/`sm:grid-cols-4` ingredient rows.
 
 Global page rules:
-- Page wrapper: `space-y-6`; page title row stacks (`flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`); the page's primary button becomes `w-full sm:w-auto`.
+- Page wrapper: `space-y-6`; page title row stacks (`flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`); the page's primary button becomes `w-full sm:w-auto`.
 - No horizontal page scroll: containers use `min-w-0`; long text `truncate` or `break-words`; verify with Playwright/devtools at 375 that `document.documentElement.scrollWidth <= 375`.
 - Horizontal scrolling is allowed only inside an element with `overflow-x-auto scrollbar-hide` (filter chips).
 
 | Page | Below `sm` (375px) | `sm`+ |
 |------|--------------------|-------|
-| Dashboard | Stat cards `grid-cols-2 gap-3` (currently 1-col via `sm:grid-cols-2`; 2-up saves scroll), quick-actions stacked full-width, lists single column, currency via formatter | `sm:grid-cols-2 lg:grid-cols-4` unchanged |
+| Dashboard | Stat cards `grid-cols-2 gap-4` (currently 1-col via `sm:grid-cols-2`; 2-up saves scroll), quick-actions stacked full-width, lists single column, currency via formatter | `sm:grid-cols-2 lg:grid-cols-4` unchanged |
 | Pantry | Search `w-full` (already `w-full sm:w-64`), category filter chips in one horizontal scroll row (`overflow-x-auto scrollbar-hide`, chips `h-11`), item cards single column; card quick actions are icon buttons 44x44 | Grid `sm:grid-cols-2 lg:grid-cols-3` |
 | Recipes | Single-column cards; filter chips scroll row; Add / AI buttons full-width stacked; Recipe detail + Add/Edit modals are bottom sheets (Modal default); ingredient rows in add/edit modals: `grid-cols-2` (name spans both, quantity + unit share a row) with remove button 44x44 | `sm:grid-cols-4` as now |
 | Meal Plans | Cards single column; meal-plan-card action row (`text-xs`, `py-2`: ~32px tall) becomes 3 equal buttons `h-11 text-sm` with icon+label; the 3-up stat grid (`grid-cols-3`) keeps 3 columns but values `text-base`, labels `text-sm` | `sm:grid-cols-2 lg:grid-cols-3` |
 | Shopping | Single column; item rows `min-h-14` with 44x44 checkbox hit area; totals in a sticky summary bar above bottom nav is NOT part of this phase (SHOP phase 4) | as now |
 | Budget | Summary cards stacked, progress bars full width, alerts list single column | 2-col from `sm` |
-| Analytics | Stat tiles `grid-cols-2` (already), charts `ResponsiveContainer height={240}` below `sm` (300 from `sm`), pie legend moves below chart (`layout="horizontal" verticalAlign="bottom"`), axis ticks 12px with `interval="preserveStartEnd"`, currency axis abbreviates (`compact` notation) | height 300 |
+| Analytics | Stat tiles `grid-cols-2` (already), charts `ResponsiveContainer height={240}` below `sm` (300 from `sm`), pie legend moves below chart (`layout="horizontal" verticalAlign="bottom"`), axis ticks 14px (`tick={{ fontSize: 14 }}`) with `interval="preserveStartEnd"`, currency axis abbreviates (`compact` notation) | height 300 |
 | Alerts | Stub page "coming soon" today [AUDIT]; keep stub but replace ad-hoc card with shared `EmptyState` (see Empty States); notification list itself lives in the bell panel | same |
 | Settings | Tab/section nav (`lg:grid-cols-4` 1+3 layout) collapses to stacked sections; section selector becomes horizontal scroll chips `h-11` above the form; form fields full width; Save button full width, sticky not required | `lg:grid-cols-4` as now |
 | Profile | Single column form, full-width buttons | as now |
@@ -247,14 +263,14 @@ Known violations to fix [AUDIT]:
 
 | Control | Where | Now | Fix |
 |---------|-------|-----|-----|
-| `Button size="sm"` | `ui/button.tsx` | `h-9` (36px), `text-xs` | `h-11 text-sm lg:h-9 lg:text-xs` (keep desktop density) |
+| `Button size="sm"` | `ui/button.tsx` | `h-9` (36px), `text-xs` | `h-11 lg:h-9`, `text-sm` at all breakpoints (no 12px) |
 | Modal close | `ui/modal.tsx` | `p-1` + 20px icon (~28px) | `h-11 w-11` flex center |
 | Header menu / bell / avatar | `dashboard-header.tsx`, `notification-bell.tsx` | `p-2` + 24px / 32px (40px) | `min-h-11 min-w-11` |
 | Sidebar close X | `dashboard-sidebar.tsx` | `p-1` | removed below `lg` |
 | Meal-plan card actions | `meal-plan-card.tsx` | `py-2 text-xs` (~32px) | `h-11 text-sm` |
 | Pantry/recipe card icon actions | `pantry-item-card.tsx`, `recipe-card.tsx` | small icon buttons | `h-11 w-11` icon buttons, or full-width row buttons |
 | Text links (forgot password, sign in/up) | auth forms | inline `text-sm` | `inline-flex min-h-11 items-center` |
-| Checkboxes / radio (remember me, dietary) | forms, preferences | native 16px | wrap in `<label class="flex min-h-11 items-center gap-3">`; checkbox visual `h-5 w-5` |
+| Checkboxes / radio (remember me, dietary) | forms, preferences | native 16px | wrap in `<label class="flex min-h-11 items-center gap-2">`; checkbox visual `h-5 w-5` |
 | Filter chips | pantry, recipes | ~32px | `h-11 px-4 text-sm` |
 | Select, Input | `ui/*` | `h-11` (44px) already | keep; `text-base` below `lg` |
 
@@ -267,8 +283,8 @@ Existing `.touch-target` utility (44x44 min) is retained; prefer `min-h-11 min-w
 ## Currency (MOB-06) [CTX]
 
 - Source of value: `UserPreference.currency` (ISO 4217, default `PHP`), exposed by a `CurrencyProvider` / `useCurrency()` hook mounted in `Providers` (loads preferences once after auth; falls back to `PHP` while loading or on error).
-- Helper: `formatCurrency(amountCents: number, currency: string = 'PHP', locale?: string): string` in `lib/utils.ts`, replacing the existing USD-only helper (callers updated). Uses `Intl.NumberFormat(locale ?? undefined, { style: 'currency', currency })`; `minimumFractionDigits`/`maximumFractionDigits` come from `resolvedOptions()` of the currency (so JPY = 0, others = 2).
-- Storage convention: amounts remain integer "cents" = value x 100 for every currency (no schema change). For zero-decimal currencies (JPY) the value shown is `cents / 100` rounded to a whole unit. Never use the `₱` literal or any hardcoded symbol; grep for `₱`, `$`, `'PHP'` literals must show zero hits in components after the phase (only the default constant `DEFAULT_CURRENCY = 'PHP'` is allowed).
+- Helper: `formatCurrency(amountCents: number, currency: string = 'PHP', locale?: string): string` in `lib/utils.ts`, replacing the existing USD-only helper (callers updated). Uses `Intl.NumberFormat(locale ?? undefined, { style: 'currency', currency })`; `minimumFractionDigits`/`maximumFractionDigits` come from `resolvedOptions()` of the currency (zero-decimal currencies such as JPY and KRW get 0 digits from `Intl`, others get 2; no per-currency table in code).
+- Storage convention: amounts remain integer "cents" = value x 100 for every currency (no schema change). For zero-decimal currencies (JPY) the value shown is `cents / 100` rounded to a whole unit. Never use the `₱` literal or any hardcoded symbol; grep for `₱` and `'PHP'` literals must show zero hits in `app/` and `components/` after the phase (only the `DEFAULT_CURRENCY = 'PHP'` constant in `lib/` is allowed).
 - Compact variant for chart axes: `formatCurrencyCompact(cents, currency)` using `notation: 'compact'`. Tooltips and cards use the full format.
 - Inputs: currency amount fields show the currency code as a read-only suffix (e.g. `PHP`) via the Input `icon`/adornment, entered as decimal in major units, converted to cents on submit.
 - Picker (Settings > Preferences and Onboarding step 1): native `<select>` (`ui/select`, 16px, accessible, best on mobile). Options label format `PHP - Philippine Peso (₱)`; the symbol in the label is derived with `Intl` (`currencyDisplay: 'narrowSymbol'`), not hardcoded:
@@ -308,13 +324,13 @@ Presentation: full-screen route-less overlay (`fixed inset-0 z-50 bg-white h-dvh
 - Title (display): "Let's set up your kitchen"
 - Body: "Tell us your weekly grocery budget so Kitcha can keep you on track."
 - Fields: Currency (`select`, default PHP), Weekly grocery budget (numeric input, `inputMode="decimal"`, prefixed by currency code; placeholder "e.g. 2000"; optional; must be >= 0).
-- Primary: "Continue". Validation error: "Enter a budget of 0 or more, or leave it blank."
+- Primary: "Continue to dietary needs". Validation error: "Enter a budget of 0 or more, or leave it blank."
 
 ### Step 2 of 3 - Dietary needs
 - Title: "Any dietary needs?"
 - Body: "We'll filter recipes and AI suggestions to match. You can change this anytime in Settings."
 - Multi-select chips (`h-11`, `aria-pressed`), values stored exactly as existing frontend values: `vegetarian`, `vegan`, `gluten_free`, `dairy_free`, `nut_free`, `halal`, `kosher` with labels Vegetarian, Vegan, Gluten-Free, Dairy-Free, Nut-Free, Halal, Kosher. Selected chip: `bg-primary-50 border-primary-500 text-primary-700` with a check icon; unselected: `border-gray-300 text-gray-700`.
-- Primary: "Continue" (enabled with zero selections; helper "None selected means no restrictions").
+- Primary: "Continue to pantry" (enabled with zero selections; helper "None selected means no restrictions").
 
 ### Step 3 of 3 - First pantry items
 - Title: "What's in your pantry?"
@@ -331,11 +347,11 @@ Presentation: full-screen route-less overlay (`fixed inset-0 z-50 bg-white h-dvh
 Component `IosInstallHint`, rendered once in `(app)/layout.tsx` (not on auth pages).
 
 - Show when ALL true: user agent is iOS Safari (iPhone/iPad incl. iPadOS reporting `MacIntel` with touch; exclude `CriOS`/`FxiOS`/in-app browsers), `navigator.standalone !== true` and `!matchMedia('(display-mode: standalone)').matches`, localStorage key `kitcha:ios-install-hint-dismissed` unset, onboarding is not showing, and the user has been on the app for >= 1 route (do not show on very first paint). All localStorage reads/writes wrapped in try/catch; if storage throws, treat as not dismissed for this session only.
-- Placement: bottom-anchored card above the bottom nav: `fixed inset-x-3 z-40 rounded-xl border border-gray-200 bg-white shadow-soft p-4`, bottom offset `calc(4rem + env(safe-area-inset-bottom) + 0.5rem)` (iPad at `lg`: offset `1rem`, `max-w-sm` right aligned).
+- Placement: bottom-anchored card above the bottom nav: `fixed inset-x-4 z-40 rounded-xl border border-gray-200 bg-white shadow-soft p-4`, bottom offset `calc(4rem + env(safe-area-inset-bottom) + 0.5rem)` (iPad at `lg`: offset `1rem`, `max-w-sm` right aligned).
 - Content: 
-  - Heading (`text-base font-semibold`): "Install Kitcha on your iPhone"
+  - Heading (`text-base font-semibold`): "Install Kitcha on your device"
   - Steps (`text-sm text-gray-600`): "1. Tap the Share button" with inline Lucide `Share` icon in `text-primary-500` (or `Share2`; use the iOS-style square-with-arrow `Share`), "2. Choose Add to Home Screen" with `PlusSquare` icon, "3. Tap Add"
-  - Dismiss: `X` icon button 44x44 `aria-label="Dismiss install hint"` and text button "Got it" (`min-h-11`); both set the dismissal key.
+  - Dismiss: `X` icon button 44x44 `aria-label="Dismiss install hint"` and text button "Dismiss hint" (`min-h-11`); both set the dismissal key. The text button reads "Dismiss hint" (not "Got it").
 - `role="region" aria-label="Install instructions"`, not a modal (no focus trap), not auto-focused. Slides up with `animate-slide-up` (none under reduced motion). Auto-hides on route change? No: persists until dismissed.
 - No Android/Chromium install prompt this phase (v2 OFF-03) [CTX].
 
@@ -382,7 +398,7 @@ Use `components/common/empty-state.tsx` on every list screen (replace the inline
 | Recipes (none) | `UtensilsCrossed` | "No recipes yet" | "Save your favorite recipes or ask AI for ideas based on your pantry." | "Add a recipe" | "Get AI suggestions" |
 | Recipes (filter no match) | `Search` | "No matching recipes" | "Try a different search or clear the filters." | "Clear filters" | none |
 | Meal Plans (none) | `Calendar` | "No meal plans yet" | "Plan your week to know exactly what to cook and buy." | "Create meal plan" | "Plan with AI" |
-| Shopping (no list / empty list) | `ShoppingBasket` | "Your shopping list is empty" | "Add items you need, or build a list from a meal plan." | "Add item" if that action exists on the page today, else "Go to meal plans" (`/mealplans`) | "Go to meal plans" |
+| Shopping (no list / empty list) | `ShoppingBasket` | "Your shopping list is empty" | "Add items you need, or build a list from a meal plan." | "Add item" (opens the existing add-item control; if the page has none today, primary becomes "Go to meal plans" and no secondary) | "Go to meal plans" |
 | Alerts (none / stub) | `Bell` | "You're all caught up" | "Budget and expiry alerts will show up here." (replaces "coming soon" copy) | none | none |
 | Dashboard widgets (no data, e.g. expiring soon) | `CheckCircle` | "Nothing expiring soon" | "Your pantry looks good." | none | none |
 
@@ -394,15 +410,19 @@ Loading is unchanged (existing skeleton / spinner). Error state for list fetch f
 
 | Element | Copy |
 |---------|------|
-| Primary CTA (onboarding) | "Continue" / "Finish setup" |
+| Primary CTA (onboarding) | "Continue to dietary needs" / "Continue to pantry" / "Finish setup" ("Skip and finish" with zero items) |
+| Onboarding secondary | "Back", "Skip setup" |
+| Modal footers (existing forms) | Primary keeps its entity-specific label ("Add Item", "Save Changes", "Create Meal Plan"); secondary is always "Cancel" (never "Close"/"No"); no bare "Submit"/"OK" |
+| Settings save | "Save Preferences" (preferences), "Save Profile" (profile), "Update Password" (password) |
 | Primary CTA (empty pantry) | "Add first item" |
+| Primary CTA (empty shopping) | "Add item" |
 | Nav labels | Home, Pantry, Meals, Shopping, More |
 | More sheet title | "More" |
 | Empty state heading + body | See Empty States table |
 | Generic error | "Something went wrong. Check your connection and try again." |
 | Onboarding save error | "We couldn't save your setup. Check your connection and try again." |
 | Currency change helper | "Changing currency only changes how amounts are shown. Existing amounts are not converted." |
-| iOS hint | "Install Kitcha on your iPhone" with the 3 steps above |
+| iOS hint | "Install Kitcha on your device" with the 3 steps above |
 | Destructive: Log Out | "Log Out" row in `text-red-600`, no confirmation (matches current behavior) |
 | Destructive: remove onboarding pantry pill | no confirmation (undoable by re-adding) |
 | Destructive: existing delete actions | unchanged (existing confirm flows are retained; they are not modified in this phase) |
@@ -459,7 +479,7 @@ All new files stay under 400 lines; one component per file.
 - Bottom nav visible below 1024, hidden at >= 1024; sidebar the reverse; content never hidden behind bar (scroll to the last element on each page).
 - No computed height < 44px on any `button, a, input, select` inside `main`, header, nav and modals below `lg` (except inline text links inside paragraphs).
 - Computed `font-size >= 16px` on all inputs below `lg`.
-- grep: zero `h-screen`/`min-h-screen` and zero `₱` literals in `app/` and `components/`.
+- grep: zero `h-screen`/`min-h-screen` and zero `₱` and `'PHP'` literals in `app/` and `components/`. "Shopping" nav label renders on one line without truncation at 375px (and at 320px).
 - `manifest.webmanifest` valid with 192/512/maskable icons; `apple-touch-icon` 180x180 opaque.
 - Reduced-motion media query present; More sheet and Modal trap focus and close on Escape.
 
