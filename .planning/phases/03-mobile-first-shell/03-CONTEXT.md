@@ -40,6 +40,14 @@ Someone with a phone can install Kitcha and use every screen comfortably with a 
 - Frontend has no test framework: gates are lint, type-check and production build (`NEXT_PUBLIC_API_URL=https://x.example npx next build`); add focused unit tests only for pure helpers if a lightweight runner (Vitest) is added, otherwise backend Jest tests for any backend change. Optionally Playwright 375px smoke if cheap.
 - Backend change (onboarding column + preference endpoint) must stay additive and backward compatible; deploy via `cd backend && railway link --project kitcha --environment production`, confirm `railway status` shows `kitcha`, `railway up --service kitcha-api --detach`. Frontend deploys by push to main (Vercel auto-builds; `NEXT_PUBLIC_API_URL` is already set). CI must stay green.
 
+### Resolved research questions (orchestrator decisions, 2026-10-09)
+- Onboarding backfill: mark complete for users who have any pantry item (including soft-deleted), non-default preferences (DB defaults PHP and 10000 cents), or whose preferences were ever updated; everyone else sees onboarding once, skippable.
+- Budget input: replace fixed PHP-scaled sliders with a numeric input (major units, min 1, sensible max) so JPY/KRW/IDR work; stored amounts stay value x 100 and are NOT converted when the currency changes.
+- `/recipes?ai=suggestions` via `useSearchParams` must be wrapped in `<Suspense>` (verify `next build` passes).
+- Real-iPhone verification (standalone mode, safe-area, keyboard hiding the bar, More sheet) is a final manual checkpoint for the user and may be deferred; use a 375/390/1280px manual checklist, no Playwright in CI.
+- Add Vitest (node env, pure helpers only) with a CI step; backend Jest for the onboarding endpoint and migration. Deploy backend first, frontend after (frontend treats a missing `onboardingCompletedAt` field as "don't show onboarding").
+- Wave 0 must define the missing Tailwind 4 `@theme` tokens (animations, shadow-soft) in `globals.css` because `tailwind.config.ts` is not loaded.
+
 ### Claude's Discretion
 Component structure, icon set (Lucide already used), sheet animation, onboarding copy, icon artwork, breakpoints beyond `lg`, which pages need card layouts.
 
