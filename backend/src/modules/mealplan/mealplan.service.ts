@@ -18,7 +18,7 @@ import {
   MealPlanItemResponse,
   MealPlanItemInput,
 } from "../../types/mealplan.types";
-import { RecipeIngredient } from "../../types/recipe.types";
+import { aggregateIngredients } from "./mealplan.aggregate";
 import { RecipeCategory, RecipeDifficulty } from "../../types/recipe.types";
 import { zapierService } from "../zapier";
 
@@ -565,44 +565,7 @@ export class MealPlanService {
       throw new AppError("Meal plan not found", 404);
     }
 
-    // Aggregate ingredients across all recipes
-    const ingredientMap = new Map<
-      string,
-      { quantity: number; unit: string; recipes: Set<string> }
-    >();
-
-    mealPlan.mealPlanItems.forEach((item) => {
-      const recipe = item.recipe;
-      const servingMultiplier = item.servings / recipe.servings;
-      const ingredients = recipe.ingredientsList as any as RecipeIngredient[];
-
-      ingredients.forEach((ingredient) => {
-        const key = `${ingredient.ingredientName.toLowerCase()}:${ingredient.unit}`;
-        const existing = ingredientMap.get(key);
-
-        if (existing) {
-          existing.quantity += ingredient.quantity * servingMultiplier;
-          existing.recipes.add(recipe.title);
-        } else {
-          ingredientMap.set(key, {
-            quantity: ingredient.quantity * servingMultiplier,
-            unit: ingredient.unit,
-            recipes: new Set([recipe.title]),
-          });
-        }
-      });
-    });
-
-    // Convert to array
-    const items = Array.from(ingredientMap.entries()).map(([key, data]) => {
-      const ingredientName = key.split(":")[0];
-      return {
-        ingredientName,
-        quantity: Math.round(data.quantity * 100) / 100, // Round to 2 decimal places
-        unit: data.unit,
-        recipes: Array.from(data.recipes),
-      };
-    });
+    const items = aggregateIngredients(mealPlan.mealPlanItems);
 
     return {
       items,
