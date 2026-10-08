@@ -40,3 +40,11 @@ export function parseQuantityInput(input: string): QuantityParseResult {
   }
   return { ok: true, quantity };
 }
+
+/**
+ * Name field value after an add succeeds: cleared only if the user has not
+ * started typing something else while the request was in flight.
+ */
+export function nameAfterAddSuccess(current: string, submitted: string): string {
+  return current.trim() === submitted.trim() ? '' : current;
+}

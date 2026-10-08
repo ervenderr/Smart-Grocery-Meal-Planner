@@ -10,7 +10,7 @@ import { CategorySection } from '@/components/shopping/category-section';
 import { FinishSheet } from '@/components/shopping/finish-sheet';
 import { GenerateFromPlan } from '@/components/shopping/generate-from-plan';
 import { ItemEditSheet } from '@/components/shopping/item-edit-sheet';
-import { QUICK_ADD_INPUT_ID, QuickAdd } from '@/components/shopping/quick-add';
+import { QUICK_ADD_INPUT_ID, QuickAdd, type QuickAddCallbacks } from '@/components/shopping/quick-add';
 import { ShoppingHistory } from '@/components/shopping/shopping-history';
 import { ShoppingModeToggle } from '@/components/shopping/shopping-mode-toggle';
 import { ShoppingItemRow } from '@/components/shopping/shopping-item-row';
@@ -29,7 +29,7 @@ import { groupItems } from '@/lib/shopping/grouping';
 import { toCreateInput } from '@/lib/shopping/list-cache';
 import { getShoppingLoadState } from '@/lib/shopping/load-state';
 import { MAX_ITEMS_PER_LIST } from '@/lib/shopping/vocab';
-import type { CarryOverMode, ShoppingItem } from '@/types/shopping.types';
+import type { CarryOverMode, CreateShoppingItemInput, ShoppingItem } from '@/types/shopping.types';
 
 const LEGACY_STORAGE_KEY = 'current-shopping-list';
 
@@ -76,11 +76,23 @@ export default function ShoppingPage() {
     });
   };
 
+  // mutateAsync (not mutate): per-call promises, so an Undo re-add on the same
+  // observer cannot swallow quick-add's callbacks. Errors are toasted by the hook.
+  const handleQuickAdd = (input: CreateShoppingItemInput, callbacks: QuickAddCallbacks) => {
+    addItem
+      .mutateAsync(input)
+      .then(callbacks.onSuccess)
+      .catch(() => undefined)
+      .finally(callbacks.onSettled);
+  };
+
   const handleDelete = (item: ShoppingItem) => {
     deleteItem.mutate(
       { itemId: item.id },
       {
         onSuccess: (removed) => {
+          // Guard: a fast double-tap must not re-create the item twice.
+          let undone = false;
           toast(
             (t) => (
               <span className="flex items-center gap-2 text-base">
@@ -89,6 +101,8 @@ export default function ShoppingPage() {
                   type="button"
                   className="min-h-11 px-2 font-semibold text-primary-600"
                   onClick={() => {
+                    if (undone) return;
+                    undone = true;
                     toast.dismiss(t.id);
                     addItem.mutate(toCreateInput(removed));
                   }}
@@ -162,7 +176,7 @@ export default function ShoppingPage() {
       {!shoppingMode && (
         <>
           <QuickAdd
-            onAdd={(input) => addItem.mutate(input)}
+            onAdd={handleQuickAdd}
             isFull={items.length >= MAX_ITEMS_PER_LIST}
           />
 

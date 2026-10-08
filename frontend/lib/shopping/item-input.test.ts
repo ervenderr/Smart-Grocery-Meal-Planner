@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseItemPriceInput, parseQuantityInput } from './item-input';
+import { nameAfterAddSuccess, parseItemPriceInput, parseQuantityInput } from './item-input';
 
 describe('parseItemPriceInput', () => {
   it('treats blank as clear', () => {
@@ -34,5 +34,15 @@ describe('parseQuantityInput', () => {
   });
   it.each(['0', '0.001', '100000', 'abc', '1e2', '-1', '1.234'])('rejects %s', (v) => {
     expect(parseQuantityInput(v).ok).toBe(false);
+  });
+});
+
+describe('nameAfterAddSuccess', () => {
+  it('clears the field when it still holds the submitted name', () => {
+    expect(nameAfterAddSuccess('Eggs', 'Eggs')).toBe('');
+    expect(nameAfterAddSuccess('  Eggs ', 'Eggs')).toBe('');
+  });
+  it('keeps what the user typed meanwhile', () => {
+    expect(nameAfterAddSuccess('Milk', 'Eggs')).toBe('Milk');
   });
 });

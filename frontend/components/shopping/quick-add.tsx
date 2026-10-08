@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { parseQuantityInput } from '@/lib/shopping/item-input';
+import { nameAfterAddSuccess, parseQuantityInput } from '@/lib/shopping/item-input';
 import {
   DEFAULT_UNIT,
   MAX_ITEM_NAME_LENGTH,
@@ -17,8 +17,14 @@ import type { CreateShoppingItemInput } from '@/types/shopping.types';
 
 export const QUICK_ADD_INPUT_ID = 'shopping-quick-add';
 
+export interface QuickAddCallbacks {
+  readonly onSuccess: () => void;
+  readonly onSettled: () => void;
+}
+
 interface QuickAddProps {
-  onAdd: (input: CreateShoppingItemInput) => void;
+  /** Must invoke onSuccess when the item was saved, so a failed add keeps the typed name. */
+  onAdd: (input: CreateShoppingItemInput, callbacks: QuickAddCallbacks) => void;
   disabled?: boolean;
   isFull?: boolean;
 }
@@ -30,13 +36,15 @@ export function QuickAdd({ onAdd, disabled = false, isFull = false }: QuickAddPr
   const [unit, setUnit] = useState<string>(DEFAULT_UNIT);
   const [category, setCategory] = useState('');
   const [quantityError, setQuantityError] = useState<string | undefined>();
+  const [pending, setPending] = useState(false);
+  const inFlight = useRef(false);
 
   const isDisabled = disabled || isFull;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed || isDisabled) return;
+    if (!trimmed || isDisabled || inFlight.current) return;
 
     const parsed = parseQuantityInput(quantity);
     if (!parsed.ok) {
@@ -46,13 +54,23 @@ export function QuickAdd({ onAdd, disabled = false, isFull = false }: QuickAddPr
     }
     setQuantityError(undefined);
 
-    onAdd({
-      itemName: trimmed,
-      quantity: parsed.quantity,
-      unit,
-      ...(category ? { category } : {}),
-    });
-    setName('');
+    inFlight.current = true;
+    setPending(true);
+    onAdd(
+      {
+        itemName: trimmed,
+        quantity: parsed.quantity,
+        unit,
+        ...(category ? { category } : {}),
+      },
+      {
+        onSuccess: () => setName((current) => nameAfterAddSuccess(current, trimmed)),
+        onSettled: () => {
+          inFlight.current = false;
+          setPending(false);
+        },
+      }
+    );
   };
 
   return (
@@ -71,7 +89,7 @@ export function QuickAdd({ onAdd, disabled = false, isFull = false }: QuickAddPr
             disabled={isDisabled}
           />
         </div>
-        <Button type="submit" disabled={isDisabled || name.trim() === ''}>
+        <Button type="submit" disabled={isDisabled || pending || name.trim() === ''}>
           Add
         </Button>
       </div>
