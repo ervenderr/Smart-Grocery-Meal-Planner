@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { queryClient } from '@/lib/react-query';
+import { CurrencyProvider } from '@/lib/currency/currency-provider';
 import { ErrorBoundary } from '@/components/common/error-boundary';
 
 /**
@@ -14,9 +15,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <CurrencyProvider>{children}</CurrencyProvider>
         <Toaster
           position="top-right"
+          containerStyle={{ top: 'calc(env(safe-area-inset-top) + 0.5rem)' }}
           toastOptions={{
             duration: 4000,
             style: {
