@@ -20,6 +20,14 @@ import {
   currencyOptionLabel,
 } from '@/lib/currency/format';
 import { MAX_BUDGET_CENTS, parseBudgetInput } from '@/lib/currency/budget';
+import {
+  DEFAULT_PREFERRED_UNIT,
+  MAX_MEALS_PER_DAY,
+  MIN_MEALS_PER_DAY,
+  PREFERRED_UNITS,
+  PREFERRED_UNIT_OPTIONS,
+  normalizePreferredUnit,
+} from '@/lib/preferences/units';
 import toast from 'react-hot-toast';
 
 const MIN_BUDGET_CENTS = 100;
@@ -33,9 +41,12 @@ const preferencesSchema = z.object({
   currency: z.string(),
   alertEnabled: z.boolean(),
   alertThresholdPercentage: z.number().min(1).max(100),
-  mealsPerDay: z.number().min(1).max(10),
+  mealsPerDay: z
+    .number()
+    .min(MIN_MEALS_PER_DAY, `Enter at least ${MIN_MEALS_PER_DAY} meal per day`)
+    .max(MAX_MEALS_PER_DAY, `Enter at most ${MAX_MEALS_PER_DAY} meals per day`),
   dietaryRestrictions: z.array(z.string()),
-  preferredUnit: z.enum(['kg', 'lb']),
+  preferredUnit: z.enum(PREFERRED_UNITS),
 });
 
 type PreferencesFormData = z.infer<typeof preferencesSchema>;
@@ -47,7 +58,7 @@ const FORM_DEFAULTS: PreferencesFormData = {
   alertThresholdPercentage: 90,
   mealsPerDay: 3,
   dietaryRestrictions: [],
-  preferredUnit: 'kg',
+  preferredUnit: DEFAULT_PREFERRED_UNIT,
 };
 
 export function PreferencesSettings() {
@@ -83,7 +94,7 @@ export function PreferencesSettings() {
       alertThresholdPercentage: preferences.alertThresholdPercentage || 90,
       mealsPerDay: preferences.mealsPerDay || 3,
       dietaryRestrictions: preferences.dietaryRestrictions || [],
-      preferredUnit: preferences.preferredUnit === 'lb' ? 'lb' : 'kg',
+      preferredUnit: normalizePreferredUnit(preferences.preferredUnit),
     };
     reset(values);
     setBudgetText(centsToMajorString(values.budgetPerWeekCents));
@@ -188,8 +199,11 @@ export function PreferencesSettings() {
             />
 
             <Select label="Preferred Unit" {...register('preferredUnit')}>
-              <option value="kg">Kilograms (kg)</option>
-              <option value="lb">Pounds (lb)</option>
+              {PREFERRED_UNIT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </Select>
           </div>
         </div>
@@ -264,8 +278,8 @@ export function PreferencesSettings() {
             <Input
               label="Meals Per Day"
               type="number"
-              min="1"
-              max="10"
+              min={MIN_MEALS_PER_DAY}
+              max={MAX_MEALS_PER_DAY}
               error={errors.mealsPerDay?.message}
               {...register('mealsPerDay', { valueAsNumber: true })}
             />
