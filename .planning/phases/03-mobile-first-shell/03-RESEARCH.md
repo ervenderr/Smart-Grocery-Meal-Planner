@@ -475,18 +475,24 @@ Verification: `grep -rn "₱" frontend/app frontend/components` returns zero, `g
 | A6 | Backfill rule (pantry items OR non-default prefs) is acceptable vs "mark all existing users complete" | Migration | Some existing users see onboarding once; skippable |
 | A7 | Radix Dialog behaves correctly under iOS Safari with `dvh` sheets (needs real-device check) | Pattern 3 | Scroll-lock glitches; verify on iPhone |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> All four were resolved by the orchestrator on 2026-10-09; see 03-CONTEXT.md "Resolved research questions".
 
 1. **Backfill breadth**
+   - RESOLVED (03-CONTEXT.md, Resolved research questions): mark complete for users with any pantry item (incl. soft-deleted), non-default preferences (PHP / 10000 cents), or preferences ever updated; everyone else sees onboarding once, skippable. Implemented in 03-02.
    - Known: CONTEXT permits "pantry items or non-default preferences" or a skippable prompt.
    - Unclear: should every pre-existing user (this is a personal side project, few users) simply be marked complete?
    - Recommendation: use the specified rule; additionally treat `user_preferences.created_at < migration time` AND `updated_at > created_at` as completed. Confirm with user only if they have real users beyond themselves.
 2. **Budget slider range for non-PHP currencies**
+   - RESOLVED (03-CONTEXT.md): numeric input in major units (min 1, sensible max) replaces PHP-scaled sliders in Settings and the AI modals; amounts stay value x 100. Implemented in 03-06 and 03-10.
    - ₱100-₱10,000 slider is meaningless for JPY/KRW/IDR (10,000 JPY ≈ ₱3,800 but 10,000 IDR ≈ ₱35).
    - Recommendation: switch the Settings budget control to a numeric `inputMode="decimal"` field (as onboarding already specifies) and keep the slider only for the AI modals with bounds scaled by a per-currency multiplier table `{ JPY: 50, KRW: 500, IDR: 5000, ... }`; or drop the slider range limits. Decide in planning; flagged as a design call.
 3. **Stored amounts after currency change**
+   - RESOLVED (03-CONTEXT.md): amounts are NOT converted when currency changes; helper text explains it. Implemented in 03-06.
    - Not converted (locked by spec). Note `budget_per_week_cents` default 10000 means "100.00" in any currency. Document in helper text only.
 4. **"AI features" More item** routes to `/recipes?ai=suggestions` per spec: requires recipes page change (Suspense). Alternative of a dedicated page is out of scope.
+   - RESOLVED (03-CONTEXT.md): route to `/recipes?ai=suggestions` with `useSearchParams` inside `<Suspense>`, verified by `next build`. Implemented in 03-07.
 
 ## Environment Availability
 
