@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Sparkles, ChefHat, Clock, TrendingUp, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
@@ -73,6 +73,15 @@ export function AIRecipeSuggestionsModal({
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -81,7 +90,11 @@ export function AIRecipeSuggestionsModal({
       <div className="absolute inset-0 bg-gray-900/50" onClick={onClose}></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-recipe-suggestions-title"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -89,17 +102,22 @@ export function AIRecipeSuggestionsModal({
               <Sparkles className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">AI Recipe Suggestions</h2>
+              <h2 id="ai-recipe-suggestions-title" className="text-xl font-bold text-gray-900">AI Recipe Suggestions</h2>
               <p className="text-sm text-gray-600">AI-powered recipe recommendations</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 hover:bg-gray-100">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-gray-100"
+          >
             <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {suggestions.length === 0 ? (
             <div className="text-center py-12">
               <div className="rounded-full bg-purple-100 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">

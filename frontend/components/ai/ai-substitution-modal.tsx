@@ -1,13 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Sparkles, ArrowRight, TrendingDown, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type IngredientSubstitution } from '@/lib/api/ai';
 import { getApiErrorMessage } from '@/lib/api/errors';
+import { useCurrency } from '@/lib/currency/currency-provider';
+import { centsToMajorString, parseMajorToCents } from '@/lib/currency/format';
 import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
+
+const DEFAULT_BUDGET_CENTS = 50000;
+const MIN_BUDGET_CENTS = 100;
+const MAX_BUDGET_CENTS = 100_000_000;
+const BUDGET_ERROR = 'Enter a budget of 1 or more';
 
 interface Ingredient {
   ingredientName: string;
@@ -32,9 +40,24 @@ export function AISubstitutionModal({
   const [suggestions, setSuggestions] = useState<IngredientSubstitution[]>([]);
   const [filteredOut, setFilteredOut] = useState(0);
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
-  const [budgetCents, setBudgetCents] = useState<number>(50000); // ₱500 default
+  const [budgetCents, setBudgetCents] = useState<number>(DEFAULT_BUDGET_CENTS);
+  const [budgetInput, setBudgetInput] = useState(centsToMajorString(DEFAULT_BUDGET_CENTS));
+  const [budgetError, setBudgetError] = useState<string | undefined>(undefined);
+  const { currency } = useCurrency();
+
+  const handleBudgetChange = (value: string) => {
+    setBudgetInput(value);
+    const cents = parseMajorToCents(value);
+    if (cents === null || cents < MIN_BUDGET_CENTS || cents > MAX_BUDGET_CENTS) {
+      setBudgetError(BUDGET_ERROR);
+      return;
+    }
+    setBudgetError(undefined);
+    setBudgetCents(cents);
+  };
 
   const handleGenerateSubstitutions = async () => {
+    if (budgetError) return;
     if (selectedIngredients.length === 0) {
       toast.error('Please select at least one ingredient to substitute');
       return;
@@ -91,6 +114,16 @@ export function AISubstitutionModal({
     onClose();
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -99,7 +132,11 @@ export function AISubstitutionModal({
       <div className="absolute inset-0 bg-gray-900/50" onClick={handleClose}></div>
 
       {/* Modal */}
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-substitution-title"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -107,37 +144,34 @@ export function AISubstitutionModal({
               <Sparkles className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">AI Ingredient Substitution</h2>
+              <h2 id="ai-substitution-title" className="text-xl font-bold text-gray-900">AI Ingredient Substitution</h2>
               <p className="text-sm text-gray-600">Find cheaper or available alternatives</p>
             </div>
           </div>
-          <button onClick={handleClose} className="rounded-lg p-2 hover:bg-gray-100">
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Close"
+            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-gray-100"
+          >
             <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {suggestions.length === 0 ? (
             <div className="space-y-6">
               {/* Budget Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Budget Target (₱{(budgetCents / 100).toFixed(2)})
-                </label>
-                <input
-                  type="range"
-                  min="1000"
-                  max="200000"
-                  step="1000"
-                  value={budgetCents}
-                  onChange={(e) => setBudgetCents(Number(e.target.value))}
-                  className="w-full"
+                <Input
+                  label={`Budget target (${currency})`}
+                  type="text"
+                  inputMode="decimal"
+                  value={budgetInput}
+                  onChange={(e) => handleBudgetChange(e.target.value)}
+                  error={budgetError}
                 />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>₱10</span>
-                  <span>₱2,000</span>
-                </div>
               </div>
 
               {/* Ingredient Selection */}
@@ -183,7 +217,7 @@ export function AISubstitutionModal({
               <Button
                 onClick={handleGenerateSubstitutions}
                 className="w-full"
-                disabled={loading || selectedIngredients.length === 0}
+                disabled={loading || selectedIngredients.length === 0 || Boolean(budgetError)}
               >
                 {loading ? (
                   <>
