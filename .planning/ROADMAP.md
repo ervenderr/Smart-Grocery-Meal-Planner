@@ -76,9 +76,9 @@ Plans:
   5. User can choose their currency and all amounts display in it
 **Plans**: 14 plans
 Plans:
-- [ ] 03-01-PLAN.md — Vitest gate + CI step, isTextEntry, Tailwind 4 @theme tokens, safe-area/16px/reduced-motion CSS, viewport export, dvh in shared components
-- [ ] 03-02-PLAN.md — Backend: currency allow-list (isIn), onboardingCompletedAt migration + backfill, idempotent POST /users/onboarding/complete (TDD)
-- [ ] 03-03-PLAN.md — 44px/16px UI primitives, Modal on Radix Dialog (dvh, safe area), EmptyState per contract
+- [x] 03-01-PLAN.md — Vitest gate + CI step, isTextEntry, Tailwind 4 @theme tokens, safe-area/16px/reduced-motion CSS, viewport export, dvh in shared components
+- [x] 03-02-PLAN.md — Backend: currency allow-list (isIn), onboardingCompletedAt migration + backfill, idempotent POST /users/onboarding/complete (TDD)
+- [x] 03-03-PLAN.md — 44px/16px UI primitives, Modal on Radix Dialog (dvh, safe area), EmptyState per contract
 - [ ] 03-04-PLAN.md — Landing, login, signup, settings, profile at 375px (dvh, 44px links, section chips)
 - [ ] 03-05-PLAN.md — Bottom nav + More sheet shell, shared nav config (TDD), compact header, sidebar at lg only
 - [ ] 03-06-PLAN.md — Currency core: Intl helpers + parity test, preferences API/hook, CurrencyProvider, Settings picker + numeric budget
@@ -143,7 +143,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 |-------|----------------|--------|-----------|
 | 1. Secure Foundation & Railway Deploy | 6/6 | Complete    | 2026-10-08 |
 | 2. Reliable AI Suggestions | 8/8 | Complete    | 2026-10-08 |
-| 3. Mobile-First Shell | 0/TBD | Not started | - |
+| 3. Mobile-First Shell | 3/14 | In Progress|  |
 | 4. Persistent Shopping List | 0/TBD | Not started | - |
 | 5. Pantry-Aware Intelligence | 0/TBD | Not started | - |
 | 6. Capture Loops | 0/TBD | Not started | - |
