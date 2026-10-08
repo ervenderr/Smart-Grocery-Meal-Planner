@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { pantryApi } from '@/lib/api/pantry';
+import { BarcodeLookup } from '@/components/food/barcode-lookup';
+import type { FoodProduct } from '@/lib/api/food';
 import toast from 'react-hot-toast';
 import type { PantryItemCategory, PantryItemUnit } from '@/types/pantry.types';
 
@@ -66,11 +68,21 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
     reset,
   } = useForm<PantryItemFormData>({
     resolver: zodResolver(pantryItemSchema),
   });
+
+  const NAME_MAX_LENGTH = 100;
+
+  const handleProductFound = (product: FoodProduct) => {
+    const fullName = product.brand ? `${product.name} (${product.brand})` : product.name;
+    const name = fullName.length <= NAME_MAX_LENGTH ? fullName : product.name.slice(0, NAME_MAX_LENGTH);
+    setValue('ingredientName', name, { shouldValidate: true });
+    setValue('category', product.suggestedCategory, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: PantryItemFormData) => {
     setIsLoading(true);
@@ -115,6 +127,13 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
           <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
             Basic Information
           </h3>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-900">
+              Look up by barcode (optional)
+            </label>
+            <BarcodeLookup onFound={handleProductFound} disabled={isLoading} />
+          </div>
 
           <Input
             label="Item Name"
