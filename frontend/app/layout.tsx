@@ -12,6 +12,14 @@ export const metadata: Metadata = {
   title: 'Kitcha',
   description: 'Plan meals, track groceries, and manage your budget with ease',
   keywords: ['meal planning', 'grocery', 'budget tracking', 'pantry management'],
+  appleWebApp: { capable: true, title: 'Kitcha', statusBarStyle: 'default' },
+  icons: {
+    icon: [
+      { url: '/kitcha-logo.svg', type: 'image/svg+xml' },
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -28,9 +36,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="light">
-      <head>
-        <link rel="icon" href="/kitcha-logo.svg" />
-      </head>
       <body className={`${inter.variable} bg-white font-sans text-gray-900 antialiased`}>
         <Providers>{children}</Providers>
       </body>
