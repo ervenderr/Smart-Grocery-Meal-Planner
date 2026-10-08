@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { pantryApi } from '@/lib/api/pantry';
 import { preferencesApi } from '@/lib/api/preferences';
 import { PREFERENCES_QUERY_KEY } from '@/lib/hooks/use-preferences';
-import { DEFAULT_CURRENCY, parseMajorToCents } from '@/lib/currency/format';
+import { DEFAULT_CURRENCY } from '@/lib/currency/format';
+import { parseBudgetInput } from '@/lib/currency/budget';
 import { buildOnboardingItem } from '@/lib/onboarding/onboarding';
 import { cn } from '@/lib/utils';
 import { StepBudget, BUDGET_STEP_TITLE, budgetError } from './step-budget';
@@ -63,7 +64,10 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
   const finish = async () => {
     patch({ saving: true, error: null });
     try {
-      const budget = parseMajorToCents(state.budgetInput);
+      const parsedBudget = state.budgetInput.trim() === ''
+        ? null
+        : parseBudgetInput(state.budgetInput, state.currency);
+      const budget = parsedBudget?.ok ? parsedBudget.cents : null;
       await preferencesApi.update({
         currency: state.currency,
         dietaryRestrictions: state.dietary,
@@ -96,7 +100,7 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
   };
 
   const next = () => {
-    if (state.step === 0 && budgetError(state.budgetInput)) {
+    if (state.step === 0 && budgetError(state.budgetInput, state.currency)) {
       patch({ showErrors: true });
       return;
     }

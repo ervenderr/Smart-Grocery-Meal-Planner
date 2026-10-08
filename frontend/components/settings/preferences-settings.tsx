@@ -18,12 +18,11 @@ import {
   DEFAULT_CURRENCY,
   centsToMajorString,
   currencyOptionLabel,
-  parseMajorToCents,
 } from '@/lib/currency/format';
+import { MAX_BUDGET_CENTS, parseBudgetInput } from '@/lib/currency/budget';
 import toast from 'react-hot-toast';
 
 const MIN_BUDGET_CENTS = 100;
-const MAX_BUDGET_CENTS = 1_000_000_000;
 const DEFAULT_BUDGET_CENTS = 200000;
 
 const preferencesSchema = z.object({
@@ -56,6 +55,7 @@ export function PreferencesSettings() {
   const { data: preferences, isLoading: fetching } = usePreferences();
   const [loading, setLoading] = useState(false);
   const [budgetText, setBudgetText] = useState(centsToMajorString(DEFAULT_BUDGET_CENTS));
+  const [budgetTouched, setBudgetTouched] = useState(false);
 
   const {
     register,
@@ -87,15 +87,26 @@ export function PreferencesSettings() {
     };
     reset(values);
     setBudgetText(centsToMajorString(values.budgetPerWeekCents));
+    setBudgetTouched(false);
   }, [preferences, reset]);
 
   const handleBudgetChange = (text: string) => {
     setBudgetText(text);
-    const cents = parseMajorToCents(text);
-    setValue('budgetPerWeekCents', cents ?? 0, { shouldDirty: true, shouldValidate: true });
+    setBudgetTouched(true);
+    const parsed = parseBudgetInput(text, currency);
+    // An unparseable value maps to 0 so the schema blocks submit
+    setValue('budgetPerWeekCents', parsed.ok ? parsed.cents : 0, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
   };
 
+  // Only judge the text once edited, so a legacy stored value never blocks other saves
+  const typedBudget = budgetTouched ? parseBudgetInput(budgetText, currency) : null;
+  const budgetTextError = typedBudget && !typedBudget.ok ? typedBudget.message : undefined;
+
   const onSubmit = async (data: PreferencesFormData) => {
+    if (budgetTextError) return;
     setLoading(true);
     try {
       const saved = await preferencesApi.update(data);
@@ -113,6 +124,7 @@ export function PreferencesSettings() {
   const handleCancel = () => {
     reset();
     setBudgetText(centsToMajorString(getValues('budgetPerWeekCents')));
+    setBudgetTouched(false);
   };
 
   const toggleDietaryRestriction = (value: string) => {
@@ -171,7 +183,7 @@ export function PreferencesSettings() {
                 inputMode="decimal"
                 value={budgetText}
                 onChange={(e) => handleBudgetChange(e.target.value)}
-                error={errors.budgetPerWeekCents?.message}
+                error={budgetTextError ?? errors.budgetPerWeekCents?.message}
                 className="pr-16"
               />
               <span

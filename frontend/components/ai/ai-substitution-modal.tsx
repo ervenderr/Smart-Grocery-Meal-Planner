@@ -47,7 +47,7 @@ export function AISubstitutionModal({
 
   const handleBudgetChange = (value: string) => {
     setBudgetInput(value);
-    const cents = parseMajorToCents(value);
+    const cents = parseMajorToCents(value, currency);
     if (cents === null || cents < MIN_BUDGET_CENTS || cents > MAX_BUDGET_CENTS) {
       setBudgetError(BUDGET_ERROR);
       return;

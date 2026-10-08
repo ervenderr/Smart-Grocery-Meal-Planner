@@ -31,6 +31,9 @@ export const updateProfileValidation = [
     .withMessage('Last name must be between 1 and 50 characters'),
 ];
 
+/** Largest value that is safely below the Postgres Int4 column limit. */
+export const MAX_BUDGET_PER_WEEK_CENTS = 2_000_000_000;
+
 /**
  * Validation rules for updating preferences
  */
@@ -48,8 +51,10 @@ export const updatePreferencesValidation = [
 
   body('budgetPerWeekCents')
     .optional()
-    .isInt({ min: 0 })
-    .withMessage('Budget must be a positive integer'),
+    .isInt({ min: 0, max: MAX_BUDGET_PER_WEEK_CENTS })
+    .withMessage(
+      `Budget must be a whole number of cents between 0 and ${MAX_BUDGET_PER_WEEK_CENTS}`
+    ),
 
   body('alertEnabled')
     .optional()

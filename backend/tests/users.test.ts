@@ -151,6 +151,26 @@ describe("Users Endpoints", () => {
       expect(response.body).toHaveProperty("message");
     });
 
+    it("should reject a budget above the Int4-safe ceiling with a clear message", async () => {
+      const response = await request(app)
+        .patch("/api/v1/users/preferences")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({ budgetPerWeekCents: 99999999999 })
+        .expect(400);
+
+      expect(JSON.stringify(response.body)).toContain("between 0 and 2000000000");
+    });
+
+    it("should accept a budget at the ceiling", async () => {
+      const response = await request(app)
+        .patch("/api/v1/users/preferences")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({ budgetPerWeekCents: 2000000000 })
+        .expect(200);
+
+      expect(response.body.budgetPerWeekCents).toBe(2000000000);
+    });
+
     it("should reject invalid meals per day", async () => {
       const response = await request(app)
         .patch("/api/v1/users/preferences")

@@ -3,15 +3,15 @@
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { SUPPORTED_CURRENCIES } from '@/lib/currency/currencies';
-import { currencyOptionLabel, parseMajorToCents } from '@/lib/currency/format';
+import { currencyOptionLabel } from '@/lib/currency/format';
+import { parseBudgetInput } from '@/lib/currency/budget';
 
 export const BUDGET_STEP_TITLE = "Let's set up your kitchen";
-const BUDGET_ERROR = 'Enter a budget of 0 or more, or leave it blank.';
-
 /** Returns an error message when a non-empty budget cannot be parsed. */
-export function budgetError(budgetInput: string): string | undefined {
+export function budgetError(budgetInput: string, currency?: string): string | undefined {
   if (budgetInput.trim() === '') return undefined;
-  return parseMajorToCents(budgetInput) === null ? BUDGET_ERROR : undefined;
+  const parsed = parseBudgetInput(budgetInput, currency);
+  return parsed.ok ? undefined : parsed.message;
 }
 
 interface StepBudgetProps {
@@ -29,7 +29,7 @@ export function StepBudget({
   onCurrencyChange,
   onBudgetChange,
 }: StepBudgetProps) {
-  const error = showErrors ? budgetError(budgetInput) : undefined;
+  const error = showErrors ? budgetError(budgetInput, currency) : undefined;
 
   return (
     <div className="space-y-6">

@@ -13,7 +13,8 @@ import { mealPlanApi } from '@/lib/api/mealplans';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { DIETARY_OPTIONS } from '@/lib/constants/dietary';
 import { useCurrency } from '@/lib/currency/currency-provider';
-import { centsToMajorString, parseMajorToCents } from '@/lib/currency/format';
+import { centsToMajorString } from '@/lib/currency/format';
+import { parseBudgetInput } from '@/lib/currency/budget';
 import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
 
@@ -96,8 +97,13 @@ export function AIMealPlanModal({
 
   const handleBudgetChange = (value: string) => {
     setBudgetInput(value);
-    const cents = parseMajorToCents(value);
-    if (cents === null || cents < 100) {
+    const parsed = parseBudgetInput(value, currency);
+    if (!parsed.ok) {
+      setError('budgetCents', { message: parsed.message });
+      return;
+    }
+    const cents = parsed.cents;
+    if (cents < 100) {
       setError('budgetCents', { message: BUDGET_ERROR });
       return;
     }

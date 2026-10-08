@@ -74,8 +74,12 @@ export function validate(req: Request, _res: Response, next: NextFunction): void
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    // Throw AppError with 400 status (errors will be in response)
-    throw new AppError('Validation failed', 400);
+    // Throw AppError with 400 status; include field messages so clients can show them
+    const errorMessages = errors
+      .array()
+      .map((err) => `${'path' in err ? err.path : 'field'}: ${err.msg}`)
+      .join(', ');
+    throw new AppError(`Validation failed: ${errorMessages}`, 400);
   }
 
   next();
