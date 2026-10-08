@@ -25,7 +25,7 @@
 - [x] **AI-04**: A per-user and global daily AI quota (DB-backed) blocks calls past the cap with a clear message
 - [x] **AI-05**: When the provider errors, times out or returns unusable output after one repair, the user gets a clear "unavailable" message, quota is refunded, and a missing key never breaks startup or /health (graceful degradation, no failover; revised per 02-CONTEXT)
 - [x] **AI-06**: Pantry and recipe text is delimited in prompts, and dietary/allergen filters are enforced in code on AI output
-- [ ] **AI-07**: Open Food Facts and USDA FoodData lookups run server-side with required User-Agent, rate-limit handling, cache, and attribution shown in the UI
+- [x] **AI-07**: Open Food Facts and USDA FoodData lookups run server-side with required User-Agent, rate-limit handling, cache, and attribution shown in the UI
 
 ### Mobile Shell (MOB)
 
