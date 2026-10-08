@@ -10,7 +10,7 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Secure Foundation & Railway Deploy** - Patched Next.js, live Railway API + Postgres, deployed frontend working end to end, CI
+- [x] **Phase 1: Secure Foundation & Railway Deploy** - Patched Next.js, live Railway API + Postgres, deployed frontend working end to end, CI (completed 2026-10-08)
 - [ ] **Phase 2: Reliable AI Suggestions** - Validated, cached, quota-guarded AI with Gemini primary and Groq fallback, plus food data lookups
 - [ ] **Phase 3: Mobile-First Shell** - Bottom nav, 375px-ready screens, home-screen install, onboarding, empty states, currency
 - [ ] **Phase 4: Persistent Shopping List** - Backend-stored lists with manual items, check-off, grouping, shopping mode, spend tracking
@@ -37,7 +37,7 @@ Plans:
 - [x] 01-03-PLAN.md — Tests-first backend hardening: Zod env, CORS allowlist + 403 guard + preview regex, trust proxy, early DB-free /health
 - [x] 01-04-PLAN.md — GitHub Actions CI (backend, frontend, docker-build), push, green on main
 - [x] 01-05-PLAN.md — Smoke test first, minimum Railway spend cap, provision `kitcha` + deploy kitcha-api, live API verified
-- [ ] 01-06-PLAN.md — Vercel NEXT_PUBLIC_API_URL (checkpoint), production build guard, full smoke + browser pass
+- [x] 01-06-PLAN.md — Vercel NEXT_PUBLIC_API_URL (checkpoint), production build guard, full smoke + browser pass
 **UI hint**: yes
 
 ### Phase 2: Reliable AI Suggestions
@@ -117,7 +117,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Secure Foundation & Railway Deploy | 5/6 | In Progress|  |
+| 1. Secure Foundation & Railway Deploy | 6/6 | Complete    | 2026-10-08 |
 | 2. Reliable AI Suggestions | 0/TBD | Not started | - |
 | 3. Mobile-First Shell | 0/TBD | Not started | - |
 | 4. Persistent Shopping List | 0/TBD | Not started | - |
