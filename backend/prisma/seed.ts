@@ -7,11 +7,28 @@
 import { PrismaClient } from '@prisma/client';
 import { hashPassword } from '../src/utils/password.util';
 
-if (process.env.NODE_ENV === 'production') {
+function refuseSeed(reason: string): never {
   console.error(
-    'Refusing to seed: NODE_ENV=production. The seed creates a demo user with a known password.'
+    `Refusing to seed: ${reason}. The seed creates a demo user with a known password.`
   );
   process.exit(1);
+}
+
+function looksLocal(databaseUrl: string | undefined): boolean {
+  if (!databaseUrl) return false;
+  try {
+    const host = new URL(databaseUrl).hostname;
+    return ['localhost', '127.0.0.1', '[::1]', 'postgres', 'db'].includes(host) || host === '';
+  } catch {
+    return false;
+  }
+}
+
+if (process.env.NODE_ENV === 'production') {
+  refuseSeed('NODE_ENV=production');
+}
+if (process.env.ALLOW_SEED !== 'true' && !looksLocal(process.env.DATABASE_URL)) {
+  refuseSeed('DATABASE_URL does not look local (set ALLOW_SEED=true to override)');
 }
 
 const prisma = new PrismaClient();
