@@ -28,6 +28,43 @@ export function applyItemPatch(
   };
 }
 
+/**
+ * Rolls back ONE failed optimistic patch without clobbering newer writes.
+ * A field is restored only while it still holds the failed patch's value; if a
+ * later mutation changed it, that later (optimistic) value is kept.
+ */
+export function revertItemPatch(
+  list: ShoppingList | undefined,
+  previous: ShoppingItem | undefined,
+  patch: UpdateShoppingItemInput
+): ShoppingList | undefined {
+  if (!list || !previous) return list;
+  const target = list.items.find((item) => item.id === previous.id);
+  if (!target) return list;
+  const merged = mergePatch(previous, patch);
+  const restored: Record<string, unknown> = {};
+  for (const key of Object.keys(patch) as Array<keyof ShoppingItem>) {
+    if (target[key] === merged[key]) restored[key] = previous[key];
+  }
+  if (Object.keys(restored).length === 0) return list;
+  return {
+    ...list,
+    items: list.items.map((item) => (item.id === previous.id ? { ...item, ...restored } : item)),
+  };
+}
+
+/** Puts a removed item back at its old position (clamped); no-op if it already exists. */
+export function restoreItem(
+  list: ShoppingList | undefined,
+  item: ShoppingItem | null | undefined,
+  index: number
+): ShoppingList | undefined {
+  if (!list || !item) return list;
+  if (list.items.some((existing) => existing.id === item.id)) return list;
+  const at = Math.max(0, Math.min(index, list.items.length));
+  return { ...list, items: [...list.items.slice(0, at), item, ...list.items.slice(at)] };
+}
+
 export function removeItem(
   list: ShoppingList | undefined,
   itemId: string

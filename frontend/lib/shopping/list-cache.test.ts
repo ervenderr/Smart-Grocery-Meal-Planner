@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { applyItemPatch, removeItem, upsertItem, toCreateInput } from './list-cache';
+import {
+  applyItemPatch,
+  removeItem,
+  restoreItem,
+  revertItemPatch,
+  upsertItem,
+  toCreateInput,
+} from './list-cache';
 import type { ShoppingItem, ShoppingList } from '@/types/shopping.types';
 
 const makeItem = (id: string, overrides: Partial<ShoppingItem> = {}): ShoppingItem =>
@@ -108,5 +115,61 @@ describe('toCreateInput', () => {
       isChecked: true,
       notes: 'n',
     });
+  });
+});
+
+describe('revertItemPatch', () => {
+  it('restores the patched field when nothing newer touched it', () => {
+    const a = makeItem('a');
+    const list = applyItemPatch(makeList([a]), 'a', { isChecked: true });
+    const next = revertItemPatch(list, a, { isChecked: true });
+    expect(next?.items[0].isChecked).toBe(false);
+  });
+
+  it('keeps a newer optimistic value when an older mutation fails', () => {
+    // t1: check (fails), t2: uncheck then check again is in flight -> cache shows checked=false
+    const a = makeItem('a', { isChecked: false });
+    const afterFirst = applyItemPatch(makeList([a]), 'a', { isChecked: true });
+    const afterSecond = applyItemPatch(afterFirst, 'a', { isChecked: false });
+    // First mutation (isChecked: true) fails; current value (false) differs from its patch.
+    const next = revertItemPatch(afterSecond, a, { isChecked: true });
+    expect(next).toBe(afterSecond);
+    expect(next?.items[0].isChecked).toBe(false);
+  });
+
+  it('only reverts fields that still hold the failed value', () => {
+    const a = makeItem('a', { isChecked: false, actualCostCents: null });
+    let list = applyItemPatch(makeList([a]), 'a', { isChecked: true, actualCostCents: 300 });
+    list = applyItemPatch(list, 'a', { actualCostCents: 450 });
+    const next = revertItemPatch(list, a, { isChecked: true, actualCostCents: 300 });
+    expect(next?.items[0].isChecked).toBe(false);
+    expect(next?.items[0].actualCostCents).toBe(450);
+  });
+
+  it('is a no-op for a missing list, snapshot or item and does not mutate', () => {
+    const a = makeItem('a');
+    const list = makeList([a]);
+    expect(revertItemPatch(undefined, a, { isChecked: true })).toBeUndefined();
+    expect(revertItemPatch(list, undefined, { isChecked: true })).toBe(list);
+    expect(revertItemPatch(list, makeItem('zzz'), { isChecked: true })).toBe(list);
+    expect(list.items[0].isChecked).toBe(false);
+  });
+});
+
+describe('restoreItem', () => {
+  it('re-inserts at the old index', () => {
+    const [a, b, c] = [makeItem('a'), makeItem('b'), makeItem('c')];
+    const { list, removed } = removeItem(makeList([a, b, c]), 'b');
+    const next = restoreItem(list, removed, 1);
+    expect(next?.items.map((i) => i.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('clamps the index and ignores duplicates or missing input', () => {
+    const [a, b] = [makeItem('a'), makeItem('b')];
+    const list = makeList([a]);
+    expect(restoreItem(list, b, 99)?.items.map((i) => i.id)).toEqual(['a', 'b']);
+    expect(restoreItem(list, a, 0)).toBe(list);
+    expect(restoreItem(list, null, 0)).toBe(list);
+    expect(restoreItem(undefined, a, 0)).toBeUndefined();
   });
 });
