@@ -66,13 +66,39 @@ export function currencyOptionLabel(code: string): string {
   return `${code} - ${name} (${currencySymbol(code)})`;
 }
 
-/** Parse a major-unit string ("12.34") to integer cents; null when invalid. */
-export function parseMajorToCents(input: string): number | null {
-  const trimmed = input.trim();
-  if (trimmed === '') return null;
-  const n = Number(trimmed);
-  if (!Number.isFinite(n) || n < 0) return null;
-  return Math.round(n * 100);
+/** Number of decimal digits users may type for a currency (JPY/KRW: 0). */
+export function currencyFractionDigits(currency: string = DEFAULT_CURRENCY): number {
+  const code = isSupportedCurrency(currency) ? currency : DEFAULT_CURRENCY;
+  try {
+    return (
+      new Intl.NumberFormat(FORMAT_LOCALE, { style: 'currency', currency: code }).resolvedOptions()
+        .maximumFractionDigits ?? 2
+    );
+  } catch {
+    return 2;
+  }
+}
+
+/**
+ * Parse a plain decimal major-unit string ("12.34") to integer cents.
+ *
+ * Works on the digits themselves (no float math) and rejects hex, exponent,
+ * signs, separators, whitespace inside the number, and more fraction digits
+ * than the currency allows. Returns null when invalid.
+ */
+export function parseMajorToCents(
+  input: string,
+  currency: string = DEFAULT_CURRENCY
+): number | null {
+  const digits = currencyFractionDigits(currency);
+  const pattern = new RegExp(`^(\\d{1,15})(?:\\.(\\d{1,${Math.max(digits, 1)}}))?$`);
+  const match = pattern.exec(input.trim());
+  if (!match) return null;
+  const fraction = match[2] ?? '';
+  if (fraction.length > digits) return null;
+  // Amounts are stored as major x 100 for every currency
+  const cents = Number(match[1]) * 100 + Number(fraction.padEnd(2, '0'));
+  return Number.isSafeInteger(cents) ? cents : null;
 }
 
 /** Cents to an editable major-unit string without trailing zeros. */

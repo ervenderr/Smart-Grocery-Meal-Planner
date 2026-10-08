@@ -55,13 +55,59 @@ describe('symbols and labels', () => {
 describe('parseMajorToCents', () => {
   it('parses valid input', () => {
     expect(parseMajorToCents('2000')).toBe(200000);
-    expect(parseMajorToCents('12.345')).toBe(1235);
+    expect(parseMajorToCents('12.34')).toBe(1234);
+    expect(parseMajorToCents('12.5')).toBe(1250);
+    expect(parseMajorToCents('0')).toBe(0);
+    expect(parseMajorToCents('  7 ')).toBe(700);
   });
 
-  it('rejects invalid input', () => {
+  it('avoids float rounding errors', () => {
+    expect(parseMajorToCents('0.29')).toBe(29);
+    expect(parseMajorToCents('1.15')).toBe(115);
+    expect(parseMajorToCents('19.99')).toBe(1999);
+    expect(parseMajorToCents('8.2')).toBe(820);
+  });
+
+  it('rejects more decimals than the currency allows', () => {
+    expect(parseMajorToCents('1.005')).toBeNull();
+    expect(parseMajorToCents('12.345')).toBeNull();
+    expect(parseMajorToCents('0.1000')).toBeNull();
+  });
+
+  it('honours zero-decimal currencies', () => {
+    expect(parseMajorToCents('1500', 'JPY')).toBe(150000);
+    expect(parseMajorToCents('1500.5', 'JPY')).toBeNull();
+    expect(parseMajorToCents('9000', 'KRW')).toBe(900000);
+    expect(parseMajorToCents('9000.0', 'KRW')).toBeNull();
+  });
+
+  it('rejects hex, exponent, binary and separators', () => {
+    expect(parseMajorToCents('0x1F')).toBeNull();
+    expect(parseMajorToCents('1e3')).toBeNull();
+    expect(parseMajorToCents('1E3')).toBeNull();
+    expect(parseMajorToCents('0b11')).toBeNull();
+    expect(parseMajorToCents('1_000')).toBeNull();
+    expect(parseMajorToCents('1,000')).toBeNull();
+    expect(parseMajorToCents('12,5')).toBeNull();
+    expect(parseMajorToCents('1 000')).toBeNull();
+    expect(parseMajorToCents('Infinity')).toBeNull();
+    expect(parseMajorToCents('NaN')).toBeNull();
+  });
+
+  it('rejects empty, negative, signed and malformed input', () => {
     expect(parseMajorToCents('')).toBeNull();
+    expect(parseMajorToCents('   ')).toBeNull();
     expect(parseMajorToCents('abc')).toBeNull();
     expect(parseMajorToCents('-5')).toBeNull();
+    expect(parseMajorToCents('+5')).toBeNull();
+    expect(parseMajorToCents('.5')).toBeNull();
+    expect(parseMajorToCents('5.')).toBeNull();
+    expect(parseMajorToCents('1.2.3')).toBeNull();
+  });
+
+  it('rejects absurdly large values', () => {
+    expect(parseMajorToCents('9'.repeat(16))).toBeNull();
+    expect(parseMajorToCents('99999999999')).toBe(9999999999900);
   });
 });
 
