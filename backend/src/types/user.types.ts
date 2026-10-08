@@ -62,6 +62,7 @@ export interface UserPreferencesResponse {
   mealsPerDay: number;
   dietaryRestrictions: string[];
   preferredUnit: string;
+  onboardingCompletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

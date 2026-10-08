@@ -128,6 +128,24 @@ export class UsersController {
   }
 
   /**
+   * POST /api/v1/users/onboarding/complete
+   * Mark onboarding as completed (idempotent)
+   *
+   * HEADERS:
+   * Authorization: Bearer <token>
+   *
+   * RESPONSE (200):
+   * Preferences object with onboardingCompletedAt set
+   */
+  async completeOnboarding(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).user.id;
+
+    const preferences = await usersService.completeOnboarding(userId);
+
+    res.status(200).json(preferences);
+  }
+
+  /**
    * PATCH /api/v1/users/password
    * Change user password
    *

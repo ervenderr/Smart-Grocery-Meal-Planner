@@ -115,6 +115,20 @@ router.patch(
 );
 
 /**
+ * POST /api/v1/users/onboarding/complete
+ * Mark onboarding as completed (idempotent, server-stamped)
+ *
+ * PROTECTED (requires JWT token)
+ *
+ * Response (200):
+ * Preferences object with onboardingCompletedAt set
+ */
+router.post(
+  '/onboarding/complete',
+  asyncHandler(usersController.completeOnboarding.bind(usersController))
+);
+
+/**
  * PATCH /api/v1/users/password
  * Change user password
  *

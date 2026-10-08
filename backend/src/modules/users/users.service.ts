@@ -188,6 +188,24 @@ export class UsersService {
   }
 
   /**
+   * Mark onboarding as completed (idempotent, server-stamped)
+   *
+   * Only stamps when the value is still null, so the first timestamp wins.
+   *
+   * @param userId - User ID
+   * @returns Promise<UserPreferencesResponse>
+   * @throws AppError if preferences not found
+   */
+  async completeOnboarding(userId: string): Promise<UserPreferencesResponse> {
+    await prisma.userPreference.updateMany({
+      where: { userId, onboardingCompletedAt: null },
+      data: { onboardingCompletedAt: new Date() },
+    });
+
+    return this.getPreferences(userId);
+  }
+
+  /**
    * Change user password
    *
    * STEPS:

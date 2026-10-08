@@ -99,6 +99,9 @@ model UserPreference {
   // Shopping preferences
   preferredUnit               String   @default("kg") @map("preferred_unit") // "kg" or "lb"
 
+  // Onboarding (null = not yet completed; server-stamped, set once)
+  onboardingCompletedAt       DateTime? @map("onboarding_completed_at")
+
   createdAt                   DateTime @default(now()) @map("created_at")
   updatedAt                   DateTime @updatedAt @map("updated_at")
 
