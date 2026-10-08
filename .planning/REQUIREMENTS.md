@@ -21,8 +21,8 @@
 
 - [x] **AI-01**: AI features use one OpenAI-compatible provider configured by env (`AI_PROVIDER`/`AI_BASE_URL`/`AI_MODEL`/`AI_API_KEY`, Dahl default) behind an `LlmProvider` interface; `@google/generative-ai` and the dead duplicate `src/services/ai.service.ts` are removed (revised per 02-CONTEXT)
 - [x] **AI-02**: Every AI response is validated against a Zod schema (one repair retry) before it reaches the user or the cache
-- [ ] **AI-03**: Identical AI requests are served from a Postgres cache without calling the provider
-- [ ] **AI-04**: A per-user and global daily AI quota (DB-backed) blocks calls past the cap with a clear message
+- [x] **AI-03**: Identical AI requests are served from a Postgres cache without calling the provider
+- [x] **AI-04**: A per-user and global daily AI quota (DB-backed) blocks calls past the cap with a clear message
 - [x] **AI-05**: When the provider errors, times out or returns unusable output after one repair, the user gets a clear "unavailable" message, quota is refunded, and a missing key never breaks startup or /health (graceful degradation, no failover; revised per 02-CONTEXT)
 - [x] **AI-06**: Pantry and recipe text is delimited in prompts, and dietary/allergen filters are enforced in code on AI output
 - [ ] **AI-07**: Open Food Facts and USDA FoodData lookups run server-side with required User-Agent, rate-limit handling, cache, and attribution shown in the UI

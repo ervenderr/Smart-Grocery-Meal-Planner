@@ -53,10 +53,10 @@ Plans:
   5. Suggestions never include ingredients that violate the user's dietary or allergen settings, and product and nutrition lookups from Open Food Facts and USDA show their attribution in the UI
 **Plans**: 8 plans
 Plans:
-- [ ] 02-01-PLAN.md — Recipe slice: env-configured OpenAI-compatible provider, think-block-tolerant JSON extraction, Zod + one repair, unavailable contract
-- [ ] 02-02-PLAN.md — Pure dietary/allergen filter + 10/min per-user burst limiter with ipKeyGenerator
+- [x] 02-01-PLAN.md — Recipe slice: env-configured OpenAI-compatible provider, think-block-tolerant JSON extraction, Zod + one repair, unavailable contract
+- [x] 02-02-PLAN.md — Pure dietary/allergen filter + 10/min per-user burst limiter with ipKeyGenerator
 - [ ] 02-03-PLAN.md — Meal plan + substitutions on the new pipeline, diet enforcement in code, Gemini removal
-- [ ] 02-04-PLAN.md — Postgres cache + atomic per-user/global daily quota (additive migration)
+- [x] 02-04-PLAN.md — Postgres cache + atomic per-user/global daily quota (additive migration)
 - [ ] 02-05-PLAN.md — Open Food Facts + USDA lookups (UA, throttle, cache, attribution) backend
 - [ ] 02-06-PLAN.md — Frontend: server messages in AI modals, diet notice, attribution component, barcode lookup
 - [ ] 02-07-PLAN.md — Smoke test extension, Railway deploy (migration), push main, CI + Vercel green
@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Secure Foundation & Railway Deploy | 6/6 | Complete    | 2026-10-08 |
-| 2. Reliable AI Suggestions | 0/TBD | Not started | - |
+| 2. Reliable AI Suggestions | 3/8 | In Progress|  |
 | 3. Mobile-First Shell | 0/TBD | Not started | - |
 | 4. Persistent Shopping List | 0/TBD | Not started | - |
 | 5. Pantry-Aware Intelligence | 0/TBD | Not started | - |
