@@ -209,3 +209,13 @@ describe('Repository quota', () => {
     expect(nextUtcMidnight(at)).toBe('2031-03-14T00:00:00.000Z');
   });
 });
+
+import { isGlobalCapNear } from '../src/modules/ai/ai-quota.repository';
+
+describe('isGlobalCapNear (WR-06)', () => {
+  it('flags usage from 80% of the global cap', () => {
+    expect(isGlobalCapNear(79, 100)).toBe(false);
+    expect(isGlobalCapNear(80, 100)).toBe(true);
+    expect(isGlobalCapNear(100, 100)).toBe(true);
+  });
+});

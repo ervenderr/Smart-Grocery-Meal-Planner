@@ -97,8 +97,8 @@ export const envSchema = z
     AI_TIMEOUT_MS: z.coerce.number().int().min(1000).max(110000).default(40000),
     AI_MAX_TOKENS: z.coerce.number().int().min(256).max(32000).default(8000),
     AI_JSON_MODE: z.enum(["off", "json_object"]).default("off"),
-    AI_USER_DAILY_LIMIT: z.coerce.number().int().min(1).default(20),
-    AI_GLOBAL_DAILY_LIMIT: z.coerce.number().int().min(1).default(100),
+    AI_USER_DAILY_LIMIT: z.coerce.number().int().min(1).max(1000).default(20),
+    AI_GLOBAL_DAILY_LIMIT: z.coerce.number().int().min(1).max(100000).default(100),
     USDA_API_KEY: optionalSecret,
     OFF_CONTACT: z
       .string()

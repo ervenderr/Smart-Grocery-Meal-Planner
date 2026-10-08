@@ -27,6 +27,13 @@ export interface ReserveInput {
   readonly globalLimit: number;
 }
 
+const GLOBAL_WARN_RATIO = 0.8;
+
+/** True once the global daily usage reaches 80% of the cap (alerting signal). */
+export function isGlobalCapNear(globalCount: number, globalLimit: number): boolean {
+  return globalCount >= Math.ceil(globalLimit * GLOBAL_WARN_RATIO);
+}
+
 export function utcDay(now: Date): string {
   return now.toISOString().slice(0, 10);
 }

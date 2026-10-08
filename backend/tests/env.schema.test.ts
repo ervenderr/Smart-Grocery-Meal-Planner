@@ -143,6 +143,12 @@ describe("parseEnv AI settings", () => {
     expect(env.AI_API_KEY).toBeUndefined();
   });
 
+  it("bounds the AI daily limits", () => {
+    expect(() => parseEnv(base({ AI_USER_DAILY_LIMIT: "1001" }))).toThrow();
+    expect(() => parseEnv(base({ AI_GLOBAL_DAILY_LIMIT: "100001" }))).toThrow();
+    expect(parseEnv(base({ AI_USER_DAILY_LIMIT: "1000" })).AI_USER_DAILY_LIMIT).toBe(1000);
+  });
+
   it("treats blank AI_API_KEY and USDA_API_KEY as unset", () => {
     const env = parseEnv(base({ AI_API_KEY: "", USDA_API_KEY: "" }));
     expect(env.AI_API_KEY).toBeUndefined();

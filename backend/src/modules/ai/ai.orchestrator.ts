@@ -14,6 +14,7 @@ import { buildCacheKey } from './ai-cache-key';
 import { getCachedSafe, pruneExpired, setCachedSafe } from './ai-cache.repository';
 import {
   QuotaExceededError,
+  isGlobalCapNear,
   nextUtcMidnight,
   pruneOldUsage,
   refundQuota,
@@ -133,6 +134,12 @@ async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<st
       globalLimit: limits.globalDaily,
     });
     logger.info('AI quota reserved', { feature: req.feature, ...counts });
+    if (isGlobalCapNear(counts.globalCount, limits.globalDaily)) {
+      logger.warn('AI global daily quota is above 80%', {
+        globalCount: counts.globalCount,
+        globalLimit: limits.globalDaily,
+      });
+    }
     return day;
   } catch (error) {
     if (error instanceof QuotaExceededError) {
