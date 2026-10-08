@@ -40,6 +40,16 @@ Users keep real shopping lists that survive reloads and device changes and are e
 - Backend first: additive Prisma migration + module, deploy to Railway (`cd backend && railway link --project kitcha --environment production`, confirm `railway status` shows `kitcha`, `railway up --service kitcha-api --detach`, verify migration logs and /health, extend `scripts/smoke-prod.sh` with shopping checks using its own smoke user), THEN push the frontend to main (Vercel auto). The frontend must tolerate the endpoints being unavailable (clear error state). CI must stay green.
 - Manual real-phone check of shopping mode (wake lock, thumb reach) is a final deferrable human checkpoint.
 
+### Resolved research questions (orchestrator decisions, 2026-10-09)
+- History total on finish = sum over CHECKED items of `actualCostCents ?? costEstimateCents ?? 0` (per-item fallback), clamped to int4 max.
+- Merge on generate-from-meal-plan only combines into existing UNCHECKED items (same name case-insensitive + same unit); checked items are left alone and a new line is added. Estimated-vs-actual difference is computed over items that have an actual price.
+- Include a small `inferCategory` keyword map (used for generated lists and quick-add when no category is chosen); unknown = "Other".
+- The Meal Plans page preview/detail gets an "Add to my list" button that calls the new generate endpoint.
+- Add a dedicated shopping rate limiter (generous, per user) and make the global `apiLimiter` skip `/api/v1/shopping` (match on `originalUrl`), because rapid check-offs would otherwise hit 100 requests/15 min.
+- Fix the existing `mealplan.service` ingredient-name truncation (`key.split(":")[0]`) when reusing it; one shared `lib/shopping/vocab.ts` for categories/units aligned to the backend enums (frontend constants currently disagree).
+- Per-item money cap 200,000,000 cents; max 300 items per list; every mutation in a transaction holding the list row lock; partial unique index is hand-written migration SQL (completes duplicate active lists first) with a comment in schema.prisma; keep `prisma migrate diff --exit-code` clean.
+- Frontend testable logic must live as pure helpers under `frontend/lib/` (Vitest only runs `lib/**/*.test.ts` in node env). No new packages (use a small aria-expanded section, not Radix accordion). Wake Lock hook re-requests on `visibilitychange`, fails silently.
+
 ### Claude's Discretion
 Endpoint naming, component structure, section collapse behavior, undo implementation, carry-over default UX, plan splitting.
 
