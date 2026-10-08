@@ -74,7 +74,22 @@ Plans:
   3. User can add Kitcha to the home screen on Android and iOS, and iOS users see a hint explaining how
   4. A new user completes a short onboarding (budget, dietary needs, first pantry items), and every list screen shows a useful empty state
   5. User can choose their currency and all amounts display in it
-**Plans**: TBD
+**Plans**: 14 plans
+Plans:
+- [ ] 03-01-PLAN.md — Vitest gate + CI step, isTextEntry, Tailwind 4 @theme tokens, safe-area/16px/reduced-motion CSS, viewport export, dvh in shared components
+- [ ] 03-02-PLAN.md — Backend: currency allow-list (isIn), onboardingCompletedAt migration + backfill, idempotent POST /users/onboarding/complete (TDD)
+- [ ] 03-03-PLAN.md — 44px/16px UI primitives, Modal on Radix Dialog (dvh, safe area), EmptyState per contract
+- [ ] 03-04-PLAN.md — Landing, login, signup, settings, profile at 375px (dvh, 44px links, section chips)
+- [ ] 03-05-PLAN.md — Bottom nav + More sheet shell, shared nav config (TDD), compact header, sidebar at lg only
+- [ ] 03-06-PLAN.md — Currency core: Intl helpers + parity test, preferences API/hook, CurrencyProvider, Settings picker + numeric budget
+- [ ] 03-07-PLAN.md — Pantry, recipes, alerts empty states + 375px; ?ai=suggestions with Suspense
+- [ ] 03-08-PLAN.md — Dashboard, analytics, budget, help + charts in user currency at 375px
+- [ ] 03-09-PLAN.md — Meal plans + shopping: currency, empty states, 44px actions
+- [ ] 03-10-PLAN.md — AI modals: numeric budget in user currency, 90dvh, Escape, 44px close
+- [ ] 03-11-PLAN.md — Onboarding: tested logic, 3-step flow, gate in shell (fail open)
+- [ ] 03-12-PLAN.md — PWA: manifest, sharp-generated icons, apple metadata, iOS install hint (TDD helpers)
+- [ ] 03-13-PLAN.md — Ship: smoke check 11, static gates, Railway deploy first, then push + CI + Vercel
+- [ ] 03-14-PLAN.md — Human checkpoint: real-iPhone + 375/390/1280px walkthrough (deferrable)
 **UI hint**: yes
 
 ### Phase 4: Persistent Shopping List
