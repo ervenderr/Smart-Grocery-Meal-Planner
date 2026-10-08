@@ -20,7 +20,11 @@ import toast from 'react-hot-toast';
 
 const aiMealPlanSchema = z.object({
   daysCount: z.number().min(1).max(14),
-  budgetCents: z.number().int().min(100).max(100_000_000),
+  budgetCents: z
+    .number()
+    .int()
+    .min(100, 'Enter a budget of 1 or more')
+    .max(100_000_000, 'Enter a smaller weekly budget'),
   dietaryRestrictions: z.array(z.string()).optional(),
   usePantry: z.boolean().optional(),
 });
@@ -52,7 +56,6 @@ function defaultSaveDates() {
 }
 
 const DEFAULT_BUDGET_CENTS = 200000;
-const BUDGET_ERROR = 'Enter a budget of 1 or more';
 
 export function AIMealPlanModal({
   isOpen,
@@ -67,12 +70,12 @@ export function AIMealPlanModal({
   const [showSaveForm, setShowSaveForm] = useState(false);
   const { format, currency } = useCurrency();
   const [budgetInput, setBudgetInput] = useState(centsToMajorString(DEFAULT_BUDGET_CENTS));
+  const [budgetTextError, setBudgetTextError] = useState<string | undefined>(undefined);
 
   const {
     register,
     handleSubmit,
     setValue,
-    setError,
     formState: { errors },
     reset,
   } = useForm<AIFormData>({
@@ -99,18 +102,17 @@ export function AIMealPlanModal({
     setBudgetInput(value);
     const parsed = parseBudgetInput(value, currency);
     if (!parsed.ok) {
-      setError('budgetCents', { message: parsed.message });
+      // Zero fails the schema, so the previous valid amount can never be submitted
+      setBudgetTextError(parsed.message);
+      setValue('budgetCents', 0, { shouldDirty: true });
       return;
     }
-    const cents = parsed.cents;
-    if (cents < 100) {
-      setError('budgetCents', { message: BUDGET_ERROR });
-      return;
-    }
-    setValue('budgetCents', cents, { shouldValidate: true, shouldDirty: true });
+    setBudgetTextError(undefined);
+    setValue('budgetCents', parsed.cents, { shouldValidate: true, shouldDirty: true });
   };
 
   const handleGenerate = async (data: AIFormData) => {
+    if (budgetTextError) return;
     setLoading(true);
     try {
       const result = await aiApi.generateMealPlan({
@@ -164,6 +166,7 @@ export function AIMealPlanModal({
     setSuggestion(null);
     setShowSaveForm(false);
     setBudgetInput(centsToMajorString(DEFAULT_BUDGET_CENTS));
+    setBudgetTextError(undefined);
   };
 
   useEffect(() => {
@@ -233,7 +236,7 @@ export function AIMealPlanModal({
                 inputMode="decimal"
                 value={budgetInput}
                 onChange={(e) => handleBudgetChange(e.target.value)}
-                error={errors.budgetCents?.message}
+                error={budgetTextError ?? errors.budgetCents?.message}
               />
 
               <div className="flex items-center gap-2">
