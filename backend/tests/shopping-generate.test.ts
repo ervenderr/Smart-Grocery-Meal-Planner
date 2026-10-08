@@ -202,3 +202,87 @@ describe('POST /api/v1/shopping/generate', () => {
     expect(await prisma.shoppingListItem.count({ where: { shoppingListId: list.id } })).toBe(299);
   });
 });
+
+describe('POST /api/v1/shopping/generate with a large merge', () => {
+  const MERGED = 100;
+  const FRESH = 50;
+  const TIME_BUDGET_MS = 4000;
+  let user: TestUser;
+  let other: TestUser;
+  let planId: string;
+  let listId: string;
+  let otherItemId: string;
+
+  const nameOf = (i: number) => `Bulk ingredient ${String(i).padStart(3, '0')}`;
+
+  beforeAll(async () => {
+    user = await signup('bulk');
+    other = await signup('bulk-other');
+    const recipeId = await createRecipe(
+      user,
+      'Banquet',
+      Array.from({ length: MERGED + FRESH }, (_, i) => ({
+        ingredientName: nameOf(i),
+        quantity: 2.25,
+        unit: 'pieces',
+      })),
+    );
+    planId = await createPlan(user, [recipeId]);
+    listId = (await getList(user).expect(200)).body.id;
+    await prisma.shoppingListItem.createMany({
+      data: Array.from({ length: MERGED }, (_, i) => ({
+        shoppingListId: listId,
+        itemName: nameOf(i),
+        quantity: 1.5,
+        unit: 'pieces',
+      })),
+    });
+    const otherList = (await getList(other).expect(200)).body;
+    otherItemId = (
+      await prisma.shoppingListItem.create({
+        data: { shoppingListId: otherList.id, itemName: nameOf(0), quantity: 7, unit: 'pieces' },
+      })
+    ).id;
+  });
+
+  afterAll(async () => {
+    const users = await prisma.user.findMany({
+      where: { email: { startsWith: PREFIX } },
+      select: { id: true },
+    });
+    const ids = users.map((u) => u.id);
+    await prisma.shoppingHistory.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.shoppingList.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.mealPlan.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.recipe.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.user.deleteMany({ where: { id: { in: ids } } });
+  });
+
+  it('merges ~100 lines and inserts the rest inside the time budget', async () => {
+    const before = await prisma.shoppingListItem.findMany({ where: { shoppingListId: listId } });
+    const started = Date.now();
+    const res = await generate(user, { mealPlanId: planId }).expect(200);
+    expect(Date.now() - started).toBeLessThan(TIME_BUDGET_MS);
+
+    expect(res.body.merged).toBe(MERGED);
+    expect(res.body.added).toBe(FRESH);
+    expect(res.body.list.items).toHaveLength(MERGED + FRESH);
+    const byName = new Map<string, { quantity: number }>(
+      res.body.list.items.map((i: { itemName: string; quantity: number }) => [i.itemName, i]),
+    );
+    for (let i = 0; i < MERGED + FRESH; i += 1) {
+      expect(byName.get(nameOf(i))?.quantity).toBe(i < MERGED ? 3.75 : 2.25);
+    }
+
+    const after = await prisma.shoppingListItem.findMany({ where: { id: { in: before.map((b) => b.id) } } });
+    for (const row of after) {
+      const prev = before.find((b) => b.id === row.id);
+      expect(row.updatedAt.getTime()).toBeGreaterThan(prev!.updatedAt.getTime());
+    }
+  });
+
+  it('never touches another user list', async () => {
+    const row = await prisma.shoppingListItem.findUniqueOrThrow({ where: { id: otherItemId } });
+    expect(row.quantity.toNumber()).toBe(7);
+  });
+});

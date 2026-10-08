@@ -9,9 +9,12 @@ import type { GenerateFromMealPlanResult } from '../../types/shopping.types';
 import { MealPlanService } from '../mealplan/mealplan.service';
 import { MAX_ITEMS_PER_LIST, SHOPPING_ERROR_CODES } from './shopping.constants';
 import { mergeIntoItems } from './shopping.merge';
-import { ensureActiveListId, loadListDto } from './shopping.repository';
+import { bulkUpdateQuantities, ensureActiveListId, loadListDto } from './shopping.repository';
 
 const mealPlanService = new MealPlanService();
+
+/** Explicit budget: the merge is a handful of statements, but allow slow links. */
+const GENERATE_TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 20_000 } as const;
 
 const planNotFound = (): AppError =>
   new AppError('Meal plan not found', 404, true, {
@@ -66,12 +69,7 @@ export async function generateFromMealPlan(
       );
     }
 
-    for (const u of plan.updates) {
-      await tx.shoppingListItem.update({
-        where: { id: u.id },
-        data: { quantity: new Decimal(u.quantity) },
-      });
-    }
+    await bulkUpdateQuantities(tx, listId, plan.updates);
     if (plan.inserts.length > 0) {
       await tx.shoppingListItem.createMany({
         data: plan.inserts.map((i) => ({
@@ -92,5 +90,5 @@ export async function generateFromMealPlan(
       added: plan.inserts.length,
       merged: plan.updates.length,
     };
-  });
+  }, GENERATE_TRANSACTION_OPTIONS);
 }

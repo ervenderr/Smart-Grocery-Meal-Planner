@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { AppError } from '../../middleware/errorHandler';
 import type { ShoppingListDto } from '../../types/shopping.types';
 import { DEFAULT_LIST_NAME } from './shopping.constants';
@@ -56,4 +56,25 @@ export const loadListDto = async (
     orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
   });
   return toListDto(list, items);
+};
+
+/**
+ * Sets many item quantities in ONE statement (UPDATE ... FROM (VALUES ...)),
+ * scoped to the given list. Callers hold the list row lock. Values are bound
+ * parameters; nothing is interpolated into the SQL text.
+ */
+export const bulkUpdateQuantities = async (
+  tx: Prisma.TransactionClient,
+  listId: string,
+  updates: ReadonlyArray<{ readonly id: string; readonly quantity: number }>,
+): Promise<void> => {
+  if (updates.length === 0) return;
+  const values = Prisma.join(
+    updates.map((u) => Prisma.sql`(${u.id}::text, ${u.quantity.toFixed(2)}::numeric(10,2))`),
+  );
+  await tx.$executeRaw`
+    UPDATE shopping_list_items AS item
+    SET quantity = v.quantity, updated_at = now()
+    FROM (VALUES ${values}) AS v(id, quantity)
+    WHERE item.id = v.id AND item.shopping_list_id = ${listId}`;
 };
