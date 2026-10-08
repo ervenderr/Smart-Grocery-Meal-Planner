@@ -35,7 +35,7 @@ const offFound = (code: string, tags: string[] = ['en:dairies']): Response =>
       brands: 'Acme',
       quantity: '1 L',
       categories_tags: tags,
-      image_front_small_url: 'https://images.test/milk.jpg',
+      image_front_small_url: 'https://images.openfoodfacts.org/images/products/milk.jpg',
       nutriments: { 'energy-kcal_100g': 64, proteins_100g: 3.3, fat_100g: 3.6, carbohydrates_100g: 4.8 },
     },
   });
@@ -84,7 +84,7 @@ describe('GET /api/v1/food/barcode/:code', () => {
       name: 'Whole Milk',
       brand: 'Acme',
       quantity: '1 L',
-      imageUrl: 'https://images.test/milk.jpg',
+      imageUrl: 'https://images.openfoodfacts.org/images/products/milk.jpg',
       suggestedCategory: 'dairy',
       nutritionPer100g: { energyKcal: 64, protein: 3.3, fat: 3.6, carbs: 4.8 },
     });
@@ -303,5 +303,24 @@ describe('per-user food rate limit (WR-05)', () => {
     expect(blocked.status).toBe(429);
     expect(blocked.body.code).toBe('FOOD_RATE_LIMITED');
     expect((await call(other.token)).status).toBe(400);
+  });
+});
+
+describe('image URL safety (WR-09)', () => {
+  it.each([
+    ['javascript:alert(1)'],
+    ['data:image/png;base64,AAAA'],
+    ['http://images.openfoodfacts.org/a.jpg'],
+    ['https://evil.example/a.jpg'],
+    ['https://openfoodfacts.org.evil.example/a.jpg'],
+    ['https://user:pw@images.openfoodfacts.org/a.jpg'],
+  ])('drops %s', async (url) => {
+    const code = barcode();
+    fetchSpy.mockResolvedValueOnce(
+      json({ status: 1, product: { code, product_name: 'X', image_front_small_url: url } })
+    );
+    const res = await lookup(code);
+    expect(res.status).toBe(200);
+    expect(res.body.product.imageUrl).toBeNull();
   });
 });

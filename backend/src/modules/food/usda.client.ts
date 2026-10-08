@@ -13,6 +13,7 @@ const USDA_BASE = 'https://api.nal.usda.gov/fdc/v1/foods/search';
 const nutrientSchema = z.object({
   nutrientNumber: z.union([z.string(), z.number()]).optional(),
   nutrientName: z.string().max(200).optional(),
+  unitName: z.string().max(20).optional(),
   value: z.number().finite().optional(),
 });
 
@@ -39,9 +40,44 @@ function pick(nutrients: readonly Nutrient[], number: string, namePattern: RegEx
   return hit?.value ?? null;
 }
 
+const KJ_PER_KCAL = 4.184;
+// 208 = Energy (kcal), 957/958 = Atwater energy (kcal) used by Foundation foods.
+const KCAL_NUMBERS: ReadonlySet<string> = new Set(['208', '957', '958']);
+
+const roundKcal = (value: number): number => Math.round(value * 10) / 10;
+
+/** Energy in kcal; kJ entries are converted, unknown-unit name matches are ignored. */
+export function pickEnergyKcal(nutrients: readonly Nutrient[]): number | null {
+  const unit = (n: Nutrient): string => (n.unitName ?? '').toUpperCase();
+  const toKcal = (n: Nutrient): number | null => {
+    if (n.value === undefined) return null;
+    if (unit(n) === 'KJ') return roundKcal(n.value / KJ_PER_KCAL);
+    return n.value;
+  };
+
+  for (const number of ['208', '957', '958']) {
+    const byNumber = nutrients.find(
+      (n) => n.nutrientNumber !== undefined && String(n.nutrientNumber) === number && n.value !== undefined
+    );
+    if (byNumber) return toKcal(byNumber);
+  }
+  const byName = nutrients.filter(
+    (n) =>
+      n.nutrientName !== undefined &&
+      /^energy/i.test(n.nutrientName) &&
+      n.value !== undefined &&
+      !KCAL_NUMBERS.has(String(n.nutrientNumber ?? '')) &&
+      (unit(n) === 'KCAL' || unit(n) === 'KJ')
+  );
+  const kcal = byName.find((n) => unit(n) === 'KCAL');
+  if (kcal) return toKcal(kcal);
+  const kj = byName.find((n) => unit(n) === 'KJ');
+  return kj ? toKcal(kj) : null;
+}
+
 function mapNutrition(nutrients: readonly Nutrient[]): NutritionPer100g {
   return {
-    energyKcal: pick(nutrients, '208', /^energy$/i),
+    energyKcal: pickEnergyKcal(nutrients),
     protein: pick(nutrients, '203', /^protein$/i),
     fat: pick(nutrients, '204', /^total lipid/i),
     carbs: pick(nutrients, '205', /^carbohydrate/i),

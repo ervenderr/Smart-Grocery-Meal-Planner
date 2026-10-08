@@ -45,6 +45,21 @@ const bodySchema = z.object({
   product: productSchema.optional(),
 });
 
+const IMAGE_HOST = 'openfoodfacts.org';
+
+/** Only https images on openfoodfacts.org (or a subdomain) are passed to clients. */
+export function safeImageUrl(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    const allowed = host === IMAGE_HOST || host.endsWith(`.${IMAGE_HOST}`);
+    return url.protocol === 'https:' && allowed && !url.username && !url.password ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export type OffProduct = z.infer<typeof productSchema>;
 export type OffResult =
   | { readonly kind: 'found'; readonly product: OffProduct }

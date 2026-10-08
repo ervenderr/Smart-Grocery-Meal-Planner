@@ -141,3 +141,29 @@ describe('searchUsda', () => {
     await expect(searchUsda('apple', { apiKey: 'k' })).rejects.toMatchObject({ kind: 'unavailable' });
   });
 });
+
+describe('pickEnergyKcal (WR-10)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { pickEnergyKcal } = require('../src/modules/food/usda.client');
+
+  it('prefers the kcal entry over a kJ entry with the same name', () => {
+    expect(
+      pickEnergyKcal([
+        { nutrientNumber: '268', nutrientName: 'Energy', unitName: 'KJ', value: 218 },
+        { nutrientNumber: '957', nutrientName: 'Energy (Atwater General Factors)', unitName: 'KCAL', value: 52 },
+      ])
+    ).toBe(52);
+  });
+
+  it('converts a kJ-only energy entry to kcal', () => {
+    expect(pickEnergyKcal([{ nutrientNumber: '268', nutrientName: 'Energy', unitName: 'KJ', value: 418.4 }])).toBe(100);
+  });
+
+  it('ignores name matches with unknown unit and returns null', () => {
+    expect(pickEnergyKcal([{ nutrientName: 'Energy', value: 218 }])).toBeNull();
+  });
+
+  it('uses nutrient 208 directly', () => {
+    expect(pickEnergyKcal([{ nutrientNumber: 208, unitName: 'KCAL', value: 64 }])).toBe(64);
+  });
+});

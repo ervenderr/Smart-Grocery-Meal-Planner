@@ -11,7 +11,7 @@ import { AI_ERROR_CODES } from '../ai/ai.errors';
 import { OFF_ATTRIBUTION, USDA_ATTRIBUTION, type Attribution } from './food.attribution';
 import { FoodUpstreamError } from './food.errors';
 import type { FoodProduct, UsdaResult } from './food.types';
-import { fetchOffProduct, mapCategory, type OffProduct } from './off.client';
+import { fetchOffProduct, mapCategory, safeImageUrl, type OffProduct } from './off.client';
 import {
   createOutboundThrottle,
   OFF_THROTTLE_LIMIT,
@@ -113,7 +113,7 @@ function toProduct(barcode: string, p: OffProduct): FoodProduct {
     name: p.product_name?.trim() || 'Unknown product',
     brand: p.brands?.trim() || null,
     quantity: p.quantity?.trim() || null,
-    imageUrl: p.image_front_small_url ?? null,
+    imageUrl: safeImageUrl(p.image_front_small_url),
     suggestedCategory: mapCategory(p.categories_tags),
     nutritionPer100g: {
       energyKcal: n?.['energy-kcal_100g'] ?? null,
