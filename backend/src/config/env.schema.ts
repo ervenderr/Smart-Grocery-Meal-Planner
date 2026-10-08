@@ -27,6 +27,24 @@ const parseOriginList = (value: string): string[] =>
     .map(normalizeEntry)
     .filter((entry) => entry.length > 0);
 
+function parseOrigin(value: string): URL | undefined {
+  try {
+    const url = new URL(value);
+    const isWeb = url.protocol === "http:" || url.protocol === "https:";
+    return isWeb && url.origin === value ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const isLoopbackHost = (hostname: string): boolean =>
+  hostname === "localhost" ||
+  hostname.endsWith(".localhost") ||
+  hostname === "0.0.0.0" ||
+  hostname === "[::1]" ||
+  hostname === "[::]" ||
+  /^127\./.test(hostname);
+
 export const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -46,7 +64,7 @@ export const envSchema = z
     API_VERSION: z.string().min(1).default("v1"),
     LOG_LEVEL: z.string().min(1).default("info"),
     CORS_ORIGIN: z.string().default("http://localhost:3000").transform(parseOriginList),
-    FRONTEND_URL: z.url().optional(),
+    FRONTEND_URL: z.string().transform(normalizeEntry).optional(),
     VERCEL_PREVIEW_SCOPE: z
       .string()
       .regex(SLUG, "must match ^[a-z0-9-]+$")
@@ -60,6 +78,16 @@ export const envSchema = z
     ZAPIER_WEBHOOK_URL: z.url().optional(),
   })
   .superRefine((env, ctx) => {
+    const formatMessage = "must be a bare origin (scheme://host[:port], no path)";
+    env.CORS_ORIGIN.forEach((origin, index) => {
+      if (parseOrigin(origin) === undefined) {
+        ctx.addIssue({ code: "custom", path: ["CORS_ORIGIN", index], message: formatMessage });
+      }
+    });
+    if (env.FRONTEND_URL !== undefined && parseOrigin(env.FRONTEND_URL) === undefined) {
+      ctx.addIssue({ code: "custom", path: ["FRONTEND_URL"], message: formatMessage });
+    }
+
     if (env.NODE_ENV !== "production") return;
 
     if (env.PORT === undefined) {
@@ -69,15 +97,20 @@ export const envSchema = z
         message: "is required in production (provided by the platform)",
       });
     }
-    const unsafe = env.CORS_ORIGIN.some(
-      (origin) => origin === "*" || origin.includes("localhost")
-    );
-    if (unsafe) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["CORS_ORIGIN"],
-        message: "must not contain '*' or localhost in production",
-      });
+    const entries: ReadonlyArray<readonly [string, string]> = [
+      ...env.CORS_ORIGIN.map((origin) => ["CORS_ORIGIN", origin] as const),
+      ...(env.FRONTEND_URL ? [["FRONTEND_URL", env.FRONTEND_URL] as const] : []),
+    ];
+    for (const [key, origin] of entries) {
+      const url = parseOrigin(origin);
+      if (url === undefined) continue; // reported by the origin-format check
+      if (url.protocol !== "https:" || isLoopbackHost(url.hostname)) {
+        ctx.addIssue({
+          code: "custom",
+          path: [key],
+          message: "must be an https origin and not loopback/localhost in production",
+        });
+      }
     }
   });
 

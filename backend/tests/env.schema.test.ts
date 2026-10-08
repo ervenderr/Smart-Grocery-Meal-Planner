@@ -93,6 +93,32 @@ describe("parseEnv", () => {
     ).toThrow();
   });
 
+  it.each([
+    ["FRONTEND_URL", "http://localhost:3000"],
+    ["FRONTEND_URL", "http://kitcha-ai.vercel.app"],
+    ["FRONTEND_URL", "https://127.0.0.1:3000"],
+    ["FRONTEND_URL", "https://0.0.0.0"],
+    ["CORS_ORIGIN", "https://localhost"],
+    ["CORS_ORIGIN", "https://[::1]:3000"],
+    ["CORS_ORIGIN", "http://kitcha-ai.vercel.app"],
+    ["CORS_ORIGIN", "https://a.example,*"],
+  ])("rejects %s=%s in production", (key, value) => {
+    expect(() => parseEnv(prod({ [key]: value }))).toThrow(new RegExp(key));
+  });
+
+  it.each(["kitcha-ai.vercel.app", "https://a.example/app", "ftp://a.example", "https://a.example?x=1"])(
+    "rejects non-origin value %s",
+    (value) => {
+      expect(() => parseEnv(prod({ CORS_ORIGIN: value }))).toThrow(/bare origin/);
+      expect(() => parseEnv(prod({ FRONTEND_URL: value }))).toThrow(/FRONTEND_URL/);
+    }
+  );
+
+  it("accepts a valid https FRONTEND_URL in production", () => {
+    const env = parseEnv(prod({ FRONTEND_URL: "https://kitcha-ai.vercel.app/" }));
+    expect(env.CORS_ORIGIN).toEqual(["https://kitcha-ai.vercel.app"]);
+  });
+
   it("validates VERCEL_PREVIEW_SCOPE", () => {
     expect(() => parseEnv(base({ VERCEL_PREVIEW_SCOPE: "Bad Scope!" }))).toThrow();
     expect(
