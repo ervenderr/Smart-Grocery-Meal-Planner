@@ -1,362 +1,100 @@
 # Kitcha - Backend API
 
-Express.js + TypeScript backend for the Kitcha application.
+Express 4 + TypeScript + Prisma 5.22 + PostgreSQL. Serves the Kitcha PWA under `/api/v1`. See the [root README](../README.md) for the product overview, deployment overview and the full environment variable table.
 
-## 🚀 Quick Start
+## Setup
 
-### Prerequisites
-
-- Node.js (v18 or higher)
-- PostgreSQL (v15 or higher)
-- npm or pnpm
-
-### Installation
+Requirements: Node.js 22, npm, PostgreSQL 15+.
 
 ```bash
-# Install dependencies
+docker compose up -d postgres     # optional local Postgres (smart_user / smart_password on :5432)
 npm install
-
-# Copy environment variables
-cp .env.example .env
-# Edit .env with your database credentials
-
-# Generate Prisma client
-npm run prisma:generate
-
-# Run database migrations
-npm run prisma:migrate
-
-# Start development server
-npm run dev
+cp .env.example .env              # set DATABASE_URL and JWT_SECRET (openssl rand -hex 32)
+npx prisma migrate deploy         # apply migrations (`npm run prisma:migrate` when editing the schema)
+npm run prisma:seed               # optional demo data: demo@example.com / Demo1234!
+npm run dev                       # http://localhost:3001
 ```
 
-Server will start on http://localhost:3001
+`JWT_SECRET` needs 32+ characters and must not contain words like `secret`, `default` or `change-this`. The seed refuses to run in production or against a non-local `DATABASE_URL` (`ALLOW_SEED=true` overrides the host check). Leave `AI_API_KEY` empty to run without AI; `/health` stays green.
 
-### Available Scripts
+## Scripts
 
-```bash
-npm run dev          # Start development server with hot reload
-npm run build        # Build for production
-npm start            # Start production server
-npm test             # Run tests
-npm run test:watch   # Run tests in watch mode
-npm run prisma:studio # Open Prisma Studio (database GUI)
-```
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | nodemon + ts-node |
+| `npm run build` / `npm start` | Generate Prisma client, compile with tsc, run `dist/index.js` |
+| `npm test` / `npm run test:watch` | Jest with coverage / watch mode |
+| `npm run lint` / `npm run type-check` / `npm run format` | ESLint / tsc --noEmit / Prettier |
+| `npm run prisma:generate` / `prisma:migrate` / `prisma:deploy` | Client generation / dev migration / apply migrations |
+| `npm run prisma:seed` / `prisma:studio` | Seed demo data / database GUI |
 
-## 📁 Project Structure
+## Environment
+
+Validated at startup by `src/config/env.schema.ts` (the process exits with a readable error if invalid). The full table lives in the [root README](../README.md#environment-variables); `.env.example` is the template. Key groups:
+
+- Core: `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN`, `FRONTEND_URL`, `NODE_ENV`, `PORT` (injected by Railway in production).
+- AI (OpenAI-compatible, default Dahl Inference): `AI_API_KEY`, `AI_PROVIDER`, `AI_BASE_URL`, `AI_MODEL`, `AI_TIMEOUT_MS`, `AI_MAX_TOKENS`, `AI_JSON_MODE`, `AI_USER_DAILY_LIMIT` (20), `AI_GLOBAL_DAILY_LIMIT` (100).
+- Food data: `USDA_API_KEY` (optional), `OFF_CONTACT`.
+- Integrations: `ZAPIER_WEBHOOK_URL`, `SPOONACULAR_API_KEY` (both optional).
+
+## Structure
 
 ```
 backend/
 ├── src/
-│   ├── config/              # Configuration files
-│   │   ├── env.config.ts    # Environment variables
-│   │   └── logger.config.ts # Winston logger setup
-│   │
-│   ├── middleware/          # Express middleware
-│   │   └── errorHandler.ts  # Global error handling
-│   │
-│   ├── modules/             # Feature modules
-│   │   ├── auth/            # Authentication (JWT)
-│   │   ├── users/           # User management
-│   │   ├── pantry/          # Pantry inventory
-│   │   ├── recipes/         # Recipe management
-│   │   ├── meal-plans/      # Meal planning
-│   │   ├── shopping/        # Shopping lists
-│   │   ├── budget/          # Budget tracking
-│   │   ├── analytics/       # Dashboard analytics
-│   │   └── zapier/          # Zapier automation webhooks
-│   │
-│   ├── services/            # External services
-│   │   └── gemini.service.ts # Gemini API integration
-│   │
-│   ├── utils/               # Helper functions
-│   ├── types/               # TypeScript types
-│   ├── app.ts               # Express app setup
-│   └── index.ts             # Entry point
-│
-├── prisma/
-│   ├── schema.prisma        # Database schema
-│   ├── migrations/          # Database migrations
-│   └── seed.ts              # Database seeding
-│
-├── tests/                   # Unit & integration tests
-├── logs/                    # Log files (production)
-├── .env.example             # Environment template
-├── .gitignore
-├── package.json
-├── tsconfig.json
-└── README.md
+│   ├── index.ts, app.ts     Bootstrap, middleware order, route mounting
+│   ├── config/              env schema, CORS, database, logger
+│   ├── constants/           currencies allow-list
+│   ├── middleware/          auth, error handler, rate limiters, HTTPS redirect
+│   ├── modules/             one folder per feature: routes, controller, service, validation
+│   │   ├── auth, users      signup/login/logout/me, profile, preferences, onboarding
+│   │   ├── pantry, recipe, mealplan, shopping, analytics, alert, notification, marketprice
+│   │   ├── ai               provider client, prompts, dietary rules, quota, cache
+│   │   ├── food             Open Food Facts barcode + USDA nutrition
+│   │   └── zapier           webhooks and scheduler
+│   ├── types/, utils/
+├── prisma/                  schema.prisma, migrations/, seed.ts
+├── tests/                   Jest + Supertest
+├── Dockerfile, entrypoint.sh, docker-compose.yml
 ```
 
-## 🔌 API Endpoints
+## API
 
-### Base URL: `http://localhost:3001/api/v1`
+Base `http://localhost:3001/api/v1`; everything except `/auth/signup` and `/auth/login` needs `Authorization: Bearer <jwt>`.
 
-### Health Check
+| Prefix | Notes |
+| --- | --- |
+| `/auth` | `/signup`, `/login`, `/logout`, `/me` |
+| `/users` | profile, `/preferences` (currency, budget, diet), `/onboarding/complete`, `/password`, `/account` |
+| `/pantry` | CRUD, `/stats`, `/expiring-soon` |
+| `/recipes`, `/mealplans` | CRUD plus stats; `/mealplans/from-ai` |
+| `/shopping` | `/list`, `/items`, `/generate`, `/finish`, `/history` |
+| `/analytics`, `/alerts`, `/notifications`, `/prices` | budget and spending insights, in-app alerts |
+| `/ai` | `/status`, `/suggest-recipes`, `/suggest-substitutions`, `/generate-meal-plan` |
+| `/food` | `/barcode/:code`, `/nutrition` |
+| `/zapier` | `/events`, `/webhooks`, `/test/:eventType` |
 
-```
-GET /health
-```
+`GET /health` (outside `/api`) is database-free and used by Railway.
 
-### Authentication (Phase 1)
+## Zapier events
 
-```
-POST /api/v1/auth/signup      # Register new user
-POST /api/v1/auth/login       # Login user
-POST /api/v1/auth/logout      # Logout user
-```
+`meal_plan_created`, `item_expiring`, `item_expired`, `stock_low`, `budget_warning`, `budget_exceeded`, `shopping_list_created`, `weekly_summary`. Register a webhook via `POST /zapier/webhooks`, or set `ZAPIER_WEBHOOK_URL`, then verify with `POST /zapier/test/meal_plan_created`.
 
-### Users (Phase 1)
-
-```
-GET    /api/v1/users/profile       # Get user profile
-PATCH  /api/v1/users/profile       # Update user profile
-PATCH  /api/v1/users/preferences   # Update preferences
-```
-
-### Pantry (Phase 2)
-
-```
-GET    /api/v1/pantry              # List all pantry items
-POST   /api/v1/pantry              # Add item to pantry
-GET    /api/v1/pantry/:id          # Get single item
-PATCH  /api/v1/pantry/:id          # Update item
-DELETE /api/v1/pantry/:id          # Delete item
-GET    /api/v1/pantry/expiring-soon # Items expiring in 7 days
-```
-
-_More endpoints will be added in subsequent phases..._
-
-### Zapier Integration
-
-```
-GET    /api/v1/zapier/events           # List available events
-POST   /api/v1/zapier/webhooks         # Register a webhook
-GET    /api/v1/zapier/webhooks         # List user's webhooks
-DELETE /api/v1/zapier/webhooks/:id     # Delete a webhook
-POST   /api/v1/zapier/test/:eventType  # Test a webhook event
-```
-
-## 🔗 Zapier Automation
-
-Kitcha integrates with Zapier for workflow automation. Events are dispatched automatically when certain actions occur.
-
-### Supported Events
-
-| Event                   | Trigger                       | Payload                       |
-| ----------------------- | ----------------------------- | ----------------------------- |
-| `meal_plan_created`     | New meal plan created         | Plan name, dates, meals, cost |
-| `item_expiring`         | Pantry item expiring soon     | Item name, days until expiry  |
-| `item_expired`          | Pantry item has expired       | Item name, message            |
-| `stock_low`             | Item quantity below threshold | Item name, current quantity   |
-| `budget_warning`        | 80%+ of weekly budget used    | Budget, spent, percentage     |
-| `budget_exceeded`       | Weekly budget exceeded        | Budget, spent, percentage     |
-| `shopping_list_created` | New shopping list generated   | List name, item count         |
-| `weekly_summary`        | Weekly meal planning summary  | Stats for the week            |
-
-### Setup
-
-1. Add your Zapier webhook URL to `.env`:
-
-   ```env
-   ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/xxxxx/xxxxx
-   ```
-
-2. Create a Zap in Zapier:
-   - Trigger: **Webhooks by Zapier** → **Catch Hook**
-   - Copy the webhook URL to your `.env`
-
-3. Configure actions in Zapier (examples):
-   - Send email when budget exceeded
-   - Add to Google Calendar when meal plan created
-   - Send Slack notification for expiring items
-   - Create Todoist task for low stock items
-
-### Testing
-
-Use the test endpoint to verify your webhook:
+## Testing
 
 ```bash
-curl -X POST http://localhost:3001/api/v1/zapier/test/meal_plan_created \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json"
+npm test                    # Jest + coverage
+npm test -- --ci            # as in CI
 ```
 
-## 🗄️ Database
+CI runs lint, type-check and tests against a Postgres 16 service, then builds the Docker image.
 
-### Schema Overview
+## Deployment (Railway)
 
-- **users** - User accounts
-- **user_preferences** - User settings (budget, dietary restrictions)
-- **pantry_items** - Inventory tracking
-- **recipes** - Recipe library
-- **meal_plans** - Weekly meal plans
-- **meal_plan_items** - Individual meals in plans
-- **shopping_lists** - Generated shopping lists
-- **shopping_list_items** - Items to buy
-- **shopping_history** - Purchase records
-- **market_prices** - Gemini API price history
-- **alerts** - Budget/expiry alerts
-
-### Prisma Commands
-
-```bash
-npm run prisma:generate  # Generate Prisma Client
-npm run prisma:migrate   # Run migrations
-npm run prisma:studio    # Open database GUI
-npx prisma migrate reset # Reset database (dev only)
-```
-
-## 🔒 Authentication
-
-Uses JWT (JSON Web Tokens):
-
-1. User signs up/logs in
-2. Server generates JWT token
-3. Client stores token (localStorage/cookies)
-4. Client includes token in Authorization header
-5. Server validates token on protected routes
-
-Token format: `Authorization: Bearer <token>`
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test -- --coverage
-```
-
-Tests use Jest + Supertest for API testing.
-
-## 📝 Environment Variables
-
-Required variables (see `.env.example`):
-
-```env
-NODE_ENV=development
-PORT=3001
-DATABASE_URL=postgresql://...
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=7d
-CORS_ORIGIN=http://localhost:3000
-ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/xxxxx/xxxxx  # Optional
-```
-
-## 🐛 Debugging
-
-### Logs
-
-- Console logs in development
-- File logs in production (`logs/` folder)
-- Winston handles all logging
-
-### Database Issues
-
-```bash
-# View current database
-npx prisma studio
-
-# Check migrations status
-npx prisma migrate status
-
-# Reset database (caution: deletes data)
-npx prisma migrate reset
-```
-
-### Common Errors
-
-**"DATABASE_URL is not defined"**
-
-- Copy `.env.example` to `.env`
-- Add your PostgreSQL connection string
-
-**"Port 3001 already in use"**
-
-- Change `PORT` in `.env`
-- Or kill process: `lsof -ti:3001 | xargs kill`
-
-**"Cannot find module @/config/..."**
-
-- Run `npm install`
-- Ensure `tsconfig.json` paths are correct
-
-## 📦 Dependencies
-
-### Core
-
-- **express** - Web framework
-- **typescript** - Type safety
-- **prisma** - Database ORM
-- **jsonwebtoken** - JWT authentication
-- **bcryptjs** - Password hashing
-- **node-cron** - Scheduled tasks (Zapier automation)
-
-### Middleware
-
-- **cors** - Cross-origin requests
-- **helmet** - Security headers
-- **morgan** - HTTP logging
-- **express-validator** - Input validation
-
-### Logging & Errors
-
-- **winston** - Structured logging
-- **dotenv** - Environment variables
-
-### Development
-
-- **nodemon** - Auto-restart on changes
-- **ts-node** - Run TypeScript directly
-- **jest** - Testing framework
-- **supertest** - API testing
-
-## 🚀 Deployment
-
-### Build for Production
-
-```bash
-npm run build
-NODE_ENV=production npm start
-```
-
-### Deploy to Railway
-
-- Project `kitcha` with two services: `kitcha-api` (this Dockerfile) and `Postgres`.
-- Deploys are manual (no GitHub auto-deploy). From `backend/` run:
-  `railway up --service kitcha-api --detach`
-- Migrations run automatically in `entrypoint.sh` (`prisma migrate deploy` with retry), then node starts as PID 1.
-- Healthcheck path: `/health`.
-- Never set `PORT`; Railway injects it.
-- `DATABASE_URL` is the reference variable `${{Postgres.DATABASE_URL}}`.
-- Generate `JWT_SECRET` without echoing it:
-  `openssl rand -hex 32 | railway variable set JWT_SECRET --stdin`
-- Never run the seed in production (it refuses when `NODE_ENV=production`).
-- Keep replicas at 1: the Zapier cron runs in-process.
-
-## 📚 Next Steps
-
-- [x] Phase 1.1: Express setup ✅
-- [ ] Phase 1.2: Prisma schema & migrations
-- [ ] Phase 1.3: Authentication module
-- [ ] Phase 1.4: User management
-- [ ] Phase 1.5: Tests
-
-See `IMPLEMENTATION_ROADMAP.md` for full timeline.
-
-## 🤝 Contributing
-
-1. Create feature branch
-2. Write tests for new features
-3. Ensure tests pass: `npm test`
-4. Follow TypeScript strict mode
-5. Document all functions with JSDoc
-
-## 📄 License
-
-MIT
+- Project with two services: the API (this `Dockerfile`, Node 22 alpine, non-root) and Postgres.
+- Manual deploys from this directory: `railway up --service kitcha-api --detach`.
+- `entrypoint.sh` runs `prisma migrate deploy` with retries, then starts node as PID 1, so migrations run on every deploy.
+- Healthcheck path `/health`. Never set `PORT`; `DATABASE_URL` is `${{Postgres.DATABASE_URL}}`.
+- Generate the secret without echoing it: `openssl rand -hex 32 | railway variable set JWT_SECRET --stdin`.
+- Keep one replica (the Zapier cron runs in-process). Never seed production.
+- Post-deploy check from the repo root: `API=https://<host> scripts/smoke-prod.sh`.
