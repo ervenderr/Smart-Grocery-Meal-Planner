@@ -16,7 +16,7 @@ const buttonVariants = cva(
         success: 'bg-green-500 text-white hover:bg-green-600 active:bg-green-700',
       },
       size: {
-        sm: 'h-9 px-3 text-xs',
+        sm: 'h-11 lg:h-9 px-3 text-sm',
         md: 'h-11 px-5 touch-target',
         lg: 'h-12 px-6 text-base touch-target',
         icon: 'h-11 w-11 touch-target',

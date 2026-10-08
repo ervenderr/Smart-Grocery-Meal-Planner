@@ -10,11 +10,12 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, icon, id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const errorId = error && inputId ? `${inputId}-error` : undefined;
 
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="mb-2 block text-sm font-medium text-gray-900">
+          <label htmlFor={inputId} className="mb-2 block text-sm font-semibold text-gray-900">
             {label}
             {props.required && <span className="ml-1 text-red-500">*</span>}
           </label>
@@ -29,7 +30,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={type}
             id={inputId}
             className={cn(
-              'flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 transition-colors touch-target',
+              'flex h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-base lg:text-sm text-gray-900 transition-colors touch-target',
               'placeholder:text-gray-500',
               'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -38,10 +39,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               className
             )}
             ref={ref}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={errorId}
             {...props}
           />
         </div>
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {error && (
+          <p id={errorId} role="alert" className="mt-1 text-sm text-red-500">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
