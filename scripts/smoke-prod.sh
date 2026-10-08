@@ -6,6 +6,7 @@
 #   --api-only  skip the frontend bundle check (8)
 #   --ai-live   make real (cached-twice) provider calls in check (9); needs AI_API_KEY on the server
 #   Check (11) covers the currency allow-list and onboarding completion contract.
+#   Check (12) covers the persistent shopping list (add, check with price, finish, history).
 #   FE=https://kitcha-ai.vercel.app (optional, default shown)
 #
 # Requires curl and jq. Exits non-zero on the first failing check.
@@ -233,6 +234,66 @@ code="$(req POST "$API/api/v1/users/onboarding/complete" -H "$AUTH" -H "$JSON_H"
 [ "$code" = "200" ] || fail "11d onboarding second call: expected 200, got $code"
 [ "$(jq -r '.onboardingCompletedAt // empty' "$BODY_FILE")" = "$ONB_FIRST" ] || fail "11d onboarding is not idempotent"
 pass "11d onboarding/complete is idempotent"
+
+# (12) persistent shopping list contract
+SHOP="$API/api/v1/shopping"
+code="$(req GET "$SHOP/list" -H "$AUTH")" || fail "12a shopping list: request failed"
+[ "$code" = "200" ] || fail "12a shopping list: expected 200, got $code"
+LIST_ID="$(jq -r '.id // empty' "$BODY_FILE")"
+[ -n "$LIST_ID" ] || fail "12a shopping list: id missing"
+[ "$(jq -r '.items | length' "$BODY_FILE")" = "0" ] || fail "12a shopping list: expected no items"
+pass "12a active shopping list created lazily and empty"
+
+code="$(req POST "$SHOP/items" -H "$AUTH" -H "$JSON_H" -d '{"itemName":"Smoke milk","quantity":2,"unit":"liters"}')" || fail "12b add item: request failed"
+[ "$code" = "201" ] || fail "12b add item: expected 201, got $code"
+[ "$(jq -r '.category' "$BODY_FILE")" = "dairy" ] || fail "12b add item: category not inferred as dairy"
+[ "$(jq -r '.quantity' "$BODY_FILE")" = "2" ] || fail "12b add item: quantity not 2"
+ITEM_ID="$(jq -r '.id // empty' "$BODY_FILE")"
+[ -n "$ITEM_ID" ] || fail "12b add item: id missing"
+pass "12b item added with inferred category dairy"
+
+code="$(req PATCH "$SHOP/items/$ITEM_ID" -H "$AUTH" -H "$JSON_H" -d '{"isChecked":true,"actualCostCents":150}')" || fail "12c check item: request failed"
+[ "$code" = "200" ] || fail "12c check item: expected 200, got $code"
+[ "$(jq -r '.isChecked' "$BODY_FILE")" = "true" ] || fail "12c check item: isChecked not true"
+pass "12c item checked with actual price"
+
+code="$(req GET "$SHOP/list" -H "$AUTH")" || fail "12d list persistence: request failed"
+[ "$code" = "200" ] || fail "12d list persistence: expected 200, got $code"
+[ "$(jq -r '.id' "$BODY_FILE")" = "$LIST_ID" ] || fail "12d list persistence: list id changed"
+jq -e --arg id "$ITEM_ID" '.items[] | select(.id == $id) | .isChecked == true and .actualCostCents == 150' "$BODY_FILE" >/dev/null || fail "12d list persistence: check/price not persisted"
+pass "12d check and price persist on a fresh GET"
+
+code="$(req POST "$SHOP/items" -H "$AUTH" -H "$JSON_H" -d '{"itemName":"Smoke bad","quantity":1,"unit":"<script>"}')" || fail "12e invalid unit: request failed"
+[ "$code" = "400" ] || fail "12e invalid unit: expected 400, got $code"
+[ "$(jq -r '.code // empty' "$BODY_FILE")" = "VALIDATION_ERROR" ] || fail "12e invalid unit: code is not VALIDATION_ERROR"
+pass "12e invalid unit rejected with 400 VALIDATION_ERROR"
+
+code="$(req GET "$SHOP/list")" || fail "12f unauthenticated: request failed"
+[ "$code" = "401" ] || fail "12f unauthenticated list: expected 401, got $code"
+pass "12f shopping list requires a token (401)"
+
+RECEIPT_DATE="$(date -u +%F)"
+code="$(req POST "$SHOP/finish" -H "$AUTH" -H "$JSON_H" -d "{\"carryOver\":\"discard\",\"receiptDate\":\"$RECEIPT_DATE\"}")" || fail "12g finish: request failed"
+[ "$code" = "200" ] || fail "12g finish: expected 200, got $code"
+[ "$(jq -r '.history.receiptDate' "$BODY_FILE")" = "$RECEIPT_DATE" ] || fail "12g finish: receiptDate mismatch"
+[ "$(jq -r '.history.totalCents' "$BODY_FILE")" = "150" ] || fail "12g finish: totalCents not 150"
+[ "$(jq -r '.list.id' "$BODY_FILE")" != "$LIST_ID" ] || fail "12g finish: list id did not change"
+[ "$(jq -r '.list.items | length' "$BODY_FILE")" = "0" ] || fail "12g finish: new list not empty"
+pass "12g finish trip writes history (150 cents) and starts a fresh list"
+
+code="$(req GET "$SHOP/history" -H "$AUTH")" || fail "12h history: request failed"
+[ "$code" = "200" ] || fail "12h history: expected 200, got $code"
+HIST_TOTAL="$(jq -r '.pagination.total' "$BODY_FILE")"
+[ "$HIST_TOTAL" -ge 1 ] || fail "12h history: pagination.total < 1"
+[ "$(jq -r '.items[0].totalCents' "$BODY_FILE")" = "150" ] || fail "12h history: first entry totalCents not 150"
+pass "12h history lists the finished trip"
+
+code="$(req POST "$SHOP/finish" -H "$AUTH" -H "$JSON_H" -d '{}')" || fail "12i empty finish: request failed"
+[ "$code" = "400" ] || fail "12i empty finish: expected 400, got $code"
+[ "$(jq -r '.code // empty' "$BODY_FILE")" = "SHOPPING_LIST_EMPTY" ] || fail "12i empty finish: code is not SHOPPING_LIST_EMPTY"
+code="$(req GET "$SHOP/history" -H "$AUTH")" || fail "12i history recheck: request failed"
+[ "$(jq -r '.pagination.total' "$BODY_FILE")" = "$HIST_TOTAL" ] || fail "12i history total changed after rejected finish"
+pass "12i finishing an empty list is rejected and history is unchanged"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
