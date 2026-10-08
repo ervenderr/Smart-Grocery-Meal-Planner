@@ -6,7 +6,8 @@
  * LIMITS:
  * - General API: 100 requests per 15 minutes per IP
  * - Auth endpoints: 5 attempts per 15 minutes per IP
- * - AI endpoints: 10 requests per hour per user (expensive operations)
+ * - AI endpoints: 10 requests per minute per user (burst limit; the daily cap
+ *   is enforced by the DB quota, not here)
  *
  * WHY RATE LIMITING?
  * - Prevents brute force password attacks
@@ -15,7 +16,7 @@
  * - Reduces server costs from automated attacks
  */
 
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response } from 'express';
 
 /**
@@ -69,30 +70,29 @@ export const authLimiter = rateLimit({
   },
 });
 
+const AI_RATE_LIMIT_MESSAGE = 'Too many AI requests. Please wait a minute and try again.';
+
 /**
- * AI endpoint rate limiter
- * Prevents abuse of expensive AI operations
+ * AI endpoint burst limiter
+ * 10 requests per minute per authenticated user. Keyed by user id (set by
+ * authenticate from the JWT); falls back to an IPv6-safe IP key.
  */
-export const aiLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 AI requests per hour
-  message: {
-    status: 'error',
-    statusCode: 429,
-    message: 'AI request limit reached. Please try again in an hour.',
-  },
+export const aiBurstLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  // Use user ID for rate limiting instead of IP (more accurate for logged-in users)
   keyGenerator: (req: Request) => {
-    // Use user ID if authenticated, otherwise fall back to IP
-    return (req as any).user?.id || req.ip || 'unknown';
+    const userId = (req as Request & { user?: { id?: string } }).user?.id;
+    return userId ?? ipKeyGenerator(req.ip ?? '');
   },
   handler: (_req: Request, res: Response) => {
     res.status(429).json({
       status: 'error',
       statusCode: 429,
-      message: 'AI request limit reached. Please try again in an hour.',
+      code: 'AI_RATE_LIMITED',
+      message: AI_RATE_LIMIT_MESSAGE,
+      error: AI_RATE_LIMIT_MESSAGE,
     });
   },
 });

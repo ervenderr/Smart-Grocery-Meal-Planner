@@ -8,7 +8,7 @@ import { Router } from 'express';
 import { AIController } from './ai.controller';
 import { authenticate } from '../../middleware/auth.middleware';
 import { asyncHandler } from '../../middleware/errorHandler';
-import { aiLimiter } from '../../middleware/rateLimiter';
+import { aiBurstLimiter } from '../../middleware/rateLimiter';
 import {
   validateAIRecipeSuggestion,
   validateAISubstitution,
@@ -22,8 +22,8 @@ const aiController = new AIController();
 // All AI routes require authentication
 router.use(authenticate);
 
-// Apply AI-specific rate limiting (10 requests per hour per user)
-router.use(aiLimiter);
+// Apply AI-specific rate limiting (10 requests per minute per user)
+router.use(aiBurstLimiter);
 
 /**
  * GET /api/v1/ai/status
