@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { shoppingApi } from '@/lib/api/shopping';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { queryKeys } from '@/lib/react-query';
+import { SHOPPING_MUTATION_SCOPE } from '@/lib/hooks/use-shopping-list';
 import { localIsoDate } from '@/lib/shopping/trip';
 import type { CarryOverMode } from '@/types/shopping.types';
 
@@ -13,9 +14,13 @@ export const HISTORY_PAGE_SIZE = 10;
 export function useFinishShopping() {
   const queryClient = useQueryClient();
   return useMutation({
+    // Same scope as the item writes: Finish is sent only after every earlier
+    // check-off/price edit has reached the server, so the saved total matches the sheet.
+    scope: SHOPPING_MUTATION_SCOPE,
     mutationFn: (carryOver: CarryOverMode) =>
       shoppingApi.finish({ carryOver, receiptDate: localIsoDate(new Date()) }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.shopping.active() });
       queryClient.setQueryData(queryKeys.shopping.active(), result.list);
       void queryClient.invalidateQueries({ queryKey: [...queryKeys.shopping.all, 'history'] });
     },
