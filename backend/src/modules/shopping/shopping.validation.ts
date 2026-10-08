@@ -52,8 +52,16 @@ export const validate = (req: Request, _res: Response, next: NextFunction): void
   next();
 };
 
+/** True for strings, numbers, booleans and null. Rejects arrays and objects. */
+const isScalar = (value: unknown): boolean => value === null || typeof value !== 'object';
+const SCALAR_MESSAGE = 'must be a single value, not a list or object';
+
+/** Wraps a chain so non-scalar bodies (arrays/objects) are rejected up front. */
+const scalarOnly = (chain: ValidationChain): ValidationChain =>
+  chain.custom(isScalar).withMessage(SCALAR_MESSAGE).bail();
+
 const itemFieldChains = (required: boolean): ValidationChain[] => {
-  const name = required ? body('itemName') : body('itemName').optional();
+  const name = scalarOnly(required ? body('itemName') : body('itemName').optional());
   return [
     name
       .customSanitizer(sanitizeText)
@@ -64,30 +72,25 @@ const itemFieldChains = (required: boolean): ValidationChain[] => {
       .withMessage('Item name is required')
       .isLength({ max: MAX_ITEM_NAME_LENGTH })
       .withMessage(`Item name must be at most ${MAX_ITEM_NAME_LENGTH} characters`),
-    body('quantity')
-      .optional()
+    scalarOnly(body('quantity').optional())
       .isFloat({ min: MIN_QUANTITY, max: MAX_QUANTITY })
       .withMessage(`Quantity must be between ${MIN_QUANTITY} and ${MAX_QUANTITY}`)
       .toFloat(),
-    body('unit')
-      .optional()
+    scalarOnly(body('unit').optional())
       .custom((v) => typeof v === 'string' && normalizeUnit(v) !== null)
       .withMessage(UNIT_MESSAGE)
       .customSanitizer((v: string) => normalizeUnit(v) ?? v),
-    body('category')
-      .optional({ values: 'falsy' })
+    scalarOnly(body('category').optional({ values: 'falsy' }))
       .isIn(Object.values(PantryCategory))
       .withMessage(`Category must be one of: ${Object.values(PantryCategory).join(', ')}`),
-    body('isChecked').optional().isBoolean({ strict: true }).withMessage('isChecked must be a boolean'),
+    scalarOnly(body('isChecked').optional()).isBoolean({ strict: true }).withMessage('isChecked must be a boolean'),
     ...(['costEstimateCents', 'actualCostCents'] as const).map((field) =>
-      body(field)
-        .optional({ nullable: true })
+      scalarOnly(body(field).optional({ nullable: true }))
         .isInt({ min: 0, max: MAX_ITEM_CENTS })
         .withMessage(`${field} must be a whole number between 0 and ${MAX_ITEM_CENTS}`)
         .toInt(),
     ),
-    body('notes')
-      .optional({ nullable: true })
+    scalarOnly(body('notes').optional({ nullable: true }))
       .customSanitizer(sanitizeText)
       .isString()
       .withMessage('Notes must be text')

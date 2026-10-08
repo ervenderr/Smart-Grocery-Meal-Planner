@@ -38,7 +38,14 @@ const mapNotFound = (error: unknown): unknown =>
     ? notFound()
     : error;
 
-const toQuantity = (q: number): Decimal => new Decimal(Math.round(q * 100) / 100);
+const toQuantity = (q: number): Decimal => {
+  if (typeof q !== 'number' || !Number.isFinite(q)) {
+    throw new AppError('Quantity must be a finite number', 400, true, {
+      code: SHOPPING_ERROR_CODES.VALIDATION_ERROR,
+    });
+  }
+  return new Decimal(Math.round(q * 100) / 100);
+};
 
 /** Explicit whitelist of the 8 updatable fields (mass-assignment safe). */
 const buildItemData = (
