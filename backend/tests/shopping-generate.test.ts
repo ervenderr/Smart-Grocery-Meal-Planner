@@ -44,11 +44,14 @@ const createRecipe = async (
       prepTimeMinutes: 5,
       cookTimeMinutes: 5,
       servings: 2,
-      ingredients,
+      ingredients: [{ ingredientName: 'Seed', quantity: 1, unit: 'grams' }],
       instructions: ['Cook'],
-    })
-    .expect(201);
-  return res.body.id as string;
+    });
+  if (res.status !== 201) throw new Error(JSON.stringify(res.body));
+  const id = res.body.id as string;
+  // The recipe API restricts units; AI/legacy recipes can hold free-text ones.
+  await prisma.recipe.update({ where: { id }, data: { ingredientsList: [...ingredients] } });
+  return id;
 };
 
 const createPlan = async (t: TestUser, recipeIds: readonly string[]): Promise<string> => {
@@ -190,6 +193,8 @@ describe('POST /api/v1/shopping/generate', () => {
       data: Array.from({ length: 299 }, (_, i) => ({
         shoppingListId: list.id,
         itemName: `filler ${i}`,
+        quantity: 1,
+        unit: 'pieces',
       })),
     });
     const res = await generate(c, { mealPlanId: planBig }).expect(400);

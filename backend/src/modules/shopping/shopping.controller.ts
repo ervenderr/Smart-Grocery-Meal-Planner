@@ -8,6 +8,7 @@ import type {
   CreateShoppingItemInput,
   UpdateShoppingItemInput,
 } from '../../types/shopping.types';
+import { generateFromMealPlan } from './shopping-generate.service';
 import { ShoppingService } from './shopping.service';
 
 const shoppingService = new ShoppingService();
@@ -59,5 +60,11 @@ export class ShoppingController {
   async deleteItem(req: Request, res: Response): Promise<void> {
     const item = await shoppingService.deleteItem(userIdOf(req), req.params.itemId as string);
     res.status(200).json(item);
+  }
+
+  async generate(req: Request, res: Response): Promise<void> {
+    const { mealPlanId } = matchedData(req, { locations: ['body'] }) as { mealPlanId: string };
+    const result = await generateFromMealPlan(userIdOf(req), mealPlanId);
+    res.status(200).json(result);
   }
 }

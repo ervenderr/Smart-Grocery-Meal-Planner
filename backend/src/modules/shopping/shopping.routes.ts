@@ -12,6 +12,7 @@ import { ShoppingController } from './shopping.controller';
 import {
   validate,
   validateCreateItem,
+  validateGenerate,
   validateItemId,
   validateUpdateItem,
 } from './shopping.validation';
@@ -64,6 +65,18 @@ router.delete(
   validateItemId,
   validate,
   asyncHandler(controller.deleteItem.bind(controller)),
+);
+
+/**
+ * @route   POST /api/v1/shopping/generate
+ * @desc    Merge a meal plan's ingredients into the active list
+ * @access  Private
+ */
+router.post(
+  '/generate',
+  validateGenerate,
+  validate,
+  asyncHandler(controller.generate.bind(controller)),
 );
 
 export default router;

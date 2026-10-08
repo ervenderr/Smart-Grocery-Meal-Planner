@@ -111,3 +111,7 @@ export const validateUpdateItem: ValidationChain[] = [
 export const validateItemId: ValidationChain[] = [
   param('itemId').isUUID().withMessage('Item id must be a valid UUID'),
 ];
+
+export const validateGenerate: ValidationChain[] = [
+  body('mealPlanId').isUUID().withMessage('mealPlanId must be a valid UUID'),
+];
