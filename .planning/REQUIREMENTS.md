@@ -29,12 +29,12 @@
 
 ### Mobile Shell (MOB)
 
-- [ ] **MOB-01**: On phones, navigation is a bottom bar with a "More" sheet; the sidebar appears only at `lg` and up
-- [ ] **MOB-02**: Every screen is usable at 375px width with no horizontal scroll, 44px minimum touch targets, and safe-area padding
-- [ ] **MOB-03**: Layouts use dynamic viewport height (`dvh`) so mobile browser chrome doesn't clip content
-- [ ] **MOB-04**: App has a web manifest and icons so it can be added to the home screen on Android and iOS, with a hint explaining how on iOS
-- [ ] **MOB-05**: New users see a short onboarding (budget, dietary needs, first pantry items) and every list screen has a useful empty state
-- [ ] **MOB-06**: Currency is configurable per user instead of hard-coded
+- [x] **MOB-01**: On phones, navigation is a bottom bar with a "More" sheet; the sidebar appears only at `lg` and up
+- [x] **MOB-02**: Every screen is usable at 375px width with no horizontal scroll, 44px minimum touch targets, and safe-area padding
+- [x] **MOB-03**: Layouts use dynamic viewport height (`dvh`) so mobile browser chrome doesn't clip content
+- [x] **MOB-04**: App has a web manifest and icons so it can be added to the home screen on Android and iOS, with a hint explaining how on iOS
+- [x] **MOB-05**: New users see a short onboarding (budget, dietary needs, first pantry items) and every list screen has a useful empty state
+- [x] **MOB-06**: Currency is configurable per user instead of hard-coded
 
 ### Shopping List (SHOP)
 
@@ -91,7 +91,7 @@
 |-------------|-------|--------|
 | DEP-01..09 | Phase 1 | Complete |
 | AI-01..07 | Phase 2 | Complete (browser UAT deferred) |
-| MOB-01..06 | Phase 3 | Pending |
+| MOB-01..06 | Phase 3 | Complete (real-phone walkthrough deferred) |
 | SHOP-01..05 | Phase 4 | Pending |
 | INT-01..05 | Phase 5 | Pending |
 | CAP-01..05 | Phase 6 | Pending |

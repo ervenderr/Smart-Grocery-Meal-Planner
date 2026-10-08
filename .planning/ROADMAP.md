@@ -12,7 +12,7 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
 
 - [x] **Phase 1: Secure Foundation & Railway Deploy** - Patched Next.js, live Railway API + Postgres, deployed frontend working end to end, CI (completed 2026-10-08)
 - [x] **Phase 2: Reliable AI Suggestions** - Validated, cached, quota-guarded AI through one env-configured OpenAI-compatible provider (Dahl default) with graceful degradation, plus food data lookups (completed 2026-10-08)
-- [ ] **Phase 3: Mobile-First Shell** - Bottom nav, 375px-ready screens, home-screen install, onboarding, empty states, currency
+- [x] **Phase 3: Mobile-First Shell** - Bottom nav, 375px-ready screens, home-screen install, onboarding, empty states, currency (completed 2026-10-08)
 - [ ] **Phase 4: Persistent Shopping List** - Backend-stored lists with manual items, check-off, grouping, shopping mode, spend tracking
 - [ ] **Phase 5: Pantry-Aware Intelligence** - Ingredient parsing, merged and pantry-subtracted lists, staples, "Cook this first"
 - [ ] **Phase 6: Capture Loops** - Barcode scan, bought-it and cooked-it pantry updates, quick pantry edits
@@ -79,16 +79,16 @@ Plans:
 - [x] 03-01-PLAN.md — Vitest gate + CI step, isTextEntry, Tailwind 4 @theme tokens, safe-area/16px/reduced-motion CSS, viewport export, dvh in shared components
 - [x] 03-02-PLAN.md — Backend: currency allow-list (isIn), onboardingCompletedAt migration + backfill, idempotent POST /users/onboarding/complete (TDD)
 - [x] 03-03-PLAN.md — 44px/16px UI primitives, Modal on Radix Dialog (dvh, safe area), EmptyState per contract
-- [ ] 03-04-PLAN.md — Landing, login, signup, settings, profile at 375px (dvh, 44px links, section chips)
-- [ ] 03-05-PLAN.md — Bottom nav + More sheet shell, shared nav config (TDD), compact header, sidebar at lg only
-- [ ] 03-06-PLAN.md — Currency core: Intl helpers + parity test, preferences API/hook, CurrencyProvider, Settings picker + numeric budget
-- [ ] 03-07-PLAN.md — Pantry, recipes, alerts empty states + 375px; ?ai=suggestions with Suspense
-- [ ] 03-08-PLAN.md — Dashboard, analytics, budget, help + charts in user currency at 375px
-- [ ] 03-09-PLAN.md — Meal plans + shopping: currency, empty states, 44px actions
-- [ ] 03-10-PLAN.md — AI modals: numeric budget in user currency, 90dvh, Escape, 44px close
-- [ ] 03-11-PLAN.md — Onboarding: tested logic, 3-step flow, gate in shell (fail open)
-- [ ] 03-12-PLAN.md — PWA: manifest, sharp-generated icons, apple metadata, iOS install hint (TDD helpers)
-- [ ] 03-13-PLAN.md — Ship: smoke check 11, static gates, Railway deploy first, then push + CI + Vercel
+- [x] 03-04-PLAN.md — Landing, login, signup, settings, profile at 375px (dvh, 44px links, section chips)
+- [x] 03-05-PLAN.md — Bottom nav + More sheet shell, shared nav config (TDD), compact header, sidebar at lg only
+- [x] 03-06-PLAN.md — Currency core: Intl helpers + parity test, preferences API/hook, CurrencyProvider, Settings picker + numeric budget
+- [x] 03-07-PLAN.md — Pantry, recipes, alerts empty states + 375px; ?ai=suggestions with Suspense
+- [x] 03-08-PLAN.md — Dashboard, analytics, budget, help + charts in user currency at 375px
+- [x] 03-09-PLAN.md — Meal plans + shopping: currency, empty states, 44px actions
+- [x] 03-10-PLAN.md — AI modals: numeric budget in user currency, 90dvh, Escape, 44px close
+- [x] 03-11-PLAN.md — Onboarding: tested logic, 3-step flow, gate in shell (fail open)
+- [x] 03-12-PLAN.md — PWA: manifest, sharp-generated icons, apple metadata, iOS install hint (TDD helpers)
+- [x] 03-13-PLAN.md — Ship: smoke check 11, static gates, Railway deploy first, then push + CI + Vercel
 - [ ] 03-14-PLAN.md — Human checkpoint: real-iPhone + 375/390/1280px walkthrough (deferrable)
 **UI hint**: yes
 
@@ -143,7 +143,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 |-------|----------------|--------|-----------|
 | 1. Secure Foundation & Railway Deploy | 6/6 | Complete    | 2026-10-08 |
 | 2. Reliable AI Suggestions | 8/8 | Complete    | 2026-10-08 |
-| 3. Mobile-First Shell | 3/14 | In Progress|  |
+| 3. Mobile-First Shell | 13/14 | Complete    | 2026-10-08 |
 | 4. Persistent Shopping List | 0/TBD | Not started | - |
 | 5. Pantry-Aware Intelligence | 0/TBD | Not started | - |
 | 6. Capture Loops | 0/TBD | Not started | - |
