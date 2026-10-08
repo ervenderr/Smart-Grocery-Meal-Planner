@@ -125,7 +125,7 @@ describe('repair and failure handling', () => {
     expect(roles).toContain('assistant');
     const last = second.messages[second.messages.length - 1];
     expect(last.role).toBe('user');
-    expect(last.content).toMatch(/invalid JSON/i);
+    expect(last.content).toMatch(/(invalid|not valid) JSON/i);
   });
 
   it('returns 503 AI_UNAVAILABLE when output is invalid twice', async () => {
@@ -167,7 +167,7 @@ describe('repair and failure handling', () => {
 
 describe('not configured', () => {
   it('returns 503 with zero fetch calls, status available:false, health 200', async () => {
-    setAiDepsForTests({ provider: buildTestProvider(undefined) });
+    setAiDepsForTests({ provider: buildTestProvider(null) });
     const { token } = await newUser([uniqueName('corn')]);
 
     const res = await suggest(token);

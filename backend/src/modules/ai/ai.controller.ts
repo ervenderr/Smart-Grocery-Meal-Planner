@@ -9,6 +9,8 @@ import { AIService } from './ai.service';
 import { PantryService } from '../pantry/pantry.service';
 import { logger } from '../../config/logger.config';
 import { AppError } from '../../middleware/errorHandler';
+import { getAiDeps } from './ai.deps';
+import { suggestRecipes } from './features/recipes';
 
 const aiService = new AIService();
 const pantryService = new PantryService();
@@ -19,57 +21,44 @@ export class AIController {
    * Get AI-generated recipe suggestions based on pantry items
    */
   async suggestRecipes(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user.id;
-      const { dietaryRestrictions, maxPrepTime, usePantry = true } = req.body;
+    const userId = (req as any).user.id;
+    const { maxPrepTime, usePantry = true } = req.body;
 
-      if (!aiService.isAvailable()) {
-        res.status(503).json({
-          error: 'AI service is not available. Please configure GEMINI_AI_API_KEY.',
+    let pantryItems: Array<{
+      ingredientName: string;
+      quantity: number;
+      unit: string;
+      category: string;
+    }> = [];
+    if (usePantry) {
+      const pantryResponse = await pantryService.getItems(userId, {});
+      pantryItems = pantryResponse.items.map((item: any) => ({
+        ingredientName: item.ingredientName,
+        quantity: Number(item.quantity),
+        unit: item.unit,
+        category: item.category,
+      }));
+
+      if (pantryItems.length === 0) {
+        res.status(400).json({
+          error: 'No pantry items found. Please add items to your pantry first.',
         });
         return;
       }
-
-      // Get user's pantry items
-      let pantryItems: any[] = [];
-      if (usePantry) {
-        const pantryResponse = await pantryService.getItems(userId, {});
-        pantryItems = pantryResponse.items.map((item: any) => ({
-          ingredientName: item.ingredientName,
-          quantity: Number(item.quantity),
-          unit: item.unit,
-          category: item.category,
-        }));
-
-        if (pantryItems.length === 0) {
-          res.status(400).json({
-            error: 'No pantry items found. Please add items to your pantry first.',
-          });
-          return;
-        }
-      }
-
-      // Get AI suggestions
-      const suggestions = await aiService.suggestRecipesFromPantry(
-        pantryItems,
-        dietaryRestrictions || [],
-        maxPrepTime
-      );
-
-      logger.info('AI recipe suggestions generated', {
-        service: 'kitcha-api',
-        userId,
-        suggestionsCount: suggestions.length,
-      });
-
-      res.json({
-        suggestions,
-        pantryItemsUsed: pantryItems.length,
-      });
-    } catch (error: any) {
-      logger.error('Suggest recipes error:', error);
-      throw error;
     }
+
+    // Dietary restrictions are deliberately not forwarded to the provider
+    // (data minimization); they are enforced in code by a later plan.
+    const { suggestions, cached } = await suggestRecipes({ userId, pantryItems, maxPrepTime });
+
+    logger.info('AI recipe suggestions generated', {
+      service: 'kitcha-api',
+      userId,
+      suggestionsCount: suggestions.length,
+      cached,
+    });
+
+    res.json({ suggestions, pantryItemsUsed: pantryItems.length, cached });
   }
 
   /**
@@ -173,11 +162,12 @@ export class AIController {
    */
   async getStatus(_req: Request, res: Response): Promise<void> {
     try {
-      const isAvailable = aiService.isAvailable();
+      const { provider } = getAiDeps();
+      const isAvailable = provider.isConfigured();
 
       res.json({
         available: isAvailable,
-        provider: 'Google Gemini AI',
+        provider: provider.label,
         features: {
           recipeSuggestions: isAvailable,
           ingredientSubstitutions: isAvailable,

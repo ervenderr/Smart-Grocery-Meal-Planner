@@ -43,12 +43,12 @@ export function errorResponse(status: number, message = 'provider error'): Respo
   });
 }
 
-export function buildTestProvider(apiKey: string | undefined = TEST_API_KEY): OpenAiCompatibleProvider {
+export function buildTestProvider(apiKey: string | null = TEST_API_KEY): OpenAiCompatibleProvider {
   return new OpenAiCompatibleProvider({
     label: 'test',
     baseUrl: TEST_BASE_URL,
     model: 'test-model',
-    apiKey,
+    apiKey: apiKey ?? undefined,
     timeoutMs: 2000,
     jsonMode: 'off',
   });
