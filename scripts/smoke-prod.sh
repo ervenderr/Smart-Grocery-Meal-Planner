@@ -143,13 +143,18 @@ if [ "$API_ONLY" = "false" ]; then
   for page in "" "/login" "/signup"; do
     html="$(curl -sS --max-time 30 "$FE$page")" || fail "8 frontend: could not fetch $FE$page"
     js_paths="$js_paths
-$(printf '%s' "$html" | grep -oE '/_next/static/[^"'"'"' )\\]+\.js')"
+$(printf '%s' "$html" | grep -oE '/_next/static/[^"'"'"' )\\]+\.js' || true)"
   done
   js_paths="$(printf '%s\n' "$js_paths" | sed '/^$/d' | sort -u)"
   [ -n "$js_paths" ] || fail "8 frontend: no /_next/static js found in HTML"
   found_api=false
+  chunk_failures=0
   while IFS= read -r p; do
-    js="$(curl -sS --max-time 30 "$FE$p")" || continue
+    if ! js="$(curl -sS --max-time 30 "$FE$p")"; then
+      chunk_failures=$((chunk_failures + 1))
+      echo "WARN: 8 frontend: could not fetch chunk $p" >&2
+      continue
+    fi
     if printf '%s' "$js" | grep -q "localhost:3001"; then
       fail "8 frontend: bundle $p still references localhost:3001"
     fi
@@ -157,7 +162,7 @@ $(printf '%s' "$html" | grep -oE '/_next/static/[^"'"'"' )\\]+\.js')"
       found_api=true
     fi
   done <<< "$js_paths"
-  [ "$found_api" = "true" ] || fail "8 frontend: no bundle contains API host $API_HOST"
+  [ "$found_api" = "true" ] || fail "8 frontend: no bundle contains API host $API_HOST ($chunk_failures chunk fetch failures)"
   pass "8 frontend bundle contains API host and no localhost:3001"
 fi
 
