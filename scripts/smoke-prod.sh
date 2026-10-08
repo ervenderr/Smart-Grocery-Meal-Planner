@@ -82,13 +82,22 @@ code="$(req GET "$API/api/v1" -H "Origin: https://evil.example")" || fail "4 evi
 [ "$(jq -r '.message' "$BODY_FILE")" = "Origin not allowed" ] || fail "4 evil origin: message is not 'Origin not allowed'"
 pass "4 unknown origin gets 403 Origin not allowed"
 
-# (5) rate-limit identity: spoofed leftmost XFF must not mint new buckets
-req GET "$API/api/v1" -H "X-Forwarded-For: 1.1.1.1" >/dev/null || fail "5 ratelimit: first request failed"
-first="$(header ratelimit-remaining)"
-req GET "$API/api/v1" -H "X-Forwarded-For: 2.2.2.2" >/dev/null || fail "5 ratelimit: second request failed"
-second="$(header ratelimit-remaining)"
-[[ "$first" =~ ^[0-9]+$ && "$second" =~ ^[0-9]+$ ]] || fail "5 ratelimit: ratelimit-remaining header missing (first='$first' second='$second')"
-[ "$second" -eq $((first - 1)) ] || fail "5 ratelimit: expected remaining to drop by exactly 1 (first=$first second=$second)"
+# (5) rate-limit identity: spoofed leftmost XFF must not mint new buckets.
+# Other traffic from the same IP can consume the bucket between the two
+# requests, so retry a few times before failing. Repeated runs within the
+# rate-limit window (15 min) also consume the auth budget.
+rl_ok=false
+first=""; second=""
+for attempt in 1 2 3; do
+  req GET "$API/api/v1" -H "X-Forwarded-For: 1.1.1.1" >/dev/null || fail "5 ratelimit: first request failed"
+  first="$(header ratelimit-remaining)"
+  req GET "$API/api/v1" -H "X-Forwarded-For: 2.2.2.2" >/dev/null || fail "5 ratelimit: second request failed"
+  second="$(header ratelimit-remaining)"
+  [[ "$first" =~ ^[0-9]+$ && "$second" =~ ^[0-9]+$ ]] || fail "5 ratelimit: ratelimit-remaining header missing (first='$first' second='$second')"
+  if [ "$second" -eq $((first - 1)) ]; then rl_ok=true; break; fi
+  echo "WARN: 5 ratelimit: attempt $attempt saw first=$first second=$second, retrying" >&2
+done
+[ "$rl_ok" = "true" ] || fail "5 ratelimit: expected remaining to drop by exactly 1 (first=$first second=$second)"
 pass "5 spoofed XFF shares one rate-limit bucket ($first -> $second)"
 
 # (6) signup + login
@@ -137,7 +146,8 @@ pass "7e pantry get after delete returns 404"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
-  API_HOST="${API#https://}"
+  API_HOST="${API#http://}"
+  API_HOST="${API_HOST#https://}"
   # The landing page does not load the API client chunk, so scan the auth pages too.
   js_paths=""
   for page in "" "/login" "/signup"; do
