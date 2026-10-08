@@ -2,9 +2,14 @@
  * Shopping DTO mappers. Always build new objects; never expose Prisma types.
  */
 
-import type { ShoppingList, ShoppingListItem } from '@prisma/client';
-import type { ShoppingItemDto, ShoppingListDto } from '../../types/shopping.types';
+import type { ShoppingHistory, ShoppingList, ShoppingListItem } from '@prisma/client';
+import type {
+  ShoppingHistoryEntryDto,
+  ShoppingItemDto,
+  ShoppingListDto,
+} from '../../types/shopping.types';
 import { DEFAULT_CATEGORY } from './shopping.constants';
+import type { HistoryTotals } from './shopping.totals';
 
 export const toItemDto = (item: ShoppingListItem): ShoppingItemDto => ({
   id: item.id,
@@ -40,3 +45,18 @@ export const toListDto = (
     items: ordered.map(toItemDto),
   };
 };
+
+export const toHistoryDto = (
+  history: ShoppingHistory,
+  totals: Pick<HistoryTotals, 'estimatedCents' | 'itemCount'>,
+  listName: string | null,
+): ShoppingHistoryEntryDto => ({
+  id: history.id,
+  receiptDate: history.receiptDate.toISOString().slice(0, 10),
+  // totalPhpCents holds minor units of the user's currency (legacy column name).
+  totalCents: history.totalPhpCents,
+  estimatedCents: totals.estimatedCents,
+  itemCount: totals.itemCount,
+  listName,
+  shoppingListId: history.shoppingListId,
+});

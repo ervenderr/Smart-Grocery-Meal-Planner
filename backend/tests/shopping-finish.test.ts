@@ -69,7 +69,12 @@ describe('shopping finish and history', () => {
   let u6: TestUser;
 
   beforeAll(async () => {
-    [u1, u2, u3, u4, u5, u6] = await Promise.all(['1', '2', '3', '4', '5', '6'].map(signup));
+    u1 = await signup('1');
+    u2 = await signup('2');
+    u3 = await signup('3');
+    u4 = await signup('4');
+    u5 = await signup('5');
+    u6 = await signup('6');
   });
 
   afterAll(async () => {

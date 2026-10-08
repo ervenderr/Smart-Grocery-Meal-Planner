@@ -8,6 +8,9 @@ import type {
   CreateShoppingItemInput,
   UpdateShoppingItemInput,
 } from '../../types/shopping.types';
+import type { CarryOverMode } from '../../types/shopping.types';
+import { finishShopping, getHistory } from './shopping-finish.service';
+import { HISTORY_PAGE_LIMIT_DEFAULT } from './shopping.constants';
 import { generateFromMealPlan } from './shopping-generate.service';
 import { ShoppingService } from './shopping.service';
 
@@ -66,5 +69,20 @@ export class ShoppingController {
     const { mealPlanId } = matchedData(req, { locations: ['body'] }) as { mealPlanId: string };
     const result = await generateFromMealPlan(userIdOf(req), mealPlanId);
     res.status(200).json(result);
+  }
+
+  async finish(req: Request, res: Response): Promise<void> {
+    const { carryOver, receiptDate } = matchedData(req, { locations: ['body'] }) as {
+      carryOver?: CarryOverMode;
+      receiptDate?: string;
+    };
+    res.status(200).json(await finishShopping(userIdOf(req), carryOver, receiptDate));
+  }
+
+  async history(req: Request, res: Response): Promise<void> {
+    const { page = 1, limit = HISTORY_PAGE_LIMIT_DEFAULT } = matchedData(req, {
+      locations: ['query'],
+    }) as { page?: number; limit?: number };
+    res.status(200).json(await getHistory(userIdOf(req), page, limit));
   }
 }

@@ -12,7 +12,9 @@ import { ShoppingController } from './shopping.controller';
 import {
   validate,
   validateCreateItem,
+  validateFinish,
   validateGenerate,
+  validateHistory,
   validateItemId,
   validateUpdateItem,
 } from './shopping.validation';
@@ -74,9 +76,35 @@ router.delete(
  */
 router.post(
   '/generate',
+  validateFinish,
   validateGenerate,
+  validateHistory,
   validate,
   asyncHandler(controller.generate.bind(controller)),
+);
+
+/**
+ * @route   POST /api/v1/shopping/finish
+ * @desc    Complete the active list into history; carry over or discard unchecked items
+ * @access  Private
+ */
+router.post(
+  '/finish',
+  validateFinish,
+  validate,
+  asyncHandler(controller.finish.bind(controller)),
+);
+
+/**
+ * @route   GET /api/v1/shopping/history
+ * @desc    Completed trips, newest first (paginated)
+ * @access  Private
+ */
+router.get(
+  '/history',
+  validateHistory,
+  validate,
+  asyncHandler(controller.history.bind(controller)),
 );
 
 export default router;

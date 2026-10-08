@@ -2,11 +2,12 @@
  * Shopping validation (express-validator). Errors carry code VALIDATION_ERROR.
  */
 
-import { body, param, validationResult, ValidationChain } from 'express-validator';
+import { body, param, query, validationResult, ValidationChain } from 'express-validator';
 import type { NextFunction, Request, Response } from 'express';
 import { AppError } from '../../middleware/errorHandler';
 import { PantryCategory } from '../../types/pantry.types';
 import {
+  HISTORY_PAGE_LIMIT_MAX,
   MAX_ITEM_CENTS,
   MAX_ITEM_NAME_LENGTH,
   MAX_NOTES_LENGTH,
@@ -14,6 +15,7 @@ import {
   MIN_QUANTITY,
   SHOPPING_ERROR_CODES,
 } from './shopping.constants';
+import { withinOneDayOfUtcToday } from './shopping-finish.service';
 import { normalizeUnit } from './shopping.units';
 
 // eslint-disable-next-line no-control-regex -- intentionally strips control characters
@@ -114,4 +116,31 @@ export const validateItemId: ValidationChain[] = [
 
 export const validateGenerate: ValidationChain[] = [
   body('mealPlanId').isUUID().withMessage('mealPlanId must be a valid UUID'),
+];
+
+export const validateFinish: ValidationChain[] = [
+  body('carryOver')
+    .optional()
+    .isIn(['carry', 'discard'])
+    .withMessage("carryOver must be 'carry' or 'discard'"),
+  body('receiptDate')
+    .optional()
+    .isString()
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage('receiptDate must be YYYY-MM-DD')
+    .bail()
+    .isISO8601({ strict: true })
+    .withMessage('receiptDate must be a valid date')
+    .bail()
+    .custom((v: string) => withinOneDayOfUtcToday(v))
+    .withMessage('receiptDate must be within one day of today'),
+];
+
+export const validateHistory: ValidationChain[] = [
+  query('page').optional().isInt({ min: 1, max: 10000 }).withMessage('page must be 1-10000').toInt(),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: HISTORY_PAGE_LIMIT_MAX })
+    .withMessage(`limit must be 1-${HISTORY_PAGE_LIMIT_MAX}`)
+    .toInt(),
 ];
