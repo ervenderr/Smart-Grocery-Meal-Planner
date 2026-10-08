@@ -76,9 +76,7 @@ router.delete(
  */
 router.post(
   '/generate',
-  validateFinish,
   validateGenerate,
-  validateHistory,
   validate,
   asyncHandler(controller.generate.bind(controller)),
 );
