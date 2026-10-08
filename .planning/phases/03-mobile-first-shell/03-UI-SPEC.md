@@ -1,7 +1,8 @@
 ---
 phase: 3
 slug: mobile-first-shell
-status: draft
+status: approved
+reviewed_at: 2026-10-09
 shadcn_initialized: false
 preset: none
 created: 2026-10-09
