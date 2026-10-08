@@ -53,9 +53,13 @@ afterAll(async () => {
   await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   fetchSpy = jest.spyOn(global, 'fetch');
   resetFoodDepsForTests();
+  // Fresh user per test so the per-user burst limiter never leaks across tests.
+  const user = await createUserWithPantry(app, []);
+  token = user.token;
+  createdUserIds.push(user.userId);
 });
 
 afterEach(() => {
@@ -266,5 +270,38 @@ describe('cache failures degrade gracefully (WR-01/WR-02)', () => {
     const res = await lookup(code);
 
     expect(res.status).toBe(404);
+  });
+});
+
+describe('nutrition query is not HTML-escaped (WR-04)', () => {
+  it('forwards apostrophes and ampersands unchanged and strips control characters', async () => {
+    setFoodDepsForTests({ usdaApiKey: USDA_KEY });
+    const suffix = crypto.randomBytes(3).toString('hex');
+    fetchSpy.mockResolvedValueOnce(json({ foods: [] }));
+
+    const res = await nutrition(`Baker's  mac & cheese\u0007 ${suffix}`);
+
+    expect(res.status).toBe(200);
+    const url = decodeURIComponent(String(fetchSpy.mock.calls[0][0]));
+    expect(url).toContain(`baker's mac & cheese ${suffix}`);
+    expect(url).not.toContain('&#x27;');
+    expect(url).not.toContain('&amp;');
+  });
+});
+
+describe('per-user food rate limit (WR-05)', () => {
+  it('returns 429 FOOD_RATE_LIMITED after the burst limit without affecting other users', async () => {
+    const heavy = await createUserWithPantry(app, []);
+    const other = await createUserWithPantry(app, []);
+    createdUserIds.push(heavy.userId, other.userId);
+    const call = (t: string) =>
+      request(app).get('/api/v1/food/barcode/abc').set('Authorization', `Bearer ${t}`);
+
+    for (let i = 0; i < 20; i++) expect((await call(heavy.token)).status).toBe(400);
+    const blocked = await call(heavy.token);
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.code).toBe('FOOD_RATE_LIMITED');
+    expect((await call(other.token)).status).toBe(400);
   });
 });

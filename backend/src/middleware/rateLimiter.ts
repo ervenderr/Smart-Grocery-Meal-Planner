@@ -97,6 +97,33 @@ export const aiBurstLimiter = rateLimit({
   },
 });
 
+const FOOD_RATE_LIMIT_MESSAGE = 'Too many product lookups. Please wait a minute and try again.';
+
+/**
+ * Food lookup burst limiter: 20 requests per minute per authenticated user so
+ * one account cannot saturate the shared outbound (Open Food Facts / USDA)
+ * throttle or flood the cache table.
+ */
+export const foodBurstLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    const userId = (req as Request & { user?: { id?: string } }).user?.id;
+    return userId ?? ipKeyGenerator(req.ip ?? '');
+  },
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      status: 'error',
+      statusCode: 429,
+      code: 'FOOD_RATE_LIMITED',
+      message: FOOD_RATE_LIMIT_MESSAGE,
+      error: FOOD_RATE_LIMIT_MESSAGE,
+    });
+  },
+});
+
 /**
  * Password reset rate limiter
  * Prevents abuse of password reset functionality
