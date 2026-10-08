@@ -20,6 +20,7 @@ import morgan from "morgan";
 import { config } from "./config/env.config";
 import { morganStream } from "./config/logger.config";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { httpsRedirect } from "./middleware/httpsRedirect";
 import { apiLimiter } from "./middleware/rateLimiter";
 import {
   buildCorsOptions,
@@ -60,16 +61,10 @@ export function createApp(): Application {
 
   /**
    * HTTPS Enforcement in Production
-   * Redirects HTTP to HTTPS
+   * Redirects HTTP to HTTPS (308) using the configured PUBLIC_HOST
    */
   if (config.env === "production") {
-    app.use((req, res, next) => {
-      if (req.secure) {
-        next();
-      } else {
-        res.redirect(301, `https://${req.header("host")}${req.originalUrl}`);
-      }
-    });
+    app.use(httpsRedirect(config.publicHost));
   }
 
   /**

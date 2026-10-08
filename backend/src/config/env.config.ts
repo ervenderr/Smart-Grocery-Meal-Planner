@@ -40,6 +40,7 @@ export const config = Object.freeze({
   env: parsed.NODE_ENV as string,
   port: parsed.PORT ?? 3001,
   apiVersion: parsed.API_VERSION,
+  publicHost: parsed.PUBLIC_HOST ?? parsed.RAILWAY_PUBLIC_DOMAIN,
 
   // Database
   database: Object.freeze({ url: parsed.DATABASE_URL }),
@@ -72,6 +73,7 @@ export const config = Object.freeze({
   readonly env: string;
   readonly port: number;
   readonly apiVersion: string;
+  readonly publicHost?: string;
   readonly database: { readonly url: string };
   readonly jwt: { readonly secret: string; readonly expiresIn: string };
   readonly cors: {

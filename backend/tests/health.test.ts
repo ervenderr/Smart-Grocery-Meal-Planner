@@ -11,6 +11,7 @@ describe("production /health and HTTPS redirect", () => {
       ...originalEnv,
       NODE_ENV: "production",
       PORT: "8080",
+      PUBLIC_HOST: "api.kitcha.example",
       CORS_ORIGIN: "https://kitcha-ai.vercel.app",
       DATABASE_URL: "postgresql://u:p@127.0.0.1:1/none",
       JWT_SECRET: crypto.randomBytes(32).toString("hex"),
@@ -38,10 +39,10 @@ describe("production /health and HTTPS redirect", () => {
     expect(res.status).toBe(200);
   });
 
-  it("redirects other plain HTTP requests with 301", async () => {
-    const res = await request(app).get("/api/v1");
-    expect(res.status).toBe(301);
-    expect(res.headers.location).toMatch(/^https:\/\//);
+  it("redirects other plain HTTP requests with 308 to the configured host", async () => {
+    const res = await request(app).get("/api/v1").set("Host", "evil.example");
+    expect(res.status).toBe(308);
+    expect(res.headers.location).toBe("https://api.kitcha.example/api/v1");
   });
 
   it("returns 403 JSON for a disallowed origin over HTTPS", async () => {

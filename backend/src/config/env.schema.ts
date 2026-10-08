@@ -65,6 +65,14 @@ export const envSchema = z
     LOG_LEVEL: z.string().min(1).default("info"),
     CORS_ORIGIN: z.string().default("http://localhost:3000").transform(parseOriginList),
     FRONTEND_URL: z.string().transform(normalizeEntry).optional(),
+    PUBLIC_HOST: z
+      .string()
+      .regex(/^[a-z0-9.-]+(:[0-9]{1,5})?$/i, "must be a bare host[:port]")
+      .optional(),
+    RAILWAY_PUBLIC_DOMAIN: z
+      .string()
+      .regex(/^[a-z0-9.-]+$/i, "must be a bare hostname")
+      .optional(),
     VERCEL_PREVIEW_SCOPE: z
       .string()
       .regex(SLUG, "must match ^[a-z0-9-]+$")
