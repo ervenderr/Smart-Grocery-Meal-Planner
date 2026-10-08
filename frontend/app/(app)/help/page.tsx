@@ -90,7 +90,7 @@ const faqs: FAQItem[] = [
   // Budget
   {
     question: 'How do I set my budget?',
-    answer: 'Go to Settings > Preferences and adjust your weekly budget using the slider. You can set amounts from ₱100 to ₱10,000 per week.',
+    answer: 'Set your weekly budget and currency in Settings > Preferences. Amounts are shown in the currency you choose.',
     category: 'budget',
   },
   {
@@ -208,7 +208,7 @@ export default function HelpPage() {
         {/* Category Sidebar */}
         <Card className="p-4 lg:col-span-1 h-fit">
           <h2 className="text-sm font-semibold text-gray-900 mb-3">Categories</h2>
-          <nav className="space-y-1">
+          <nav role="group" aria-label="Help categories" className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 lg:mx-0 lg:flex-col lg:gap-1 lg:space-y-0 lg:overflow-visible lg:px-0">
             {categories.map((category) => {
               const Icon = category.icon;
               const isActive = activeCategory === category.id;
@@ -217,7 +217,8 @@ export default function HelpPage() {
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                  aria-pressed={isActive}
+                  className={`flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 text-left text-sm transition-colors lg:w-full lg:rounded-lg ${
                     isActive
                       ? 'bg-primary-50 text-primary-700 font-medium'
                       : 'text-gray-700 hover:bg-gray-50'
@@ -232,8 +233,8 @@ export default function HelpPage() {
         </Card>
 
         {/* FAQ Content */}
-        <div className="lg:col-span-3">
-          <Card className="p-6">
+        <div className="min-w-0 lg:col-span-3">
+          <Card className="p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-6">
               <HelpCircle className="h-5 w-5 text-primary-600" />
               <h2 className="text-lg font-semibold text-gray-900">
@@ -252,7 +253,7 @@ export default function HelpPage() {
                   >
                     <button
                       onClick={() => toggleItem(index)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                      className="flex min-h-12 w-full items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
                     >
                       <span className="font-medium text-gray-900 pr-4">
                         {faq.question}

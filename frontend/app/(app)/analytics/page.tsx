@@ -14,10 +14,12 @@ import { analyticsApi } from '@/lib/api/analytics';
 import toast from 'react-hot-toast';
 import { subDays, format } from 'date-fns';
 import Link from 'next/link';
+import { useCurrency } from '@/lib/currency/currency-provider';
 
 type DateRange = '7d' | '30d' | '90d' | 'all';
 
 export default function AnalyticsPage() {
+  const { format: formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [budgetStatus, setBudgetStatus] = useState<any>(null);
@@ -94,10 +96,6 @@ export default function AnalyticsPage() {
     }
   };
 
-  const formatCurrency = (cents: number) => {
-    return `₱${(cents / 100).toFixed(2)}`;
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -123,7 +121,7 @@ export default function AnalyticsPage() {
             <button
               key={range}
               onClick={() => setDateRange(range)}
-              className={`px-2.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
+              className={`min-h-11 px-4 text-sm font-medium rounded-lg transition-colors ${
                 dateRange === range
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

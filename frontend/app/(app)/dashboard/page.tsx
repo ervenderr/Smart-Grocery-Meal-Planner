@@ -5,17 +5,21 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
-import { ShoppingCart, Package, Calendar, TrendingUp, ChefHat, Plus, AlertCircle } from 'lucide-react';
+import { ShoppingCart, Package, Calendar, TrendingUp, ChefHat, Plus, AlertCircle, CheckCircle } from 'lucide-react';
 import { analyticsApi } from '@/lib/api/analytics';
 import { pantryApi } from '@/lib/api/pantry';
 import { recipeApi } from '@/lib/api/recipes';
 import { mealPlanApi } from '@/lib/api/mealplans';
-import toast from 'react-hot-toast';
+import { EmptyState } from '@/components/common/empty-state';
+import { useCurrency } from '@/lib/currency/currency-provider';
+import type { ExpiringItem } from '@/types/pantry.types';
 import type { AnalyticsDashboard } from '@/types/budget.types';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const router = useRouter();
+  const { format: formatCurrency } = useCurrency();
+  const [expiring, setExpiring] = useState<ExpiringItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsDashboard | null>(null);
   const [pantryCount, setPantryCount] = useState(0);
@@ -25,14 +29,16 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [analyticsData, pantryData, recipesData, mealPlansData] = await Promise.all([
+      const [analyticsData, pantryData, recipesData, mealPlansData, expiringData] = await Promise.all([
         analyticsApi.getDashboard(30).catch(() => null),
         pantryApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
         recipeApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
         mealPlanApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
+        pantryApi.getExpiringSoon(7).catch(() => [] as ExpiringItem[]),
       ]);
 
       setAnalytics(analyticsData);
+      setExpiring(expiringData);
       setPantryCount(pantryData.pagination?.total || 0);
       setRecipeCount(recipesData.pagination?.total || 0);
       setMealPlanCount(mealPlansData.pagination?.total || 0);
@@ -46,10 +52,6 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
-
-  const formatCurrency = (cents: number) => {
-    return `₱${(cents / 100).toFixed(2)}`;
-  };
 
   const getBudgetStatusColor = (status?: string) => {
     switch (status) {
@@ -127,22 +129,22 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card
               key={stat.name}
-              className="p-6 cursor-pointer hover:shadow-md transition-shadow"
+              className="min-w-0 cursor-pointer p-4 transition-shadow hover:shadow-md sm:p-6"
               onClick={stat.onClick}
             >
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <p className="mt-1 text-xs text-gray-500">{stat.change}</p>
+                  <p className="mt-2 text-2xl font-bold sm:text-3xl text-gray-900">{stat.value}</p>
+                  <p className="mt-1 break-words text-xs text-gray-500">{stat.change}</p>
                 </div>
-                <div className={`rounded-lg ${stat.color} p-3`}>
+                <div className={`hidden shrink-0 rounded-lg ${stat.color} p-3 sm:block`}>
                   <Icon className="h-6 w-6 text-white" />
                 </div>
               </div>
@@ -154,12 +156,12 @@ export default function DashboardPage() {
       {/* Quick Actions & Insights Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Quick Actions */}
-        <Card className="p-6">
+        <Card className="min-w-0 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="space-y-3">
             <button
               onClick={() => router.push('/pantry')}
-              className="flex w-full items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50"
+              className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                 <Package className="h-5 w-5 text-blue-600" />
@@ -172,7 +174,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => router.push('/recipes')}
-              className="flex w-full items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50"
+              className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
                 <ChefHat className="h-5 w-5 text-green-600" />
@@ -185,7 +187,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => router.push('/mealplans')}
-              className="flex w-full items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50"
+              className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
                 <Calendar className="h-5 w-5 text-purple-600" />
@@ -200,7 +202,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Spending Insights */}
-        <Card className="p-6">
+        <Card className="min-w-0 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Spending Overview</h2>
           {analytics?.categoryBreakdown && analytics.categoryBreakdown.length > 0 ? (
             <div className="space-y-3">
@@ -239,18 +241,42 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Expiring Soon */}
+      <Card className="min-w-0 p-4 sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Expiring Soon</h2>
+        {expiring.length > 0 ? (
+          <ul className="space-y-2">
+            {expiring.slice(0, 5).map((entry) => (
+              <li key={entry.item.id} className="flex min-h-11 items-center justify-between gap-2 rounded-lg bg-gray-50 p-2 text-sm">
+                <span className="min-w-0 truncate font-medium capitalize text-gray-900">{entry.item.ingredientName}</span>
+                <span className="shrink-0 text-gray-600">
+                  {entry.daysUntilExpiry < 0 ? 'Expired' : `${entry.daysUntilExpiry}d left`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState
+            icon={CheckCircle}
+            title="Nothing expiring soon"
+            description="Your pantry looks good."
+            headingLevel="h3"
+          />
+        )}
+      </Card>
+
       {/* Savings Insights */}
       {analytics?.savingsInsights && analytics.savingsInsights.length > 0 && (
-        <Card className="p-6 bg-green-50 border-green-200">
+        <Card className="min-w-0 border-green-200 bg-green-50 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-green-900 mb-4">Savings Opportunities</h2>
           <div className="space-y-3">
             {analytics.savingsInsights.map((insight, index) => (
               <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg">
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900">{insight.title}</p>
                   <p className="text-xs text-gray-600 mt-1">{insight.description}</p>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <p className="text-sm font-bold text-green-600">
                     {formatCurrency(insight.amountSavedCents)}
                   </p>

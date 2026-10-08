@@ -6,11 +6,13 @@ import { Card } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { analyticsApi } from '@/lib/api/analytics';
 import toast from 'react-hot-toast';
+import { useCurrency } from '@/lib/currency/currency-provider';
 import type { BudgetStatus, CategorySpending } from '@/types/budget.types';
 
 export default function BudgetPage() {
   const [budgetStatus, setBudgetStatus] = useState<BudgetStatus | null>(null);
   const [categories, setCategories] = useState<CategorySpending[]>([]);
+  const { format: formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(true);
 
   const fetchBudgetData = async () => {
@@ -33,10 +35,6 @@ export default function BudgetPage() {
   useEffect(() => {
     fetchBudgetData();
   }, []);
-
-  const formatCurrency = (cents: number) => {
-    return `₱${(cents / 100).toFixed(2)}`;
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,12 +82,12 @@ export default function BudgetPage() {
 
       {/* Budget Status Card */}
       {budgetStatus && (
-        <Card className={`p-6 border-2 ${getStatusColor(budgetStatus.status)}`}>
+        <Card className={`min-w-0 p-4 sm:p-6 border-2 ${getStatusColor(budgetStatus.status)}`}>
           <div className="flex items-start gap-4">
             <div className="rounded-full bg-white p-3">
               {getStatusIcon(budgetStatus.status)}
             </div>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <h3 className="text-lg font-semibold mb-1 capitalize">
                 {budgetStatus.status === 'healthy' ? 'On Track' : budgetStatus.status === 'warning' ? 'Approaching Limit' : 'Budget Exceeded'}
               </h3>
@@ -115,7 +113,7 @@ export default function BudgetPage() {
               </div>
 
               {/* Budget Details */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                 <div>
                   <p className="text-xs opacity-75">Weekly Budget</p>
                   <p className="text-lg font-bold">{formatCurrency(budgetStatus.weeklyBudgetCents)}</p>
