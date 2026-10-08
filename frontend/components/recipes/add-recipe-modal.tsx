@@ -206,7 +206,7 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
               placeholder="Describe your recipe..."
               rows={2}
               disabled={isLoading}
-              className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+              className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base lg:text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
               {...register('description')}
             />
             {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>}
@@ -328,11 +328,11 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
           <div className="space-y-3">
             {ingredientFields.map((field, index) => (
               <div key={field.id} className="flex gap-2 items-start">
-                <div className="flex-1 grid gap-2 grid-cols-2 sm:grid-cols-4">
+                <div className="min-w-0 flex-1 grid gap-2 grid-cols-2 sm:grid-cols-4">
                   <input
                     placeholder="Ingredient"
                     disabled={isLoading}
-                    className="col-span-2 sm:col-span-1 h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
+                    className="col-span-2 sm:col-span-1 h-11 rounded-lg border border-gray-300 bg-white px-3 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
                     {...register(`ingredients.${index}.ingredientName`)}
                   />
                   <input
@@ -340,12 +340,12 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
                     step="0.01"
                     placeholder="Qty"
                     disabled={isLoading}
-                    className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
+                    className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
                     {...register(`ingredients.${index}.quantity`, { valueAsNumber: true })}
                   />
                   <select
                     disabled={isLoading}
-                    className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
+                    className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
                     {...register(`ingredients.${index}.unit`)}
                   >
                     <option value="">Unit</option>
@@ -358,7 +358,7 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
                   <input
                     placeholder="Notes (optional)"
                     disabled={isLoading}
-                    className="col-span-2 sm:col-span-1 h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
+                    className="col-span-2 sm:col-span-1 h-11 rounded-lg border border-gray-300 bg-white px-3 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50"
                     {...register(`ingredients.${index}.notes`)}
                   />
                 </div>
@@ -367,7 +367,8 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
                     type="button"
                     onClick={() => removeIngredient(index)}
                     disabled={isLoading}
-                    className="h-11 px-3 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    aria-label={`Remove ingredient ${index + 1}`}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -404,7 +405,7 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
                   placeholder={`Step ${index + 1}`}
                   rows={2}
                   disabled={isLoading}
-                  className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50 resize-none"
+                  className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:opacity-50 resize-none"
                   {...register(`instructions.${index}`)}
                 />
                 {instructionFields.length > 1 && (
@@ -412,7 +413,8 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
                     type="button"
                     onClick={() => removeInstruction(index)}
                     disabled={isLoading}
-                    className="mt-2 px-3 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    aria-label={`Remove step ${index + 1}`}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -448,7 +450,7 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
                   type="button"
                   onClick={() => toggleRestriction(restriction.value)}
                   disabled={isLoading}
-                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors disabled:opacity-50 ${
+                  className={`h-11 px-4 text-sm rounded-lg border transition-colors disabled:opacity-50 ${
                     selectedRestrictions.includes(restriction.value)
                       ? 'bg-primary-100 border-primary-500 text-primary-700'
                       : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -475,7 +477,7 @@ export function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalPro
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 pb-safe border-t border-gray-200">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 pb-safe border-t border-gray-200">
           <Button type="button" variant="outline" fullWidth onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>

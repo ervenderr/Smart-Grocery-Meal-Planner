@@ -78,7 +78,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
 
         {/* Description */}
         {recipe.description && (
-          <p className="text-gray-700 leading-relaxed">{recipe.description}</p>
+          <p className="text-gray-700 leading-relaxed break-words">{recipe.description}</p>
         )}
 
         {/* Meta Info */}
@@ -86,28 +86,28 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
           <div className="flex items-center gap-2 text-gray-600">
             <Clock className="h-5 w-5 text-primary-600" />
             <div>
-              <p className="text-xs text-gray-500">Prep Time</p>
+              <p className="text-sm text-gray-500">Prep Time</p>
               <p className="font-medium">{recipe.prepTimeMinutes} min</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Clock className="h-5 w-5 text-primary-600" />
             <div>
-              <p className="text-xs text-gray-500">Cook Time</p>
+              <p className="text-sm text-gray-500">Cook Time</p>
               <p className="font-medium">{recipe.cookTimeMinutes} min</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Clock className="h-5 w-5 text-primary-600" />
             <div>
-              <p className="text-xs text-gray-500">Total Time</p>
+              <p className="text-sm text-gray-500">Total Time</p>
               <p className="font-medium">{recipe.totalTimeMinutes} min</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Users className="h-5 w-5 text-primary-600" />
             <div>
-              <p className="text-xs text-gray-500">Servings</p>
+              <p className="text-sm text-gray-500">Servings</p>
               <p className="font-medium">{recipe.servings}</p>
             </div>
           </div>
@@ -119,7 +119,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Dietary Information</h4>
             <div className="flex flex-wrap gap-2">
               {recipe.dietaryRestrictions.map((restriction, index) => (
-                <span key={index} className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                <span key={index} className="px-2 py-1 text-sm bg-green-100 text-green-700 rounded">
                   {formatRestriction(restriction)}
                 </span>
               ))}
@@ -133,7 +133,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Tags</h4>
             <div className="flex flex-wrap gap-2">
               {recipe.tags.map((tag, index) => (
-                <span key={index} className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                <span key={index} className="px-2 py-1 text-sm bg-gray-100 text-gray-600 rounded">
                   {tag}
                 </span>
               ))}
@@ -143,7 +143,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
 
         {/* Ingredients */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
               Ingredients
             </h4>
@@ -161,7 +161,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
             {recipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex items-start gap-2">
                 <span className="text-primary-600 mt-1">•</span>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1 break-words">
                   <span className="font-medium text-gray-900">
                     {ingredient.quantity} {ingredient.unit}
                   </span>
@@ -194,7 +194,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
 
         {/* Created Date */}
         <div className="pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
             <Calendar className="h-4 w-4" />
             <span>Created {new Date(recipe.createdAt).toLocaleDateString()}</span>
           </div>
