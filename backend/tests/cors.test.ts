@@ -20,7 +20,7 @@ describe("buildOriginPredicate", () => {
   it.each([
     "https://kitcha-ai.vercel.app",
     "https://kitcha-94293z3ib-ervenderrs-projects.vercel.app",
-    "https://kitcha-git-feature-x-ervenderrs-projects.vercel.app",
+    "https://kitcha-git-feature-ervenderrs-projects.vercel.app",
     "https://kitcha-ervenderrs-projects.vercel.app",
   ])("allows %s", (origin) => {
     expect(isAllowed(origin)).toBe(true);
@@ -32,6 +32,9 @@ describe("buildOriginPredicate", () => {
     "http://kitcha-ai.vercel.app",
     "https://kitcha-ai.vercel.app.evil.com",
     "https://evil-kitcha-94293z3ib-ervenderrs-projects.vercel.app",
+    "https://kitcha-git-x-evil-ervenderrs-projects.vercel.app",
+    "https://kitcha-git-feature-x-ervenderrs-projects.vercel.app",
+    "https://kitcha-git-x-ervenderrs-projects-evil.vercel.app",
   ])("rejects %s", (origin) => {
     expect(isAllowed(origin)).toBe(false);
   });

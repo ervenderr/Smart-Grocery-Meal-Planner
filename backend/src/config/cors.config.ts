@@ -23,11 +23,20 @@ export function normalizeOrigin(origin: string): string {
 /**
  * Matches Vercel generated URLs of one project in one scope:
  * <project>-<9 char hash>-<scope>, <project>-git-<branch>-<scope>, <project>-<scope>
+ *
+ * Security: the "<branch>-<scope>" boundary is ambiguous when the branch may
+ * contain hyphens, because Vercel team slugs are attacker-registrable
+ * (team "evil-<scope>" yields kitcha-git-x-evil-<scope>.vercel.app). The
+ * branch segment is therefore a single hyphen-free token, so everything after
+ * it must be exactly the configured scope. Previews of hyphenated branches must
+ * be listed explicitly in CORS_ORIGIN. Residual risk: the hash and bare forms
+ * cannot be disambiguated by pattern alone (an attacker team named after a
+ * trailing part of the scope); keep VERCEL_PREVIEW_SCOPE unset to disable.
  */
 function buildPreviewRegExp(project: string, scope: string): RegExp {
   const p = escapeRegExp(project);
   const s = escapeRegExp(scope);
-  return new RegExp(`^https://${p}(-git-[a-z0-9-]+|-[a-z0-9]{9})?-${s}\\.vercel\\.app$`);
+  return new RegExp(`^https://${p}(-git-[a-z0-9]+|-[a-z0-9]{9})?-${s}\\.vercel\\.app$`);
 }
 
 export function buildOriginPredicate(opts: OriginPredicateOptions): OriginPredicate {
