@@ -5,6 +5,7 @@
  */
 
 import { body } from 'express-validator';
+import { SUPPORTED_CURRENCIES } from '../../constants/currencies';
 
 /**
  * Validation rules for updating profile
@@ -37,8 +38,13 @@ export const updatePreferencesValidation = [
   body('currency')
     .optional()
     .isString()
-    .isLength({ min: 3, max: 3 })
-    .withMessage('Currency must be a 3-letter code (e.g., USD, EUR)'),
+    .withMessage('Currency must be a string')
+    .trim()
+    .customSanitizer((value: unknown) =>
+      typeof value === 'string' ? value.toUpperCase() : value
+    )
+    .isIn([...SUPPORTED_CURRENCIES])
+    .withMessage(`Currency must be one of: ${SUPPORTED_CURRENCIES.join(', ')}`),
 
   body('budgetPerWeekCents')
     .optional()
