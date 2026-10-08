@@ -117,7 +117,7 @@ export function ProfileSettings() {
               id="firstName"
               type="text"
               {...register('firstName')}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+              className="block min-h-11 w-full text-base lg:text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               placeholder="John"
             />
           </div>
@@ -139,7 +139,7 @@ export function ProfileSettings() {
               id="lastName"
               type="text"
               {...register('lastName')}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+              className="block min-h-11 w-full text-base lg:text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               placeholder="Doe"
             />
           </div>
@@ -161,7 +161,7 @@ export function ProfileSettings() {
               id="email"
               type="email"
               {...register('email')}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+              className="block min-h-11 w-full text-base lg:text-sm pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               placeholder="john@example.com"
             />
           </div>
@@ -171,16 +171,17 @@ export function ProfileSettings() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <div className="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             onClick={() => reset()}
             disabled={!isDirty || loading}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={!isDirty || loading}>
+          <Button type="submit" className="w-full sm:w-auto" disabled={!isDirty || loading}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -189,7 +190,7 @@ export function ProfileSettings() {
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Save Changes
+                Save Profile
               </>
             )}
           </Button>

@@ -108,7 +108,7 @@ export function PasswordSettings() {
               id="currentPassword"
               type={showCurrent ? 'text' : 'password'}
               {...register('currentPassword')}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+              className="block min-h-11 w-full text-base lg:text-sm pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               placeholder="Enter current password"
             />
             <button
@@ -141,7 +141,7 @@ export function PasswordSettings() {
               id="newPassword"
               type={showNew ? 'text' : 'password'}
               {...register('newPassword')}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+              className="block min-h-11 w-full text-base lg:text-sm pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               placeholder="Enter new password"
             />
             <button
@@ -197,7 +197,7 @@ export function PasswordSettings() {
               id="confirmPassword"
               type={showConfirm ? 'text' : 'password'}
               {...register('confirmPassword')}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+              className="block min-h-11 w-full text-base lg:text-sm pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
               placeholder="Confirm new password"
             />
             <button
@@ -237,16 +237,17 @@ export function PasswordSettings() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <div className="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
+            className="w-full sm:w-auto"
             onClick={() => reset()}
             disabled={loading}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" className="w-full sm:w-auto" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -255,7 +256,7 @@ export function PasswordSettings() {
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                Change Password
+                Update Password
               </>
             )}
           </Button>

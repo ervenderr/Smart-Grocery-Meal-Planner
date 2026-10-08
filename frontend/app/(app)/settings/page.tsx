@@ -54,9 +54,35 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      {/* Mobile section chips */}
+      <div
+        role="group"
+        aria-label="Settings sections"
+        className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:hidden"
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => setActiveTab(tab.id)}
+              className={`h-11 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors ${
+                isActive
+                  ? 'border border-primary-500 bg-primary-50 text-primary-700'
+                  : 'border border-gray-300 text-gray-700'
+              }`}
+            >
+              {tab.name}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Sidebar Navigation */}
-        <Card className="p-4 lg:col-span-1 h-fit">
+        <Card className="hidden h-fit p-4 lg:col-span-1 lg:block">
           <nav className="space-y-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -103,7 +129,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Content Area */}
-        <div className="lg:col-span-3">
+        <div className="min-w-0 lg:col-span-3">
           {renderTabContent()}
         </div>
       </div>

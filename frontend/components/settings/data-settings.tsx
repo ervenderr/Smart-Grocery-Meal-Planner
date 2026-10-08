@@ -155,7 +155,7 @@ export function DataSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* Data Statistics */}
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
@@ -198,11 +198,12 @@ export function DataSettings() {
           Download your data in JSON or CSV format
         </p>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Button
             onClick={() => exportData('json')}
             disabled={loading}
             variant="outline"
+            className="min-h-11 w-full sm:w-auto"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -215,6 +216,7 @@ export function DataSettings() {
             onClick={() => exportData('csv')}
             disabled={loading}
             variant="outline"
+            className="min-h-11 w-full sm:w-auto"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -226,7 +228,7 @@ export function DataSettings() {
         </div>
 
         <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
+          <p className="break-words text-sm text-blue-800">
             <strong>Note:</strong> Your exported data includes all recipes, meal plans, and pantry items.
             You can use this backup to import your data later or for record keeping.
           </p>
@@ -247,7 +249,7 @@ export function DataSettings() {
           <Button
             onClick={() => setShowDeleteConfirm(true)}
             variant="outline"
-            className="border-red-300 text-red-700 hover:bg-red-50"
+            className="min-h-11 w-full border-red-300 text-red-700 hover:bg-red-50 sm:w-auto"
           >
             <Trash2 className="h-4 w-4" />
             Delete Account
@@ -268,16 +270,17 @@ export function DataSettings() {
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder="DELETE MY ACCOUNT"
-              className="block w-full px-3 py-2 border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+              className="block min-h-11 w-full px-3 py-2 text-base lg:text-sm border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500"
             />
 
-            <div className="flex gap-3">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button
                 onClick={() => {
                   setShowDeleteConfirm(false);
                   setDeleteConfirmText('');
                 }}
                 variant="outline"
+                className="min-h-11 w-full sm:w-auto"
                 disabled={loading}
               >
                 Cancel
@@ -285,7 +288,7 @@ export function DataSettings() {
               <Button
                 onClick={deleteAccount}
                 disabled={loading || deleteConfirmText !== 'DELETE MY ACCOUNT'}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="min-h-11 w-full bg-red-600 hover:bg-red-700 text-white sm:w-auto"
               >
                 {loading ? (
                   <>

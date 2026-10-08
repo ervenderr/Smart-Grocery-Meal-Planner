@@ -9,7 +9,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Profile</h1>
           <p className="mt-1 text-sm text-gray-600">
@@ -19,15 +19,15 @@ export default function ProfilePage() {
       </div>
 
       <Card className="p-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-500 text-white text-2xl font-bold">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white text-2xl font-bold">
             {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+          <div className="min-w-0">
+            <h2 className="break-words text-xl font-semibold text-gray-900">
               {user?.firstName} {user?.lastName}
             </h2>
-            <p className="text-sm text-gray-600">{user?.email}</p>
+            <p className="break-words text-sm text-gray-600">{user?.email}</p>
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700">Email</label>
-            <p className="mt-1 text-gray-900">{user?.email}</p>
+            <p className="mt-1 break-words text-gray-900">{user?.email}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700">Member Since</label>
