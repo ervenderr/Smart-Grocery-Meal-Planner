@@ -13,7 +13,7 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
 - [x] **Phase 1: Secure Foundation & Railway Deploy** - Patched Next.js, live Railway API + Postgres, deployed frontend working end to end, CI (completed 2026-10-08)
 - [x] **Phase 2: Reliable AI Suggestions** - Validated, cached, quota-guarded AI through one env-configured OpenAI-compatible provider (Dahl default) with graceful degradation, plus food data lookups (completed 2026-10-08)
 - [x] **Phase 3: Mobile-First Shell** - Bottom nav, 375px-ready screens, home-screen install, onboarding, empty states, currency (completed 2026-10-08)
-- [ ] **Phase 4: Persistent Shopping List** - Backend-stored lists with manual items, check-off, grouping, shopping mode, spend tracking
+- [x] **Phase 4: Persistent Shopping List** - Backend-stored lists with manual items, check-off, grouping, shopping mode, spend tracking (completed 2026-10-08)
 - [ ] **Phase 5: Pantry-Aware Intelligence** - Ingredient parsing, merged and pantry-subtracted lists, staples, "Cook this first"
 - [ ] **Phase 6: Capture Loops** - Barcode scan, bought-it and cooked-it pantry updates, quick pantry edits
 
@@ -105,17 +105,17 @@ Plans:
   5. User sees estimated vs actual spend for a list
 **Plans**: 12 plans
 Plans:
-- [ ] 04-01-PLAN.md — Backend: one-active-list migration (dedupe + partial unique index), shopping contracts, lazy GET /shopping/list
-- [ ] 04-02-PLAN.md — Frontend pure helpers: shared vocab, category grouping, estimated vs actual totals, strict item input parsing
-- [ ] 04-03-PLAN.md — Frontend contract: shopping types, API client, query keys, immutable cache helpers
-- [ ] 04-04-PLAN.md — Backend: item POST/PATCH/DELETE with ownership, bounds, 300 cap, inferCategory, per-user shopping limiter
-- [ ] 04-05-PLAN.md — Frontend: persisted list page with quick-add, optimistic check-off, category sections, edit sheet, undo
-- [ ] 04-06-PLAN.md — Backend: fixed meal plan aggregation, pure merge, POST /shopping/generate
-- [ ] 04-07-PLAN.md — Frontend: add a meal plan to the list from Shopping and Meal Plans pages
-- [ ] 04-08-PLAN.md — Backend: finish shopping (carry/discard) into history, GET /shopping/history
-- [ ] 04-09-PLAN.md — Frontend: sticky estimated vs actual bar, finish sheet, past trips
-- [ ] 04-10-PLAN.md — Frontend: shopping mode with Screen Wake Lock and 56px check rows
-- [ ] 04-11-PLAN.md — Ship: smoke check 12, gates, Railway deploy first, then push main (CI + Vercel)
+- [x] 04-01-PLAN.md — Backend: one-active-list migration (dedupe + partial unique index), shopping contracts, lazy GET /shopping/list
+- [x] 04-02-PLAN.md — Frontend pure helpers: shared vocab, category grouping, estimated vs actual totals, strict item input parsing
+- [x] 04-03-PLAN.md — Frontend contract: shopping types, API client, query keys, immutable cache helpers
+- [x] 04-04-PLAN.md — Backend: item POST/PATCH/DELETE with ownership, bounds, 300 cap, inferCategory, per-user shopping limiter
+- [x] 04-05-PLAN.md — Frontend: persisted list page with quick-add, optimistic check-off, category sections, edit sheet, undo
+- [x] 04-06-PLAN.md — Backend: fixed meal plan aggregation, pure merge, POST /shopping/generate
+- [x] 04-07-PLAN.md — Frontend: add a meal plan to the list from Shopping and Meal Plans pages
+- [x] 04-08-PLAN.md — Backend: finish shopping (carry/discard) into history, GET /shopping/history
+- [x] 04-09-PLAN.md — Frontend: sticky estimated vs actual bar, finish sheet, past trips
+- [x] 04-10-PLAN.md — Frontend: shopping mode with Screen Wake Lock and 56px check rows
+- [x] 04-11-PLAN.md — Ship: smoke check 12, gates, Railway deploy first, then push main (CI + Vercel)
 - [ ] 04-12-PLAN.md — Real-phone shopping mode and cross-device check (deferrable checkpoint)
 **UI hint**: yes
 
@@ -157,6 +157,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 | 1. Secure Foundation & Railway Deploy | 6/6 | Complete    | 2026-10-08 |
 | 2. Reliable AI Suggestions | 8/8 | Complete    | 2026-10-08 |
 | 3. Mobile-First Shell | 13/14 | Complete    | 2026-10-08 |
-| 4. Persistent Shopping List | 0/TBD | Not started | - |
+| 4. Persistent Shopping List | 11/12 | Complete    | 2026-10-08 |
 | 5. Pantry-Aware Intelligence | 0/TBD | Not started | - |
 | 6. Capture Loops | 0/TBD | Not started | - |

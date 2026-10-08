@@ -38,11 +38,11 @@
 
 ### Shopping List (SHOP)
 
-- [ ] **SHOP-01**: Shopping lists are stored in the backend (new `shopping` module wired to the existing model) and survive reload and device changes
-- [ ] **SHOP-02**: User can add, edit, remove and check off items manually, and check-offs persist
-- [ ] **SHOP-03**: User can generate a list from a meal plan and it is saved as a list
-- [ ] **SHOP-04**: Items are grouped by store category, and a shopping mode keeps the screen awake with large check targets
-- [ ] **SHOP-05**: User sees estimated vs actual spend for a list
+- [x] **SHOP-01**: Shopping lists are stored in the backend (new `shopping` module wired to the existing model) and survive reload and device changes
+- [x] **SHOP-02**: User can add, edit, remove and check off items manually, and check-offs persist
+- [x] **SHOP-03**: User can generate a list from a meal plan and it is saved as a list
+- [x] **SHOP-04**: Items are grouped by store category, and a shopping mode keeps the screen awake with large check targets
+- [x] **SHOP-05**: User sees estimated vs actual spend for a list
 
 ### Pantry-aware Intelligence (INT)
 
@@ -92,7 +92,7 @@
 | DEP-01..09 | Phase 1 | Complete |
 | AI-01..07 | Phase 2 | Complete (browser UAT deferred) |
 | MOB-01..06 | Phase 3 | Complete (real-phone walkthrough deferred) |
-| SHOP-01..05 | Phase 4 | Pending |
+| SHOP-01..05 | Phase 4 | Complete (real-phone check deferred) |
 | INT-01..05 | Phase 5 | Pending |
 | CAP-01..05 | Phase 6 | Pending |
 
