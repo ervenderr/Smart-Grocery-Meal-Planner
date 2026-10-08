@@ -2,14 +2,24 @@
  * AI orchestrator: provider call -> tolerant extract -> Zod validate ->
  * exactly one repair call -> AI_UNAVAILABLE.
  *
- * Plan 02-04 wraps runAiFeature with cache + quota; userId and cacheInputs are
- * accepted now for that purpose and intentionally unused here.
+ * runAiFeature wraps that with the cache and quota: cache hit (free, no quota)
+ * -> atomic reserve -> provider -> validated payload cached; failures refund.
  */
 
 import { z } from 'zod';
 import { logger } from '../../config/logger.config';
-import { aiUnavailableError } from './ai.errors';
+import { aiQuotaExceededError, aiUnavailableError } from './ai.errors';
 import { getAiDeps } from './ai.deps';
+import { buildCacheKey } from './ai-cache-key';
+import { getCached, pruneExpired, setCached } from './ai-cache.repository';
+import {
+  QuotaExceededError,
+  nextUtcMidnight,
+  pruneOldUsage,
+  refundQuota,
+  reserveQuota,
+  utcDay,
+} from './ai-quota.repository';
 import { extractJson } from './json-extract';
 import { LlmMessage, ProviderError } from './providers/llm-provider';
 
@@ -74,14 +84,107 @@ async function callProviderWithRepair<T>(req: AiRunRequest<T>): Promise<T> {
   throw new ProviderError('bad_response');
 }
 
-export async function runAiFeature<T>(req: AiRunRequest<T>): Promise<{ data: T; cached: boolean }> {
-  if (!getAiDeps().provider.isConfigured()) throw aiUnavailableError();
+const HOUR_MS = 3_600_000;
+const CACHE_TTL_MS: Record<AiFeature, number> = {
+  recipes: 24 * HOUR_MS,
+  meal_plan: 24 * HOUR_MS,
+  substitutions: 7 * 24 * HOUR_MS,
+};
+const PRUNE_ONE_IN = 20;
+const USAGE_KEEP_DAYS = 14;
+
+function describeError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function readCache<T>(key: string, now: Date, schema: z.ZodType<T>): Promise<T | null> {
+  const stored = await getCached(key, now);
+  if (stored === null) return null;
+  const parsed = schema.safeParse(stored);
+  return parsed.success ? parsed.data : null;
+}
+
+async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<string> {
+  const day = utcDay(now);
+  const { limits } = getAiDeps();
   try {
-    const data = await callProviderWithRepair(req);
-    return { data, cached: false };
+    const counts = await reserveQuota({
+      userId: req.userId,
+      day,
+      userLimit: limits.userDaily,
+      globalLimit: limits.globalDaily,
+    });
+    logger.info('AI quota reserved', { feature: req.feature, ...counts });
+    return day;
   } catch (error) {
+    if (error instanceof QuotaExceededError) {
+      throw aiQuotaExceededError({
+        scope: error.scope,
+        limit: error.limit,
+        resetsAt: nextUtcMidnight(now),
+      });
+    }
+    logger.error('AI quota reserve failed', { feature: req.feature, error: describeError(error) });
+    throw aiUnavailableError();
+  }
+}
+
+async function safeRefund(userId: string, day: string): Promise<void> {
+  try {
+    await refundQuota({ userId, day });
+  } catch (error) {
+    logger.error('AI quota refund failed', { error: describeError(error) });
+  }
+}
+
+function pruneSometimes(now: Date): void {
+  if (Math.floor(Math.random() * PRUNE_ONE_IN) !== 0) return;
+  Promise.all([pruneExpired(now), pruneOldUsage(now, USAGE_KEEP_DAYS)]).catch((error) =>
+    logger.warn('AI housekeeping failed', { error: describeError(error) })
+  );
+}
+
+async function storeResult<T>(req: AiRunRequest<T>, key: string, data: T, now: Date): Promise<void> {
+  try {
+    await setCached({
+      key,
+      feature: req.feature,
+      schemaVersion: req.schemaVersion,
+      payload: data,
+      ttlMs: CACHE_TTL_MS[req.feature],
+      now,
+    });
+    pruneSometimes(now);
+  } catch (error) {
+    logger.warn('AI cache write failed', { feature: req.feature, error: describeError(error) });
+  }
+}
+
+async function generate<T>(req: AiRunRequest<T>, day: string): Promise<T> {
+  try {
+    return await callProviderWithRepair(req);
+  } catch (error) {
+    await safeRefund(req.userId, day);
     const kind = error instanceof ProviderError ? error.kind : 'unexpected';
     logger.warn('AI feature failed', { feature: req.feature, kind });
     throw aiUnavailableError();
   }
+}
+
+export async function runAiFeature<T>(req: AiRunRequest<T>): Promise<{ data: T; cached: boolean }> {
+  const deps = getAiDeps();
+  if (!deps.provider.isConfigured()) throw aiUnavailableError();
+
+  const now = deps.now();
+  const key = buildCacheKey(req.feature, req.schemaVersion, req.cacheInputs);
+  const hit = await readCache(key, now, req.schema);
+  if (hit !== null) {
+    logger.info('AI cache hit', { feature: req.feature, cached: true });
+    return { data: hit, cached: true };
+  }
+
+  const day = await reserveOrThrow(req, now);
+  const data = await generate(req, day);
+  await storeResult(req, key, data, now);
+  return { data, cached: false };
 }
