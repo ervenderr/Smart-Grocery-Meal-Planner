@@ -138,8 +138,14 @@ pass "7e pantry get after delete returns 404"
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
   API_HOST="${API#https://}"
-  html="$(curl -sS --max-time 30 "$FE")" || fail "8 frontend: could not fetch $FE"
-  js_paths="$(printf '%s' "$html" | grep -oE '/_next/static/[^"'"'"' )\\]+\.js' | sort -u)"
+  # The landing page does not load the API client chunk, so scan the auth pages too.
+  js_paths=""
+  for page in "" "/login" "/signup"; do
+    html="$(curl -sS --max-time 30 "$FE$page")" || fail "8 frontend: could not fetch $FE$page"
+    js_paths="$js_paths
+$(printf '%s' "$html" | grep -oE '/_next/static/[^"'"'"' )\\]+\.js')"
+  done
+  js_paths="$(printf '%s\n' "$js_paths" | sed '/^$/d' | sort -u)"
   [ -n "$js_paths" ] || fail "8 frontend: no /_next/static js found in HTML"
   found_api=false
   while IFS= read -r p; do
