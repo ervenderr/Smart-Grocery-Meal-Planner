@@ -532,3 +532,30 @@ model ZapierWebhook {
   @@index([userId, eventType, isActive])
   @@map("zapier_webhooks")
 }
+
+// AI quota counters. scope is 'global' or 'user:<id>' (not a relation: the
+// global row is not a user). updated_at has a plain default because the raw
+// upsert in ai-quota.repository.ts bypasses the Prisma client.
+model AiUsage {
+  scope     String
+  day       DateTime @db.Date
+  count     Int      @default(0)
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@id([scope, day])
+  @@map("ai_usage")
+}
+
+// Validated AI payload cache, keyed by a versioned content hash.
+model AiCache {
+  key           String   @id
+  feature       String
+  schemaVersion Int      @map("schema_version")
+  payload       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+  expiresAt     DateTime @map("expires_at")
+
+  @@index([expiresAt])
+  @@index([feature])
+  @@map("ai_cache")
+}
