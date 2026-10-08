@@ -2,7 +2,9 @@
 # Production smoke test for the Kitcha API (and optionally the Vercel frontend bundle).
 #
 # Usage:
-#   API=https://<host>.up.railway.app scripts/smoke-prod.sh [--api-only]
+#   API=https://<host>.up.railway.app scripts/smoke-prod.sh [--api-only] [--ai-live]
+#   --api-only  skip the frontend bundle check (8)
+#   --ai-live   make real (cached-twice) provider calls in check (9); needs AI_API_KEY on the server
 #   FE=https://kitcha-ai.vercel.app (optional, default shown)
 #
 # Requires curl and jq. Exits non-zero on the first failing check.
@@ -14,10 +16,12 @@ API="${API:-}"
 FE="${FE:-https://kitcha-ai.vercel.app}"
 PREVIEW_ORIGIN="https://kitcha-git-main-ervenderrs-projects.vercel.app"
 API_ONLY=false
+AI_LIVE=false
 
 for arg in "$@"; do
   case "$arg" in
     --api-only) API_ONLY=true ;;
+    --ai-live) AI_LIVE=true ;;
     *) echo "Unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -143,6 +147,64 @@ pass "7d pantry delete returns 200"
 code="$(req GET "$API/api/v1/pantry/$ITEM_ID" -H "$AUTH")" || fail "7 pantry get-after-delete: request failed"
 [ "$code" = "404" ] || fail "7 pantry get-after-delete: expected 404, got $code"
 pass "7e pantry get after delete returns 404"
+
+# (9) AI contract
+code="$(req GET "$API/api/v1/ai/status" -H "$AUTH")" || fail "9 ai status: request failed"
+[ "$code" = "200" ] || fail "9 ai status: expected 200, got $code"
+[ -n "$(jq -r '.provider // empty' "$BODY_FILE")" ] || fail "9 ai status: provider missing"
+AI_AVAILABLE="$(jq -r '.available' "$BODY_FILE")"
+case "$AI_AVAILABLE" in true|false) ;; *) fail "9 ai status: available is not a boolean" ;; esac
+pass "9a ai status returns 200 (provider $(jq -r '.provider' "$BODY_FILE"), available=$AI_AVAILABLE)"
+
+AI_ITEM_PAYLOAD="$(jq -n --arg n "smoke-rice-$EPOCH" '{ingredientName:$n,quantity:2,unit:"pieces",category:"other"}')"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "Content-Type: application/json" -d "$AI_ITEM_PAYLOAD")" || fail "9 ai pantry item: request failed"
+[ "$code" = "201" ] || fail "9 ai pantry item: expected 201, got $code"
+AI_ITEM_ID="$(jq -r '.id // .data.id // .item.id // empty' "$BODY_FILE")"
+[ -n "$AI_ITEM_ID" ] || fail "9 ai pantry item: no id in response"
+
+AI_BODY='{}'
+if [ "$AI_AVAILABLE" = "false" ]; then
+  code="$(req POST "$API/api/v1/ai/suggest-recipes" -H "$AUTH" -H "Content-Type: application/json" -d "$AI_BODY")" || fail "9 ai unavailable: request failed"
+  [ "$code" = "503" ] || fail "9 ai unavailable: expected 503, got $code"
+  [ "$(jq -r '.code' "$BODY_FILE")" = "AI_UNAVAILABLE" ] || fail "9 ai unavailable: code is not AI_UNAVAILABLE"
+  [ -n "$(jq -r '.message // empty' "$BODY_FILE")" ] || fail "9 ai unavailable: message is empty"
+  pass "9 AI unavailable contract (503 AI_UNAVAILABLE with message)"
+elif [ "$AI_LIVE" = "false" ]; then
+  echo "SKIP: 9 live AI call (pass --ai-live)"
+else
+  code="$(req POST "$API/api/v1/ai/suggest-recipes" --max-time 100 -H "$AUTH" -H "Content-Type: application/json" -d "$AI_BODY")" || fail "9 ai live: request failed"
+  [ "$code" = "200" ] || fail "9 ai live: expected 200, got $code"
+  [ "$(jq -r '.suggestions | type' "$BODY_FILE")" = "array" ] || fail "9 ai live: suggestions is not an array"
+  pass "9b live suggest-recipes returns 200 with suggestions array"
+  code="$(req POST "$API/api/v1/ai/suggest-recipes" --max-time 100 -H "$AUTH" -H "Content-Type: application/json" -d "$AI_BODY")" || fail "9 ai live repeat: request failed"
+  [ "$code" = "200" ] || fail "9 ai live repeat: expected 200, got $code"
+  [ "$(jq -r '.cached' "$BODY_FILE")" = "true" ] || fail "9 ai live repeat: response was not cached"
+  pass "9c identical repeat request is served from cache (cached=true)"
+fi
+
+code="$(req DELETE "$API/api/v1/pantry/$AI_ITEM_ID" -H "$AUTH")" || fail "9 ai pantry cleanup: request failed"
+[ "$code" = "200" ] || fail "9 ai pantry cleanup: expected 200, got $code"
+
+# (10) food lookups
+code="$(req GET "$API/api/v1/food/barcode/3017620422003" -H "$AUTH")" || fail "10 barcode: request failed"
+if [ "$code" = "429" ] && [ "$(jq -r '.code' "$BODY_FILE")" = "LOOKUP_THROTTLED" ]; then
+  echo "WARN: 10a barcode lookup throttled (LOOKUP_THROTTLED), not a failure"
+else
+  [ "$code" = "200" ] || fail "10 barcode: expected 200, got $code"
+  [ "$(jq -r '.attribution.license' "$BODY_FILE")" = "ODbL" ] || fail "10 barcode: attribution.license is not ODbL"
+  [ -n "$(jq -r '.product.name // empty' "$BODY_FILE")" ] || fail "10 barcode: product.name is empty"
+  pass "10a barcode lookup returns 200 with ODbL attribution"
+fi
+
+code="$(req GET "$API/api/v1/food/nutrition?query=apple" -H "$AUTH")" || fail "10 nutrition: request failed"
+if [ "$code" = "200" ]; then
+  [ "$(jq -r '.attribution.license' "$BODY_FILE")" = "CC0" ] || fail "10 nutrition: attribution.license is not CC0"
+  pass "10b nutrition lookup returns 200 with CC0 attribution"
+elif [ "$code" = "503" ] && [ "$(jq -r '.code' "$BODY_FILE")" = "LOOKUP_UNAVAILABLE" ]; then
+  pass "10b nutrition lookup unavailable without USDA key (503 LOOKUP_UNAVAILABLE)"
+else
+  fail "10 nutrition: unexpected status $code"
+fi
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
