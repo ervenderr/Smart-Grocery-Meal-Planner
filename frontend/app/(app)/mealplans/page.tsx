@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Calendar, ShoppingCart, Sparkles, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,12 +13,16 @@ import { MealPlanDetailModal } from '@/components/mealplans/meal-plan-detail-mod
 import { MealPlanCard } from '@/components/mealplans/meal-plan-card';
 import { AIMealPlanModal } from '@/components/ai/ai-meal-plan-modal';
 import { mealPlanApi } from '@/lib/api/mealplans';
+import { useGenerateShoppingList } from '@/lib/hooks/use-generate-shopping-list';
 import toast from 'react-hot-toast';
 import type { MealPlan } from '@/types/mealplan.types';
 import type { MealPlanSuggestion } from '@/lib/api/ai';
 
 export default function MealPlansPage() {
   const { format } = useCurrency();
+  const router = useRouter();
+  const generateList = useGenerateShoppingList();
+  const [selectedPreviewPlan, setSelectedPreviewPlan] = useState<MealPlan | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,8 +87,9 @@ export default function MealPlansPage() {
     try {
       const data = await mealPlanApi.getShoppingList(mealPlan.id);
       setShoppingListData(data);
+      setSelectedPreviewPlan(mealPlan);
       setShowShoppingList(true);
-      toast.success('Shopping list generated!');
+      
     } catch (error: any) {
       console.error('Generate shopping list error:', error);
       toast.error('Failed to generate shopping list');
@@ -125,7 +131,9 @@ export default function MealPlansPage() {
                 <ShoppingCart className="h-5 w-5 text-primary-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-primary-900">Shopping List Generated</h3>
+                <h3 className="font-semibold text-primary-900">
+                  Ingredients for {selectedPreviewPlan?.name ?? 'this plan'}
+                </h3>
                 <p className="text-sm text-primary-700">
                   {shoppingListData.items.length} items
                   {shoppingListData.totalEstimatedCostCents &&
@@ -141,6 +149,24 @@ export default function MealPlansPage() {
               Close
             </button>
           </div>
+          {selectedPreviewPlan && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              <Button
+                className="text-sm"
+                disabled={generateList.isPending}
+                onClick={() =>
+                  generateList.mutate(selectedPreviewPlan.id)
+                }
+              >
+                {generateList.isPending ? 'Adding...' : 'Add to my list'}
+              </Button>
+              {generateList.isSuccess && generateList.variables === selectedPreviewPlan.id && (
+                <Button variant="outline" className="text-sm" onClick={() => router.push('/shopping')}>
+                  Open list
+                </Button>
+              )}
+            </div>
+          )}
           <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto">
             <div className="space-y-2">
               {shoppingListData.items.map((item: any, index: number) => (
@@ -150,7 +176,7 @@ export default function MealPlansPage() {
                     <span className="font-medium">{item.quantity} {item.unit}</span>
                     <span className="text-gray-700"> {item.ingredientName}</span>
                     {item.recipes && item.recipes.length > 0 && (
-                      <span className="text-gray-500 text-xs"> (from {item.recipes.join(', ')})</span>
+                      <span className="text-gray-500 text-sm"> (from {item.recipes.join(', ')})</span>
                     )}
                   </div>
                 </div>

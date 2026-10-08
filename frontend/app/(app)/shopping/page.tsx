@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { EmptyState } from '@/components/common/empty-state';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { CategorySection } from '@/components/shopping/category-section';
+import { GenerateFromPlan } from '@/components/shopping/generate-from-plan';
 import { ItemEditSheet } from '@/components/shopping/item-edit-sheet';
 import { QUICK_ADD_INPUT_ID, QuickAdd } from '@/components/shopping/quick-add';
 import { ShoppingItemRow } from '@/components/shopping/shopping-item-row';
@@ -114,6 +115,8 @@ export default function ShoppingPage() {
         onAdd={(input) => addItem.mutate(input)}
         isFull={items.length >= MAX_ITEMS_PER_LIST}
       />
+
+      <GenerateFromPlan defaultExpanded={items.length === 0} />
 
       {items.length === 0 ? (
         <EmptyState
