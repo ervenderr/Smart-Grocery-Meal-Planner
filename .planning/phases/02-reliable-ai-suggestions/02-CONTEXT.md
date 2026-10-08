@@ -27,7 +27,10 @@ Users get dependable, safe AI suggestions that stay within free-tier limits and 
 ### Safety and quality
 - Zod schema for every AI response with one repair retry; invalid output is never shown or cached.
 - Prompt hygiene: pantry/recipe text is delimited as data in prompts; dietary/allergen filters enforced in code on the AI output (drop violating items), not only in the prompt.
-- Send the provider only food-related data (ingredients, preferences, dietary flags, budget); never emails, names or tokens.
+- Send the provider only food-related data (ingredient names, cuisine/meal-type hints, budget); never emails, names, tokens, allergies, medical or religion-linked dietary flags (Dahl terms forbid special-category data). Dietary/allergen restrictions (saved `UserPreference.dietaryRestrictions` plus request-level) are enforced ONLY in code on the AI output, via a pure keyword filter applied after the cache read.
+- OFF User-Agent contact: use the public repo URL `https://github.com/ervenderr/Smart-Grocery-Meal-Planner` via `OFF_CONTACT` env default (not the user's email).
+- Attribution: reusable attribution UI component plus a minimal barcode-number text lookup in the add-pantry modal (camera scanning stays in Phase 6).
+- Frontend error contract: AI error responses carry `message`, `error` and `code`; update AI modals to show server messages.
 - Fix the pre-existing `ERR_ERL_KEY_GEN_IPV6` warning in `backend/src/middleware/rateLimiter.ts` (AI limiter keyGenerator) as part of this phase.
 - Open Food Facts and USDA FoodData lookups (AI-07): server-side only, required User-Agent, respect 15 req/min OFF limit, cache results, show attribution (ODbL for OFF) in the UI. USDA needs a free key from api.data.gov (user sets `USDA_API_KEY` later; code must degrade gracefully without it).
 
