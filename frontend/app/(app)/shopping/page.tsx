@@ -27,6 +27,7 @@ import {
 } from '@/lib/hooks/use-shopping-list';
 import { groupItems } from '@/lib/shopping/grouping';
 import { toCreateInput } from '@/lib/shopping/list-cache';
+import { getShoppingLoadState } from '@/lib/shopping/load-state';
 import { MAX_ITEMS_PER_LIST } from '@/lib/shopping/vocab';
 import type { CarryOverMode, ShoppingItem } from '@/types/shopping.types';
 
@@ -103,7 +104,9 @@ export default function ShoppingPage() {
     );
   };
 
-  if (isLoading) {
+  const loadState = getShoppingLoadState({ isLoading, isError, hasData: list !== undefined });
+
+  if (loadState === 'loading') {
     return (
       <div className="flex justify-center py-12">
         <LoadingSpinner size="lg" />
@@ -111,7 +114,7 @@ export default function ShoppingPage() {
     );
   }
 
-  if (isError) {
+  if (loadState === 'error') {
     return (
       <EmptyState
         icon={AlertCircle}
@@ -131,6 +134,24 @@ export default function ShoppingPage() {
           {items.length} {items.length === 1 ? 'item' : 'items'}
         </p>
       </header>
+
+      {loadState === 'refresh-failed' && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+        >
+          <span>
+            Couldn&apos;t refresh your list. {getApiErrorMessage(error, 'Showing the last saved version.')}
+          </span>
+          <button
+            type="button"
+            className="min-h-11 shrink-0 px-2 font-semibold text-amber-900 underline"
+            onClick={() => void refetch()}
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       <ShoppingModeToggle
         enabled={shoppingMode}
