@@ -11,6 +11,8 @@ export interface LlmMessage {
 export interface LlmCompleteOptions {
   readonly maxTokens: number;
   readonly temperature: number;
+  /** Optional per-call cap; the effective timeout is min(configured, this). */
+  readonly timeoutMs?: number;
 }
 
 export interface LlmProvider {

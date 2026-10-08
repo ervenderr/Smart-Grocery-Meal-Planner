@@ -20,7 +20,7 @@ import {
   reserveQuota,
   utcDay,
 } from './ai-quota.repository';
-import { extractJson } from './json-extract';
+import { extractJson, stripReasoning } from './json-extract';
 import { LlmMessage, ProviderError } from './providers/llm-provider';
 
 export type AiFeature = 'recipes' | 'substitutions' | 'meal_plan';
@@ -40,6 +40,8 @@ type ParseResult<T> = { ok: true; data: T } | { ok: false; problems: string };
 
 const MAX_REPLY_ECHO = 6000;
 const MAX_PROBLEMS = 1500;
+/** A repair call is skipped when less than this remains of the total budget. */
+const MIN_REPAIR_BUDGET_MS = 3000;
 
 function parseReply<T>(text: string, schema: z.ZodType<T>): ParseResult<T> {
   let raw: unknown;
@@ -53,6 +55,12 @@ function parseReply<T>(text: string, schema: z.ZodType<T>): ParseResult<T> {
   return { ok: false, problems: z.prettifyError(result.error).slice(0, MAX_PROBLEMS) };
 }
 
+/** Echo only the answer (reasoning removed), keeping the tail where the JSON ends. */
+function echoReply(reply: string): string {
+  const answer = stripReasoning(reply).trim();
+  return answer.length > 0 ? answer.slice(-MAX_REPLY_ECHO) : '(no JSON was produced)';
+}
+
 function repairMessages(
   original: readonly LlmMessage[],
   reply: string,
@@ -60,7 +68,7 @@ function repairMessages(
 ): readonly LlmMessage[] {
   return [
     ...original,
-    { role: 'assistant', content: reply.slice(0, MAX_REPLY_ECHO) },
+    { role: 'assistant', content: echoReply(reply) },
     {
       role: 'user',
       content:
@@ -71,14 +79,20 @@ function repairMessages(
 }
 
 async function callProviderWithRepair<T>(req: AiRunRequest<T>): Promise<T> {
-  const { provider } = getAiDeps();
-  const opts = { maxTokens: req.maxTokens, temperature: req.temperature };
+  const { provider, totalTimeoutMs } = getAiDeps();
+  const deadline = Date.now() + totalTimeoutMs;
+  const base = { maxTokens: req.maxTokens, temperature: req.temperature };
 
-  const first = await provider.complete(req.messages, opts);
+  const first = await provider.complete(req.messages, { ...base, timeoutMs: totalTimeoutMs });
   const parsed = parseReply(first, req.schema);
   if (parsed.ok) return parsed.data;
 
-  const second = await provider.complete(repairMessages(req.messages, first, parsed.problems), opts);
+  const remaining = deadline - Date.now();
+  if (remaining < MIN_REPAIR_BUDGET_MS) throw new ProviderError('timeout');
+  const second = await provider.complete(repairMessages(req.messages, first, parsed.problems), {
+    ...base,
+    timeoutMs: remaining,
+  });
   const repaired = parseReply(second, req.schema);
   if (repaired.ok) return repaired.data;
   throw new ProviderError('bad_response');

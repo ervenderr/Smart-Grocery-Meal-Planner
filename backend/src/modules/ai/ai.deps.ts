@@ -12,6 +12,8 @@ export interface AiDeps {
   readonly provider: LlmProvider;
   readonly limits: { readonly userDaily: number; readonly globalDaily: number };
   readonly now: () => Date;
+  /** Overall budget for one feature run (initial call plus repair). */
+  readonly totalTimeoutMs: number;
 }
 
 let current: AiDeps | undefined;
@@ -28,6 +30,7 @@ function buildDefaultDeps(): AiDeps {
     }),
     limits: { userDaily: config.ai.userDailyLimit, globalDaily: config.ai.globalDailyLimit },
     now: () => new Date(),
+    totalTimeoutMs: config.ai.timeoutMs,
   };
 }
 

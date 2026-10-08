@@ -63,7 +63,7 @@ export class OpenAiCompatibleProvider implements LlmProvider {
           Authorization: `Bearer ${this.cfg.apiKey}`,
         },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(this.cfg.timeoutMs),
+        signal: AbortSignal.timeout(Math.min(this.cfg.timeoutMs, opts.timeoutMs ?? this.cfg.timeoutMs)),
       });
     } catch (error) {
       const name = (error as { name?: string } | null)?.name;
@@ -95,7 +95,9 @@ export class OpenAiCompatibleProvider implements LlmProvider {
   private async readBody(res: Response): Promise<ChatCompletionBody> {
     try {
       return (await res.json()) as ChatCompletionBody;
-    } catch {
+    } catch (error) {
+      const name = (error as { name?: string } | null)?.name;
+      if (name === 'TimeoutError' || name === 'AbortError') throw new ProviderError('timeout');
       throw new ProviderError('bad_response', res.status);
     }
   }
