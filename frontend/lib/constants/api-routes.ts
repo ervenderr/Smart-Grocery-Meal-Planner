@@ -3,7 +3,9 @@
  * Centralized API endpoints for the application
  */
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
 export const API_VERSION = 'v1';
 
 export const API_ROUTES = {
@@ -45,7 +47,8 @@ export const API_ROUTES = {
   SHOPPING: {
     LISTS: `/api/${API_VERSION}/shopping-lists`,
     BY_ID: (id: string) => `/api/${API_VERSION}/shopping-lists/${id}`,
-    ITEM: (listId: string, itemId: string) => `/api/${API_VERSION}/shopping-lists/${listId}/items/${itemId}`,
+    ITEM: (listId: string, itemId: string) =>
+      `/api/${API_VERSION}/shopping-lists/${listId}/items/${itemId}`,
     COMPLETE: (id: string) => `/api/${API_VERSION}/shopping-lists/${id}/complete`,
   },
 
