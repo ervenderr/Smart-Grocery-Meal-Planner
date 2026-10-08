@@ -12,10 +12,12 @@ import { GenerateFromPlan } from '@/components/shopping/generate-from-plan';
 import { ItemEditSheet } from '@/components/shopping/item-edit-sheet';
 import { QUICK_ADD_INPUT_ID, QuickAdd } from '@/components/shopping/quick-add';
 import { ShoppingHistory } from '@/components/shopping/shopping-history';
+import { ShoppingModeToggle } from '@/components/shopping/shopping-mode-toggle';
 import { ShoppingItemRow } from '@/components/shopping/shopping-item-row';
 import { SummaryBar } from '@/components/shopping/summary-bar';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { useCurrency } from '@/lib/currency/currency-provider';
+import { useWakeLock } from '@/lib/hooks/use-wake-lock';
 import { useFinishShopping } from '@/lib/hooks/use-finish-shopping';
 import {
   useAddShoppingItem,
@@ -41,6 +43,8 @@ export default function ShoppingPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [editing, setEditing] = useState<ShoppingItem | null>(null);
+  const [shoppingMode, setShoppingMode] = useState(false);
+  const { active: wakeLockActive } = useWakeLock(shoppingMode);
 
   useEffect(() => {
     // The pre-persistence list lived in sessionStorage; it is dropped, not migrated.
@@ -128,12 +132,22 @@ export default function ShoppingPage() {
         </p>
       </header>
 
-      <QuickAdd
-        onAdd={(input) => addItem.mutate(input)}
-        isFull={items.length >= MAX_ITEMS_PER_LIST}
+      <ShoppingModeToggle
+        enabled={shoppingMode}
+        onChange={setShoppingMode}
+        wakeLockActive={wakeLockActive}
       />
 
-      <GenerateFromPlan defaultExpanded={items.length === 0} />
+      {!shoppingMode && (
+        <>
+          <QuickAdd
+            onAdd={(input) => addItem.mutate(input)}
+            isFull={items.length >= MAX_ITEMS_PER_LIST}
+          />
+
+          <GenerateFromPlan defaultExpanded={items.length === 0} />
+        </>
+      )}
 
       {items.length === 0 ? (
         <EmptyState
@@ -169,6 +183,10 @@ export default function ShoppingPage() {
                     })
                   }
                   onOpen={setEditing}
+                  large={shoppingMode}
+                  onSetActualPrice={(cents) =>
+                    updateItem.mutate({ itemId: item.id, patch: { actualCostCents: cents } })
+                  }
                 />
               ))}
             </CategorySection>
@@ -176,7 +194,7 @@ export default function ShoppingPage() {
         </div>
       )}
 
-      <ShoppingHistory />
+      {!shoppingMode && <ShoppingHistory />}
 
       {items.length > 0 && (
         <SummaryBar
