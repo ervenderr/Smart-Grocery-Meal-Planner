@@ -10,3 +10,11 @@ README.md
 coverage
 .DS_Store
 *.log
+.env.*
+!.env.example
+tests
+*.pem
+*.key
+Dockerfile
+.dockerignore
+docker-compose.yml

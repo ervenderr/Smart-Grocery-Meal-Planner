@@ -29,6 +29,11 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
+# Drop dev-only packages from the runtime payload. `prisma` (CLI used by the
+# entrypoint for migrate deploy) and the generated client stay because they are
+# regular dependencies. --ignore-scripts keeps the generated client untouched.
+RUN npm prune --omit=dev --ignore-scripts
+
 # Production image
 FROM base AS runner
 WORKDIR /app
