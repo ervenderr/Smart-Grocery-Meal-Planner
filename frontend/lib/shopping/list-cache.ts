@@ -10,6 +10,12 @@ import type {
  * All accept `undefined` (empty cache) and return `undefined` for the list.
  */
 
+function mergePatch(item: ShoppingItem, patch: UpdateShoppingItemInput): ShoppingItem {
+  const { category, ...rest } = patch;
+  // The server always stores a category string; a null patch keeps the current one.
+  return { ...item, ...rest, category: category ?? item.category };
+}
+
 export function applyItemPatch(
   list: ShoppingList | undefined,
   itemId: string,
@@ -18,7 +24,7 @@ export function applyItemPatch(
   if (!list) return undefined;
   return {
     ...list,
-    items: list.items.map((item) => (item.id === itemId ? { ...item, ...patch } : item)),
+    items: list.items.map((item) => (item.id === itemId ? mergePatch(item, patch) : item)),
   };
 }
 
