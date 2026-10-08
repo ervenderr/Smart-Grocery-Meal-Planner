@@ -1,164 +1,148 @@
 /**
  * AI Controller
  *
- * Handles HTTP requests for AI-powered features
+ * Handles HTTP requests for AI-powered features. Dietary restrictions
+ * (saved preferences UNION request) are enforced here in code, after the
+ * provider/cache step, and are never forwarded to the provider.
  */
 
 import { Request, Response } from 'express';
-import { AIService } from './ai.service';
 import { PantryService } from '../pantry/pantry.service';
+import { prisma } from '../../config/database.config';
 import { logger } from '../../config/logger.config';
 import { AppError } from '../../middleware/errorHandler';
 import { getAiDeps } from './ai.deps';
+import { normalizeRestrictions } from './dietary-filter';
+import { filterMealPlan, filterRecipeSuggestions, filterSubstitutions } from './features/apply-dietary';
+import { generateMealPlan } from './features/meal-plan';
 import { suggestRecipes } from './features/recipes';
+import { suggestSubstitutions } from './features/substitutions';
 
-const aiService = new AIService();
 const pantryService = new PantryService();
+
+const MAX_REQUEST_RESTRICTIONS = 10;
+const MAX_RESTRICTION_LENGTH = 50;
+
+interface PantryRow {
+  ingredientName: string;
+  quantity: number;
+  unit: string;
+  category: string;
+}
+
+function toStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((v): v is string => typeof v === 'string')
+    .slice(0, MAX_REQUEST_RESTRICTIONS)
+    .map((v) => v.slice(0, MAX_RESTRICTION_LENGTH));
+}
+
+async function loadRestrictions(userId: string, requestList: unknown): Promise<readonly string[]> {
+  const prefs = await prisma.userPreference.findUnique({
+    where: { userId },
+    select: { dietaryRestrictions: true },
+  });
+  return normalizeRestrictions(prefs?.dietaryRestrictions, toStringList(requestList));
+}
+
+async function loadPantry(userId: string): Promise<PantryRow[]> {
+  const response = await pantryService.getItems(userId, {});
+  return response.items.map((item: any) => ({
+    ingredientName: item.ingredientName,
+    quantity: Number(item.quantity),
+    unit: item.unit,
+    category: item.category,
+  }));
+}
 
 export class AIController {
   /**
    * POST /api/v1/ai/suggest-recipes
-   * Get AI-generated recipe suggestions based on pantry items
    */
   async suggestRecipes(req: Request, res: Response): Promise<void> {
     const userId = (req as any).user.id;
-    const { maxPrepTime, usePantry = true } = req.body;
+    const { maxPrepTime, usePantry = true, dietaryRestrictions } = req.body;
 
-    let pantryItems: Array<{
-      ingredientName: string;
-      quantity: number;
-      unit: string;
-      category: string;
-    }> = [];
-    if (usePantry) {
-      const pantryResponse = await pantryService.getItems(userId, {});
-      pantryItems = pantryResponse.items.map((item: any) => ({
-        ingredientName: item.ingredientName,
-        quantity: Number(item.quantity),
-        unit: item.unit,
-        category: item.category,
-      }));
-
-      if (pantryItems.length === 0) {
-        res.status(400).json({
-          error: 'No pantry items found. Please add items to your pantry first.',
-        });
-        return;
-      }
+    const pantryItems = usePantry ? await loadPantry(userId) : [];
+    if (usePantry && pantryItems.length === 0) {
+      res.status(400).json({
+        error: 'No pantry items found. Please add items to your pantry first.',
+      });
+      return;
     }
 
-    // Dietary restrictions are deliberately not forwarded to the provider
-    // (data minimization); they are enforced in code by a later plan.
+    const restrictions = await loadRestrictions(userId, dietaryRestrictions);
     const { suggestions, cached } = await suggestRecipes({ userId, pantryItems, maxPrepTime });
+    const { result, filteredOut } = filterRecipeSuggestions(suggestions, restrictions);
 
     logger.info('AI recipe suggestions generated', {
       service: 'kitcha-api',
       userId,
-      suggestionsCount: suggestions.length,
+      suggestionsCount: result.length,
+      filteredOut,
       cached,
     });
 
-    res.json({ suggestions, pantryItemsUsed: pantryItems.length, cached });
+    res.json({ suggestions: result, pantryItemsUsed: pantryItems.length, filteredOut, cached });
   }
 
   /**
    * POST /api/v1/ai/suggest-substitutions
-   * Get AI-generated ingredient substitution suggestions
    */
   async suggestSubstitutions(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user.id;
-      const { ingredients, budgetCents } = req.body;
+    const userId = (req as any).user.id;
+    const { ingredients, budgetCents, dietaryRestrictions } = req.body;
 
-      if (!aiService.isAvailable()) {
-        res.status(503).json({
-          error: 'AI service is not available. Please configure GEMINI_AI_API_KEY.',
-        });
-        return;
-      }
-
-      if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
-        throw new AppError('Ingredients array is required', 400);
-      }
-
-      // Get AI substitution suggestions
-      const suggestions = await aiService.suggestIngredientSubstitutions(
-        ingredients,
-        budgetCents
-      );
-
-      logger.info('AI substitution suggestions generated', {
-        service: 'kitcha-api',
-        userId,
-        suggestionsCount: suggestions.length,
-      });
-
-      res.json({ suggestions });
-    } catch (error: any) {
-      logger.error('Suggest substitutions error:', error);
-      throw error;
+    if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+      throw new AppError('Ingredients array is required', 400);
     }
+
+    const restrictions = await loadRestrictions(userId, dietaryRestrictions);
+    const { suggestions, cached } = await suggestSubstitutions({ userId, ingredients, budgetCents });
+    const { result, filteredOut } = filterSubstitutions(suggestions, restrictions);
+
+    logger.info('AI substitution suggestions generated', {
+      service: 'kitcha-api',
+      userId,
+      suggestionsCount: result.length,
+      filteredOut,
+      cached,
+    });
+
+    res.json({ suggestions: result, filteredOut, cached });
   }
 
   /**
    * POST /api/v1/ai/generate-meal-plan
-   * Generate a meal plan using AI
    */
   async generateMealPlan(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user.id;
-      const { daysCount = 7, budgetCents, dietaryRestrictions = [], usePantry = true } = req.body;
+    const userId = (req as any).user.id;
+    const { daysCount = 7, budgetCents, dietaryRestrictions, usePantry = true } = req.body;
 
-      if (!aiService.isAvailable()) {
-        res.status(503).json({
-          error: 'AI service is not available. Please configure GEMINI_AI_API_KEY.',
-        });
-        return;
-      }
-
-      if (!budgetCents || budgetCents <= 0) {
-        throw new AppError('Valid budget is required', 400);
-      }
-
-      // Get user's pantry items if requested
-      let pantryItems: any[] = [];
-      if (usePantry) {
-        const pantryResponse = await pantryService.getItems(userId, {});
-        pantryItems = pantryResponse.items.map((item: any) => ({
-          ingredientName: item.ingredientName,
-          quantity: Number(item.quantity),
-          unit: item.unit,
-        }));
-      }
-
-      // Generate AI meal plan
-      const mealPlan = await aiService.generateMealPlan(
-        daysCount,
-        budgetCents,
-        dietaryRestrictions,
-        pantryItems
-      );
-
-      logger.info('AI meal plan generated', {
-        service: 'kitcha-api',
-        userId,
-        daysCount,
-        budget: budgetCents,
-      });
-
-      res.json({
-        mealPlan,
-        pantryItemsUsed: pantryItems.length,
-      });
-    } catch (error: any) {
-      logger.error('Generate meal plan error:', error);
-      throw error;
+    if (!budgetCents || budgetCents <= 0) {
+      throw new AppError('Valid budget is required', 400);
     }
+
+    const pantryItems = usePantry ? await loadPantry(userId) : [];
+    const restrictions = await loadRestrictions(userId, dietaryRestrictions);
+    const { mealPlan, cached } = await generateMealPlan({ userId, daysCount, budgetCents, pantryItems });
+    const { result, filteredOut } = filterMealPlan(mealPlan, restrictions);
+
+    logger.info('AI meal plan generated', {
+      service: 'kitcha-api',
+      userId,
+      daysCount,
+      budget: budgetCents,
+      filteredOut,
+      cached,
+    });
+
+    res.json({ mealPlan: result, pantryItemsUsed: pantryItems.length, filteredOut, cached });
   }
 
   /**
    * GET /api/v1/ai/status
-   * Check if AI service is available
    */
   async getStatus(_req: Request, res: Response): Promise<void> {
     try {
