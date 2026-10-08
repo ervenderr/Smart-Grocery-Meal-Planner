@@ -26,10 +26,6 @@ export function stripReasoning(text: string): string {
   return withoutOpen.slice((last.index ?? 0) + last[0].length);
 }
 
-function stripFences(text: string): string {
-  return text.replace(/```(?:json)?/gi, '');
-}
-
 /** Index one past the end of the balanced value starting at `start`, or -1. */
 function findBalancedEnd(text: string, start: number): number {
   let depth = 0;
@@ -53,15 +49,43 @@ function findBalancedEnd(text: string, start: number): number {
   return -1;
 }
 
-export function extractJson(text: string): unknown {
-  const cleaned = stripFences(stripReasoning(text));
-  const start = cleaned.search(/[{[]/);
-  if (start === -1) throw new JsonExtractError();
-  const end = findBalancedEnd(cleaned, start);
-  if (end === -1) throw new JsonExtractError();
+export interface ExtractJsonOptions {
+  /** Try object candidates before array candidates (for object schemas). */
+  readonly prefer?: 'object';
+}
+
+function tryParseAt(text: string, start: number): { value: unknown } | null {
+  const end = findBalancedEnd(text, start);
+  if (end === -1) return null;
   try {
-    return JSON.parse(cleaned.slice(start, end));
+    return { value: JSON.parse(text.slice(start, end)) };
   } catch {
-    throw new JsonExtractError();
+    return null;
   }
+}
+
+function candidateStarts(text: string, opener: RegExp): number[] {
+  const starts: number[] = [];
+  for (let i = 0; i < text.length; i += 1) {
+    if (opener.test(text[i])) starts.push(i);
+  }
+  return starts;
+}
+
+/**
+ * Returns the first bracket-started value that balances and parses. Code
+ * fences are plain prose outside JSON, so they are left in place (stripping
+ * them would corrupt backticks inside JSON strings).
+ */
+export function extractJson(text: string, options: ExtractJsonOptions = {}): unknown {
+  const cleaned = stripReasoning(text);
+  const passes =
+    options.prefer === 'object' ? [/\{/, /[{[]/] : [/[{[]/];
+  for (const opener of passes) {
+    for (const start of candidateStarts(cleaned, opener)) {
+      const parsed = tryParseAt(cleaned, start);
+      if (parsed) return parsed.value;
+    }
+  }
+  throw new JsonExtractError();
 }

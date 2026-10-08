@@ -51,7 +51,7 @@ const MIN_REPAIR_BUDGET_MS = 3000;
 function parseReply<T>(text: string, schema: z.ZodType<T>): ParseResult<T> {
   let raw: unknown;
   try {
-    raw = extractJson(text);
+    raw = extractJson(text, { prefer: 'object' });
   } catch {
     return { ok: false, problems: 'No parseable JSON object was found in the reply.' };
   }

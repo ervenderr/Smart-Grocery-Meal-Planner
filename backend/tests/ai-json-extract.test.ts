@@ -44,6 +44,24 @@ describe('extractJson', () => {
     expect(extractJson('[1,2] {"a":1}')).toEqual([1, 2]);
   });
 
+  it('skips a stray bracket in prose and finds the real object', () => {
+    expect(extractJson('Here are 3 [great] recipes: {"recipes":[]}')).toEqual({ recipes: [] });
+  });
+
+  it('skips an unbalanced leading brace', () => {
+    expect(extractJson('use { carefully: {"a":1}')).toEqual({ a: 1 });
+  });
+
+  it('prefers an object over an earlier array when asked', () => {
+    expect(extractJson('[1,2] {"a":1}', { prefer: 'object' })).toEqual({ a: 1 });
+    expect(extractJson('[1,2]', { prefer: 'object' })).toEqual([1, 2]);
+  });
+
+  it('keeps triple backticks that are inside JSON strings', () => {
+    const text = '```json\n{"code":"use ```js\\nx``` here"}\n```';
+    expect(extractJson(text)).toEqual({ code: 'use ```js\nx``` here' });
+  });
+
   it('throws when no JSON is present or it is unbalanced', () => {
     expect(() => extractJson('just prose')).toThrow(JsonExtractError);
     expect(() => extractJson('{"a":')).toThrow(JsonExtractError);
