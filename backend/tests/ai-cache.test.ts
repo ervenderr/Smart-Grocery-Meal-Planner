@@ -1,0 +1,174 @@
+/**
+ * AI cache: repeat requests are free, keys are canonical and versioned,
+ * failed generations are never cached, expired rows are ignored.
+ */
+
+import request from 'supertest';
+import { createApp } from '../src/app';
+import { prisma } from '../src/config/database.config';
+import { resetAiDepsForTests, setAiDepsForTests } from '../src/modules/ai/ai.deps';
+import { buildCacheKey } from '../src/modules/ai/ai-cache-key';
+import { getCached, setCached } from '../src/modules/ai/ai-cache.repository';
+import {
+  chatCompletion,
+  createUserWithPantry,
+  errorResponse,
+  installFakeAi,
+  uniqueName,
+} from './helpers/ai-test-helpers';
+
+const app = createApp();
+const createdUserIds: string[] = [];
+const createdKeys: string[] = [];
+let fetchSpy: jest.SpyInstance;
+
+const recipe = (name: string, ingredients: string[]) => ({
+  name,
+  description: 'Tasty',
+  difficulty: 'easy',
+  prepTimeMinutes: 10,
+  cookTimeMinutes: 20,
+  ingredients: ingredients.map((n) => ({ ingredientName: n, quantity: 1, unit: 'cups' })),
+  instructions: ['Mix', 'Cook'],
+});
+const reply = (names: string[]): string =>
+  JSON.stringify({ recipes: [recipe('Bowl', [names[0], 'salt'])] });
+
+beforeEach(() => {
+  fetchSpy = jest.spyOn(global, 'fetch');
+  installFakeAi();
+  // Unique far-future day so ai_usage rows never collide with other files.
+  setAiDepsForTests({ now: () => new Date('2031-04-01T12:00:00Z') });
+});
+
+afterEach(async () => {
+  resetAiDepsForTests();
+  await prisma.$executeRaw`DELETE FROM ai_usage WHERE day = '2031-04-01'::date`;
+});
+
+afterAll(async () => {
+  await prisma.aiCache.deleteMany({ where: { key: { in: createdKeys } } });
+  await prisma.pantryItem.deleteMany({ where: { userId: { in: createdUserIds } } });
+  await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
+});
+
+async function newUser(names: string[]) {
+  const user = await createUserWithPantry(app, names);
+  createdUserIds.push(user.userId);
+  return user;
+}
+
+const suggest = (token: string, body: Record<string, unknown> = {}) =>
+  request(app).post('/api/v1/ai/suggest-recipes').set('Authorization', `Bearer ${token}`).send(body);
+
+async function userCount(userId: string): Promise<number> {
+  const rows = await prisma.$queryRaw<Array<{ count: number }>>`
+    SELECT count FROM ai_usage WHERE scope = ${'user:' + userId} AND day = '2031-04-01'::date`;
+  return rows[0]?.count ?? 0;
+}
+
+describe('buildCacheKey', () => {
+  it('ignores key order, case and whitespace; returns 64 hex chars', () => {
+    const a = buildCacheKey('recipes', 1, { x: ['Rice  Bowl'], y: { b: 1, a: 2 } });
+    const b = buildCacheKey('recipes', 1, { y: { a: 2, b: 1 }, x: [' rice bowl '] });
+    expect(a).toBe(b);
+    expect(a).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('changes when feature or schemaVersion changes', () => {
+    const base = buildCacheKey('recipes', 1, { a: 1 });
+    expect(buildCacheKey('meal_plan', 1, { a: 1 })).not.toBe(base);
+    expect(buildCacheKey('recipes', 2, { a: 1 })).not.toBe(base);
+  });
+});
+
+describe('cache repository', () => {
+  it('ignores an expired row and replaces it on set', async () => {
+    const key = buildCacheKey('recipes', 1, { n: uniqueName('exp') });
+    createdKeys.push(key);
+    const now = new Date('2031-04-01T12:00:00Z');
+    await prisma.aiCache.create({
+      data: {
+        key,
+        feature: 'recipes',
+        schemaVersion: 1,
+        payload: { old: true },
+        expiresAt: new Date('2031-03-01T00:00:00Z'),
+      },
+    });
+    expect(await getCached(key, now)).toBeNull();
+    await setCached({ key, feature: 'recipes', schemaVersion: 1, payload: { fresh: true }, ttlMs: 60000, now });
+    expect(await getCached(key, now)).toEqual({ fresh: true });
+  });
+});
+
+describe('suggest-recipes caching', () => {
+  it('serves an identical repeat from cache with one provider call and one quota use', async () => {
+    const a = uniqueName('rice');
+    const { token, userId } = await newUser([a]);
+    fetchSpy.mockResolvedValueOnce(chatCompletion(reply([a])));
+
+    const first = await suggest(token);
+    const second = await suggest(token);
+
+    expect(first.status).toBe(200);
+    expect(first.body.cached).toBe(false);
+    expect(second.status).toBe(200);
+    expect(second.body.cached).toBe(true);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(await userCount(userId)).toBe(1);
+  });
+
+  it('shares one cached payload between users with the same pantry names', async () => {
+    const a = uniqueName('lentil');
+    const u1 = await newUser([a]);
+    const u2 = await newUser([a]);
+    fetchSpy.mockResolvedValueOnce(chatCompletion(reply([a])));
+
+    const r1 = await suggest(u1.token);
+    const r2 = await suggest(u2.token);
+
+    expect(r1.status).toBe(200);
+    expect(r2.body.cached).toBe(true);
+    expect(r2.body.suggestions[0].matchPercentage).toBe(50);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(await userCount(u2.userId)).toBe(0);
+  });
+
+  it('misses when maxPrepTime differs', async () => {
+    const a = uniqueName('oat');
+    const { token } = await newUser([a]);
+    fetchSpy.mockImplementation(async () => chatCompletion(reply([a])));
+
+    await suggest(token, { maxPrepTime: 15 });
+    await suggest(token, { maxPrepTime: 30 });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('caches nothing after an invalid reply, and a later valid request calls the provider', async () => {
+    const a = uniqueName('kale');
+    const { token } = await newUser([a]);
+    fetchSpy
+      .mockResolvedValueOnce(chatCompletion('not json'))
+      .mockResolvedValueOnce(chatCompletion('still not json'));
+
+    const bad = await suggest(token);
+    expect(bad.status).toBe(503);
+
+    fetchSpy.mockResolvedValueOnce(chatCompletion(reply([a])));
+    const good = await suggest(token);
+    expect(good.status).toBe(200);
+    expect(good.body.cached).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not cache a provider 500', async () => {
+    const a = uniqueName('pea');
+    const { token } = await newUser([a]);
+    fetchSpy.mockResolvedValueOnce(errorResponse(500));
+    expect((await suggest(token)).status).toBe(503);
+    fetchSpy.mockResolvedValueOnce(chatCompletion(reply([a])));
+    expect((await suggest(token)).body.cached).toBe(false);
+  });
+});
