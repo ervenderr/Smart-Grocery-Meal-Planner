@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { AislePriceInput } from '@/components/shopping/aisle-price-input';
 import { useCurrency } from '@/lib/currency/currency-provider';
+import { itemCheckboxLabel, priceChipLabel } from '@/lib/shopping/a11y';
 import { unitLabel } from '@/lib/shopping/vocab';
 import type { ShoppingItem } from '@/types/shopping.types';
 
@@ -34,7 +35,16 @@ export function ShoppingItemRow({
   const meta = [`${item.quantity} ${unitLabel(item.unit)}`, priceText].filter(Boolean).join(' · ');
 
   if (large) {
-    const label = item.isChecked ? `Mark ${item.itemName} as not bought` : `Mark ${item.itemName} as bought`;
+    const chipText = item.actualCostCents !== null ? format(item.actualCostCents) : 'Add price';
+    // The chip already shows an actual price, so only the estimate is added here.
+    const largeMeta = [
+      `${item.quantity} ${unitLabel(item.unit)}`,
+      item.actualCostCents === null && item.costEstimateCents !== null
+        ? `Est. ${format(item.costEstimateCents)}`
+        : '',
+    ]
+      .filter(Boolean)
+      .join(' · ');
     return (
       <li
         data-shopping-mode="large"
@@ -46,7 +56,7 @@ export function ShoppingItemRow({
             type="button"
             role="checkbox"
             aria-checked={item.isChecked}
-            aria-label={label}
+            // Name comes from the visible text (item, quantity, estimate); aria-checked carries state.
             onClick={() => onToggle(item)}
             className="flex min-h-14 flex-1 items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
@@ -69,20 +79,18 @@ export function ShoppingItemRow({
               >
                 {item.itemName}
               </span>
-              <span className="text-sm text-gray-600">
-                {`${item.quantity} ${unitLabel(item.unit)}`}
-              </span>
+              <span className="text-sm text-gray-600">{largeMeta}</span>
             </span>
           </button>
           {onSetActualPrice && (
             <button
               type="button"
-              aria-label={`Set actual price for ${item.itemName}`}
+              aria-label={priceChipLabel(chipText, item.itemName)}
               aria-expanded={pricing}
               onClick={() => setPricing((open) => !open)}
               className="min-h-11 min-w-11 self-center rounded-lg px-3 text-sm text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
             >
-              {item.actualCostCents !== null ? format(item.actualCostCents) : 'Add price'}
+              {chipText}
             </button>
           )}
         </div>
@@ -107,9 +115,7 @@ export function ShoppingItemRow({
         type="button"
         role="checkbox"
         aria-checked={item.isChecked}
-        aria-label={
-          item.isChecked ? `Mark ${item.itemName} as not bought` : `Mark ${item.itemName} as bought`
-        }
+        aria-label={itemCheckboxLabel(item.itemName)}
         onClick={() => onToggle(item)}
         className="flex min-h-11 min-w-11 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
       >
