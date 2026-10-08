@@ -172,3 +172,19 @@ describe('suggest-recipes caching', () => {
     expect((await suggest(token)).body.cached).toBe(false);
   });
 });
+
+describe('cache DB failures degrade to a miss (WR-01)', () => {
+  it('still generates and returns recipes when cache read and write throw', async () => {
+    const a = uniqueName('rice');
+    const { token } = await newUser([a]);
+    jest.spyOn(prisma.aiCache, 'findUnique').mockRejectedValue(new Error('db down'));
+    jest.spyOn(prisma.aiCache, 'upsert').mockRejectedValue(new Error('db down'));
+    fetchSpy.mockResolvedValueOnce(chatCompletion(reply([a])));
+
+    const res = await suggest(token);
+
+    expect(res.status).toBe(200);
+    expect(res.body.cached).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+});

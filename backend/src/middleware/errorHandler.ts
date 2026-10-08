@@ -99,21 +99,23 @@ export const errorHandler = (
   }
   // Handle Prisma errors (database)
   else if (err.name === 'PrismaClientKnownRequestError') {
-    statusCode = 400;
+    // Unknown database failures are server errors, not client errors.
+    statusCode = 500;
     message = 'Database operation failed';
 
     // Prisma error codes
     const prismaError = err as any;
     if (prismaError.code === 'P2002') {
+      statusCode = 400;
       message = 'A record with this value already exists';
     } else if (prismaError.code === 'P2025') {
       message = 'Record not found';
       statusCode = 404;
     }
   }
-  // Generic error
+  // Generic error: never leak raw messages for unexpected errors in production
   else {
-    message = err.message || 'Something went wrong';
+    message = isProduction ? 'Internal server error' : err.message || 'Something went wrong';
   }
 
   // Log the error (with full stack trace for debugging)
@@ -130,13 +132,13 @@ export const errorHandler = (
   // Build response (AppErrors with a code also expose `code`, an `error`
   // alias of the message and their details, e.g. quota info)
   const appError = err instanceof AppError ? err : undefined;
+  // Details are spread first so they can never overwrite the fixed fields.
   const response: ErrorResponse = {
+    ...(appError?.code ? (appError.details ?? {}) : {}),
     status: 'error',
     statusCode,
     message,
-    ...(appError?.code
-      ? { ...(appError.details ?? {}), code: appError.code, error: message }
-      : {}),
+    ...(appError?.code ? { code: appError.code, error: message } : {}),
   };
 
   // Include validation errors if present

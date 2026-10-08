@@ -6,7 +6,7 @@
 import { config } from '../../config/env.config';
 import { AppError } from '../../middleware/errorHandler';
 import { buildCacheKey } from '../ai/ai-cache-key';
-import { getCached, setCached } from '../ai/ai-cache.repository';
+import { getCachedSafe, setCachedSafe } from '../ai/ai-cache.repository';
 import { AI_ERROR_CODES } from '../ai/ai.errors';
 import { OFF_ATTRIBUTION, USDA_ATTRIBUTION, type Attribution } from './food.attribution';
 import { FoodUpstreamError } from './food.errors';
@@ -126,7 +126,7 @@ function toProduct(barcode: string, p: OffProduct): FoodProduct {
 
 export async function lookupBarcode(barcode: string): Promise<BarcodeResult> {
   const key = buildCacheKey(OFF_FEATURE, SCHEMA_VERSION, { barcode });
-  const hit = (await getCached(key, deps.now())) as CachedOff | null;
+  const hit = (await getCachedSafe(key, deps.now())) as CachedOff | null;
   if (hit) {
     if (!hit.found) throw notFoundError();
     return { product: hit.product, attribution: OFF_ATTRIBUTION, cached: true };
@@ -143,12 +143,12 @@ export async function lookupBarcode(barcode: string): Promise<BarcodeResult> {
   const now = deps.now();
   if (result.kind === 'not_found') {
     const entry: CachedOff = { found: false };
-    await setCached({ key, feature: OFF_FEATURE, schemaVersion: SCHEMA_VERSION, payload: entry, ttlMs: NOT_FOUND_TTL_MS, now });
+    await setCachedSafe({ key, feature: OFF_FEATURE, schemaVersion: SCHEMA_VERSION, payload: entry, ttlMs: NOT_FOUND_TTL_MS, now });
     throw notFoundError();
   }
   const product = toProduct(barcode, result.product);
   const entry: CachedOff = { found: true, product };
-  await setCached({ key, feature: OFF_FEATURE, schemaVersion: SCHEMA_VERSION, payload: entry, ttlMs: FOUND_TTL_MS, now });
+  await setCachedSafe({ key, feature: OFF_FEATURE, schemaVersion: SCHEMA_VERSION, payload: entry, ttlMs: FOUND_TTL_MS, now });
   return { product, attribution: OFF_ATTRIBUTION, cached: false };
 }
 
@@ -158,7 +158,7 @@ export async function searchNutrition(query: string): Promise<NutritionResult> {
 
   const normalized = query.trim().toLowerCase();
   const key = buildCacheKey(USDA_FEATURE, SCHEMA_VERSION, { query: normalized });
-  const hit = (await getCached(key, deps.now())) as { results: UsdaResult[] } | null;
+  const hit = (await getCachedSafe(key, deps.now())) as { results: UsdaResult[] } | null;
   if (hit) return { results: hit.results, attribution: USDA_ATTRIBUTION, cached: true };
 
   acquire(deps.usdaThrottle);
@@ -168,7 +168,7 @@ export async function searchNutrition(query: string): Promise<NutritionResult> {
   } catch (error) {
     throw mapUpstreamError(error);
   }
-  await setCached({
+  await setCachedSafe({
     key,
     feature: USDA_FEATURE,
     schemaVersion: SCHEMA_VERSION,

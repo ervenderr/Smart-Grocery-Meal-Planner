@@ -242,3 +242,29 @@ describe('GET /api/v1/food/nutrition', () => {
     expect(res.body.retryAfterSeconds).toBeGreaterThan(0);
   });
 });
+
+describe('cache failures degrade gracefully (WR-01/WR-02)', () => {
+  it('serves a barcode lookup when cache read and write both fail', async () => {
+    const code = barcode();
+    jest.spyOn(prisma.aiCache, 'findUnique').mockRejectedValue(new Error('db down'));
+    jest.spyOn(prisma.aiCache, 'upsert').mockRejectedValue(new Error('db down'));
+    fetchSpy.mockResolvedValueOnce(offFound(code));
+
+    const res = await lookup(code);
+
+    expect(res.status).toBe(200);
+    expect(res.body.cached).toBe(false);
+    expect(res.body.product.name).toBe('Whole Milk');
+  });
+
+  it('keeps a clean 404 for not-found barcodes when the cache write fails', async () => {
+    const code = barcode();
+    jest.spyOn(prisma.aiCache, 'findUnique').mockResolvedValue(null);
+    jest.spyOn(prisma.aiCache, 'upsert').mockRejectedValue(new Error('db down'));
+    fetchSpy.mockResolvedValueOnce(json({ status: 0 }));
+
+    const res = await lookup(code);
+
+    expect(res.status).toBe(404);
+  });
+});

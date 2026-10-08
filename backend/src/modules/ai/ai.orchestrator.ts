@@ -11,7 +11,7 @@ import { logger } from '../../config/logger.config';
 import { aiQuotaExceededError, aiUnavailableError } from './ai.errors';
 import { getAiDeps } from './ai.deps';
 import { buildCacheKey } from './ai-cache-key';
-import { getCached, pruneExpired, setCached } from './ai-cache.repository';
+import { getCachedSafe, pruneExpired, setCachedSafe } from './ai-cache.repository';
 import {
   QuotaExceededError,
   nextUtcMidnight,
@@ -98,7 +98,7 @@ function describeError(error: unknown): string {
 }
 
 async function readCache<T>(key: string, now: Date, schema: z.ZodType<T>): Promise<T | null> {
-  const stored = await getCached(key, now);
+  const stored = await getCachedSafe(key, now);
   if (stored === null) return null;
   const parsed = schema.safeParse(stored);
   return parsed.success ? parsed.data : null;
@@ -145,19 +145,15 @@ function pruneSometimes(now: Date): void {
 }
 
 async function storeResult<T>(req: AiRunRequest<T>, key: string, data: T, now: Date): Promise<void> {
-  try {
-    await setCached({
-      key,
-      feature: req.feature,
-      schemaVersion: req.schemaVersion,
-      payload: data,
-      ttlMs: CACHE_TTL_MS[req.feature],
-      now,
-    });
-    pruneSometimes(now);
-  } catch (error) {
-    logger.warn('AI cache write failed', { feature: req.feature, error: describeError(error) });
-  }
+  const stored = await setCachedSafe({
+    key,
+    feature: req.feature,
+    schemaVersion: req.schemaVersion,
+    payload: data,
+    ttlMs: CACHE_TTL_MS[req.feature],
+    now,
+  });
+  if (stored) pruneSometimes(now);
 }
 
 async function generate<T>(req: AiRunRequest<T>, day: string): Promise<T> {
