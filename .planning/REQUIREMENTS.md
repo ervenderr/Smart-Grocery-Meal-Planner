@@ -90,7 +90,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DEP-01..09 | Phase 1 | Complete |
-| AI-01..07 | Phase 2 | Pending |
+| AI-01..07 | Phase 2 | Complete (browser UAT deferred) |
 | MOB-01..06 | Phase 3 | Pending |
 | SHOP-01..05 | Phase 4 | Pending |
 | INT-01..05 | Phase 5 | Pending |

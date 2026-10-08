@@ -11,7 +11,7 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Secure Foundation & Railway Deploy** - Patched Next.js, live Railway API + Postgres, deployed frontend working end to end, CI (completed 2026-10-08)
-- [ ] **Phase 2: Reliable AI Suggestions** - Validated, cached, quota-guarded AI through one env-configured OpenAI-compatible provider (Dahl default) with graceful degradation, plus food data lookups
+- [x] **Phase 2: Reliable AI Suggestions** - Validated, cached, quota-guarded AI through one env-configured OpenAI-compatible provider (Dahl default) with graceful degradation, plus food data lookups (completed 2026-10-08)
 - [ ] **Phase 3: Mobile-First Shell** - Bottom nav, 375px-ready screens, home-screen install, onboarding, empty states, currency
 - [ ] **Phase 4: Persistent Shopping List** - Backend-stored lists with manual items, check-off, grouping, shopping mode, spend tracking
 - [ ] **Phase 5: Pantry-Aware Intelligence** - Ingredient parsing, merged and pantry-subtracted lists, staples, "Cook this first"
@@ -60,7 +60,7 @@ Plans:
 - [x] 02-05-PLAN.md — Open Food Facts + USDA lookups (UA, throttle, cache, attribution) backend
 - [x] 02-06-PLAN.md — Frontend: server messages in AI modals, diet notice, attribution component, barcode lookup
 - [x] 02-07-PLAN.md — Smoke test extension, Railway deploy (migration), push main, CI + Vercel green
-- [ ] 02-08-PLAN.md — User sets AI_API_KEY; live provider smoke (deferrable)
+- [x] 02-08-PLAN.md — User sets AI_API_KEY; live provider smoke (deferrable)
 **UI hint**: yes
 
 ### Phase 3: Mobile-First Shell
@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Secure Foundation & Railway Deploy | 6/6 | Complete    | 2026-10-08 |
-| 2. Reliable AI Suggestions | 7/8 | In Progress|  |
+| 2. Reliable AI Suggestions | 8/8 | Complete    | 2026-10-08 |
 | 3. Mobile-First Shell | 0/TBD | Not started | - |
 | 4. Persistent Shopping List | 0/TBD | Not started | - |
 | 5. Pantry-Aware Intelligence | 0/TBD | Not started | - |
