@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { BottomNav } from '@/components/dashboard/bottom-nav';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
+import { OnboardingGate } from '@/components/onboarding/onboarding-gate';
 
 export default function AppLayout({
   children,
@@ -35,6 +36,7 @@ export default function AppLayout({
         </div>
       </div>
       <BottomNav />
+      <OnboardingGate />
     </ProtectedRoute>
   );
 }
