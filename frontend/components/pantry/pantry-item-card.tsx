@@ -54,7 +54,7 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
           {/* Item Name & Category */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <h3 className="font-semibold text-gray-900 truncate">{item.ingredientName}</h3>
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium w-fit ${getCategoryColor(item.category)}`}>
+            <span className={`rounded-full px-2 py-0.5 text-sm font-semibold w-fit ${getCategoryColor(item.category)}`}>
               {item.category}
             </span>
           </div>
@@ -66,7 +66,7 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
 
           {/* Location */}
           {item.location && (
-            <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+            <div className="mt-2 flex items-center gap-1 text-sm text-gray-500">
               <MapPin className="h-3 w-3" />
               {item.location}
             </div>
@@ -74,7 +74,7 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
 
           {/* Expiry Warning */}
           {expiryStatus && (
-            <div className={`mt-2 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ${expiryStatus.color}`}>
+            <div className={`mt-2 flex items-center gap-1 rounded-md px-2 py-1 text-sm font-semibold ${expiryStatus.color}`}>
               <AlertTriangle className="h-3 w-3" />
               {expiryStatus.label}
             </div>
@@ -82,7 +82,7 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
 
           {/* Expiry Date */}
           {item.expiryDate && !expiryStatus && (
-            <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+            <div className="mt-2 flex items-center gap-1 text-sm text-gray-500">
               <Calendar className="h-3 w-3" />
               Expires: {new Date(item.expiryDate).toLocaleDateString()}
             </div>
@@ -90,23 +90,27 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
 
           {/* Notes */}
           {item.notes && (
-            <p className="mt-2 text-xs text-gray-500 line-clamp-2">{item.notes}</p>
+            <p className="mt-2 text-sm text-gray-500 line-clamp-2 break-words">{item.notes}</p>
           )}
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-1">
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
           <button
+            type="button"
             onClick={() => onEdit(item)}
-            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 touch-target"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100"
             title="Edit item"
+            aria-label={`Edit ${item.ingredientName}`}
           >
             <Edit2 className="h-4 w-4" />
           </button>
           <button
+            type="button"
             onClick={() => onDelete(item)}
-            className="rounded-lg p-2 text-red-600 hover:bg-red-50 touch-target"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 hover:bg-red-50"
             title="Delete item"
+            aria-label={`Delete ${item.ingredientName}`}
           >
             <Trash2 className="h-4 w-4" />
           </button>

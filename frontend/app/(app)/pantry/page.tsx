@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Package, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/common/empty-state';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { AddPantryItemModal } from '@/components/pantry/add-pantry-item-modal';
 import { EditPantryItemModal } from '@/components/pantry/edit-pantry-item-modal';
@@ -14,9 +14,25 @@ import { pantryApi } from '@/lib/api/pantry';
 import toast from 'react-hot-toast';
 import type { PantryItem } from '@/types/pantry.types';
 
+const CATEGORIES = [
+  { value: '', label: 'All' },
+  { value: 'protein', label: 'Protein' },
+  { value: 'vegetable', label: 'Vegetables' },
+  { value: 'fruit', label: 'Fruits' },
+  { value: 'dairy', label: 'Dairy' },
+  { value: 'grains', label: 'Grains' },
+  { value: 'spices', label: 'Spices' },
+  { value: 'canned', label: 'Canned Goods' },
+  { value: 'frozen', label: 'Frozen' },
+  { value: 'beverages', label: 'Beverages' },
+  { value: 'condiments', label: 'Condiments' },
+  { value: 'other', label: 'Other' },
+];
+
 export default function PantryPage() {
   const [items, setItems] = useState<PantryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -24,16 +40,21 @@ export default function PantryPage() {
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<PantryItem | null>(null);
 
-  const fetchItems = async () => {
+  const fetchItems = async (
+    category: string = selectedCategory,
+    search: string = searchQuery
+  ) => {
     setLoading(true);
+    setLoadError(false);
     try {
       const response = await pantryApi.getAll({
-        category: selectedCategory || undefined,
-        search: searchQuery || undefined,
+        category: category || undefined,
+        search: search || undefined,
       });
       setItems(response.items || []);
     } catch (error: any) {
       console.error('Fetch pantry items error:', error);
+      setLoadError(true);
       toast.error('Failed to load pantry items');
     } finally {
       setLoading(false);
@@ -43,6 +64,12 @@ export default function PantryPage() {
   useEffect(() => {
     fetchItems();
   }, [selectedCategory]);
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('');
+    fetchItems('', '');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +122,7 @@ export default function PantryPage() {
             Manage your pantry inventory and track expiration dates
           </p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>
+        <Button className="w-full sm:w-auto" onClick={() => setShowAddModal(true)}>
           <Plus className="h-4 w-4" />
           Add Item
         </Button>
@@ -132,30 +159,35 @@ export default function PantryPage() {
                 placeholder="Search items..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
             </div>
           </form>
 
           {/* Category Filter */}
-          <div className="w-full sm:w-64">
-            <Select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">All Categories</option>
-              <option value="protein">Protein</option>
-              <option value="vegetable">Vegetables</option>
-              <option value="fruit">Fruits</option>
-              <option value="dairy">Dairy</option>
-              <option value="grains">Grains</option>
-              <option value="spices">Spices</option>
-              <option value="canned">Canned Goods</option>
-              <option value="frozen">Frozen</option>
-              <option value="beverages">Beverages</option>
-              <option value="condiments">Condiments</option>
-              <option value="other">Other</option>
-            </Select>
+          <div
+            role="group"
+            aria-label="Filter by category"
+            className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1 sm:max-w-md"
+          >
+            {CATEGORIES.map((cat) => {
+              const active = selectedCategory === cat.value;
+              return (
+                <button
+                  key={cat.value || 'all'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setSelectedCategory(cat.value)}
+                  className={`h-11 shrink-0 rounded-full border px-4 text-sm font-semibold ${
+                    active
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 bg-white text-gray-700'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </Card>
@@ -165,24 +197,32 @@ export default function PantryPage() {
         <div className="flex justify-center py-12">
           <LoadingSpinner size="lg" />
         </div>
+      ) : loadError ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load your pantry"
+          description="Check your connection and try again."
+          actionLabel="Try again"
+          onAction={() => fetchItems()}
+        />
       ) : items.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center">
-          <div className="rounded-full bg-gray-100 p-4">
-            <Filter className="h-12 w-12 text-gray-400" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">No items found</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            {searchQuery || selectedCategory
-              ? 'Try adjusting your filters'
-              : 'Get started by adding your first pantry item'}
-          </p>
-          {!searchQuery && !selectedCategory && (
-            <Button onClick={() => setShowAddModal(true)} className="mt-4">
-              <Plus className="h-4 w-4" />
-              Add Your First Item
-            </Button>
-          )}
-        </Card>
+        searchQuery || selectedCategory ? (
+          <EmptyState
+            icon={Search}
+            title="No matching items"
+            description="Try a different search or clear the filters."
+            actionLabel="Clear filters"
+            onAction={handleClearFilters}
+          />
+        ) : (
+          <EmptyState
+            icon={Package}
+            title="Your pantry is empty"
+            description="Add what you have at home to track expiry dates and get recipe ideas."
+            actionLabel="Add first item"
+            onAction={() => setShowAddModal(true)}
+          />
+        )
       ) : (
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
@@ -200,7 +240,7 @@ export default function PantryPage() {
       <AddPantryItemModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSuccess={fetchItems}
+        onSuccess={() => fetchItems()}
       />
 
       <EditPantryItemModal
@@ -209,7 +249,7 @@ export default function PantryPage() {
           setShowEditModal(false);
           setEditingItem(null);
         }}
-        onSuccess={fetchItems}
+        onSuccess={() => fetchItems()}
         item={editingItem}
       />
     </div>

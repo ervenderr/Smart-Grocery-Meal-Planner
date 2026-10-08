@@ -49,7 +49,7 @@ export function BarcodeLookup({ onFound, disabled }: BarcodeLookupProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-end gap-2">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <Input
             placeholder="e.g., 5000159484695"
             inputMode="numeric"
@@ -64,6 +64,7 @@ export function BarcodeLookup({ onFound, disabled }: BarcodeLookupProps) {
         <Button
           type="button"
           variant="outline"
+          className="min-h-11 shrink-0"
           loading={loading}
           disabled={disabled || loading || code.length === 0}
           onClick={handleLookup}
@@ -75,7 +76,7 @@ export function BarcodeLookup({ onFound, disabled }: BarcodeLookupProps) {
       {message && <p className="text-sm text-red-600">{message}</p>}
 
       {product && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+        <div className="min-w-0 break-words rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
           <p className="font-medium text-gray-900">{product.name}</p>
           {(product.brand || product.quantity) && (
             <p>{[product.brand, product.quantity].filter(Boolean).join(' - ')}</p>
@@ -84,7 +85,7 @@ export function BarcodeLookup({ onFound, disabled }: BarcodeLookupProps) {
         </div>
       )}
 
-      {attribution && (product || message) && <FoodDataAttribution attribution={attribution} />}
+      {attribution && (product || message) && <FoodDataAttribution attribution={attribution} className="break-words" />}
     </div>
   );
 }

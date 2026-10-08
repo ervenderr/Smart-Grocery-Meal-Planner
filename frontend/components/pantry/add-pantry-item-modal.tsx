@@ -226,7 +226,7 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
                 disabled={isLoading}
                 {...register('purchaseDate')}
               />
-              <p className="mt-1 text-xs text-gray-500">When did you buy this?</p>
+              <p className="mt-1 text-sm text-gray-500">When did you buy this?</p>
             </div>
 
             <div>
@@ -237,7 +237,7 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
                 disabled={isLoading}
                 {...register('expiryDate')}
               />
-              <p className="mt-1 text-xs text-gray-500">When does it expire?</p>
+              <p className="mt-1 text-sm text-gray-500">When does it expire?</p>
             </div>
           </div>
         </div>
@@ -253,7 +253,7 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
               placeholder="Add any extra details about this item..."
               rows={3}
               disabled={isLoading}
-              className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+              className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base lg:text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
               {...register('notes')}
             />
             {errors.notes && <p className="mt-1 text-sm text-red-500">{errors.notes.message}</p>}
@@ -261,7 +261,7 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 pb-safe border-t border-gray-200">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 pb-safe border-t border-gray-200">
           <Button type="button" variant="outline" fullWidth onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
