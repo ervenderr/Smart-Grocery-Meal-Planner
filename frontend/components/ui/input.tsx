@@ -5,10 +5,12 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   error?: string;
   icon?: React.ReactNode;
+  /** Trailing adornment (for example a currency code) aligned to the field, not the error text. */
+  suffix?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, icon, id, ...props }, ref) => {
+  ({ className, type, label, error, icon, suffix, id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
     const errorId = error && inputId ? `${inputId}-error` : undefined;
 
@@ -43,6 +45,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={errorId}
             {...props}
           />
+          {suffix && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-600"
+            >
+              {suffix}
+            </span>
+          )}
         </div>
         {error && (
           <p id={errorId} role="alert" className="mt-1 text-sm text-red-500">

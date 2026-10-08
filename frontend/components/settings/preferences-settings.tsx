@@ -176,23 +176,16 @@ export function PreferencesSettings() {
               </p>
             </div>
 
-            <div className="relative">
-              <Input
-                label="Weekly grocery budget"
-                type="text"
-                inputMode="decimal"
-                value={budgetText}
-                onChange={(e) => handleBudgetChange(e.target.value)}
-                error={budgetTextError ?? errors.budgetPerWeekCents?.message}
-                className="pr-16"
-              />
-              <span
-                className="pointer-events-none absolute right-4 bottom-0 flex h-11 items-center text-sm font-semibold text-gray-500"
-                aria-hidden="true"
-              >
-                {currency}
-              </span>
-            </div>
+            <Input
+              label="Weekly grocery budget"
+              type="text"
+              inputMode="decimal"
+              value={budgetText}
+              onChange={(e) => handleBudgetChange(e.target.value)}
+              error={budgetTextError ?? errors.budgetPerWeekCents?.message}
+              suffix={currency}
+              className="pr-16"
+            />
 
             <Select label="Preferred Unit" {...register('preferredUnit')}>
               <option value="kg">Kilograms (kg)</option>

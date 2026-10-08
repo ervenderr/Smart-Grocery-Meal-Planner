@@ -47,23 +47,16 @@ export function StepBudget({
           </option>
         ))}
       </Select>
-      <div className="relative">
-        <Input
-          label="Weekly grocery budget"
-          inputMode="decimal"
-          placeholder="e.g. 2000"
-          value={budgetInput}
-          onChange={(e) => onBudgetChange(e.target.value)}
-          error={error}
-          className="pr-16"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute right-4 top-[calc(1.25rem+0.5rem+0.75rem)] text-sm font-semibold text-gray-600"
-        >
-          {currency}
-        </span>
-      </div>
+      <Input
+        label="Weekly grocery budget"
+        inputMode="decimal"
+        placeholder="e.g. 2000"
+        value={budgetInput}
+        onChange={(e) => onBudgetChange(e.target.value)}
+        error={error}
+        suffix={currency}
+        className="pr-16"
+      />
     </div>
   );
 }
