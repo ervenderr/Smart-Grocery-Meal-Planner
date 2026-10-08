@@ -64,7 +64,8 @@ Exceptions (each justified):
 - 56px (`w-14`) x 32px (`h-8`): bottom-nav active icon pill. Justified: the pill must be wider than the 24px icon and 32px tall for a visible active shape; both are multiples of 4 and sit between tokens.
 - 80px (`5rem`): main-content bottom padding = 64px bar + 16px (md) breathing room, expressed as a token sum, then plus the safe-area inset.
 - 44px (`h-11`, `min-h-11`, `min-w-11`): touch-target exception above.
-- No 12px values: use 8px or 16px (`gap-2` / `gap-4`, `inset-x-4`). Existing `gap-3` in untouched code is out of contract.- Safe-area insets (`env(safe-area-inset-*)`) are added on top of tokens, not rounded.
+- No 12px values: use 8px or 16px (`gap-2` / `gap-4`, `inset-x-4`). Existing `gap-3` in untouched code is out of contract.
+- Safe-area insets (`env(safe-area-inset-*)`) are added on top of tokens, not rounded.
 
 ### Main content bottom padding (below `lg`)
 `main` gets `pb-[calc(5rem+env(safe-area-inset-bottom))]` (64px bar + 16px md breathing room = 80px, plus inset). At `lg` revert to `lg:pb-8`. Toasts (react-hot-toast) and any floating buttons must sit above the bar: offset `bottom: calc(4rem + env(safe-area-inset-bottom) + 0.5rem)`.
