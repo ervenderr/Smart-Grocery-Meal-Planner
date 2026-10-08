@@ -5,6 +5,7 @@
 #   API=https://<host>.up.railway.app scripts/smoke-prod.sh [--api-only] [--ai-live]
 #   --api-only  skip the frontend bundle check (8)
 #   --ai-live   make real (cached-twice) provider calls in check (9); needs AI_API_KEY on the server
+#   Check (11) covers the currency allow-list and onboarding completion contract.
 #   FE=https://kitcha-ai.vercel.app (optional, default shown)
 #
 # Requires curl and jq. Exits non-zero on the first failing check.
@@ -205,6 +206,33 @@ elif [ "$code" = "503" ] && [ "$(jq -r '.code' "$BODY_FILE")" = "LOOKUP_UNAVAILA
 else
   fail "10 nutrition: unexpected status $code"
 fi
+
+# (11) currency allow-list and onboarding contract
+JSON_H="Content-Type: application/json"
+code="$(req GET "$API/api/v1/users/preferences" -H "$AUTH")" || fail "11a preferences: request failed"
+[ "$code" = "200" ] || fail "11a preferences: expected 200, got $code"
+jq -e 'has("onboardingCompletedAt")' "$BODY_FILE" >/dev/null || fail "11a preferences: onboardingCompletedAt missing"
+pass "11a preferences include onboardingCompletedAt"
+
+code="$(req PATCH "$API/api/v1/users/preferences" -H "$AUTH" -H "$JSON_H" -d '{"currency":"XXX"}')" || fail "11b currency: request failed"
+[ "$code" = "400" ] || fail "11b unsupported currency: expected 400, got $code"
+pass "11b unsupported currency rejected with 400"
+
+code="$(req PATCH "$API/api/v1/users/preferences" -H "$AUTH" -H "$JSON_H" -d '{"currency":"jpy"}')" || fail "11c currency: request failed"
+[ "$code" = "200" ] || fail "11c currency jpy: expected 200, got $code"
+[ "$(jq -r '.currency' "$BODY_FILE")" = "JPY" ] || fail "11c currency jpy: not normalised to JPY"
+code="$(req PATCH "$API/api/v1/users/preferences" -H "$AUTH" -H "$JSON_H" -d '{"currency":"PHP"}')" || fail "11c currency reset: request failed"
+[ "$code" = "200" ] || fail "11c currency reset to PHP: expected 200, got $code"
+pass "11c currency normalised to uppercase and reset to PHP"
+
+code="$(req POST "$API/api/v1/users/onboarding/complete" -H "$AUTH" -H "$JSON_H" -d '{}')" || fail "11d onboarding: request failed"
+[ "$code" = "200" ] || fail "11d onboarding first call: expected 200, got $code"
+ONB_FIRST="$(jq -r '.onboardingCompletedAt // empty' "$BODY_FILE")"
+[ -n "$ONB_FIRST" ] || fail "11d onboarding: onboardingCompletedAt is null"
+code="$(req POST "$API/api/v1/users/onboarding/complete" -H "$AUTH" -H "$JSON_H" -d '{}')" || fail "11d onboarding repeat: request failed"
+[ "$code" = "200" ] || fail "11d onboarding second call: expected 200, got $code"
+[ "$(jq -r '.onboardingCompletedAt // empty' "$BODY_FILE")" = "$ONB_FIRST" ] || fail "11d onboarding is not idempotent"
+pass "11d onboarding/complete is idempotent"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
