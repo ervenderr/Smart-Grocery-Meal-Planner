@@ -25,13 +25,24 @@ import { isProduction } from '@/config/env.config';
  * Example:
  * throw new AppError('User not found', 404);
  */
+export interface AppErrorOptions {
+  readonly code?: string;
+  readonly details?: Readonly<Record<string, unknown>>;
+}
+
 export class AppError extends Error {
+  public readonly code?: string;
+  public readonly details?: Readonly<Record<string, unknown>>;
+
   constructor(
     public message: string,
     public statusCode: number = 500,
-    public isOperational: boolean = true
+    public isOperational: boolean = true,
+    options?: AppErrorOptions
   ) {
     super(message);
+    this.code = options?.code;
+    this.details = options?.details;
     Object.setPrototypeOf(this, AppError.prototype);
   }
 }
@@ -46,6 +57,9 @@ interface ErrorResponse {
   message: string;
   errors?: any[];
   stack?: string; // Only in development
+  code?: string;
+  error?: string;
+  [detailKey: string]: unknown;
 }
 
 /**
@@ -113,11 +127,16 @@ export const errorHandler = (
     userId: (req as any).user?.id, // If authenticated
   });
 
-  // Build response
+  // Build response (AppErrors with a code also expose `code`, an `error`
+  // alias of the message and their details, e.g. quota info)
+  const appError = err instanceof AppError ? err : undefined;
   const response: ErrorResponse = {
     status: 'error',
     statusCode,
     message,
+    ...(appError?.code
+      ? { ...(appError.details ?? {}), code: appError.code, error: message }
+      : {}),
   };
 
   // Include validation errors if present

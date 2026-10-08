@@ -18,6 +18,12 @@ const WEAK_SECRET_FRAGMENTS: readonly string[] = [
 
 const SLUG = /^[a-z0-9-]+$/;
 
+/** Blank values (e.g. an empty Railway variable) count as unset. */
+const blankToUndefined = (value: unknown): unknown =>
+  typeof value === "string" && value.trim() === "" ? undefined : value;
+
+const optionalSecret = z.preprocess(blankToUndefined, z.string().min(1).optional());
+
 const normalizeEntry = (value: string): string =>
   value.trim().replace(/\/+$/, "");
 
@@ -82,6 +88,23 @@ export const envSchema = z
       .regex(SLUG, "must match ^[a-z0-9-]+$")
       .default("kitcha"),
     GEMINI_AI_API_KEY: z.string().optional(),
+    AI_PROVIDER: z.string().min(1).default("dahl"),
+    AI_BASE_URL: z
+      .url()
+      .default("https://inference.dahl.global/v1")
+      .transform((value) => value.replace(/\/+$/, "")),
+    AI_MODEL: z.string().min(1).default("MiniMaxAI/MiniMax-M2.7"),
+    AI_API_KEY: optionalSecret,
+    AI_TIMEOUT_MS: z.coerce.number().int().min(1000).max(110000).default(40000),
+    AI_MAX_TOKENS: z.coerce.number().int().min(256).max(32000).default(8000),
+    AI_JSON_MODE: z.enum(["off", "json_object"]).default("off"),
+    AI_USER_DAILY_LIMIT: z.coerce.number().int().min(1).default(20),
+    AI_GLOBAL_DAILY_LIMIT: z.coerce.number().int().min(1).default(100),
+    USDA_API_KEY: optionalSecret,
+    OFF_CONTACT: z
+      .string()
+      .min(3)
+      .default("https://github.com/ervenderr/Smart-Grocery-Meal-Planner"),
     SPOONACULAR_API_KEY: z.string().optional(),
     ZAPIER_WEBHOOK_URL: z.url().optional(),
   })
@@ -103,6 +126,13 @@ export const envSchema = z
         code: "custom",
         path: ["PORT"],
         message: "is required in production (provided by the platform)",
+      });
+    }
+    if (!env.AI_BASE_URL.startsWith("https://")) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["AI_BASE_URL"],
+        message: "must be an https URL in production",
       });
     }
     const entries: ReadonlyArray<readonly [string, string]> = [

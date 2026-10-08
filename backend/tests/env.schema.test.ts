@@ -127,3 +127,51 @@ describe("parseEnv", () => {
     ).toBe("ervenderrs-projects");
   });
 });
+
+describe("parseEnv AI settings", () => {
+  it("applies AI defaults", () => {
+    const env = parseEnv(base());
+    expect(env.AI_PROVIDER).toBe("dahl");
+    expect(env.AI_BASE_URL).toBe("https://inference.dahl.global/v1");
+    expect(env.AI_MODEL).toBe("MiniMaxAI/MiniMax-M2.7");
+    expect(env.AI_TIMEOUT_MS).toBe(40000);
+    expect(env.AI_MAX_TOKENS).toBe(8000);
+    expect(env.AI_JSON_MODE).toBe("off");
+    expect(env.AI_USER_DAILY_LIMIT).toBe(20);
+    expect(env.AI_GLOBAL_DAILY_LIMIT).toBe(100);
+    expect(env.OFF_CONTACT).toBe("https://github.com/ervenderr/Smart-Grocery-Meal-Planner");
+    expect(env.AI_API_KEY).toBeUndefined();
+  });
+
+  it("treats blank AI_API_KEY and USDA_API_KEY as unset", () => {
+    const env = parseEnv(base({ AI_API_KEY: "", USDA_API_KEY: "" }));
+    expect(env.AI_API_KEY).toBeUndefined();
+    expect(env.USDA_API_KEY).toBeUndefined();
+  });
+
+  it("strips trailing slashes from AI_BASE_URL", () => {
+    expect(parseEnv(base({ AI_BASE_URL: "https://x.example/v1//" })).AI_BASE_URL).toBe(
+      "https://x.example/v1"
+    );
+  });
+
+  it("rejects an invalid AI_BASE_URL and http in production", () => {
+    expect(() => parseEnv(base({ AI_BASE_URL: "not a url" }))).toThrow(/AI_BASE_URL/);
+    expect(() => parseEnv(prod({ AI_BASE_URL: "http://x.example/v1" }))).toThrow(/AI_BASE_URL/);
+    expect(parseEnv(prod({ AI_BASE_URL: "https://x.example/v1" })).AI_BASE_URL).toBe(
+      "https://x.example/v1"
+    );
+  });
+
+  it("never echoes the AI_API_KEY value in error output", () => {
+    const key = "dummy-key-value-0123456789";
+    let message = "";
+    try {
+      parseEnv(base({ AI_API_KEY: key, AI_JSON_MODE: "bogus" }));
+    } catch (e) {
+      message = (e as Error).message;
+    }
+    expect(message).toMatch(/AI_JSON_MODE/);
+    expect(message).not.toContain(key);
+  });
+});

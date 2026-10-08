@@ -67,6 +67,25 @@ export const config = Object.freeze({
     spoonacular: parsed.SPOONACULAR_API_KEY,
   }),
 
+  // AI provider (single OpenAI-compatible endpoint, env-configured)
+  ai: Object.freeze({
+    provider: parsed.AI_PROVIDER,
+    baseUrl: parsed.AI_BASE_URL,
+    model: parsed.AI_MODEL,
+    apiKey: parsed.AI_API_KEY,
+    timeoutMs: parsed.AI_TIMEOUT_MS,
+    maxTokens: parsed.AI_MAX_TOKENS,
+    jsonMode: parsed.AI_JSON_MODE,
+    userDailyLimit: parsed.AI_USER_DAILY_LIMIT,
+    globalDailyLimit: parsed.AI_GLOBAL_DAILY_LIMIT,
+  }),
+
+  // Food data lookups (Open Food Facts / USDA)
+  foodData: Object.freeze({
+    usdaApiKey: parsed.USDA_API_KEY,
+    offContact: parsed.OFF_CONTACT,
+  }),
+
   // Zapier Integration
   zapier: Object.freeze({ webhookUrl: parsed.ZAPIER_WEBHOOK_URL }),
 }) as {
@@ -83,6 +102,18 @@ export const config = Object.freeze({
   };
   readonly logging: { readonly level: string };
   readonly apis: { readonly geminiAI?: string; readonly spoonacular?: string };
+  readonly ai: {
+    readonly provider: string;
+    readonly baseUrl: string;
+    readonly model: string;
+    readonly apiKey?: string;
+    readonly timeoutMs: number;
+    readonly maxTokens: number;
+    readonly jsonMode: "off" | "json_object";
+    readonly userDailyLimit: number;
+    readonly globalDailyLimit: number;
+  };
+  readonly foodData: { readonly usdaApiKey?: string; readonly offContact: string };
   readonly zapier: { readonly webhookUrl?: string };
 };
 
