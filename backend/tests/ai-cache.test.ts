@@ -188,3 +188,82 @@ describe('cache DB failures degrade to a miss (WR-01)', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('refresh and empty results (WR-12)', () => {
+  it('refresh bypasses the cached result, consumes quota and replaces the cache', async () => {
+    const a = uniqueName('quinoa');
+    const { token, userId } = await newUser([a]);
+    fetchSpy
+      .mockResolvedValueOnce(chatCompletion(reply([a])))
+      .mockResolvedValueOnce(chatCompletion(JSON.stringify({ recipes: [recipe('Fresh Bowl', [a])] })));
+
+    await suggest(token);
+    const fresh = await suggest(token, { refresh: true });
+    const after = await suggest(token);
+
+    expect(fresh.body.cached).toBe(false);
+    expect(fresh.body.suggestions[0].name).toBe('Fresh Bowl');
+    expect(after.body.cached).toBe(true);
+    expect(after.body.suggestions[0].name).toBe('Fresh Bowl');
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(await userCount(userId)).toBe(2);
+  });
+
+  it('does not cache an empty substitution list', async () => {
+    const { token } = await newUser([]);
+    const name = uniqueName('sage');
+    fetchSpy
+      .mockResolvedValueOnce(chatCompletion(JSON.stringify({ substitutions: [] })))
+      .mockResolvedValueOnce(chatCompletion(JSON.stringify({ substitutions: [] })));
+    const call = () =>
+      request(app)
+        .post('/api/v1/ai/suggest-substitutions')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ingredients: [{ ingredientName: name, quantity: 1, unit: 'cups' }] });
+
+    const first = await call();
+    const second = await call();
+
+    expect(first.body.cached).toBe(false);
+    expect(second.body.cached).toBe(false);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('numeric and boolean string coercion (WR-11)', () => {
+  it('applies maxPrepTime "30" to the prompt and treats usePantry "false" as false', async () => {
+    const { token } = await newUser([uniqueName('pea')]);
+    fetchSpy.mockResolvedValueOnce(chatCompletion(reply(['x'])));
+
+    const res = await suggest(token, { maxPrepTime: '30', usePantry: 'false', refresh: 'true' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.pantryItemsUsed).toBe(0);
+    const sent = fetchSpy.mock.calls[0][1].body as string;
+    expect(sent).toContain('Maximum prep time: 30 minutes.');
+    expect(sent).not.toContain('No prep time limit.');
+  });
+
+  it('applies budgetCents "5000" to the substitution prompt', async () => {
+    const { token } = await newUser([]);
+    fetchSpy.mockResolvedValueOnce(
+      chatCompletion(
+        JSON.stringify({
+          substitutions: [{ original: 'a', substitute: 'b', reason: 'r', estimatedSavingsPercent: 10 }],
+        })
+      )
+    );
+
+    const res = await request(app)
+      .post('/api/v1/ai/suggest-substitutions')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        ingredients: [{ ingredientName: uniqueName('oil'), quantity: '2', unit: 'cups' }],
+        budgetCents: '5000',
+      });
+
+    expect(res.status).toBe(200);
+    const sent = fetchSpy.mock.calls[0][1].body as string;
+    expect(sent).toContain('Budget: 50.00 PHP.');
+  });
+});

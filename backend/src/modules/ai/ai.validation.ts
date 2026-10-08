@@ -31,7 +31,14 @@ export const validateAIRecipeSuggestion: ValidationChain[] = [
   body('usePantry')
     .optional()
     .isBoolean()
-    .withMessage('usePantry must be a boolean'),
+    .withMessage('usePantry must be a boolean')
+    .toBoolean(),
+
+  body('refresh')
+    .optional()
+    .isBoolean()
+    .withMessage('refresh must be a boolean')
+    .toBoolean(),
 
   body('dietaryRestrictions')
     .optional()
@@ -48,7 +55,8 @@ export const validateAIRecipeSuggestion: ValidationChain[] = [
   body('maxPrepTime')
     .optional()
     .isInt({ min: 1, max: 480 })
-    .withMessage('maxPrepTime must be between 1 and 480 minutes (8 hours)'),
+    .withMessage('maxPrepTime must be between 1 and 480 minutes (8 hours)')
+    .toInt(),
 ];
 
 /**
@@ -67,7 +75,8 @@ export const validateAISubstitution: ValidationChain[] = [
 
   body('ingredients.*.quantity')
     .isFloat({ min: 0.01, max: 10000 })
-    .withMessage('quantity must be between 0.01 and 10000'),
+    .withMessage('quantity must be between 0.01 and 10000')
+    .toFloat(),
 
   body('ingredients.*.unit')
     .isString()
@@ -78,7 +87,14 @@ export const validateAISubstitution: ValidationChain[] = [
   body('budgetCents')
     .optional()
     .isInt({ min: 0, max: 100000000 })
-    .withMessage('budgetCents must be between 0 and 100,000,000'),
+    .withMessage('budgetCents must be between 0 and 100,000,000')
+    .toInt(),
+
+  body('refresh')
+    .optional()
+    .isBoolean()
+    .withMessage('refresh must be a boolean')
+    .toBoolean(),
 ];
 
 /**
@@ -88,11 +104,13 @@ export const validateAIMealPlan: ValidationChain[] = [
   body('daysCount')
     .optional()
     .isInt({ min: 1, max: 14 })
-    .withMessage('daysCount must be between 1 and 14 days'),
+    .withMessage('daysCount must be between 1 and 14 days')
+    .toInt(),
 
   body('budgetCents')
     .isInt({ min: 100, max: 100000000 })
-    .withMessage('budgetCents must be between 100 and 100,000,000'),
+    .withMessage('budgetCents must be between 100 and 100,000,000')
+    .toInt(),
 
   body('dietaryRestrictions')
     .optional()
@@ -109,5 +127,12 @@ export const validateAIMealPlan: ValidationChain[] = [
   body('usePantry')
     .optional()
     .isBoolean()
-    .withMessage('usePantry must be a boolean'),
+    .withMessage('usePantry must be a boolean')
+    .toBoolean(),
+
+  body('refresh')
+    .optional()
+    .isBoolean()
+    .withMessage('refresh must be a boolean')
+    .toBoolean(),
 ];

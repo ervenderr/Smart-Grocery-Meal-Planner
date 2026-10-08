@@ -60,6 +60,8 @@ export const aiApi = {
     usePantry?: boolean;
     dietaryRestrictions?: string[];
     maxPrepTime?: number;
+    /** Bypass the server cache for a genuinely new result (still counts toward quota). */
+    refresh?: boolean;
   }): Promise<{
     suggestions: RecipeSuggestion[];
     pantryItemsUsed: number;

@@ -80,6 +80,7 @@ const normName = (s: string): string => s.toLowerCase().replace(/\s+/g, ' ').tri
 
 export async function generateMealPlan(input: {
   readonly userId: string;
+  readonly refresh?: boolean;
   readonly daysCount: number;
   readonly budgetCents: number;
   readonly pantryItems: readonly MealPlanPantryItem[];
@@ -94,6 +95,7 @@ export async function generateMealPlan(input: {
     schema: buildMealPlanSchema(input.daysCount),
     maxTokens: config.ai.maxTokens,
     temperature: 0.7,
+    skipCache: input.refresh === true,
   });
   return { mealPlan: data, cached };
 }

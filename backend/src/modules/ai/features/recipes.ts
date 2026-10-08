@@ -110,6 +110,7 @@ export async function suggestRecipes(input: {
   readonly userId: string;
   readonly pantryItems: readonly PantryPromptItem[];
   readonly maxPrepTime?: number;
+  readonly refresh?: boolean;
 }): Promise<{ suggestions: readonly RecipeSuggestion[]; cached: boolean }> {
   const pantryNames = Array.from(
     new Set(input.pantryItems.map((i) => normName(i.ingredientName)))
@@ -123,6 +124,7 @@ export async function suggestRecipes(input: {
     schema: recipesPayloadSchema,
     maxTokens: config.ai.maxTokens,
     temperature: 0.7,
+    skipCache: input.refresh === true,
   });
   return { suggestions: toRecipeSuggestions(data, pantryNames), cached };
 }

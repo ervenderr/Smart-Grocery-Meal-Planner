@@ -62,6 +62,7 @@ export async function suggestSubstitutions(input: {
   readonly userId: string;
   readonly ingredients: readonly SubstitutionIngredient[];
   readonly budgetCents?: number;
+  readonly refresh?: boolean;
 }): Promise<{ suggestions: readonly Substitution[]; cached: boolean }> {
   const ingredients = input.ingredients
     .map((i) => `${i.ingredientName.toLowerCase().trim()}|${i.quantity}|${i.unit.toLowerCase().trim()}`)
@@ -75,6 +76,9 @@ export async function suggestSubstitutions(input: {
     schema: substitutionsPayloadSchema,
     maxTokens: config.ai.maxTokens,
     temperature: 0.5,
+    skipCache: input.refresh === true,
+    // A flaky empty answer must not be pinned for a week.
+    shouldCache: (payload) => payload.substitutions.length > 0,
   });
   return { suggestions: data.substitutions, cached };
 }

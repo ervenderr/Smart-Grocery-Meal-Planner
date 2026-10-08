@@ -34,6 +34,10 @@ export interface AiRunRequest<T> {
   readonly schema: z.ZodType<T>;
   readonly maxTokens: number;
   readonly temperature: number;
+  /** Bypass the cache read (quota is still consumed); the fresh result replaces the cached one. */
+  readonly skipCache?: boolean;
+  /** Return false to keep a result out of the cache (e.g. empty lists). Default: always cache. */
+  shouldCache?(data: T): boolean;
 }
 
 type ParseResult<T> = { ok: true; data: T } | { ok: false; problems: string };
@@ -187,7 +191,7 @@ export async function runAiFeature<T>(req: AiRunRequest<T>): Promise<{ data: T; 
 
   const now = deps.now();
   const key = buildCacheKey(req.feature, req.schemaVersion, req.cacheInputs);
-  const hit = await readCache(key, now, req.schema);
+  const hit = req.skipCache ? null : await readCache(key, now, req.schema);
   if (hit !== null) {
     logger.info('AI cache hit', { feature: req.feature, cached: true });
     return { data: hit, cached: true };
@@ -195,6 +199,6 @@ export async function runAiFeature<T>(req: AiRunRequest<T>): Promise<{ data: T; 
 
   const day = await reserveOrThrow(req, now);
   const data = await generate(req, day);
-  await storeResult(req, key, data, now);
+  if (req.shouldCache ? req.shouldCache(data) : true) await storeResult(req, key, data, now);
   return { data, cached: false };
 }

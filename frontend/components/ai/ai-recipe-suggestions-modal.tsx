@@ -28,10 +28,10 @@ export function AIRecipeSuggestionsModal({
   const [filteredOut, setFilteredOut] = useState(0);
   const [savingRecipe, setSavingRecipe] = useState(false);
 
-  const handleGenerateSuggestions = async () => {
+  const handleGenerateSuggestions = async (refresh = false) => {
     setLoading(true);
     try {
-      const result = await aiApi.suggestRecipes({ usePantry: true });
+      const result = await aiApi.suggestRecipes({ usePantry: true, refresh });
       setSuggestions(result.suggestions);
       setPantryItemsUsed(result.pantryItemsUsed);
       setFilteredOut(result.filteredOut ?? 0);
@@ -111,7 +111,7 @@ export function AIRecipeSuggestionsModal({
               <p className="text-sm text-gray-600 mb-6 max-w-sm mx-auto">
                 Let AI analyze your pantry items and suggest delicious recipes you can make right now
               </p>
-              <Button onClick={handleGenerateSuggestions} disabled={loading}>
+              <Button onClick={() => handleGenerateSuggestions()} disabled={loading}>
                 {loading ? (
                   <>
                     <LoadingSpinner size="sm" />
@@ -208,7 +208,7 @@ export function AIRecipeSuggestionsModal({
               ))}
 
               <div className="text-center pt-4">
-                <Button variant="outline" onClick={handleGenerateSuggestions} disabled={loading}>
+                <Button variant="outline" onClick={() => handleGenerateSuggestions(true)} disabled={loading}>
                   {loading ? (
                     <>
                       <LoadingSpinner size="sm" />

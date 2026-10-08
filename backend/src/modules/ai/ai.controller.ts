@@ -62,7 +62,7 @@ export class AIController {
    */
   async suggestRecipes(req: Request, res: Response): Promise<void> {
     const userId = (req as any).user.id;
-    const { maxPrepTime, usePantry = true, dietaryRestrictions } = req.body;
+    const { maxPrepTime, usePantry = true, dietaryRestrictions, refresh = false } = req.body;
 
     const pantryItems = usePantry ? await loadPantry(userId) : [];
     if (usePantry && pantryItems.length === 0) {
@@ -73,7 +73,7 @@ export class AIController {
     }
 
     const restrictions = await loadRestrictions(userId, dietaryRestrictions);
-    const { suggestions, cached } = await suggestRecipes({ userId, pantryItems, maxPrepTime });
+    const { suggestions, cached } = await suggestRecipes({ userId, pantryItems, maxPrepTime, refresh });
     const { result, filteredOut } = filterRecipeSuggestions(suggestions, restrictions);
 
     logger.info('AI recipe suggestions generated', {
@@ -92,14 +92,14 @@ export class AIController {
    */
   async suggestSubstitutions(req: Request, res: Response): Promise<void> {
     const userId = (req as any).user.id;
-    const { ingredients, budgetCents, dietaryRestrictions } = req.body;
+    const { ingredients, budgetCents, dietaryRestrictions, refresh = false } = req.body;
 
     if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
       throw new AppError('Ingredients array is required', 400);
     }
 
     const restrictions = await loadRestrictions(userId, dietaryRestrictions);
-    const { suggestions, cached } = await suggestSubstitutions({ userId, ingredients, budgetCents });
+    const { suggestions, cached } = await suggestSubstitutions({ userId, ingredients, budgetCents, refresh });
     const { result, filteredOut } = filterSubstitutions(suggestions, restrictions);
 
     logger.info('AI substitution suggestions generated', {
@@ -118,7 +118,7 @@ export class AIController {
    */
   async generateMealPlan(req: Request, res: Response): Promise<void> {
     const userId = (req as any).user.id;
-    const { daysCount = 7, budgetCents, dietaryRestrictions, usePantry = true } = req.body;
+    const { daysCount = 7, budgetCents, dietaryRestrictions, usePantry = true, refresh = false } = req.body;
 
     if (!budgetCents || budgetCents <= 0) {
       throw new AppError('Valid budget is required', 400);
@@ -126,7 +126,7 @@ export class AIController {
 
     const pantryItems = usePantry ? await loadPantry(userId) : [];
     const restrictions = await loadRestrictions(userId, dietaryRestrictions);
-    const { mealPlan, cached } = await generateMealPlan({ userId, daysCount, budgetCents, pantryItems });
+    const { mealPlan, cached } = await generateMealPlan({ userId, daysCount, budgetCents, pantryItems, refresh });
     const { result, filteredOut } = filterMealPlan(mealPlan, restrictions);
 
     logger.info('AI meal plan generated', {
