@@ -191,6 +191,9 @@ export function createApp(): Application {
   console.log("  - Loading zapier routes...");
   const zapierRoutes = require("./modules/zapier/zapier.routes").default;
 
+  console.log("  - Loading shopping routes...");
+  const shoppingRoutes = require("./modules/shopping/shopping.routes").default;
+
   console.log("✅ All route modules loaded successfully");
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
@@ -205,6 +208,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/food`, foodRoutes);
   app.use(`/api/${config.apiVersion}/notifications`, notificationRoutes);
   app.use(`/api/${config.apiVersion}/zapier`, zapierRoutes);
+  app.use(`/api/${config.apiVersion}/shopping`, shoppingRoutes);
 
   console.log("✅ All routes registered successfully");
 
