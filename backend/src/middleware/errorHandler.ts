@@ -164,7 +164,10 @@ export const notFoundHandler = (
  *
  * WHY: Without this, you'd need try-catch in every async route
  */
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fn: (req: any, res: Response, next: NextFunction) => unknown
+) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, _res, next)).catch(next);
   };

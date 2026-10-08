@@ -8,7 +8,6 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-var-requires': 'off', // app.ts intentionally uses require() for route modules
-    '@typescript-eslint/ban-types': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
     'prefer-const': 'warn',
     'no-var': 'warn',
