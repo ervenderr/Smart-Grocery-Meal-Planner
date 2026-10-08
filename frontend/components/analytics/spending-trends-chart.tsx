@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
+import { useCurrency } from '@/lib/currency/currency-provider';
 
 interface SpendingTrendsChartProps {
   data: any[];
@@ -11,14 +12,15 @@ interface SpendingTrendsChartProps {
 }
 
 export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProps) {
+  const { format: formatMoney, compact } = useCurrency();
   // Transform data for chart
   const chartData = data.map((item) => ({
     date: format(new Date(item.weekStart || item.date), 'MMM dd'),
-    spent: item.totalSpentCents / 100, // Convert cents to pesos
+    spent: item.totalSpentCents / 100, // Major units for the chart
     budget: item.budgetCents ? item.budgetCents / 100 : null,
   }));
 
-  const formatCurrency = (value: number) => `₱${value.toFixed(0)}`;
+  const formatAxis = (value: number) => compact(Math.round(value * 100));
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -27,7 +29,7 @@ export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProp
           <p className="text-sm font-medium text-gray-900 mb-2">{payload[0].payload.date}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: <span className="font-semibold">₱{entry.value.toFixed(2)}</span>
+              {entry.name}: <span className="font-semibold">{formatMoney(Math.round(entry.value * 100))}</span>
             </p>
           ))}
         </div>
@@ -37,7 +39,7 @@ export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProp
   };
 
   return (
-    <Card className="p-6">
+    <Card className="min-w-0 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Spending Trends</h3>
@@ -49,18 +51,21 @@ export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProp
       </div>
 
       {chartData.length > 0 ? (
-        <ResponsiveContainer width="100%" height={300}>
+        <div className="h-60 min-w-0 sm:h-[300px]">
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 12, fill: '#6b7280' }}
+              tick={{ fontSize: 14, fill: '#6b7280' }}
               stroke="#e5e7eb"
+              interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fontSize: 12, fill: '#6b7280' }}
+              tick={{ fontSize: 14, fill: '#6b7280' }}
               stroke="#e5e7eb"
-              tickFormatter={formatCurrency}
+              width={56}
+              tickFormatter={formatAxis}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
@@ -89,8 +94,9 @@ export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProp
             )}
           </LineChart>
         </ResponsiveContainer>
+        </div>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-gray-500">
+        <div className="flex items-center justify-center h-60 text-gray-500 sm:h-[300px]">
           <p>No spending data available for this period</p>
         </div>
       )}

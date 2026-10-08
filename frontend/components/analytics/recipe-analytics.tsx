@@ -84,7 +84,7 @@ export function RecipeAnalytics() {
 
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="min-w-0 p-4 sm:p-6">
         <div className="flex items-center justify-center py-12">
           <LoadingSpinner />
         </div>
@@ -93,7 +93,7 @@ export function RecipeAnalytics() {
   }
 
   return (
-    <Card className="p-6">
+    <Card className="min-w-0 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Recipe Insights</h3>
@@ -105,7 +105,7 @@ export function RecipeAnalytics() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
         <div className="bg-pink-50 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-1">
             <ChefHat className="h-4 w-4 text-pink-600" />
@@ -127,7 +127,7 @@ export function RecipeAnalytics() {
             <Star className="h-4 w-4 text-orange-600" />
             <p className="text-sm font-medium text-orange-900">Difficulty</p>
           </div>
-          <p className="text-xl font-bold text-orange-900">{stats.mostCommonDifficulty}</p>
+          <p className="break-words text-xl font-bold text-orange-900">{stats.mostCommonDifficulty}</p>
         </div>
 
         <div className="bg-green-50 rounded-lg p-4">
@@ -147,7 +147,7 @@ export function RecipeAnalytics() {
             topRecipes.map((recipe, index) => (
               <div
                 key={recipe.id}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                className="flex min-h-11 items-center justify-between p-2 bg-gray-50 rounded-lg"
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="text-xs font-semibold text-gray-500 w-5">#{index + 1}</span>

@@ -61,7 +61,7 @@ export function PantryAnalytics() {
 
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card className="min-w-0 p-4 sm:p-6">
         <div className="flex items-center justify-center py-12">
           <LoadingSpinner />
         </div>
@@ -70,7 +70,7 @@ export function PantryAnalytics() {
   }
 
   return (
-    <Card className="p-6">
+    <Card className="min-w-0 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Pantry Insights</h3>
@@ -82,7 +82,7 @@ export function PantryAnalytics() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
         <div className="bg-blue-50 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-1">
             <Archive className="h-4 w-4 text-blue-600" />
@@ -104,7 +104,7 @@ export function PantryAnalytics() {
             <TrendingUp className="h-4 w-4 text-purple-600" />
             <p className="text-sm font-medium text-purple-900">Top Category</p>
           </div>
-          <p className="text-xl font-bold text-purple-900">{stats.topCategory}</p>
+          <p className="break-words text-xl font-bold text-purple-900">{stats.topCategory}</p>
         </div>
       </div>
 
@@ -116,13 +116,13 @@ export function PantryAnalytics() {
             topItems.map((item, index) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                className="flex min-h-11 items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-gray-500 w-5">#{index + 1}</span>
-                  <span className="text-sm font-medium text-gray-900 capitalize">{item.name}</span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-500 w-5 shrink-0">#{index + 1}</span>
+                  <span className="min-w-0 truncate text-sm font-medium text-gray-900 capitalize">{item.name}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   <span className="text-sm text-gray-600">
                     {item.quantity} {item.unit}
                   </span>

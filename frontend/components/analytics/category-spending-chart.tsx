@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Package } from 'lucide-react';
+import { useCurrency } from '@/lib/currency/currency-provider';
 
 interface CategorySpendingChartProps {
   data: any[];
@@ -11,10 +12,11 @@ interface CategorySpendingChartProps {
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
+  const { format: formatMoney } = useCurrency();
   // Transform data for chart
   const chartData = data.slice(0, 8).map((item) => ({
     name: item.category.charAt(0).toUpperCase() + item.category.slice(1),
-    value: item.totalSpentCents / 100, // Convert to pesos
+    value: item.totalSpentCents / 100, // Major units
     percentage: item.percentage,
     count: item.itemCount,
   }));
@@ -28,7 +30,7 @@ export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
           <p className="text-sm font-medium text-gray-900 mb-1">{data.name}</p>
           <p className="text-sm text-gray-600">
-            Amount: <span className="font-semibold text-gray-900">₱{data.value.toFixed(2)}</span>
+            Amount: <span className="font-semibold text-gray-900">{formatMoney(Math.round(data.value * 100))}</span>
           </p>
           <p className="text-sm text-gray-600">
             Items: <span className="font-semibold text-gray-900">{data.count}</span>
@@ -57,7 +59,7 @@ export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
         fill="white"
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
-        fontSize={12}
+        fontSize={14}
         fontWeight={600}
       >
         {`${percentage.toFixed(0)}%`}
@@ -66,7 +68,7 @@ export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="min-w-0 p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Category Breakdown</h3>
@@ -79,7 +81,8 @@ export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
 
       {chartData.length > 0 ? (
         <>
-          <ResponsiveContainer width="100%" height={300}>
+          <div className="h-60 min-w-0 sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={chartData}
@@ -87,7 +90,7 @@ export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
                 cy="50%"
                 labelLine={false}
                 label={renderCustomLabel}
-                outerRadius={100}
+                outerRadius="80%"
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -98,23 +101,24 @@ export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
+          </div>
 
           {/* Legend */}
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="mt-4 grid grid-cols-1 gap-2 min-[400px]:grid-cols-2">
             {chartData.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
-                <span className="text-xs text-gray-700 truncate">{item.name}</span>
-                <span className="text-xs text-gray-500 ml-auto">₱{item.value.toFixed(0)}</span>
+                <span className="min-w-0 truncate text-sm text-gray-700">{item.name}</span>
+                <span className="ml-auto shrink-0 text-sm text-gray-500">{formatMoney(Math.round(item.value * 100))}</span>
               </div>
             ))}
           </div>
         </>
       ) : (
-        <div className="flex items-center justify-center h-[300px] text-gray-500">
+        <div className="flex items-center justify-center h-60 text-gray-500 sm:h-[300px]">
           <p>No category data available</p>
         </div>
       )}
