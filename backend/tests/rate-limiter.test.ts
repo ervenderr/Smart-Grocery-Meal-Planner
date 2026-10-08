@@ -78,3 +78,75 @@ describe("AI burst limiter", () => {
     expect(logged.join("\n")).not.toContain("ERR_ERL_KEY_GEN_IPV6");
   });
 });
+
+describe("Shopping limiter", () => {
+  const suffix = `${Date.now()}`;
+  const email = `rl-shop-${suffix}@example.com`;
+  let app: Express;
+  let limiterModule: typeof import("../src/middleware/rateLimiter");
+  let token: string;
+
+  beforeAll(async () => {
+    jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      app = require("../src/app").createApp();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      limiterModule = require("../src/middleware/rateLimiter");
+    });
+    token = await signup(app, email);
+  });
+
+  afterAll(async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { prisma } = require("../src/config/database.config");
+    const users = await prisma.user.findMany({
+      where: { email: { startsWith: "rl-shop-" } },
+      select: { id: true },
+    });
+    const ids = users.map((u: { id: string }) => u.id);
+    await prisma.shoppingList.deleteMany({ where: { userId: { in: ids } } });
+    await prisma.user.deleteMany({ where: { id: { in: ids } } });
+  });
+
+  it("isShoppingRequest matches only the shopping prefix", () => {
+    const { isShoppingRequest } = limiterModule;
+    expect(isShoppingRequest("/api/v1/shopping/list")).toBe(true);
+    expect(isShoppingRequest("/api/v1/shopping")).toBe(true);
+    expect(isShoppingRequest("/api/v1/shopping?x=1")).toBe(true);
+    expect(isShoppingRequest("/api/v1/shoppingx")).toBe(false);
+    expect(isShoppingRequest("/api/v1/pantry")).toBe(false);
+  });
+
+  it("limits per user id with SHOPPING_RATE_LIMITED and spares other users", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const express = require("express") as typeof import("express");
+    const mini = express();
+    mini.use((req, _res, next) => {
+      (req as unknown as { user: { id: string } }).user = {
+        id: String(req.headers["x-user"]),
+      };
+      next();
+    });
+    mini.use(limiterModule.createShoppingLimiter(3));
+    mini.get("/ping", (_req, res) => {
+      res.json({ ok: true });
+    });
+    for (let i = 0; i < 3; i += 1) {
+      await request(mini).get("/ping").set("x-user", "u1").expect(200);
+    }
+    const limited = await request(mini).get("/ping").set("x-user", "u1");
+    expect(limited.status).toBe(429);
+    expect(limited.body.code).toBe("SHOPPING_RATE_LIMITED");
+    expect(limited.body.error).toBe(limited.body.message);
+    await request(mini).get("/ping").set("x-user", "u2").expect(200);
+  });
+
+  it("does not throttle 105 sequential shopping requests with the global limiter", async () => {
+    for (let i = 0; i < 105; i += 1) {
+      const res = await request(app)
+        .get("/api/v1/shopping/list")
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(200);
+    }
+  });
+});
