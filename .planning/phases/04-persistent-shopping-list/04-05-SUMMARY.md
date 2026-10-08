@@ -28,7 +28,7 @@ Shopping page now reads the server-stored active list through React Query, with 
 ## Commits
 - a93dbd7 feat(04-05): add shopping list query and mutation hooks
 - a2780c8 feat(04-05): add shopping quick-add, item row and category section
-- feat(04-05): rewrite shopping page on the persistent list API (third task commit, see git log)
+- b564e15 feat(04-05): rewrite shopping page on the persistent list API
 
 ## Decisions
 - Edit sheet form is a keyed inner component so state re-initialises per item.
