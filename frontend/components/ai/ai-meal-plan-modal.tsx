@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Sparkles, Calendar, Banknote, Utensils, Save } from 'lucide-react';
+import { Sparkles, Calendar, Banknote, Utensils, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type MealPlanSuggestion } from '@/lib/api/ai';
 import { mealPlanApi } from '@/lib/api/mealplans';
@@ -169,259 +170,222 @@ export function AIMealPlanModal({
     setBudgetTextError(undefined);
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleCancel();
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-gray-900/50" onClick={handleCancel}></div>
-
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ai-meal-plan-title"
-        className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col"
-      >
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-purple-100 p-2">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-            </div>
+    <Modal isOpen={isOpen} onClose={handleCancel} title="AI Meal Plan Generator" size="xl">
+      <div className="space-y-6 pb-2">
+        <p className="flex items-center gap-2 text-sm text-gray-600">
+          <Sparkles className="h-4 w-4 text-purple-600" aria-hidden="true" />
+          Intelligent meal planning for your week
+        </p>
+        {!suggestion ? (
+          <form onSubmit={handleSubmit(handleGenerate)} className="space-y-6">
             <div>
-              <h2 id="ai-meal-plan-title" className="text-xl font-bold text-gray-900">AI Meal Plan Generator</h2>
-              <p className="text-sm text-gray-600">Intelligent meal planning for your week</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleCancel}
-            aria-label="Close"
-            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-gray-100"
-          >
-            <X className="h-5 w-5 text-gray-600" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-          {!suggestion ? (
-            <form onSubmit={handleSubmit(handleGenerate)} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Duration (Days)
-                </label>
-                <input
-                  type="number"
-                  {...register('daysCount', { valueAsNumber: true })}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                />
-                {errors.daysCount && (
-                  <p className="mt-1 text-sm text-red-600">{errors.daysCount.message}</p>
-                )}
-              </div>
-
-              <Input
-                label={`Weekly budget (${currency})`}
-                type="text"
-                inputMode="decimal"
-                value={budgetInput}
-                onChange={(e) => handleBudgetChange(e.target.value)}
-                error={budgetTextError ?? errors.budgetCents?.message}
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Duration (Days)
+              </label>
+              <input
+                type="number"
+                {...register('daysCount', { valueAsNumber: true })}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
+              {errors.daysCount && (
+                <p className="mt-1 text-sm text-red-600">{errors.daysCount.message}</p>
+              )}
+            </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="usePantry"
-                  {...register('usePantry')}
-                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            <Input
+              label={`Weekly budget (${currency})`}
+              type="text"
+              inputMode="decimal"
+              value={budgetInput}
+              onChange={(e) => handleBudgetChange(e.target.value)}
+              error={budgetTextError ?? errors.budgetCents?.message}
+            />
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="usePantry"
+                {...register('usePantry')}
+                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label htmlFor="usePantry" className="text-sm font-medium text-gray-700">
+                Use ingredients from my pantry
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Dietary Restrictions (Optional)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {DIETARY_OPTIONS.map(({ value, label }) => (
+                  <label key={value} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      value={value}
+                      {...register('dietaryRestrictions')}
+                      className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  Generating your meal plan...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Generate Meal Plan
+                </>
+              )}
+            </Button>
+          </form>
+        ) : showSaveForm ? (
+          <form onSubmit={handleSubmitSave(handleSave)} className="space-y-6">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <h3 className="font-semibold text-purple-900 mb-1">{suggestion.name}</h3>
+              <p className="text-sm text-purple-700">
+                {suggestion.meals.length} meals • {format(suggestion.estimatedCostCents)}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                Schedule Your Meal Plan
+              </h3>
+
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                <Input
+                  label="Start Date"
+                  type="date"
+                  error={saveErrors.startDate?.message}
+                  disabled={saving}
+                  required
+                  {...registerSave('startDate')}
                 />
-                <label htmlFor="usePantry" className="text-sm font-medium text-gray-700">
-                  Use ingredients from my pantry
-                </label>
+
+                <Input
+                  label="End Date"
+                  type="date"
+                  error={saveErrors.endDate?.message}
+                  disabled={saving}
+                  required
+                  {...registerSave('endDate')}
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dietary Restrictions (Optional)
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {DIETARY_OPTIONS.map(({ value, label }) => (
-                    <label key={value} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        value={value}
-                        {...register('dietaryRestrictions')}
-                        className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <span>{label}</span>
-                    </label>
-                  ))}
-                </div>
+                <textarea
+                  placeholder="Add notes about this meal plan..."
+                  rows={2}
+                  disabled={saving}
+                  className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                  {...registerSave('notes')}
+                />
+                {saveErrors.notes && <p className="mt-1 text-sm text-red-500">{saveErrors.notes.message}</p>}
               </div>
+            </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSaveForm(false)}
+                disabled={saving}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button type="submit" disabled={saving} className="flex-1">
+                {saving ? (
                   <>
                     <LoadingSpinner size="sm" />
-                    Generating your meal plan...
+                    Saving...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" />
-                    Generate Meal Plan
+                    <Save className="h-4 w-4" />
+                    Save Meal Plan
                   </>
                 )}
               </Button>
-            </form>
-          ) : showSaveForm ? (
-            <form onSubmit={handleSubmitSave(handleSave)} className="space-y-6">
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h3 className="font-semibold text-purple-900 mb-1">{suggestion.name}</h3>
-                <p className="text-sm text-purple-700">
-                  {suggestion.meals.length} meals • {format(suggestion.estimatedCostCents)}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-                  Schedule Your Meal Plan
-                </h3>
-
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-                  <Input
-                    label="Start Date"
-                    type="date"
-                    error={saveErrors.startDate?.message}
-                    disabled={saving}
-                    required
-                    {...registerSave('startDate')}
-                  />
-
-                  <Input
-                    label="End Date"
-                    type="date"
-                    error={saveErrors.endDate?.message}
-                    disabled={saving}
-                    required
-                    {...registerSave('endDate')}
-                  />
-                </div>
-
-                <div>
-                  <textarea
-                    placeholder="Add notes about this meal plan..."
-                    rows={2}
-                    disabled={saving}
-                    className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                    {...registerSave('notes')}
-                  />
-                  {saveErrors.notes && <p className="mt-1 text-sm text-red-500">{saveErrors.notes.message}</p>}
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowSaveForm(false)}
-                  disabled={saving}
-                  className="flex-1"
-                >
-                  Back
-                </Button>
-                <Button type="submit" disabled={saving} className="flex-1">
-                  {saving ? (
-                    <>
-                      <LoadingSpinner size="sm" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      Save Meal Plan
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-6">
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <h3 className="font-semibold text-purple-900 mb-2">{suggestion.name}</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-purple-600" />
-                    <span className="text-purple-800">{suggestion.meals.length} meals</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Banknote className="h-4 w-4 text-purple-600" />
-                    <span className="text-purple-800">{format(suggestion.estimatedCostCents)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Utensils className="h-4 w-4 text-purple-600" />
-                    <span className="text-purple-800">{suggestion.totalCalories.toLocaleString()} cal</span>
-                  </div>
-                </div>
-                {pantryItemsUsed > 0 && (
-                  <p className="text-sm text-purple-700 mt-2">
-                    Uses {pantryItemsUsed} items from your pantry
-                  </p>
-                )}
-              </div>
-
-              <DietFilterNotice filteredOut={filteredOut} />
-
-              <div className="space-y-4">
-                {dayNames.map((dayName, dayIndex) => {
-                  const dayMeals = suggestion.meals.filter(m => m.day === dayIndex);
-                  if (dayMeals.length === 0) return null;
-
-                  return (
-                    <div key={dayIndex} className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">{dayName}</h4>
-                      <div className="space-y-3">
-                        {dayMeals.map((meal, mealIndex) => (
-                          <div key={mealIndex} className="flex gap-3">
-                            <span className="text-xs font-medium text-gray-500 uppercase w-20 flex-shrink-0 pt-1">
-                              {meal.mealType}
-                            </span>
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900">{meal.recipeName}</p>
-                              <p className="text-sm text-gray-600 mt-1">
-                                {meal.ingredients.join(', ')}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setSuggestion(null)} className="flex-1">
-                  Generate New Plan
-                </Button>
-                <Button onClick={handleUse} className="flex-1">
-                  Use This Meal Plan
-                </Button>
-              </div>
             </div>
-          )}
-        </div>
+          </form>
+        ) : (
+          <div className="space-y-6">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <h3 className="font-semibold text-purple-900 mb-2">{suggestion.name}</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-purple-600" />
+                  <span className="text-purple-800">{suggestion.meals.length} meals</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Banknote className="h-4 w-4 text-purple-600" />
+                  <span className="text-purple-800">{format(suggestion.estimatedCostCents)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Utensils className="h-4 w-4 text-purple-600" />
+                  <span className="text-purple-800">{suggestion.totalCalories.toLocaleString()} cal</span>
+                </div>
+              </div>
+              {pantryItemsUsed > 0 && (
+                <p className="text-sm text-purple-700 mt-2">
+                  Uses {pantryItemsUsed} items from your pantry
+                </p>
+              )}
+            </div>
+
+            <DietFilterNotice filteredOut={filteredOut} />
+
+            <div className="space-y-4">
+              {dayNames.map((dayName, dayIndex) => {
+                const dayMeals = suggestion.meals.filter(m => m.day === dayIndex);
+                if (dayMeals.length === 0) return null;
+
+                return (
+                  <div key={dayIndex} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-3">{dayName}</h4>
+                    <div className="space-y-3">
+                      {dayMeals.map((meal, mealIndex) => (
+                        <div key={mealIndex} className="flex gap-3">
+                          <span className="text-xs font-medium text-gray-500 uppercase w-20 flex-shrink-0 pt-1">
+                            {meal.mealType}
+                          </span>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{meal.recipeName}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {meal.ingredients.join(', ')}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setSuggestion(null)} className="flex-1">
+                Generate New Plan
+              </Button>
+              <Button onClick={handleUse} className="flex-1">
+                Use This Meal Plan
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }
