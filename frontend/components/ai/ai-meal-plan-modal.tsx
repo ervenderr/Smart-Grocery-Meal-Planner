@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,12 +11,15 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type MealPlanSuggestion } from '@/lib/api/ai';
 import { mealPlanApi } from '@/lib/api/mealplans';
 import { getApiErrorMessage } from '@/lib/api/errors';
+import { DIETARY_OPTIONS } from '@/lib/constants/dietary';
+import { useCurrency } from '@/lib/currency/currency-provider';
+import { centsToMajorString, parseMajorToCents } from '@/lib/currency/format';
 import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
 
 const aiMealPlanSchema = z.object({
   daysCount: z.number().min(1).max(14),
-  budgetCents: z.number().min(100).max(10000000),
+  budgetCents: z.number().int().min(100).max(100_000_000),
   dietaryRestrictions: z.array(z.string()).optional(),
   usePantry: z.boolean().optional(),
 });
@@ -37,15 +40,18 @@ const saveMealPlanSchema = z.object({
 
 type SaveMealPlanFormData = z.infer<typeof saveMealPlanSchema>;
 
-const DIETARY_OPTIONS = [
-  'vegetarian',
-  'vegan',
-  'gluten_free',
-  'dairy_free',
-  'nut_free',
-  'halal',
-  'kosher',
-];
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+function defaultSaveDates() {
+  const now = Date.now();
+  return {
+    startDate: new Date(now).toISOString().split('T')[0],
+    endDate: new Date(now + WEEK_MS).toISOString().split('T')[0],
+  };
+}
+
+const DEFAULT_BUDGET_CENTS = 200000;
+const BUDGET_ERROR = 'Enter a budget of 1 or more';
 
 export function AIMealPlanModal({
   isOpen,
@@ -58,18 +64,21 @@ export function AIMealPlanModal({
   const [pantryItemsUsed, setPantryItemsUsed] = useState(0);
   const [filteredOut, setFilteredOut] = useState(0);
   const [showSaveForm, setShowSaveForm] = useState(false);
+  const { format, currency } = useCurrency();
+  const [budgetInput, setBudgetInput] = useState(centsToMajorString(DEFAULT_BUDGET_CENTS));
 
   const {
     register,
     handleSubmit,
-    watch,
+    setValue,
+    setError,
     formState: { errors },
     reset,
   } = useForm<AIFormData>({
     resolver: zodResolver(aiMealPlanSchema),
     defaultValues: {
       daysCount: 7,
-      budgetCents: 200000, // ₱2000
+      budgetCents: DEFAULT_BUDGET_CENTS,
       dietaryRestrictions: [],
       usePantry: true,
     },
@@ -82,13 +91,18 @@ export function AIMealPlanModal({
     reset: resetSave,
   } = useForm<SaveMealPlanFormData>({
     resolver: zodResolver(saveMealPlanSchema),
-    defaultValues: {
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    },
+    defaultValues: defaultSaveDates(),
   });
 
-  const budgetPesos = watch('budgetCents') / 100;
+  const handleBudgetChange = (value: string) => {
+    setBudgetInput(value);
+    const cents = parseMajorToCents(value);
+    if (cents === null || cents < 100) {
+      setError('budgetCents', { message: BUDGET_ERROR });
+      return;
+    }
+    setValue('budgetCents', cents, { shouldValidate: true, shouldDirty: true });
+  };
 
   const handleGenerate = async (data: AIFormData) => {
     setLoading(true);
@@ -143,7 +157,18 @@ export function AIMealPlanModal({
     resetSave();
     setSuggestion(null);
     setShowSaveForm(false);
+    setBudgetInput(centsToMajorString(DEFAULT_BUDGET_CENTS));
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCancel();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -151,32 +176,37 @@ export function AIMealPlanModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-gray-900/50" onClick={handleCancel}></div>
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-meal-plan-title"
+        className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col"
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-purple-100 p-2">
               <Sparkles className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">AI Meal Plan Generator</h2>
+              <h2 id="ai-meal-plan-title" className="text-xl font-bold text-gray-900">AI Meal Plan Generator</h2>
               <p className="text-sm text-gray-600">Intelligent meal planning for your week</p>
             </div>
           </div>
-          <button onClick={handleCancel} className="rounded-lg p-2 hover:bg-gray-100">
+          <button
+            type="button"
+            onClick={handleCancel}
+            aria-label="Close"
+            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-gray-100"
+          >
             <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {!suggestion ? (
             <form onSubmit={handleSubmit(handleGenerate)} className="space-y-6">
-              {/* Duration */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Duration (Days)
@@ -191,29 +221,15 @@ export function AIMealPlanModal({
                 )}
               </div>
 
-              {/* Budget */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Budget (₱{budgetPesos.toFixed(2)})
-                </label>
-                <input
-                  type="range"
-                  min="10000"
-                  max="1000000"
-                  step="10000"
-                  {...register('budgetCents', { valueAsNumber: true })}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>₱100</span>
-                  <span>₱10,000</span>
-                </div>
-                {errors.budgetCents && (
-                  <p className="mt-1 text-sm text-red-600">{errors.budgetCents.message}</p>
-                )}
-              </div>
+              <Input
+                label={`Weekly budget (${currency})`}
+                type="text"
+                inputMode="decimal"
+                value={budgetInput}
+                onChange={(e) => handleBudgetChange(e.target.value)}
+                error={errors.budgetCents?.message}
+              />
 
-              {/* Use Pantry Items */}
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -226,21 +242,20 @@ export function AIMealPlanModal({
                 </label>
               </div>
 
-              {/* Dietary Restrictions */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Dietary Restrictions (Optional)
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {DIETARY_OPTIONS.map((option) => (
-                    <label key={option} className="flex items-center gap-2 text-sm">
+                  {DIETARY_OPTIONS.map(({ value, label }) => (
+                    <label key={value} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        value={option}
+                        value={value}
                         {...register('dietaryRestrictions')}
                         className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                       />
-                      <span className="capitalize">{option.replace('_', ' ')}</span>
+                      <span>{label}</span>
                     </label>
                   ))}
                 </div>
@@ -265,7 +280,7 @@ export function AIMealPlanModal({
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <h3 className="font-semibold text-purple-900 mb-1">{suggestion.name}</h3>
                 <p className="text-sm text-purple-700">
-                  {suggestion.meals.length} meals • ₱{(suggestion.estimatedCostCents / 100).toFixed(2)}
+                  {suggestion.meals.length} meals • {format(suggestion.estimatedCostCents)}
                 </p>
               </div>
 
@@ -333,7 +348,6 @@ export function AIMealPlanModal({
             </form>
           ) : (
             <div className="space-y-6">
-              {/* Summary */}
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <h3 className="font-semibold text-purple-900 mb-2">{suggestion.name}</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
@@ -343,7 +357,7 @@ export function AIMealPlanModal({
                   </div>
                   <div className="flex items-center gap-2">
                     <Banknote className="h-4 w-4 text-purple-600" />
-                    <span className="text-purple-800">₱{(suggestion.estimatedCostCents / 100).toFixed(2)}</span>
+                    <span className="text-purple-800">{format(suggestion.estimatedCostCents)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Utensils className="h-4 w-4 text-purple-600" />
@@ -359,7 +373,6 @@ export function AIMealPlanModal({
 
               <DietFilterNotice filteredOut={filteredOut} />
 
-              {/* Meals by Day */}
               <div className="space-y-4">
                 {dayNames.map((dayName, dayIndex) => {
                   const dayMeals = suggestion.meals.filter(m => m.day === dayIndex);
