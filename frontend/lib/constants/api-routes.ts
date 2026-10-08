@@ -45,12 +45,14 @@ export const API_ROUTES = {
 
   // Shopping
   SHOPPING: {
-    LISTS: `/api/${API_VERSION}/shopping-lists`,
-    BY_ID: (id: string) => `/api/${API_VERSION}/shopping-lists/${id}`,
-    ITEM: (listId: string, itemId: string) =>
-      `/api/${API_VERSION}/shopping-lists/${listId}/items/${itemId}`,
-    COMPLETE: (id: string) => `/api/${API_VERSION}/shopping-lists/${id}/complete`,
+    LIST: `/api/${API_VERSION}/shopping/list`,
+    ITEMS: `/api/${API_VERSION}/shopping/items`,
+    ITEM: (itemId: string) => `/api/${API_VERSION}/shopping/items/${itemId}`,
+    GENERATE: `/api/${API_VERSION}/shopping/generate`,
+    FINISH: `/api/${API_VERSION}/shopping/finish`,
+    HISTORY: `/api/${API_VERSION}/shopping/history`,
   },
+
 
   // Budget & Pricing
   BUDGET: {

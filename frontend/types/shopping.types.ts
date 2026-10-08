@@ -1,18 +1,17 @@
 /**
- * Shopping List Types
+ * Shopping list types. Mirror the backend DTOs under /api/v1/shopping.
  */
 
-export interface ShoppingListItem {
+export interface ShoppingItem {
   id: string;
   shoppingListId: string;
   itemName: string;
   quantity: number;
   unit: string;
+  category: string;
   costEstimateCents: number | null;
   actualCostCents: number | null;
-  category: string | null;
   isChecked: boolean;
-  substituteSuggestion: string | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -20,49 +19,59 @@ export interface ShoppingListItem {
 
 export interface ShoppingList {
   id: string;
-  userId: string;
-  mealPlanId: string | null;
   name: string;
-  totalCostCents: number | null;
-  totalGeminiUnits: number | null;
+  mealPlanId: string | null;
   isCompleted: boolean;
-  completedAt: string | null;
-  items: ShoppingListItem[];
   createdAt: string;
   updatedAt: string;
+  items: ShoppingItem[];
 }
 
-export interface ShoppingListItemInput {
+export interface CreateShoppingItemInput {
   itemName: string;
-  quantity: number;
-  unit: string;
-  costEstimateCents?: number;
-  category?: string;
-  substituteSuggestion?: string;
-  notes?: string;
-}
-
-export interface CreateShoppingListData {
-  name: string;
-  mealPlanId?: string;
-  notes?: string;
-  items?: ShoppingListItemInput[];
-}
-
-export interface UpdateShoppingListData {
-  name?: string;
-  isCompleted?: boolean;
-  items?: ShoppingListItemInput[];
-}
-
-export interface UpdateShoppingListItemData {
+  quantity?: number;
+  unit?: string;
+  category?: string | null;
+  costEstimateCents?: number | null;
+  actualCostCents?: number | null;
   isChecked?: boolean;
-  actualCostCents?: number;
-  notes?: string;
+  notes?: string | null;
 }
 
-export interface ShoppingListsResponse {
-  items: ShoppingList[];
+export type UpdateShoppingItemInput = Partial<CreateShoppingItemInput>;
+
+export type CarryOverMode = 'carry' | 'discard';
+
+export interface GenerateShoppingListResult {
+  list: ShoppingList;
+  added: number;
+  merged: number;
+}
+
+export interface FinishShoppingInput {
+  carryOver?: CarryOverMode;
+  /** User's local date, YYYY-MM-DD */
+  receiptDate?: string;
+}
+
+export interface ShoppingHistoryEntry {
+  id: string;
+  /** YYYY-MM-DD */
+  receiptDate: string;
+  totalCents: number;
+  estimatedCents: number;
+  itemCount: number;
+  listName: string | null;
+  shoppingListId: string | null;
+}
+
+export interface FinishShoppingResult {
+  history: ShoppingHistoryEntry;
+  list: ShoppingList;
+}
+
+export interface ShoppingHistoryPage {
+  items: ShoppingHistoryEntry[];
   pagination: {
     page: number;
     limit: number;
@@ -70,36 +79,3 @@ export interface ShoppingListsResponse {
     totalPages: number;
   };
 }
-
-export interface ShoppingListFilters {
-  isCompleted?: boolean;
-  sortBy?: 'name' | 'createdAt' | 'completedAt';
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  limit?: number;
-}
-
-// For meal plan generated shopping lists
-export interface MealPlanShoppingListItem {
-  ingredientName: string;
-  quantity: number;
-  unit: string;
-  recipes: string[];
-}
-
-export interface MealPlanShoppingList {
-  items: MealPlanShoppingListItem[];
-  totalEstimatedCostCents: number | null;
-}
-
-export type ShoppingItemCategory =
-  | 'produce'
-  | 'protein'
-  | 'dairy'
-  | 'grains'
-  | 'frozen'
-  | 'canned'
-  | 'beverages'
-  | 'snacks'
-  | 'condiments'
-  | 'other';

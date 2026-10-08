@@ -45,8 +45,8 @@ export const queryKeys = {
   },
   shopping: {
     all: ['shopping'] as const,
-    lists: () => ['shopping', 'lists'] as const,
-    detail: (id: string) => ['shopping', 'detail', id] as const,
+    active: () => ['shopping', 'active'] as const,
+    history: (page: number) => ['shopping', 'history', page] as const,
   },
   budget: {
     summary: () => ['budget', 'summary'] as const,

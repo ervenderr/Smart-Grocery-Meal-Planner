@@ -1,90 +1,56 @@
 import { apiClient } from './client';
+import { API_ROUTES } from '@/lib/constants/api-routes';
 import type {
   ShoppingList,
-  ShoppingListsResponse,
-  CreateShoppingListData,
-  UpdateShoppingListData,
-  UpdateShoppingListItemData,
-  ShoppingListFilters,
+  ShoppingItem,
+  CreateShoppingItemInput,
+  UpdateShoppingItemInput,
+  GenerateShoppingListResult,
+  FinishShoppingInput,
+  FinishShoppingResult,
+  ShoppingHistoryPage,
 } from '@/types/shopping.types';
 
-export const shoppingListApi = {
-  /**
-   * Get all shopping lists with optional filters
-   * Note: This endpoint may not be implemented yet on backend
-   */
-  async getAll(filters?: ShoppingListFilters): Promise<ShoppingListsResponse> {
-    const params = new URLSearchParams();
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params.append(key, String(value));
-        }
-      });
-    }
-
-    const query = params.toString();
-    const url = query ? `/api/v1/shopping-lists?${query}` : '/api/v1/shopping-lists';
-
-    return await apiClient.get<ShoppingListsResponse>(url);
+/**
+ * Shopping API Service (/api/v1/shopping). Errors propagate to React Query.
+ */
+export const shoppingApi = {
+  getActiveList: async (): Promise<ShoppingList> => {
+    return apiClient.get<ShoppingList>(API_ROUTES.SHOPPING.LIST);
   },
 
-  /**
-   * Get a single shopping list by ID
-   */
-  async getById(id: string): Promise<ShoppingList> {
-    return await apiClient.get<ShoppingList>(`/api/v1/shopping-lists/${id}`);
+  addItem: async (input: CreateShoppingItemInput): Promise<ShoppingItem> => {
+    return apiClient.post<ShoppingItem>(API_ROUTES.SHOPPING.ITEMS, input);
   },
 
-  /**
-   * Create a new shopping list
-   */
-  async create(data: CreateShoppingListData): Promise<ShoppingList> {
-    return await apiClient.post<ShoppingList>('/api/v1/shopping-lists', data);
-  },
-
-  /**
-   * Update an existing shopping list
-   */
-  async update(id: string, data: UpdateShoppingListData): Promise<ShoppingList> {
-    return await apiClient.patch<ShoppingList>(`/api/v1/shopping-lists/${id}`, data);
-  },
-
-  /**
-   * Delete a shopping list
-   */
-  async delete(id: string): Promise<void> {
-    await apiClient.delete(`/api/v1/shopping-lists/${id}`);
-  },
-
-  /**
-   * Mark shopping list as completed
-   */
-  async complete(id: string): Promise<ShoppingList> {
-    return await apiClient.patch<ShoppingList>(`/api/v1/shopping-lists/${id}`, {
-      isCompleted: true,
-    });
-  },
-
-  /**
-   * Update a shopping list item
-   */
-  async updateItem(
-    listId: string,
-    itemId: string,
-    data: UpdateShoppingListItemData
-  ): Promise<ShoppingList> {
-    return await apiClient.patch<ShoppingList>(
-      `/api/v1/shopping-lists/${listId}/items/${itemId}`,
-      data
+  updateItem: async (itemId: string, patch: UpdateShoppingItemInput): Promise<ShoppingItem> => {
+    return apiClient.patch<ShoppingItem>(
+      API_ROUTES.SHOPPING.ITEM(encodeURIComponent(itemId)),
+      patch
     );
   },
 
-  /**
-   * Delete a shopping list item
-   */
-  async deleteItem(listId: string, itemId: string): Promise<void> {
-    await apiClient.delete(`/api/v1/shopping-lists/${listId}/items/${itemId}`);
+  deleteItem: async (itemId: string): Promise<ShoppingItem> => {
+    return apiClient.delete<ShoppingItem>(API_ROUTES.SHOPPING.ITEM(encodeURIComponent(itemId)));
+  },
+
+  generateFromMealPlan: async (mealPlanId: string): Promise<GenerateShoppingListResult> => {
+    return apiClient.post<GenerateShoppingListResult>(API_ROUTES.SHOPPING.GENERATE, {
+      mealPlanId,
+    });
+  },
+
+  finish: async (input: FinishShoppingInput = {}): Promise<FinishShoppingResult> => {
+    return apiClient.post<FinishShoppingResult>(API_ROUTES.SHOPPING.FINISH, input);
+  },
+
+  getHistory: async (params?: { page?: number; limit?: number }): Promise<ShoppingHistoryPage> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    const query = queryParams.toString();
+    return apiClient.get<ShoppingHistoryPage>(
+      `${API_ROUTES.SHOPPING.HISTORY}${query ? `?${query}` : ''}`
+    );
   },
 };
