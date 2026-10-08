@@ -35,7 +35,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Show loading while checking auth and hydrating
   if (isLoading || !isAuthenticated || !token) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-dvh items-center justify-center bg-gray-50">
         <LoadingSpinner size="lg" />
       </div>
     );

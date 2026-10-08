@@ -22,6 +22,22 @@
   --color-expiry-ok: #10b981;
   --color-expiry-warning: #f59e0b;
   --color-expiry-critical: #ef4444;
+
+  /* Animations and shadows (Tailwind 4 tokens; tailwind.config.ts is not loaded) */
+  --animate-fade-in: fadeIn 0.3s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+
+  @keyframes slideUp {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 }
 
 :root {
@@ -79,4 +95,41 @@ body {
 
 .animate-slideInRight {
   animation: slideInRight 0.3s ease-out;
+}
+
+/* Safe-area utilities (viewport-fit=cover) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* 16px inputs below lg prevent iOS focus zoom */
+@media (max-width: 1023px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Remove 300ms tap delay and grey tap flash */
+button,
+a,
+[role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
