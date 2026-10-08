@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type MealPlanSuggestion } from '@/lib/api/ai';
 import { mealPlanApi } from '@/lib/api/mealplans';
+import { getApiErrorMessage } from '@/lib/api/errors';
+import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
 
 const aiMealPlanSchema = z.object({
@@ -54,6 +56,7 @@ export function AIMealPlanModal({
   const [saving, setSaving] = useState(false);
   const [suggestion, setSuggestion] = useState<MealPlanSuggestion | null>(null);
   const [pantryItemsUsed, setPantryItemsUsed] = useState(0);
+  const [filteredOut, setFilteredOut] = useState(0);
   const [showSaveForm, setShowSaveForm] = useState(false);
 
   const {
@@ -99,10 +102,10 @@ export function AIMealPlanModal({
 
       setSuggestion(result.mealPlan);
       setPantryItemsUsed(result.pantryItemsUsed);
+      setFilteredOut(result.filteredOut ?? 0);
       toast.success('AI meal plan generated!');
-    } catch (error: any) {
-      console.error('AI meal plan error:', error);
-      toast.error(error.response?.data?.error || 'Failed to generate meal plan');
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Failed to generate meal plan'));
     } finally {
       setLoading(false);
     }
@@ -127,9 +130,8 @@ export function AIMealPlanModal({
       toast.success('Meal plan saved successfully!');
       onMealPlanSaved?.();
       handleCancel();
-    } catch (error: any) {
-      console.error('Save meal plan error:', error);
-      toast.error(error.response?.data?.error || 'Failed to save meal plan');
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Failed to save meal plan'));
     } finally {
       setSaving(false);
     }
@@ -354,6 +356,8 @@ export function AIMealPlanModal({
                   </p>
                 )}
               </div>
+
+              <DietFilterNotice filteredOut={filteredOut} />
 
               {/* Meals by Day */}
               <div className="space-y-4">

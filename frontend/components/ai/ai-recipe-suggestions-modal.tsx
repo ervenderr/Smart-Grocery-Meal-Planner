@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type RecipeSuggestion } from '@/lib/api/ai';
 import { recipeApi } from '@/lib/api/recipes';
+import { getApiErrorMessage } from '@/lib/api/errors';
+import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
 
 interface AIRecipeSuggestionsModalProps {
@@ -23,6 +25,7 @@ export function AIRecipeSuggestionsModal({
   const [suggestions, setSuggestions] = useState<RecipeSuggestion[]>([]);
   const [pantryItemsUsed, setPantryItemsUsed] = useState(0);
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeSuggestion | null>(null);
+  const [filteredOut, setFilteredOut] = useState(0);
   const [savingRecipe, setSavingRecipe] = useState(false);
 
   const handleGenerateSuggestions = async () => {
@@ -31,10 +34,10 @@ export function AIRecipeSuggestionsModal({
       const result = await aiApi.suggestRecipes({ usePantry: true });
       setSuggestions(result.suggestions);
       setPantryItemsUsed(result.pantryItemsUsed);
+      setFilteredOut(result.filteredOut ?? 0);
       toast.success(`Generated ${result.suggestions.length} recipe suggestions!`);
-    } catch (error: any) {
-      console.error('AI suggestion error:', error);
-      toast.error(error.response?.data?.error || 'Failed to generate suggestions');
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Failed to generate suggestions'));
     } finally {
       setLoading(false);
     }
@@ -63,9 +66,8 @@ export function AIRecipeSuggestionsModal({
       toast.success('Recipe saved successfully!');
       onRecipeAdded?.();
       onClose();
-    } catch (error: any) {
-      console.error('Save recipe error:', error);
-      toast.error('Failed to save recipe');
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Failed to save recipe'));
     } finally {
       setSavingRecipe(false);
     }
@@ -130,6 +132,8 @@ export function AIRecipeSuggestionsModal({
                   <strong>{pantryItemsUsed} pantry items</strong> analyzed • {suggestions.length} recipes suggested
                 </p>
               </div>
+
+              <DietFilterNotice filteredOut={filteredOut} />
 
               {suggestions.map((suggestion, index) => (
                 <div

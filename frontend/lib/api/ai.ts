@@ -60,7 +60,12 @@ export const aiApi = {
     usePantry?: boolean;
     dietaryRestrictions?: string[];
     maxPrepTime?: number;
-  }): Promise<{ suggestions: RecipeSuggestion[]; pantryItemsUsed: number }> {
+  }): Promise<{
+    suggestions: RecipeSuggestion[];
+    pantryItemsUsed: number;
+    filteredOut?: number;
+    cached?: boolean;
+  }> {
     return await apiClient.post('/api/v1/ai/suggest-recipes', params || {}, {
       timeout: 90000, // 90 seconds for AI generation
     });
@@ -72,7 +77,11 @@ export const aiApi = {
   async suggestSubstitutions(
     ingredients: Array<{ ingredientName: string; quantity: number; unit: string }>,
     budgetCents?: number
-  ): Promise<{ suggestions: IngredientSubstitution[] }> {
+  ): Promise<{
+    suggestions: IngredientSubstitution[];
+    filteredOut?: number;
+    cached?: boolean;
+  }> {
     return await apiClient.post('/api/v1/ai/suggest-substitutions', {
       ingredients,
       budgetCents,
@@ -89,7 +98,12 @@ export const aiApi = {
     budgetCents: number;
     dietaryRestrictions?: string[];
     usePantry?: boolean;
-  }): Promise<{ mealPlan: MealPlanSuggestion; pantryItemsUsed: number }> {
+  }): Promise<{
+    mealPlan: MealPlanSuggestion;
+    pantryItemsUsed: number;
+    filteredOut?: number;
+    cached?: boolean;
+  }> {
     return await apiClient.post('/api/v1/ai/generate-meal-plan', params, {
       timeout: 120000, // 120 seconds for meal plan generation
     });

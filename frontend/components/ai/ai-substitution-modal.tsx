@@ -5,6 +5,8 @@ import { X, Sparkles, ArrowRight, TrendingDown, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { aiApi, type IngredientSubstitution } from '@/lib/api/ai';
+import { getApiErrorMessage } from '@/lib/api/errors';
+import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
 
 interface Ingredient {
@@ -28,6 +30,7 @@ export function AISubstitutionModal({
 }: AISubstitutionModalProps) {
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<IngredientSubstitution[]>([]);
+  const [filteredOut, setFilteredOut] = useState(0);
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
   const [budgetCents, setBudgetCents] = useState<number>(50000); // ₱500 default
 
@@ -44,18 +47,19 @@ export function AISubstitutionModal({
         budgetCents
       );
 
+      setFilteredOut(result.filteredOut ?? 0);
       if (result.suggestions.length === 0) {
-        toast('No substitutions found for the selected ingredients', {
+        toast((result.filteredOut ?? 0) > 0
+          ? `No substitutions to show: ${result.filteredOut} hidden by your dietary settings (keyword check, not a medical guarantee)`
+          : 'No substitutions found for the selected ingredients', {
           icon: '🤷',
         });
       } else {
         setSuggestions(result.suggestions);
         toast.success(`Found ${result.suggestions.length} substitution suggestions!`);
       }
-    } catch (error: any) {
-      console.error('Substitution error:', error);
-      const message = error.response?.data?.error || 'Failed to generate substitutions';
-      toast.error(message);
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Failed to generate substitutions'));
     } finally {
       setLoading(false);
     }
@@ -196,6 +200,8 @@ export function AISubstitutionModal({
             </div>
           ) : (
             <div className="space-y-4">
+              <DietFilterNotice filteredOut={filteredOut} />
+
               {/* Summary */}
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
