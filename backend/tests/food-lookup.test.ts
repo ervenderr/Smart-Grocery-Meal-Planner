@@ -118,7 +118,7 @@ describe('GET /api/v1/food/barcode/:code', () => {
     expect(res.status).toBe(404);
     expect(res.body.code).toBe('LOOKUP_NOT_FOUND');
     expect(res.body.message).toBe('No product found for this barcode.');
-    expect(res.body.details.attribution.license).toBe('ODbL');
+    expect(res.body.attribution.license).toBe('ODbL');
     const again = await lookup(code);
     expect(again.status).toBe(404);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -158,7 +158,7 @@ describe('GET /api/v1/food/barcode/:code', () => {
     expect(res.status).toBe(429);
     expect(res.body.code).toBe('LOOKUP_THROTTLED');
     expect(res.body.message).toBe('Product lookups are busy, try again in a minute.');
-    expect(res.body.details.retryAfterSeconds).toBeGreaterThan(0);
+    expect(res.body.retryAfterSeconds).toBeGreaterThan(0);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     // cached entries bypass the throttle
     expect((await lookup(first)).body.cached).toBe(true);
@@ -239,6 +239,6 @@ describe('GET /api/v1/food/nutrition', () => {
     const res = await nutrition(`plum${crypto.randomBytes(3).toString('hex')}`);
     expect(res.status).toBe(429);
     expect(res.body.code).toBe('LOOKUP_THROTTLED');
-    expect(res.body.details.retryAfterSeconds).toBeGreaterThan(0);
+    expect(res.body.retryAfterSeconds).toBeGreaterThan(0);
   });
 });

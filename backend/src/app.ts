@@ -181,6 +181,9 @@ export function createApp(): Application {
   console.log("  - Loading AI routes...");
   const aiRoutes = require("./modules/ai/ai.routes").default;
 
+  console.log("  - Loading food routes...");
+  const foodRoutes = require("./modules/food/food.routes").default;
+
   console.log("  - Loading notification routes...");
   const notificationRoutes =
     require("./modules/notification/notification.routes").default;
@@ -199,6 +202,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/alerts`, alertRoutes);
   app.use(`/api/${config.apiVersion}/analytics`, analyticsRoutes);
   app.use(`/api/${config.apiVersion}/ai`, aiRoutes);
+  app.use(`/api/${config.apiVersion}/food`, foodRoutes);
   app.use(`/api/${config.apiVersion}/notifications`, notificationRoutes);
   app.use(`/api/${config.apiVersion}/zapier`, zapierRoutes);
 
