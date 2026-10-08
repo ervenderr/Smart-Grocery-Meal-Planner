@@ -6,6 +6,8 @@
  * LIMITS:
  * - General API: 100 requests per 15 minutes per IP
  * - Auth endpoints: 5 attempts per 15 minutes per IP
+ * - Shopping endpoints: 600 requests per 15 minutes per user (the general API
+ *   limiter skips /api/v1/shopping so aisle check-offs are not throttled)
  * - AI endpoints: 10 requests per minute per user (burst limit; the daily cap
  *   is enforced by the DB quota, not here)
  *
@@ -18,6 +20,16 @@
 
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response } from 'express';
+import {
+  SHOPPING_RATE_LIMIT_MAX,
+  SHOPPING_RATE_LIMIT_WINDOW_MS,
+} from '../modules/shopping/shopping.constants';
+
+const SHOPPING_PATH_PATTERN = /^\/api\/v1\/shopping(\/|\?|$)/;
+
+/** True for /api/v1/shopping and anything beneath it (matches originalUrl). */
+export const isShoppingRequest = (originalUrl: string): boolean =>
+  SHOPPING_PATH_PATTERN.test(originalUrl);
 
 /**
  * General API rate limiter
@@ -31,6 +43,9 @@ export const apiLimiter = rateLimit({
     statusCode: 429,
     message: 'Too many requests from this IP, please try again after 15 minutes',
   },
+  // Mounted at '/api/', so req.path is relative; match on originalUrl.
+  // Shopping has its own per-user limiter.
+  skip: (req: Request) => isShoppingRequest(req.originalUrl),
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Skip rate limiting for successful requests in some cases
@@ -96,6 +111,32 @@ export const aiBurstLimiter = rateLimit({
     });
   },
 });
+
+const SHOPPING_RATE_LIMIT_MESSAGE = 'Too many shopping list requests. Please wait a moment and try again.';
+
+/** Per-user shopping limiter (keyed by user id; IPv6-safe IP fallback). */
+export const createShoppingLimiter = (limit: number = SHOPPING_RATE_LIMIT_MAX) =>
+  rateLimit({
+    windowMs: SHOPPING_RATE_LIMIT_WINDOW_MS,
+    limit,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req: Request) => {
+      const userId = (req as Request & { user?: { id?: string } }).user?.id;
+      return userId ?? ipKeyGenerator(req.ip ?? '');
+    },
+    handler: (_req: Request, res: Response) => {
+      res.status(429).json({
+        status: 'error',
+        statusCode: 429,
+        code: 'SHOPPING_RATE_LIMITED',
+        message: SHOPPING_RATE_LIMIT_MESSAGE,
+        error: SHOPPING_RATE_LIMIT_MESSAGE,
+      });
+    },
+  });
+
+export const shoppingLimiter = createShoppingLimiter();
 
 const FOOD_RATE_LIMIT_MESSAGE = 'Too many product lookups. Please wait a minute and try again.';
 

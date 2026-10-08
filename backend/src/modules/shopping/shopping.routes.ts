@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
+import { shoppingLimiter } from '../../middleware/rateLimiter';
 import { asyncHandler } from '../../middleware/errorHandler';
 import { ShoppingController } from './shopping.controller';
 import {
@@ -19,6 +20,7 @@ const router = Router();
 const controller = new ShoppingController();
 
 router.use(authenticate);
+router.use(shoppingLimiter);
 
 /**
  * @route   GET /api/v1/shopping/list
