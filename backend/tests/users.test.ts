@@ -320,3 +320,59 @@ describe("Users currency validation", () => {
     expect(SUPPORTED_CURRENCIES[0]).toBe("PHP");
   });
 });
+
+describe("Users onboarding completion", () => {
+  let token: string;
+
+  beforeAll(async () => {
+    const response = await request(app).post("/api/v1/auth/signup").send({
+      email: "users-test-onboarding@example.com",
+      password: "TestPass123",
+      firstName: "Onboarding",
+      lastName: "Test",
+    });
+    token = response.body.token;
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({
+      where: { email: { contains: "users-test-onboarding" } },
+    });
+  });
+
+  it("returns onboardingCompletedAt: null for a new user", async () => {
+    const response = await request(app)
+      .get("/api/v1/users/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+    expect(response.body).toHaveProperty("onboardingCompletedAt", null);
+  });
+
+  it("cannot be set through PATCH /preferences", async () => {
+    const response = await request(app)
+      .patch("/api/v1/users/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ onboardingCompletedAt: "2000-01-01T00:00:00.000Z" })
+      .expect(200);
+    expect(response.body.onboardingCompletedAt).toBeNull();
+  });
+
+  it("requires authentication to complete onboarding", async () => {
+    await request(app).post("/api/v1/users/onboarding/complete").expect(401);
+  });
+
+  it("stamps server time once and is idempotent", async () => {
+    const first = await request(app)
+      .post("/api/v1/users/onboarding/complete")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+    expect(typeof first.body.onboardingCompletedAt).toBe("string");
+    expect(Number.isNaN(Date.parse(first.body.onboardingCompletedAt))).toBe(false);
+
+    const second = await request(app)
+      .post("/api/v1/users/onboarding/complete")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+    expect(second.body.onboardingCompletedAt).toBe(first.body.onboardingCompletedAt);
+  });
+});
