@@ -210,7 +210,7 @@ export function AddMealPlanModal({ isOpen, onClose, onSuccess }: AddMealPlanModa
             {mealFields.map((field, index) => (
               <div key={field.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                 <div className="flex gap-2 items-start">
-                  <div className="flex-1 grid gap-3 grid-cols-1 sm:grid-cols-2">
+                  <div className="min-w-0 flex-1 grid gap-2 grid-cols-1 sm:grid-cols-2">
                     <Select
                       label="Day"
                       error={errors.meals?.[index]?.dayOfWeek?.message}
@@ -271,7 +271,8 @@ export function AddMealPlanModal({ isOpen, onClose, onSuccess }: AddMealPlanModa
                       type="button"
                       onClick={() => removeMeal(index)}
                       disabled={isLoading}
-                      className="mt-6 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      aria-label="Remove meal"
+                      className="mt-6 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-50"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -286,11 +287,11 @@ export function AddMealPlanModal({ isOpen, onClose, onSuccess }: AddMealPlanModa
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 pb-safe border-t border-gray-200">
-          <Button type="button" variant="outline" fullWidth onClick={handleClose} disabled={isLoading}>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 pb-safe border-t border-gray-200">
+          <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type="submit" fullWidth loading={isLoading} disabled={isLoading || loadingRecipes}>
+          <Button type="submit" className="w-full sm:w-auto" loading={isLoading} disabled={isLoading || loadingRecipes}>
             {isLoading ? 'Creating...' : 'Create Meal Plan'}
           </Button>
         </div>

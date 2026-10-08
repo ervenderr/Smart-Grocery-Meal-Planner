@@ -2,6 +2,7 @@
 
 import { Calendar, Banknote, Flame, Heart, Clock, Users } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import { useCurrency } from '@/lib/currency/currency-provider';
 import type { MealPlan, MealPlanItem } from '@/types/mealplan.types';
 
 interface MealPlanDetailModalProps {
@@ -13,6 +14,7 @@ interface MealPlanDetailModalProps {
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetailModalProps) {
+  const { format } = useCurrency();
   if (!mealPlan) return null;
 
   const formatDate = (dateString: string) => {
@@ -21,7 +23,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
 
   const formatCost = (cents: number | null) => {
     if (cents === null) return 'Not calculated';
-    return `₱${(cents / 100).toFixed(2)}`;
+    return format(cents);
   };
 
   const getMealsByDay = () => {
@@ -67,34 +69,34 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-gray-50 rounded-lg text-center">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-2 bg-gray-50 rounded-lg text-center">
             <div className="flex items-center justify-center gap-2 text-gray-600 mb-1">
               <Calendar className="h-4 w-4" />
             </div>
             <p className="text-lg font-semibold text-gray-900">{mealPlan.meals.length}</p>
-            <p className="text-xs text-gray-500">Total Meals</p>
+            <p className="text-sm text-gray-500">Total Meals</p>
           </div>
-          <div className="p-4 bg-green-50 rounded-lg text-center">
+          <div className="p-2 bg-green-50 rounded-lg text-center">
             <div className="flex items-center justify-center gap-2 text-green-600 mb-1">
               <Banknote className="h-4 w-4" />
             </div>
             <p className="text-lg font-semibold text-gray-900">{formatCost(mealPlan.totalCostCents)}</p>
-            <p className="text-xs text-gray-500">Total Cost</p>
+            <p className="text-sm text-gray-500">Total Cost</p>
           </div>
-          <div className="p-4 bg-orange-50 rounded-lg text-center">
+          <div className="p-2 bg-orange-50 rounded-lg text-center">
             <div className="flex items-center justify-center gap-2 text-orange-600 mb-1">
               <Flame className="h-4 w-4" />
             </div>
             <p className="text-lg font-semibold text-gray-900">{mealPlan.totalCalories || '-'}</p>
-            <p className="text-xs text-gray-500">Total Calories</p>
+            <p className="text-sm text-gray-500">Total Calories</p>
           </div>
         </div>
 
         {/* Notes */}
         {mealPlan.notes && (
           <div className="p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-gray-700">{mealPlan.notes}</p>
+            <p className="text-sm text-gray-700 break-words">{mealPlan.notes}</p>
           </div>
         )}
 
@@ -118,9 +120,9 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
                       {meals.map((meal) => (
                         <div key={meal.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
+                            <div className="min-w-0 flex-1 break-words">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getMealTypeColor(meal.mealType)}`}>
+                                <span className={`text-sm px-2 py-0.5 rounded-full font-medium ${getMealTypeColor(meal.mealType)}`}>
                                   {meal.mealType}
                                 </span>
                                 {meal.recipe && (
@@ -130,7 +132,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
                                 )}
                               </div>
                               {meal.recipe && (
-                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
                                   <div className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
                                     <span>{meal.recipe.prepTimeMinutes + meal.recipe.cookTimeMinutes} min</span>
@@ -148,7 +150,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
                                   {meal.costCents && (
                                     <div className="flex items-center gap-1">
                                       <Banknote className="h-3 w-3" />
-                                      <span>₱{(meal.costCents / 100).toFixed(2)}</span>
+                                      <span>{format(meal.costCents)}</span>
                                     </div>
                                   )}
                                 </div>
