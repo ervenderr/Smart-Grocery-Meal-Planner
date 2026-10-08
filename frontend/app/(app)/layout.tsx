@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/dashboard/bottom-nav';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate';
+import { IosInstallHint } from '@/components/pwa/ios-install-hint';
 
 export default function AppLayout({
   children,
@@ -37,6 +38,7 @@ export default function AppLayout({
       </div>
       <BottomNav />
       <OnboardingGate />
+      <IosInstallHint />
     </ProtectedRoute>
   );
 }
