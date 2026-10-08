@@ -299,6 +299,10 @@ model MealPlanItem {
 // WHY total_gemini_units: Converted price for budget tracking
 // WHY is_completed: Track shopping trip completion
 //
+// Hand-written in migration 20261011000000_shopping_active_list_unique (Prisma 5.22
+// cannot model partial indexes and ignores it in migrate diff):
+//   CREATE UNIQUE INDEX "shopping_lists_one_active_per_user" ON "shopping_lists" ("user_id")
+//   WHERE "is_completed" = false AND "deleted_at" IS NULL;
 model ShoppingList {
   id                  String    @id @default(uuid())
   userId              String    @map("user_id")
@@ -379,7 +383,7 @@ model ShoppingHistory {
   shoppingListId      String?  @map("shopping_list_id") // Optional link
 
   receiptDate         DateTime @map("receipt_date") @db.Date
-  totalPhpCents       Int      @map("total_php_cents")
+  totalPhpCents       Int      @map("total_php_cents") // minor units (major x 100) of the user's currency despite the legacy name; do not rename
 
   // Gemini conversion snapshot
   geminiPrice         Decimal? @map("gemini_price") @db.Decimal(10, 4) // PHP price that day
