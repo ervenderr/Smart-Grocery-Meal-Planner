@@ -87,7 +87,6 @@ export const envSchema = z
       .string()
       .regex(SLUG, "must match ^[a-z0-9-]+$")
       .default("kitcha"),
-    GEMINI_AI_API_KEY: z.string().optional(),
     AI_PROVIDER: z.string().min(1).default("dahl"),
     AI_BASE_URL: z
       .url()

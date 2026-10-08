@@ -175,3 +175,10 @@ describe("parseEnv AI settings", () => {
     expect(message).not.toContain(key);
   });
 });
+
+describe("parseEnv legacy variables", () => {
+  it("ignores a leftover GEMINI_AI_API_KEY instead of failing startup", () => {
+    const env = parseEnv(base({ GEMINI_AI_API_KEY: "leftover-value" }));
+    expect(env).not.toHaveProperty("GEMINI_AI_API_KEY");
+  });
+});

@@ -265,7 +265,7 @@ Before you begin, ensure you have the following installed:
 - **npm**: Version 10.x or higher (comes with Node.js)
 - **PostgreSQL**: Version 15 or higher ([Download](https://www.postgresql.org/download/))
 - **Git**: Latest version ([Download](https://git-scm.com/))
-- **Google Gemini API Key**: ([Get API Key](https://ai.google.dev/))
+- **AI provider API key**: any OpenAI-compatible provider (default: Dahl Inference, MiniMax M2.7)
 
 ### Step 1: Clone the Repository
 
@@ -305,8 +305,12 @@ DATABASE_URL="postgresql://username:password@localhost:5432/smart_grocery_db"
 JWT_SECRET="your-super-secure-jwt-secret-minimum-32-characters-long"
 JWT_EXPIRY="7d"
 
-# Google Gemini AI
-GEMINI_AI_API_KEY="your-gemini-api-key-here"
+# AI provider (any OpenAI-compatible endpoint works by changing these env vars)
+AI_PROVIDER="dahl"
+AI_BASE_URL="https://inference.dahl.global/v1"
+AI_MODEL="MiniMaxAI/MiniMax-M2.7"
+# AI_API_KEY is a secret: set it only as a Railway variable, never commit it
+# Optional: USDA_API_KEY (nutrition), OFF_CONTACT (Open Food Facts User-Agent contact)
 
 # CORS Configuration
 FRONTEND_URL="http://localhost:3000"

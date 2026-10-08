@@ -63,7 +63,6 @@ export const config = Object.freeze({
 
   // Optional APIs
   apis: Object.freeze({
-    geminiAI: parsed.GEMINI_AI_API_KEY,
     spoonacular: parsed.SPOONACULAR_API_KEY,
   }),
 
@@ -101,7 +100,7 @@ export const config = Object.freeze({
     readonly previewScope?: string;
   };
   readonly logging: { readonly level: string };
-  readonly apis: { readonly geminiAI?: string; readonly spoonacular?: string };
+  readonly apis: { readonly spoonacular?: string };
   readonly ai: {
     readonly provider: string;
     readonly baseUrl: string;
