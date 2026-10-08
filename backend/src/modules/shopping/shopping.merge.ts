@@ -42,10 +42,9 @@ const MIN_HUNDREDTHS = Math.round(MIN_QUANTITY * 100);
 export const mergeKey = (name: string, unit: string): string =>
   `${name.trim().toLowerCase()}${SEP}${unit.trim().toLowerCase()}`;
 
-const toHundredths = (q: number): number => {
-  const safe = Number.isFinite(q) && q > 0 ? q : 1;
-  return Math.min(MAX_HUNDREDTHS, Math.max(MIN_HUNDREDTHS, Math.round(safe * 100)));
-};
+/** Positive amounts round to hundredths, clamped to [MIN_QUANTITY, MAX_QUANTITY]. */
+const toHundredths = (q: number): number =>
+  Math.min(MAX_HUNDREDTHS, Math.max(MIN_HUNDREDTHS, Math.round(q * 100)));
 
 interface Clean {
   readonly itemName: string;
@@ -53,7 +52,12 @@ interface Clean {
   readonly hundredths: number;
 }
 
+/**
+ * Rule: incoming lines with a zero, negative or non-finite quantity (for
+ * example "salt, 0 tsp") are skipped rather than coerced to 1.
+ */
 const clean = (item: IncomingItem): Clean | null => {
+  if (!Number.isFinite(item.quantity) || item.quantity <= 0) return null;
   const itemName = item.itemName.replace(/\s+/g, ' ').trim().slice(0, MAX_ITEM_NAME_LENGTH).trim();
   if (itemName.length === 0) return null;
   return { itemName, unit: coerceUnit(item.unit), hundredths: toHundredths(item.quantity) };
