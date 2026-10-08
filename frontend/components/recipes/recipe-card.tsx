@@ -54,14 +54,14 @@ export function RecipeCard({ recipe, onEdit, onDelete, onView }: RecipeCardProps
       <div className="p-3 sm:p-4">
         {/* Title & Category */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-gray-900 line-clamp-2 flex-1">{recipe.name}</h3>
+          <h3 className="font-semibold text-gray-900 line-clamp-2 min-w-0 flex-1 break-words">{recipe.name}</h3>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getCategoryColor(recipe.category)}`}>
+          <span className={`rounded-full px-2 py-0.5 text-sm font-semibold ${getCategoryColor(recipe.category)}`}>
             {recipe.category}
           </span>
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getDifficultyColor(recipe.difficulty)}`}>
+          <span className={`rounded-full px-2 py-0.5 text-sm font-semibold ${getDifficultyColor(recipe.difficulty)}`}>
             {recipe.difficulty}
           </span>
         </div>
@@ -72,7 +72,7 @@ export function RecipeCard({ recipe, onEdit, onDelete, onView }: RecipeCardProps
         )}
 
         {/* Meta Info */}
-        <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+        <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
           <div className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             <span>{recipe.totalTimeMinutes} min</span>
@@ -87,37 +87,39 @@ export function RecipeCard({ recipe, onEdit, onDelete, onView }: RecipeCardProps
         {recipe.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {recipe.tags.slice(0, 3).map((tag, index) => (
-              <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+              <span key={index} className="text-sm bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
                 {tag}
               </span>
             ))}
             {recipe.tags.length > 3 && (
-              <span className="text-xs text-gray-500">+{recipe.tags.length - 3}</span>
+              <span className="text-sm text-gray-500">+{recipe.tags.length - 3}</span>
             )}
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t border-gray-100">
+        <div className="flex justify-end gap-2 border-t border-gray-100 pt-2">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(recipe);
             }}
-            className="flex-1 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label={`Edit ${recipe.name}`}
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100"
           >
-            <Edit2 className="h-4 w-4 inline mr-1" />
-            Edit
+            <Edit2 className="h-4 w-4" />
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(recipe);
             }}
-            className="flex-1 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            aria-label={`Delete ${recipe.name}`}
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50"
           >
-            <Trash2 className="h-4 w-4 inline mr-1" />
-            Delete
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>

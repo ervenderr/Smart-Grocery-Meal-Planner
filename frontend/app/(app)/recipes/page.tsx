@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, BookOpen, Sparkles } from 'lucide-react';
+import { Suspense, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Plus, Search, UtensilsCrossed, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/common/empty-state';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { AddRecipeModal } from '@/components/recipes/add-recipe-modal';
 import { EditRecipeModal } from '@/components/recipes/edit-recipe-modal';
@@ -15,9 +17,36 @@ import { recipeApi } from '@/lib/api/recipes';
 import toast from 'react-hot-toast';
 import type { Recipe, RecipeFilters } from '@/types/recipe.types';
 
+const CATEGORY_CHIPS = [
+  { value: '', label: 'All' },
+  { value: 'breakfast', label: 'Breakfast' },
+  { value: 'lunch', label: 'Lunch' },
+  { value: 'dinner', label: 'Dinner' },
+  { value: 'snack', label: 'Snack' },
+  { value: 'dessert', label: 'Dessert' },
+  { value: 'beverage', label: 'Beverage' },
+];
+
 export default function RecipesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center py-12">
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
+      <RecipesPageContent />
+    </Suspense>
+  );
+}
+
+function RecipesPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({
     category: undefined,
@@ -33,16 +62,21 @@ export default function RecipesPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Recipe | null>(null);
 
-  const fetchRecipes = async () => {
+  const fetchRecipes = async (
+    activeFilters: RecipeFilters = filters,
+    search: string = searchQuery
+  ) => {
     setLoading(true);
+    setLoadError(false);
     try {
       const response = await recipeApi.getAll({
-        ...filters,
-        search: searchQuery || undefined,
+        ...activeFilters,
+        search: search || undefined,
       });
       setRecipes(response.items || []);
     } catch (error: any) {
       console.error('Fetch recipes error:', error);
+      setLoadError(true);
       toast.error('Failed to load recipes');
     } finally {
       setLoading(false);
@@ -52,6 +86,24 @@ export default function RecipesPage() {
   useEffect(() => {
     fetchRecipes();
   }, [filters]);
+
+  useEffect(() => {
+    if (searchParams.get('ai') === 'suggestions') {
+      setShowAISuggestionsModal(true);
+      router.replace('/recipes');
+    }
+  }, [searchParams, router]);
+
+  const handleClearFilters = () => {
+    const cleared: RecipeFilters = {
+      ...filters,
+      category: undefined,
+      difficulty: undefined,
+    };
+    setSearchQuery('');
+    setFilters(cleared);
+    fetchRecipes(cleared, '');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +155,7 @@ export default function RecipesPage() {
             Create and manage your recipe collection
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <Button variant="outline" onClick={() => setShowAISuggestionsModal(true)}>
             <Sparkles className="h-4 w-4" />
             AI Suggestions
@@ -127,25 +179,38 @@ export default function RecipesPage() {
                 placeholder="Search recipes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-base lg:text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
             </div>
           </form>
 
           {/* Filter Row */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-            <Select
-              value={filters.category || ''}
-              onChange={(e) => handleFilterChange('category', e.target.value)}
-            >
-              <option value="">All Categories</option>
-              <option value="breakfast">Breakfast</option>
-              <option value="lunch">Lunch</option>
-              <option value="dinner">Dinner</option>
-              <option value="snack">Snack</option>
-              <option value="dessert">Dessert</option>
-              <option value="beverage">Beverage</option>
-            </Select>
+          <div
+            role="group"
+            aria-label="Filter by category"
+            className="scrollbar-hide -mx-1 flex gap-2 overflow-x-auto px-1"
+          >
+            {CATEGORY_CHIPS.map((chip) => {
+              const active = (filters.category || '') === chip.value;
+              return (
+                <button
+                  key={chip.value || 'all'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => handleFilterChange('category', chip.value)}
+                  className={`h-11 shrink-0 rounded-full border px-4 text-sm font-semibold ${
+                    active
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 bg-white text-gray-700'
+                  }`}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
 
             <Select
               value={filters.difficulty || ''}
@@ -176,24 +241,34 @@ export default function RecipesPage() {
         <div className="flex justify-center py-12">
           <LoadingSpinner size="lg" />
         </div>
+      ) : loadError ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="Couldn't load your recipes"
+          description="Check your connection and try again."
+          actionLabel="Try again"
+          onAction={() => fetchRecipes()}
+        />
       ) : recipes.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center">
-          <div className="rounded-full bg-gray-100 p-4">
-            <BookOpen className="h-12 w-12 text-gray-400" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">No recipes found</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            {searchQuery || filters.category || filters.difficulty
-              ? 'Try adjusting your filters'
-              : 'Get started by adding your first recipe'}
-          </p>
-          {!searchQuery && !filters.category && !filters.difficulty && (
-            <Button onClick={() => setShowAddModal(true)} className="mt-4">
-              <Plus className="h-4 w-4" />
-              Add Your First Recipe
-            </Button>
-          )}
-        </Card>
+        searchQuery || filters.category || filters.difficulty ? (
+          <EmptyState
+            icon={Search}
+            title="No matching recipes"
+            description="Try a different search or clear the filters."
+            actionLabel="Clear filters"
+            onAction={handleClearFilters}
+          />
+        ) : (
+          <EmptyState
+            icon={UtensilsCrossed}
+            title="No recipes yet"
+            description="Save your favorite recipes or ask AI for ideas based on your pantry."
+            actionLabel="Add a recipe"
+            onAction={() => setShowAddModal(true)}
+            secondaryActionLabel="Get AI suggestions"
+            onSecondaryAction={() => setShowAISuggestionsModal(true)}
+          />
+        )
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
@@ -212,7 +287,7 @@ export default function RecipesPage() {
       <AddRecipeModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSuccess={fetchRecipes}
+        onSuccess={() => fetchRecipes()}
       />
 
       <EditRecipeModal
@@ -221,7 +296,7 @@ export default function RecipesPage() {
           setShowEditModal(false);
           setSelectedRecipe(null);
         }}
-        onSuccess={fetchRecipes}
+        onSuccess={() => fetchRecipes()}
         recipe={selectedRecipe}
       />
 
@@ -237,7 +312,7 @@ export default function RecipesPage() {
       <AIRecipeSuggestionsModal
         isOpen={showAISuggestionsModal}
         onClose={() => setShowAISuggestionsModal(false)}
-        onRecipeAdded={fetchRecipes}
+        onRecipeAdded={() => fetchRecipes()}
       />
     </div>
   );
