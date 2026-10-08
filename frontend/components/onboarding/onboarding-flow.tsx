@@ -13,13 +13,13 @@ import { PREFERENCES_QUERY_KEY } from '@/lib/hooks/use-preferences';
 import { DEFAULT_CURRENCY } from '@/lib/currency/format';
 import { parseBudgetInput } from '@/lib/currency/budget';
 import { buildOnboardingItem } from '@/lib/onboarding/onboarding';
+import { classifyOnboardingError, findAlreadyCreated } from '@/lib/onboarding/errors';
 import { cn } from '@/lib/utils';
 import { StepBudget, BUDGET_STEP_TITLE, budgetError } from './step-budget';
 import { StepDietary, DIETARY_STEP_TITLE } from './step-dietary';
 import { StepPantry, PANTRY_STEP_TITLE } from './step-pantry';
 
 const TOTAL_STEPS = 3;
-const SAVE_ERROR = "We couldn't save your setup. Check your connection and try again.";
 const STEP_TITLES = [BUDGET_STEP_TITLE, DIETARY_STEP_TITLE, PANTRY_STEP_TITLE] as const;
 
 interface FlowState {
@@ -29,9 +29,13 @@ interface FlowState {
   dietary: string[];
   items: string[];
   createdNames: string[];
+  /** Names whose create may have succeeded server-side but was not confirmed. */
+  pendingNames: string[];
+  prefsSaved: boolean;
   showErrors: boolean;
   saving: boolean;
   error: string | null;
+  errorRetryable: boolean;
 }
 
 interface OnboardingFlowProps {
@@ -48,9 +52,12 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
     dietary: [],
     items: [],
     createdNames: [],
+    pendingNames: [],
+    prefsSaved: false,
     showErrors: false,
     saving: false,
     error: null,
+    errorRetryable: true,
   });
 
   const patch = (next: Partial<FlowState>) => setState((s) => ({ ...s, ...next }));
@@ -61,32 +68,75 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
     queryClient.setQueryData(PREFERENCES_QUERY_KEY, result);
   };
 
+  /** On retry, drop pending names that already exist so a lost response never duplicates. */
+  const confirmPending = async (pending: string[]): Promise<string[]> => {
+    const existing: string[] = [];
+    for (const name of pending) {
+      const { items } = await pantryApi.getAll({ search: name, limit: 50 });
+      existing.push(...findAlreadyCreated([name], items));
+    }
+    return existing;
+  };
+
+  const saveItems = async (): Promise<string[]> => {
+    const alreadyThere = await confirmPending(state.pendingNames);
+    let created = [...state.createdNames, ...alreadyThere];
+    let pending = state.pendingNames.filter((n) => !alreadyThere.includes(n));
+    const rejected: string[] = [];
+    patch({ createdNames: created, pendingNames: pending });
+    for (const name of state.items) {
+      if (created.includes(name)) continue;
+      const data = buildOnboardingItem(name);
+      if (!data) continue;
+      try {
+        await pantryApi.create(data);
+        created = [...created, name];
+        pending = pending.filter((n) => n !== name);
+        patch({ createdNames: created, pendingNames: pending });
+      } catch (itemError) {
+        if (classifyOnboardingError(itemError).retryable) {
+          patch({ pendingNames: [...pending.filter((n) => n !== name), name] });
+          throw itemError;
+        }
+        // A rejected item (validation, conflict) is skipped; it would fail every retry
+        console.error(`Onboarding: could not add "${name}":`, itemError);
+        rejected.push(name);
+      }
+    }
+    return rejected;
+  };
+
+  const fail = (error: unknown) => {
+    console.error('Onboarding save failed:', error);
+    const failure = classifyOnboardingError(error);
+    patch({ saving: false, error: failure.message, errorRetryable: failure.retryable });
+  };
+
   const finish = async () => {
     patch({ saving: true, error: null });
     try {
-      const parsedBudget = state.budgetInput.trim() === ''
-        ? null
-        : parseBudgetInput(state.budgetInput, state.currency);
-      const budget = parsedBudget?.ok ? parsedBudget.cents : null;
-      await preferencesApi.update({
-        currency: state.currency,
-        dietaryRestrictions: state.dietary,
-        ...(budget != null ? { budgetPerWeekCents: budget } : {}),
-      });
-      let created = state.createdNames;
-      for (const name of state.items) {
-        if (created.includes(name)) continue;
-        const data = buildOnboardingItem(name);
-        if (!data) continue;
-        await pantryApi.create(data);
-        created = [...created, name];
-        patch({ createdNames: created });
+      if (!state.prefsSaved) {
+        const parsedBudget =
+          state.budgetInput.trim() === ''
+            ? null
+            : parseBudgetInput(state.budgetInput, state.currency);
+        const budget = parsedBudget?.ok ? parsedBudget.cents : null;
+        await preferencesApi.update({
+          currency: state.currency,
+          dietaryRestrictions: state.dietary,
+          ...(budget != null ? { budgetPerWeekCents: budget } : {}),
+        });
+        patch({ prefsSaved: true });
       }
+      const rejected = await saveItems();
       await markComplete();
       toast.success("You're all set! Welcome to Kitcha.");
+      if (rejected.length > 0) {
+        toast.error(`We couldn't add: ${rejected.join(', ')}. You can add them from Pantry.`);
+      }
       router.push('/dashboard');
-    } catch {
-      patch({ saving: false, error: SAVE_ERROR });
+    } catch (error) {
+      fail(error);
     }
   };
 
@@ -94,8 +144,8 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
     patch({ saving: true, error: null });
     try {
       await markComplete();
-    } catch {
-      patch({ saving: false, error: SAVE_ERROR });
+    } catch (error) {
+      fail(error);
     }
   };
 
@@ -116,6 +166,7 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
 
   const toggleDietary = (value: string) =>
     patch({
+      prefsSaved: false,
       dietary: state.dietary.includes(value)
         ? state.dietary.filter((v) => v !== value)
         : [...state.dietary, value],
@@ -170,8 +221,8 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
                     currency={state.currency}
                     budgetInput={state.budgetInput}
                     showErrors={state.showErrors}
-                    onCurrencyChange={(currency) => patch({ currency })}
-                    onBudgetChange={(budgetInput) => patch({ budgetInput })}
+                    onCurrencyChange={(currency) => patch({ currency, prefsSaved: false })}
+                    onBudgetChange={(budgetInput) => patch({ budgetInput, prefsSaved: false })}
                   />
                 )}
                 {state.step === 1 && (
@@ -188,6 +239,11 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
                 <p role="alert" className="text-sm text-red-600">
                   {state.error}
                 </p>
+              )}
+              {state.error && !state.errorRetryable && (
+                <Button variant="outline" size="lg" fullWidth onClick={() => void skip()}>
+                  Continue without saving
+                </Button>
               )}
               <div className="flex flex-col gap-2">
                 <Button size="lg" fullWidth loading={state.saving} onClick={next}>
