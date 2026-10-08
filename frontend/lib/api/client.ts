@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { API_BASE_URL } from '@/lib/constants/api-routes';
+import { queryClient } from '@/lib/react-query';
+import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 
 /**
  * API Client Configuration
@@ -55,6 +57,9 @@ class ApiClient {
               if (!isAuthEndpoint) {
                 // Unauthorized - clear token and redirect to login
                 this.clearToken();
+                if (typeof window !== 'undefined') {
+                  clearUserSessionState(queryClient, window.sessionStorage, window.localStorage);
+                }
                 if (typeof window !== 'undefined') {
                   window.location.href = '/login';
                 }

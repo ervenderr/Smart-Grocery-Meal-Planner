@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, AuthState } from '@/types/auth.types';
+import { queryClient } from '@/lib/react-query';
+import { clearUserSessionState } from '@/lib/auth/session-cleanup';
+
+function resetUserSessionState(): void {
+  clearUserSessionState(
+    queryClient,
+    typeof window !== 'undefined' ? window.sessionStorage : undefined,
+    typeof window !== 'undefined' ? window.localStorage : undefined
+  );
+}
 
 interface AuthStore extends AuthState {
   setAuth: (token: string, user: User) => void;
@@ -23,6 +33,8 @@ export const useAuthStore = create<AuthStore>()(
        * Set authentication data after login/signup
        */
       setAuth: (token: string, user: User) => {
+        // A new session must never inherit cached data from a previous user
+        resetUserSessionState();
         // Store token in localStorage for API client
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth-token', token);
@@ -49,6 +61,8 @@ export const useAuthStore = create<AuthStore>()(
        * Clear authentication data on logout
        */
       clearAuth: () => {
+        // Drop every cached query and per-user browser state
+        resetUserSessionState();
         // Remove token from localStorage
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth-token');
