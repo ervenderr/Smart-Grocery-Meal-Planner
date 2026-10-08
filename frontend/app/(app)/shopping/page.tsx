@@ -7,11 +7,16 @@ import toast from 'react-hot-toast';
 import { EmptyState } from '@/components/common/empty-state';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { CategorySection } from '@/components/shopping/category-section';
+import { FinishSheet } from '@/components/shopping/finish-sheet';
 import { GenerateFromPlan } from '@/components/shopping/generate-from-plan';
 import { ItemEditSheet } from '@/components/shopping/item-edit-sheet';
 import { QUICK_ADD_INPUT_ID, QuickAdd } from '@/components/shopping/quick-add';
+import { ShoppingHistory } from '@/components/shopping/shopping-history';
 import { ShoppingItemRow } from '@/components/shopping/shopping-item-row';
+import { SummaryBar } from '@/components/shopping/summary-bar';
 import { getApiErrorMessage } from '@/lib/api/errors';
+import { useCurrency } from '@/lib/currency/currency-provider';
+import { useFinishShopping } from '@/lib/hooks/use-finish-shopping';
 import {
   useAddShoppingItem,
   useDeleteShoppingItem,
@@ -21,7 +26,7 @@ import {
 import { groupItems } from '@/lib/shopping/grouping';
 import { toCreateInput } from '@/lib/shopping/list-cache';
 import { MAX_ITEMS_PER_LIST } from '@/lib/shopping/vocab';
-import type { ShoppingItem } from '@/types/shopping.types';
+import type { CarryOverMode, ShoppingItem } from '@/types/shopping.types';
 
 const LEGACY_STORAGE_KEY = 'current-shopping-list';
 
@@ -31,6 +36,9 @@ export default function ShoppingPage() {
   const addItem = useAddShoppingItem();
   const updateItem = useUpdateShoppingItem();
   const deleteItem = useDeleteShoppingItem();
+  const finishShopping = useFinishShopping();
+  const { format } = useCurrency();
+  const [finishOpen, setFinishOpen] = useState(false);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [editing, setEditing] = useState<ShoppingItem | null>(null);
 
@@ -53,6 +61,15 @@ export default function ShoppingPage() {
       else next.add(category);
       return next;
     });
+
+  const handleFinish = (carryOver: CarryOverMode) => {
+    finishShopping.mutate(carryOver, {
+      onSuccess: (result) => {
+        setFinishOpen(false);
+        toast.success(`Trip saved: ${format(result.history.totalCents)}`);
+      },
+    });
+  };
 
   const handleDelete = (item: ShoppingItem) => {
     deleteItem.mutate(
@@ -158,6 +175,24 @@ export default function ShoppingPage() {
           ))}
         </div>
       )}
+
+      <ShoppingHistory />
+
+      {items.length > 0 && (
+        <SummaryBar
+          items={items}
+          onFinish={() => setFinishOpen(true)}
+          finishDisabled={finishShopping.isPending}
+        />
+      )}
+
+      <FinishSheet
+        isOpen={finishOpen}
+        onClose={() => setFinishOpen(false)}
+        items={items}
+        onConfirm={handleFinish}
+        isPending={finishShopping.isPending}
+      />
 
       <ItemEditSheet
         item={editing}
