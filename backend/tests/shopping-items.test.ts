@@ -188,9 +188,16 @@ describe('shopping items', () => {
         actualCostCents: 450,
         notes: 'ripe',
       });
-      const reset = await patch(d, item.id, { category: null, notes: null }).expect(200);
+      const reset = await patch(d, item.id, {
+        category: null,
+        notes: null,
+        costEstimateCents: null,
+        actualCostCents: null,
+      }).expect(200);
       expect(reset.body.category).toBe('other');
       expect(reset.body.notes).toBeNull();
+      expect(reset.body.costEstimateCents).toBeNull();
+      expect(reset.body.actualCostCents).toBeNull();
     });
 
     it('returns 400 for a non-uuid id and 404 for unknown id', async () => {
