@@ -3,45 +3,17 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { X, Home, Package, UtensilsCrossed, Calendar, ShoppingBasket, TrendingUp, Bell, BarChart3, Settings } from 'lucide-react';
+import { NAV_SIDEBAR, isActive } from '@/lib/navigation';
 
-interface DashboardSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Pantry', href: '/pantry', icon: Package },
-  { name: 'Recipes', href: '/recipes', icon: UtensilsCrossed },
-  { name: 'Meal Plans', href: '/mealplans', icon: Calendar },
-  { name: 'Shopping Lists', href: '/shopping', icon: ShoppingBasket },
-  { name: 'Budget', href: '/budget', icon: TrendingUp },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
-
-export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
+export function DashboardSidebar() {
   const pathname = usePathname();
 
   return (
     <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-gray-900/50 lg:hidden"
-          onClick={onClose}
-        ></div>
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 transform border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        {/* Logo & Close Button */}
-        <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6">
+      {/* Sidebar (desktop only; phones use the bottom nav) */}
+      <aside className="hidden border-r border-gray-200 bg-white lg:flex lg:w-64 lg:flex-col">
+        {/* Logo */}
+        <div className="flex h-16 items-center border-b border-gray-200 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <Image
               src="/kitcha-logo-name.svg"
@@ -52,33 +24,26 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
               className="h-20 w-auto"
             />
           </Link>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1 text-gray-600 hover:bg-gray-100 lg:hidden"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+        <nav aria-label="Primary" className="flex-1 space-y-1 p-4">
+          {NAV_SIDEBAR.map((item) => {
+            const active = isActive(pathname, item.href);
             const Icon = item.icon;
 
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
-                onClick={onClose}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
+                  active
                     ? 'bg-primary-50 text-primary-700'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Icon className="h-5 w-5" />
-                {item.name}
+                {item.label}
               </Link>
             );
           })}

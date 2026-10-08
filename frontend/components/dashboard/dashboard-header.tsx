@@ -1,55 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Menu, Bell, Search, LogOut, User, Settings } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Search, LogOut, User, Settings } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { authApi } from '@/lib/api/auth';
+import { useLogout } from '@/lib/auth/use-logout';
+import { getPageTitle } from '@/lib/navigation';
 import { NotificationsDropdown } from './notifications-dropdown';
-import toast from 'react-hot-toast';
 
-interface DashboardHeaderProps {
-  onMenuClick: () => void;
-}
-
-export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
+export function DashboardHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const { user, clearAuth } = useAuthStore();
-
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-      clearAuth();
-      toast.success('Logged out successfully');
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Clear auth anyway
-      clearAuth();
-      router.push('/login');
-    }
-  };
+  const user = useAuthStore((state) => state.user);
+  const handleLogout = useLogout();
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-10 border-b border-gray-200 bg-white pt-safe lg:shadow-sm">
+     <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:h-16 lg:px-8">
       {/* Left Side */}
-      <div className="flex items-center gap-4">
-        {/* Mobile Menu Button */}
-        <button
-          onClick={onMenuClick}
-          className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
+      <div className="flex min-w-0 items-center gap-2 lg:gap-4">
+        {/* Compact brand + page title (below lg) */}
+        <Link href="/dashboard" className="flex shrink-0 items-center lg:hidden" aria-label="Kitcha home">
+          <Image src="/kitcha-logo.svg" alt="" width={32} height={32} className="h-8 w-8" />
+        </Link>
+        <span className="truncate text-xl font-semibold text-gray-900 lg:hidden" aria-hidden="true">
+          {getPageTitle(pathname)}
+        </span>
 
         {/* Search Bar */}
-        <div className="hidden sm:block">
+        <div className="hidden lg:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
+              aria-label="Search"
               className="h-10 w-64 rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
           </div>
@@ -62,7 +50,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         <NotificationsDropdown />
 
         {/* User Menu */}
-        <div className="relative">
+        <div className="relative hidden lg:block">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2 rounded-lg p-2 hover:bg-gray-100"
@@ -135,6 +123,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           )}
         </div>
       </div>
+     </div>
     </header>
   );
 }

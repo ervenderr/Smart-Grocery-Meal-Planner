@@ -129,16 +129,17 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
   return (
     <div className="fixed inset-0 z-50 bg-black/25 animate-fadeIn" onClick={onClose}>
       <div
-        className="absolute right-0 top-0 h-full w-full sm:w-96 md:w-[450px] bg-white shadow-2xl animate-slideInRight"
+        className="absolute right-0 top-0 flex h-full w-full flex-col pt-safe pb-safe sm:w-96 md:w-[450px] bg-white shadow-2xl animate-slideInRight"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="border-b border-gray-200 p-4">
+        <div className="shrink-0 border-b border-gray-200 p-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+              aria-label="Close notifications"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100"
             >
               <X className="h-5 w-5" />
             </button>
@@ -148,7 +149,7 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
           <div className="flex gap-2">
             <button
               onClick={() => setFilter('all')}
-              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex-1 min-h-11 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 filter === 'all'
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -158,7 +159,7 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
             </button>
             <button
               onClick={() => setFilter('unread')}
-              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex-1 min-h-11 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 filter === 'unread'
                   ? 'bg-primary-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -168,8 +169,9 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
             </button>
             <button
               onClick={handleMarkAllRead}
-              className="rounded-lg px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
               title="Mark all as read"
+              aria-label="Mark all as read"
             >
               <CheckCheck className="h-4 w-4" />
             </button>
@@ -177,7 +179,7 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
         </div>
 
         {/* Notifications list */}
-        <div className="h-[calc(100%-140px)] overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-12">
               <LoadingSpinner size="lg" />
@@ -222,8 +224,9 @@ export function NotificationPanel({ onClose, onUpdate }: NotificationPanelProps)
                     </div>
                     <button
                       onClick={(e) => handleDismiss(e, notification.id)}
-                      className="flex-shrink-0 rounded-lg p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                      className="flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-600"
                       title="Dismiss"
+                      aria-label="Dismiss notification"
                     >
                       <X className="h-4 w-4" />
                     </button>
