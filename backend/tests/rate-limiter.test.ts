@@ -149,4 +149,37 @@ describe("Shopping limiter", () => {
       expect(res.status).toBe(200);
     }
   });
+  it("limits unauthenticated and bad-token shopping floods per IP, not authenticated users", async () => {
+    // The general limit is 100 per IP (signup already used one); expect 401s, then 429.
+    let unauthorized = 0;
+    let limited = 0;
+    for (let i = 0; i < 110; i += 1) {
+      const res = await request(app)
+        .get("/api/v1/shopping/list")
+        .set("Authorization", i % 2 === 0 ? "Bearer garbage" : "");
+      if (res.status === 401) unauthorized += 1;
+      if (res.status === 429) limited += 1;
+    }
+    expect(unauthorized).toBeGreaterThanOrEqual(95);
+    expect(unauthorized).toBeLessThanOrEqual(100);
+    expect(limited).toBe(110 - unauthorized);
+
+    // A valid user from the same IP keeps working past the general limit.
+    for (let i = 0; i < 5; i += 1) {
+      const res = await request(app)
+        .get("/api/v1/shopping/list")
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it("hasValidBearerToken rejects missing, malformed and forged tokens", () => {
+    const { hasValidBearerToken } = limiterModule;
+    const req = (authorization?: string) =>
+      ({ headers: { authorization } }) as unknown as import("express").Request;
+    expect(hasValidBearerToken(req())).toBe(false);
+    expect(hasValidBearerToken(req("Bearer nope"))).toBe(false);
+    expect(hasValidBearerToken(req(`Bearer ${token}`))).toBe(true);
+    expect(hasValidBearerToken(req(`Bearer ${token}x`))).toBe(false);
+  });
 });

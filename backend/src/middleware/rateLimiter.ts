@@ -7,7 +7,9 @@
  * - General API: 100 requests per 15 minutes per IP
  * - Auth endpoints: 5 attempts per 15 minutes per IP
  * - Shopping endpoints: 600 requests per 15 minutes per user (the general API
- *   limiter skips /api/v1/shopping so aisle check-offs are not throttled)
+ *   limiter skips /api/<version>/shopping ONLY for requests carrying a valid
+ *   JWT, so aisle check-offs are not throttled while unauthenticated or
+ *   bad-token floods still hit the per-IP general limit)
  * - AI endpoints: 10 requests per minute per user (burst limit; the daily cap
  *   is enforced by the DB quota, not here)
  *
@@ -20,16 +22,34 @@
 
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { Request, Response } from 'express';
+import { config } from '../config/env.config';
 import {
   SHOPPING_RATE_LIMIT_MAX,
   SHOPPING_RATE_LIMIT_WINDOW_MS,
 } from '../modules/shopping/shopping.constants';
+import { extractTokenFromHeader, verifyToken } from '../utils/jwt.util';
 
-const SHOPPING_PATH_PATTERN = /^\/api\/v1\/shopping(\/|\?|$)/;
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-/** True for /api/v1/shopping and anything beneath it (matches originalUrl). */
+const SHOPPING_PATH_PATTERN = new RegExp(
+  `^/api/${escapeRegExp(config.apiVersion)}/shopping(/|\\?|$)`,
+);
+
+/** True for /api/<version>/shopping and anything beneath it (matches originalUrl). */
 export const isShoppingRequest = (originalUrl: string): boolean =>
   SHOPPING_PATH_PATTERN.test(originalUrl);
+
+/** True when the request carries a bearer token with a valid signature and expiry. */
+export const hasValidBearerToken = (req: Request): boolean => {
+  const token = extractTokenFromHeader(req.headers.authorization);
+  if (!token) return false;
+  try {
+    verifyToken(token);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 /**
  * General API rate limiter
@@ -44,8 +64,9 @@ export const apiLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes',
   },
   // Mounted at '/api/', so req.path is relative; match on originalUrl.
-  // Shopping has its own per-user limiter.
-  skip: (req: Request) => isShoppingRequest(req.originalUrl),
+  // Shopping has its own per-user limiter, but only for requests with a valid
+  // token; unauthenticated traffic stays under this per-IP limit.
+  skip: (req: Request) => isShoppingRequest(req.originalUrl) && hasValidBearerToken(req),
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Skip rate limiting for successful requests in some cases
