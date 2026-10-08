@@ -82,6 +82,31 @@ describe('POST /api/v1/ai/generate-meal-plan', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('accepts a 14-day plan with days up to 13 and more than 60 meals', async () => {
+    const { token } = await newUser([uniqueName('lentil')]);
+    const meals: Meal[] = [];
+    for (let d = 0; d < 14; d++) {
+      for (const t of ['breakfast', 'lunch', 'dinner', 'snack']) meals.push(meal(d, t, `Dish ${d}${t}`, ['x']));
+    }
+    fetchSpy.mockResolvedValueOnce(chatCompletion(plan(meals)));
+
+    const res = await generate(token, { daysCount: 14, budgetCents: uniqueBudget() });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mealPlan.meals).toHaveLength(56);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects meals whose day is beyond the requested daysCount', async () => {
+    const { token } = await newUser([uniqueName('bean')]);
+    const bad = plan([meal(5, 'lunch', 'Late', ['x'])]);
+    fetchSpy.mockResolvedValueOnce(chatCompletion(bad)).mockResolvedValueOnce(chatCompletion(bad));
+
+    const res = await generate(token, { daysCount: 3, budgetCents: uniqueBudget() });
+
+    expect(res.status).toBe(503);
+  });
+
   it('repairs once when day is outside 0..6 or mealType is invalid', async () => {
     const { token } = await newUser([uniqueName('oat')]);
     fetchSpy
