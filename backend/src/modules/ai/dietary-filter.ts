@@ -35,14 +35,30 @@ const TAG_TERMS: Readonly<Record<string, readonly string[]>> = Object.freeze({
   'dairy-free': DAIRY,
   'lactose-free': DAIRY,
   'nut-free': NUTS,
-  'peanut allergy': ['peanut'],
+  'nut-allergy': NUTS,
+  'tree-nut-free': NUTS,
+  'gluten-intolerant': GLUTEN,
+  'celiac': GLUTEN,
+  'dairy-allergy': DAIRY,
+  'lactose-intolerant': DAIRY,
+  'egg-allergy': EGG,
+  'peanut-allergy': ['peanut'],
   'peanut-free': ['peanut'],
-  'shellfish allergy': SHELLFISH,
+  'shellfish-allergy': SHELLFISH,
   'shellfish-free': SHELLFISH,
   'egg-free': EGG,
   halal: ['pork', 'bacon', 'ham', 'lard', 'gelatin', 'wine', 'beer', 'rum'],
   kosher: ['pork', 'bacon', 'ham', 'lard', 'shrimp', 'crab', 'lobster'],
 });
+
+/** Canonical lookup key: lowercase, with underscores, spaces and hyphens unified. */
+function canonKey(value: string): string {
+  return value.toLowerCase().trim().replace(/[_\s-]+/g, '-');
+}
+
+const TAG_INDEX: ReadonlyMap<string, readonly string[]> = new Map(
+  Object.entries(TAG_TERMS).map(([key, terms]) => [canonKey(key), terms]),
+);
 
 const STOP_WORDS: ReadonlySet<string> = new Set([
   'no', 'not', 'free', 'allergy', 'allergic', 'avoid', 'to', 'intolerant',
@@ -56,7 +72,7 @@ export function normalizeRestrictions(
 ): readonly string[] {
   const all = lists.flatMap((list) => list ?? []);
   const cleaned = all
-    .map((item) => String(item).toLowerCase().trim().replace(/\s+/g, ' '))
+    .map((item) => String(item).toLowerCase().trim().replace(/_+/g, ' ').replace(/\s+/g, ' '))
     .filter((item) => item.length > 0);
   return [...new Set(cleaned)].sort();
 }
@@ -81,8 +97,11 @@ function freeTextTokens(restriction: string): readonly string[] {
 
 export function buildForbiddenTerms(restrictions: readonly string[]): readonly string[] {
   const terms = normalizeRestrictions(restrictions).flatMap((restriction) => {
-    const known = TAG_TERMS[restriction];
-    return known ?? freeTextTokens(restriction);
+    const known = TAG_INDEX.get(canonKey(restriction));
+    if (known) return known;
+    // Unknown restriction: never pass silently. Forbid the restriction text
+    // itself plus its meaningful tokens.
+    return [restriction, ...freeTextTokens(restriction)];
   });
   return [...new Set(terms)].sort();
 }

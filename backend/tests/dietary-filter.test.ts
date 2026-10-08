@@ -103,3 +103,44 @@ describe("partitionByRestrictions", () => {
     expect(result.removedCount).toBe(0);
   });
 });
+
+describe("frontend restriction values (CR-01)", () => {
+  const FRONTEND_VALUES = [
+    "vegetarian",
+    "vegan",
+    "gluten_free",
+    "dairy_free",
+    "nut_free",
+    "halal",
+    "kosher",
+  ];
+
+  it.each(FRONTEND_VALUES)("%s yields a non-trivial forbidden term list", (value) => {
+    expect(buildForbiddenTerms([value]).length).toBeGreaterThan(1);
+  });
+
+  it.each([
+    ["gluten_free", ["whole wheat bread"]],
+    ["dairy_free", ["cheddar cheese"]],
+    ["nut_free", ["almond flour cake"]],
+    ["Gluten Free", ["pasta"]],
+    ["nut allergy", ["cashew chicken"]],
+    ["vegan", ["egg fried rice"]],
+    ["halal", ["bacon"]],
+    ["kosher", ["shrimp"]],
+  ])("%s filters %j", (restriction, texts) => {
+    expect(check(restriction, texts)).toBe(true);
+  });
+
+  it("treats underscore, space and hyphen forms identically", () => {
+    const a = buildForbiddenTerms(["gluten_free"]);
+    expect(buildForbiddenTerms(["gluten-free"])).toEqual(a);
+    expect(buildForbiddenTerms(["gluten free"])).toEqual(a);
+  });
+
+  it("unknown restrictions fall back to the restriction text as a forbidden term", () => {
+    expect(buildForbiddenTerms(["no mushrooms"])).toContain("no mushrooms");
+    expect(check("sesame", ["sesame oil"])).toBe(true);
+    expect(buildForbiddenTerms(["xyz_thing"])).toContain("xyz thing");
+  });
+});
