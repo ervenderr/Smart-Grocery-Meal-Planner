@@ -8,6 +8,7 @@
 #   Check (11) covers the currency allow-list and onboarding completion contract.
 #   Check (12) covers the persistent shopping list (add, check with price, finish, history).
 #   Check (13) covers pantry-aware intelligence (staples, cook-first, pantry-subtracted generate).
+#   Check (14) covers capture loops (barcode, quick edit, bought it, cooked it)
 #   FE=https://kitcha-ai.vercel.app (optional, default shown)
 #
 # Requires curl and jq. Exits non-zero on the first failing check.
@@ -363,6 +364,100 @@ code="$(req POST "$SHOP/generate" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg p "
 jq -e '.added == 0 and .merged == 0' "$BODY_FILE" >/dev/null || fail "13h regenerate: second generate changed the list"
 jq -e --arg t "$EPOCH" '.list.items | map(select(.itemName | test("smoke bread flour " + $t; "i"))) | length == 1 and .[0].quantity == 1.5' "$BODY_FILE" >/dev/null || fail "13h regenerate: bread flour quantity changed"
 pass "13h generating the same plan twice adds nothing (already on your list)"
+
+# (14) capture loops: barcode, quick edit, bought it, cooked it.
+# The smoke user's data remains afterwards (no delete-account endpoint); every
+# name carries the per-run $EPOCH tag so the check does not depend on prior runs.
+T="Smoke$EPOCH"
+BC="400${EPOCH}"
+PANTRY="$API/api/v1/pantry"
+
+code="$(req POST "$PANTRY" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg n "$T milk" --arg b "$BC" '{ingredientName:$n,quantity:1,unit:"liters",category:"dairy",barcode:$b}')")" || fail "14a barcode create: request failed"
+[ "$code" = "201" ] || fail "14a barcode create: expected 201, got $code"
+MILK_ID="$(jq -r '.id // empty' "$BODY_FILE")"
+[ -n "$MILK_ID" ] || fail "14a barcode create: id missing"
+[ "$(jq -r '.barcode' "$BODY_FILE")" = "$BC" ] || fail "14a barcode create: barcode not stored"
+code="$(req GET "$PANTRY?barcode=$BC&limit=1" -H "$AUTH")" || fail "14a barcode filter: request failed"
+[ "$code" = "200" ] || fail "14a barcode filter: expected 200, got $code"
+[ "$(jq -r '.items[0].id' "$BODY_FILE")" = "$MILK_ID" ] || fail "14a barcode filter: wrong item"
+code="$(req GET "$PANTRY?barcode=abc" -H "$AUTH")" || fail "14a bad barcode: request failed"
+[ "$code" = "400" ] || fail "14a bad barcode: expected 400, got $code"
+pass "14a barcode stored, filterable, malformed barcode rejected"
+
+code="$(req PATCH "$PANTRY/$MILK_ID" -H "$AUTH" -H "$JSON_H" -d '{"quantity":0}')" || fail "14b quantity 0: request failed"
+[ "$code" = "200" ] || fail "14b quantity 0: expected 200, got $code"
+jq -e '(.quantity | tonumber) == 0' "$BODY_FILE" >/dev/null || fail "14b quantity 0: not stored"
+code="$(req PATCH "$PANTRY/$MILK_ID" -H "$AUTH" -H "$JSON_H" -d '{"quantity":-1}')" || fail "14b negative: request failed"
+[ "$code" = "400" ] || fail "14b negative quantity: expected 400, got $code"
+code="$(req PATCH "$PANTRY/$MILK_ID" -H "$AUTH" -H "$JSON_H" -d '{"expiryDate":null}')" || fail "14b clear expiry: request failed"
+[ "$code" = "200" ] || fail "14b clear expiry: expected 200, got $code"
+jq -e '.expiryDate == null' "$BODY_FILE" >/dev/null || fail "14b clear expiry: expiryDate not null"
+pass "14b quantity 0 allowed, negative rejected, expiry cleared"
+
+code="$(req POST "$SHOP/items" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg n "$T milk" '{itemName:$n,quantity:1,unit:"liters"}')")" || fail "14c add milk: request failed"
+[ "$code" = "201" ] || fail "14c add milk: expected 201, got $code"
+SM_ID="$(jq -r '.id' "$BODY_FILE")"
+code="$(req POST "$SHOP/items" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg n "$T eggs" '{itemName:$n,quantity:12,unit:"pieces"}')")" || fail "14c add eggs: request failed"
+[ "$code" = "201" ] || fail "14c add eggs: expected 201, got $code"
+SE_ID="$(jq -r '.id' "$BODY_FILE")"
+for sid in "$SM_ID" "$SE_ID"; do
+  code="$(req PATCH "$SHOP/items/$sid" -H "$AUTH" -H "$JSON_H" -d '{"isChecked":true}')" || fail "14c check: request failed"
+  [ "$code" = "200" ] || fail "14c check: expected 200, got $code"
+done
+code="$(req POST "$SHOP/finish" -H "$AUTH" -H "$JSON_H" -d "{\"carryOver\":\"discard\",\"addToPantry\":true,\"receiptDate\":\"$RECEIPT_DATE\"}")" || fail "14c finish: request failed"
+[ "$code" = "200" ] || fail "14c finish: expected 200, got $code"
+jq -e '.pantry.failed == false and .pantry.added >= 1 and .pantry.merged >= 1' "$BODY_FILE" >/dev/null || fail "14c finish: pantry added/merged contract not met"
+code="$(req GET "$PANTRY?search=$T%20eggs" -H "$AUTH")" || fail "14c eggs lookup: request failed"
+jq -e '(.items | length) == 1 and (.items[0].quantity | tonumber) == 12' "$BODY_FILE" >/dev/null || fail "14c eggs lot is not a single lot of 12"
+code="$(req GET "$PANTRY/$MILK_ID" -H "$AUTH")" || fail "14c milk lookup: request failed"
+jq -e '(.quantity | tonumber) == 1' "$BODY_FILE" >/dev/null || fail "14c milk lot is not 1 after merge"
+pass "14c bought-it adds eggs and merges milk into the pantry"
+
+ORECIPE="$(jq -nc --arg t "$T" '{name:($t + " omelette"),category:"dinner",difficulty:"easy",prepTimeMinutes:5,cookTimeMinutes:5,servings:1,instructions:["Cook"],ingredients:[{ingredientName:($t + " eggs"),quantity:3,unit:"pieces"},{ingredientName:($t + " milk"),quantity:200,unit:"ml"},{ingredientName:"salt",quantity:1,unit:"tsp"},{ingredientName:($t + " saffron"),quantity:1,unit:"grams"}]}')"
+code="$(req POST "$API/api/v1/recipes" -H "$AUTH" -H "$JSON_H" -d "$ORECIPE")" || fail "14d recipe: request failed"
+[ "$code" = "201" ] || fail "14d recipe: expected 201, got $code"
+COOK_RECIPE_ID="$(jq -r '.id // .data.id // empty' "$BODY_FILE")"
+[ -n "$COOK_RECIPE_ID" ] || fail "14d recipe: id missing"
+code="$(req POST "$API/api/v1/cook/preview" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg r "$COOK_RECIPE_ID" '{recipeId:$r}')")" || fail "14d preview: request failed"
+[ "$code" = "200" ] || fail "14d preview: expected 200, got $code"
+jq -e --arg t "$T" '.rows | map(select((.name | ascii_downcase) == ($t + " eggs" | ascii_downcase) and .use == 3 and .left == 9)) | length == 1' "$BODY_FILE" >/dev/null || fail "14d preview: eggs row (use 3, left 9) missing"
+jq -e --arg t "$T" '.rows | map(select((.name | ascii_downcase) == ($t + " milk" | ascii_downcase) and .unit == "liters" and .use == 0.2)) | length == 1' "$BODY_FILE" >/dev/null || fail "14d preview: milk row (liters, use 0.2) missing"
+jq -e '.staples | map(ascii_downcase) | index("salt") != null' "$BODY_FILE" >/dev/null || fail "14d preview: salt not in staples"
+jq -e --arg t "$T" '.notInPantry | map(ascii_downcase) | any(contains("saffron"))' "$BODY_FILE" >/dev/null || fail "14d preview: saffron not in notInPantry"
+DEDUCTIONS="$(jq -c '[.rows[] | {key, unit, use}]' "$BODY_FILE")"
+pass "14d cook preview computes eggs, milk (unit-converted), staples and not-in-pantry"
+
+code="$(req POST "$API/api/v1/cook/apply" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg r "$COOK_RECIPE_ID" --argjson d "$DEDUCTIONS" '{recipeId:$r,deductions:$d}')")" || fail "14e apply: request failed"
+[ "$code" = "200" ] || fail "14e apply: expected 200, got $code"
+jq -e '.updated >= 2' "$BODY_FILE" >/dev/null || fail "14e apply: updated < 2"
+code="$(req GET "$PANTRY?search=$T%20eggs" -H "$AUTH")" || fail "14e eggs recheck: request failed"
+jq -e '(.items[0].quantity | tonumber) == 9' "$BODY_FILE" >/dev/null || fail "14e eggs not reduced to 9"
+pass "14e cook apply deducts the pantry (eggs 12 -> 9)"
+
+COOK_PLAN="$(jq -nc --arg r "$COOK_RECIPE_ID" --arg s "$TODAY" --arg e "$IN9" --arg n "$T plan" '{name:$n,startDate:$s,endDate:$e,meals:[{recipeId:$r,dayOfWeek:0,mealType:"dinner",servings:1}]}')"
+code="$(req POST "$API/api/v1/mealplans" -H "$AUTH" -H "$JSON_H" -d "$COOK_PLAN")" || fail "14f meal plan: request failed"
+[ "$code" = "201" ] || fail "14f meal plan: expected 201, got $code"
+COOK_PLAN_ID="$(jq -r '.id // .data.id // empty' "$BODY_FILE")"
+MEAL_ID="$(jq -r '.meals[0].id // empty' "$BODY_FILE")"
+[ -n "$COOK_PLAN_ID" ] && [ -n "$MEAL_ID" ] || fail "14f meal plan: plan or meal id missing"
+code="$(req POST "$API/api/v1/cook/preview" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg m "$MEAL_ID" '{mealPlanItemId:$m}')")" || fail "14f meal preview: request failed"
+[ "$code" = "200" ] || fail "14f meal preview: expected 200, got $code"
+jq -e '.alreadyCooked == false' "$BODY_FILE" >/dev/null || fail "14f meal preview: alreadyCooked is not false"
+MEAL_APPLY="$(jq -nc --arg m "$MEAL_ID" '{mealPlanItemId:$m,deductions:[]}')"
+code="$(req POST "$API/api/v1/cook/apply" -H "$AUTH" -H "$JSON_H" -d "$MEAL_APPLY")" || fail "14f meal apply: request failed"
+[ "$code" = "200" ] || fail "14f meal apply: expected 200, got $code"
+code="$(req POST "$API/api/v1/cook/apply" -H "$AUTH" -H "$JSON_H" -d "$MEAL_APPLY")" || fail "14f meal re-apply: request failed"
+[ "$code" = "409" ] || fail "14f meal re-apply: expected 409, got $code"
+[ "$(jq -r '.code // empty' "$BODY_FILE")" = "ALREADY_COOKED" ] || fail "14f meal re-apply: code is not ALREADY_COOKED"
+code="$(req GET "$API/api/v1/mealplans/$COOK_PLAN_ID" -H "$AUTH")" || fail "14f plan fetch: request failed"
+[ "$code" = "200" ] || fail "14f plan fetch: expected 200, got $code"
+jq -e --arg m "$MEAL_ID" '.meals | map(select(.id == $m and .cookedAt != null)) | length == 1' "$BODY_FILE" >/dev/null || fail "14f plan: meal cookedAt not set"
+pass "14f planned meal cooks once; second apply is 409 ALREADY_COOKED; cookedAt set"
+
+code="$(req POST "$API/api/v1/cook/preview" -H "$AUTH" -H "$JSON_H" -d '{"recipeId":"00000000-0000-4000-8000-000000000000"}')" || fail "14g unknown recipe: request failed"
+[ "$code" = "404" ] || fail "14g unknown recipe: expected 404, got $code"
+[ "$(jq -r '.code // empty' "$BODY_FILE")" = "RECIPE_NOT_FOUND" ] || fail "14g unknown recipe: code is not RECIPE_NOT_FOUND"
+pass "14g unknown recipe preview returns 404 RECIPE_NOT_FOUND"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
