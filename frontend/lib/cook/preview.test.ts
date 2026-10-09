@@ -5,6 +5,7 @@ import {
   toDeductions,
   deductionCount,
   cookSuccessToast,
+  isPreviewStale,
 } from './preview';
 import type { CookRow } from '@/types/cook.types';
 
@@ -71,5 +72,26 @@ describe('cookSuccessToast', () => {
   });
   it('formats singular', () => {
     expect(cookSuccessToast({ updated: 1, usedUp: 0, skipped: 0 })).toBe('Pantry updated. 1 item used.');
+  });
+});
+
+describe('isPreviewStale', () => {
+  const base = { servings: 2, debouncedServings: 2, isPlaceholderData: false, isFetching: false };
+
+  it('is fresh when servings settled and nothing is loading', () => {
+    expect(isPreviewStale(base)).toBe(false);
+    expect(isPreviewStale({ ...base, servings: null, debouncedServings: null })).toBe(false);
+  });
+
+  it('is stale while servings are still debouncing', () => {
+    expect(isPreviewStale({ ...base, servings: 3 })).toBe(true);
+  });
+
+  it('is stale while placeholder data from the previous servings is shown', () => {
+    expect(isPreviewStale({ ...base, isPlaceholderData: true })).toBe(true);
+  });
+
+  it('is stale while a preview request is in flight', () => {
+    expect(isPreviewStale({ ...base, isFetching: true })).toBe(true);
   });
 });

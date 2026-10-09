@@ -12,7 +12,7 @@ import { CookNotes } from '@/components/cook/cook-notes';
 import { cookApi } from '@/lib/api/cook';
 import { getApiErrorCode } from '@/lib/api/errors';
 import { queryKeys } from '@/lib/react-query';
-import { cookSuccessToast, deductionCount, toDeductions } from '@/lib/cook/preview';
+import { cookSuccessToast, deductionCount, isPreviewStale, toDeductions } from '@/lib/cook/preview';
 import type { CookPreview, CookRow, CookTarget } from '@/types/cook.types';
 
 interface CookedItSheetProps {
@@ -138,8 +138,14 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
   });
 
   const applying = apply.isPending;
+  const previewStale = isPreviewStale({
+    servings,
+    debouncedServings: debounced,
+    isPlaceholderData: preview.isPlaceholderData,
+    isFetching: preview.isFetching,
+  });
   const submit = () => {
-    if (applying) return;
+    if (applying || previewStale) return;
     setApplyError(false);
     apply.mutate();
   };
@@ -207,7 +213,7 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
     if (cooked || !data || showError || noIngredients) return null;
     if (count === 0 && !isMeal) return null;
     return (
-      <Button onClick={submit} disabled={applying}>
+      <Button onClick={submit} disabled={applying || previewStale}>
         {applying ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
