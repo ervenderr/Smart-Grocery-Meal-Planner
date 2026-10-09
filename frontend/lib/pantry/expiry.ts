@@ -74,3 +74,35 @@ export function toExpiringItems(payload: unknown, now: Date = new Date()): Expir
   }
   return entries.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry);
 }
+
+const pad = (n: number): string => String(n).padStart(2, '0');
+
+/** Local calendar date as YYYY-MM-DD (never UTC-shifted). */
+export function toIsoDate(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** Today's local date as YYYY-MM-DD. */
+export function todayIso(now: Date = new Date()): string {
+  return toIsoDate(now);
+}
+
+/**
+ * Expiry shortcut: base is `current` when it is a valid YYYY-MM-DD on or
+ * after today, otherwise today. Returns base + days as YYYY-MM-DD.
+ */
+export function addDaysShortcut(
+  current: string | null | undefined,
+  days: number,
+  now: Date = new Date(),
+): string {
+  const today = todayIso(now);
+  const untilCurrent = getDaysUntilExpiry(current, now);
+  const match =
+    typeof current === 'string' ? DATE_PREFIX.exec(current.trim()) : null;
+  const useCurrent = match !== null && untilCurrent !== null && untilCurrent >= 0;
+  const [y, m, d] = (useCurrent && match ? [match[1], match[2], match[3]] : today.split('-')).map(
+    Number,
+  );
+  return toIsoDate(new Date(y, m - 1, d + days));
+}
