@@ -2,9 +2,9 @@
 
 ## What This Is
 
-Kitcha is a personal full-stack app (Next.js frontend, Express + Prisma + PostgreSQL backend) that tracks pantry inventory and expiry, manages recipes, plans weekly meals, builds shopping lists, tracks grocery budget, and offers AI suggestions (currently Google Gemini). It is a side project with low traffic (a handful of AI calls per day), so free tiers and zero-cost infrastructure are preferred over scale.
+Kitcha is a personal full-stack app (Next.js frontend, Express + Prisma + PostgreSQL backend) that tracks pantry inventory and expiry, manages recipes, plans weekly meals, builds shopping lists, tracks grocery budget, and offers AI suggestions through one env-configured OpenAI-compatible provider. It is a side project with low traffic (a handful of AI calls per day), so free tiers and zero-cost infrastructure are preferred over scale.
 
-This milestone takes the already-working app and makes it production-real: deployed backend on Railway, mobile-first PWA experience, cheaper/better AI suggestions, and closing the feature/process gaps that users of similar apps complain about.
+v1.0 took the already-working app and made it production-real: backend on Railway, a mobile-first installable experience, dependable free-tier AI, a persistent pantry-aware shopping list, and barcode / bought-it / cooked-it capture loops. Real-device verification of the mobile flows is still pending (see Deferred in STATE.md).
 
 ## Core Value
 
@@ -14,40 +14,45 @@ Someone standing in a kitchen or grocery aisle with a phone can quickly see what
 
 ### Validated
 
-<!-- Inferred from existing code (brownfield). -->
-
 - ✓ Auth (JWT, bcrypt) — existing
 - ✓ Pantry CRUD with categories, quantities, expiry — existing
 - ✓ Recipe management, favorites, dietary filters, public sharing — existing
 - ✓ Meal plans with items, cost estimation — existing
-- ✓ Shopping lists + shopping history — existing
 - ✓ Budget tracking, analytics, market prices — existing
 - ✓ Notifications and alerts (expiry, budget, low stock) — existing
-- ✓ Gemini-powered recipe suggestions / meal plan generation / substitutions — existing
 - ✓ Zapier webhook integration — existing
+- ✓ Patched Next.js 16.4.0, Railway API + Postgres with spend cap, healthcheck, CORS allowlist, per-IP rate limits, Zod env, CI (DEP-01..09) — v1.0
+- ✓ Validated, cached, quota-guarded AI via one OpenAI-compatible provider, diet/allergen enforcement, Open Food Facts and USDA lookups (AI-01..07) — v1.0 (browser check deferred)
+- ✓ Mobile shell: bottom nav, 375px/44px/dvh, manifest and install hint, onboarding, empty states, currency (MOB-01..06) — v1.0 (real-iPhone walkthrough deferred)
+- ✓ Persistent backend shopping lists with check-off, grouping, shopping mode, spend tracking (SHOP-01..05) — v1.0 (real-phone check deferred)
+- ✓ Pantry-aware intelligence: ingredient parsing, merged and pantry-subtracted lists, staples, "Cook this first" (INT-01..05) — v1.0 (real-phone check deferred)
+- ✓ Capture loops: barcode scan, bought-it, cooked-it, quick pantry edits (CAP-01..05) — v1.0 (real-device walkthrough deferred)
 
 ### Active
 
-- [ ] Backend deployed to Railway (project + Railway Postgres, migrations on deploy, env vars, health check, CORS for frontend) via the Railway CLI
-- [ ] Mobile-first redesign of the Next.js frontend: bottom navigation, thumb-friendly touch targets, mobile layouts for every screen, installable PWA (manifest, icons, offline shell)
-- [ ] AI suggestions research and upgrade: compare free LLM providers (Gemini free tier vs Groq/OpenRouter/Mistral etc.) and free food data APIs (TheMealDB, Open Food Facts, USDA FoodData, Spoonacular free tier); adopt what clearly wins; add caching and rate/quota guards since usage is low
-- [ ] Gap analysis from competitor apps (Mealime, Paprika, Samsung Food, KitchenPal, etc.), app-store/Reddit reviews, and an audit of Kitcha's own UX flows; turn findings into prioritized requirements (e.g. barcode scan, onboarding, empty states, shopping-list UX, expiry-driven recipes)
-- [ ] Deployment/process hygiene: CI, env documentation, replace Render config with Railway config, production readiness checklist
+- [ ] Consolidated real-device verification pass for the five deferred v1.0 checks
+- [ ] Offline service worker, read-only offline data, install/update prompts (OFF-01..04; needs `@serwist/turbopack` spike on real phones)
+- [ ] URL recipe import (IMP-01)
+- [ ] Household sharing (HH-01; requires schema re-key)
 
 ### Out of Scope
 
 - Native iOS/Android app (Expo/React Native) — PWA covers the "mobile first" goal at a fraction of the cost
+- Gemini, OpenRouter, Mistral, Cerebras, Spoonacular, Edamam — free-tier limits, training-data terms or ToS conflicts; Gemini SDK removed in v1.0
+- Receipt OCR, grocery delivery integrations, calorie diary, social features — high cost or off core value
+- Provider failover for AI — single provider with graceful degradation is enough at this traffic
 - Paid LLM or data APIs — side project; free tiers only
 - Moving the frontend host as part of this milestone — only the backend + DB move to Railway (frontend host stays as-is, e.g. Vercel)
 - Multi-tenant scale work (queues, horizontal scaling) — traffic is tiny
 
 ## Context
 
-- Brownfield repo: `backend/` (Express 4, Prisma 5.22, TypeScript, Jest, Winston, Dockerfile + `entrypoint.sh` running `prisma migrate deploy`, `render.yaml` from a previous Render target), `frontend/` (Next.js 16.0.2 pinned, vulnerable, must upgrade; Tailwind 4, Zustand, React Hook Form, Zod, Axios, Lucide), `project details/` (original specs).
-- Backend modules: ai, alert, analytics, auth, marketprice, mealplan, notification, pantry, recipe, users, zapier. AI lives in `backend/src/services/ai.service.ts` and `backend/src/modules/ai/`.
-- Backend listens on `PORT` (Dockerfile defaults to 10000); required env: `DATABASE_URL`, `JWT_SECRET`, `PORT`; optional `GEMINI_AI_API_KEY`, `SPOONACULAR_API_KEY`, `FRONTEND_URL`, `CORS_ORIGIN`.
-- Railway CLI is installed and logged in (account: Erven Idjad). Deployment will be done through it.
-- Last work in git: Zapier integration (event dispatching, docs).
+Shipped v1.0 on 2026-10-10: 6 phases, 62 executed plans, about 19k lines TypeScript in `backend/src` and about 23.5k in `frontend`.
+- `backend/` (Express 4, Prisma 5.22, TypeScript, Jest, Winston, Dockerfile + `entrypoint.sh` running `prisma migrate deploy`) is deployed on Railway with Railway Postgres; `render.yaml` is gone. `frontend/` (Next.js 16.4.0, React 19.3.0, Tailwind 4, Zustand, React Query, Zod) deploys on Vercel.
+- Backend modules include ai, alert, analytics, auth, cook, food, marketprice, mealplan, notification, pantry, recipe, shopping, users, zapier, plus an intelligence core (units, quantity, canonical names, staples, pantry subtraction).
+- AI: env-configured OpenAI-compatible provider (`AI_PROVIDER`/`AI_BASE_URL`/`AI_MODEL`/`AI_API_KEY`, Dahl default), Postgres cache, DB-backed daily quotas.
+- Known tech debt: five deferred human verifications (Phase 2 browser check, 03-14, 04-12, 05-13, 06-13), frontend tests cover pure helpers only (no component tests), backend Jest needs live Postgres (CI provides it), stale `draft` status in VALIDATION.md files.
+- Railway CLI is installed and logged in (account: Erven Idjad).
 
 ## Constraints
 
@@ -61,10 +66,14 @@ Someone standing in a kitchen or grocery aisle with a phone can quickly see what
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Mobile-first = responsive PWA, not native app | Reuses existing Next.js code, one codebase, installable on phone | — Pending |
-| Backend + Postgres on Railway; frontend host unchanged | User wants BE on Railway; Railway Postgres removes a separate DB vendor | — Pending |
-| Compare free AI options, keep Gemini unless something clearly wins | Gemini already integrated; avoid churn without benefit | — Pending |
-| Gap analysis benchmarks competitors + reviews + own-app audit | User asked what others find we are missing | — Pending |
+| Mobile-first = responsive PWA, not native app | Reuses existing Next.js code, one codebase, installable on phone | ✓ Good (manifest + install hint shipped; offline SW deferred) |
+| Backend + Postgres on Railway; frontend host unchanged | User wants BE on Railway; Railway Postgres removes a separate DB vendor | ✓ Good (live, spend cap set; watch cost after a week on Hobby) |
+| Compare free AI options, keep Gemini unless something clearly wins | Gemini already integrated; avoid churn without benefit | ⚠️ Revisit (superseded: one env-configured OpenAI-compatible provider, Gemini removed; real free quota still to confirm) |
+| Gap analysis benchmarks competitors + reviews + own-app audit | User asked what others find we are missing | ✓ Good (drove barcode, onboarding, empty states, shopping UX, cook-first) |
+| Single AI provider, no failover, graceful "unavailable" with quota refund | Free tiers, tiny traffic, simpler than multi-provider | ✓ Good |
+| Exact Decimal quantities and unit families for ingredient math | No float drift when merging and subtracting | ✓ Good |
+| One active shopping list per user via partial unique index | Race-safe lazy creation, simple UX | ✓ Good |
+| Defer offline service worker and URL import to next milestone | Serwist/Turbopack needs real-phone spike | — Pending |
 
 ## Evolution
 
@@ -84,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-08 after initialization*
+*Last updated: 2026-10-10 after v1.0 milestone*
