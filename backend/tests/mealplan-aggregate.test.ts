@@ -1,4 +1,4 @@
-import { aggregateIngredients } from '../src/modules/mealplan/mealplan.aggregate';
+import { aggregateGroups, aggregateIngredients } from '../src/modules/mealplan/mealplan.aggregate';
 
 const item = (servings: number, recipe: { servings: number; title: string; ingredientsList: unknown }) => ({
   servings,
@@ -25,7 +25,8 @@ describe('aggregateIngredients', () => {
     expect(out).toEqual([{ ingredientName: 'Onion', quantity: 3, unit: 'pieces', recipes: ['A', 'B'] }]);
   });
 
-  it('keeps different units separate', () => {
+  // Phase 5: same-family units merge (INT-02)
+  it('merges cups and liters of the same ingredient into one volume line', () => {
     const out = aggregateIngredients([
       item(1, {
         servings: 1,
@@ -36,7 +37,77 @@ describe('aggregateIngredients', () => {
         ],
       }),
     ]);
+    expect(out).toEqual([{ ingredientName: 'Milk', quantity: 1.24, unit: 'liters', recipes: ['A'] }]);
+  });
+
+  it('keeps volume and count units of the same ingredient separate', () => {
+    const out = aggregateIngredients([
+      item(1, {
+        servings: 1,
+        title: 'A',
+        ingredientsList: [
+          { ingredientName: 'Milk', quantity: 1, unit: 'cups' },
+          { ingredientName: 'Milk', quantity: 2, unit: 'pieces' },
+        ],
+      }),
+    ]);
     expect(out).toHaveLength(2);
+  });
+
+  it('merges grams and kg across recipes (1.5 kg)', () => {
+    const out = aggregateIngredients([
+      item(1, { servings: 1, title: 'A', ingredientsList: [{ ingredientName: 'Flour', quantity: 500, unit: 'grams' }] }),
+      item(1, { servings: 1, title: 'B', ingredientsList: [{ ingredientName: 'flour', quantity: 1, unit: 'kg' }] }),
+    ]);
+    expect(out).toEqual([{ ingredientName: 'Flour', quantity: 1.5, unit: 'kg', recipes: ['A', 'B'] }]);
+  });
+
+  it('merges singular and plural names', () => {
+    const out = aggregateIngredients([
+      item(1, {
+        servings: 1,
+        title: 'A',
+        ingredientsList: [
+          { ingredientName: 'Tomatoes', quantity: 2, unit: 'pieces' },
+          { ingredientName: 'tomato', quantity: 1, unit: 'pieces' },
+        ],
+      }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ quantity: 3, unit: 'pieces' });
+  });
+
+  it('applies the display ladder even to a single-unit group', () => {
+    const out = aggregateIngredients([
+      item(1, { servings: 1, title: 'A', ingredientsList: [{ ingredientName: 'rice', quantity: 2000, unit: 'grams' }] }),
+    ]);
+    expect(out[0]).toMatchObject({ quantity: 2, unit: 'kg' });
+  });
+
+  it('sums thirds exactly (three 1/3 cup lines are 1 cup, not 0.99)', () => {
+    const list = [{ ingredientName: 'sugar', quantity: 1, unit: 'cups' }];
+    const out = aggregateIngredients([
+      item(1, { servings: 3, title: 'A', ingredientsList: list }),
+      item(1, { servings: 3, title: 'B', ingredientsList: list }),
+      item(1, { servings: 3, title: 'C', ingredientsList: list }),
+    ]);
+    expect(out[0]).toMatchObject({ quantity: 1, unit: 'cups' });
+  });
+
+  it('aggregateGroups counts zero-quantity entries but creates no group for them', () => {
+    const res = aggregateGroups([
+      item(1, {
+        servings: 1,
+        title: 'A',
+        ingredientsList: [
+          { ingredientName: 'Salt', quantity: 0, unit: 'tsp' },
+          { ingredientName: 'Pepper', quantity: 1, unit: 'tsp' },
+          { ingredientName: '', quantity: 1, unit: 'tsp' },
+        ],
+      }),
+    ]);
+    expect(res.ingredientCount).toBe(2);
+    expect(res.groups).toHaveLength(1);
   });
 
   it('applies the servings multiplier, defaulting to 1 for bad recipe servings', () => {
