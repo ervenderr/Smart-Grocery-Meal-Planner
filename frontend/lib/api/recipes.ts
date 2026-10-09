@@ -8,6 +8,8 @@ import type {
   RecipeFilters,
 } from '@/types/recipe.types';
 
+import { normalizeCookFirst, type CookFirstResult } from '@/lib/recipes/cook-first';
+
 export const recipeApi = {
   /**
    * Get all recipes with optional filters
@@ -34,6 +36,23 @@ export const recipeApi = {
    */
   async getStats(): Promise<RecipeStats> {
     return await apiClient.get<RecipeStats>('/api/v1/recipes/stats');
+  },
+
+  /**
+   * Rank recipes by soon-to-expire pantry usage (cook this first)
+   */
+  async getCookFirst(opts: {
+    limit?: number;
+    today: string;
+    includeAll?: boolean;
+  }): Promise<CookFirstResult> {
+    const params = new URLSearchParams({ today: opts.today });
+    params.set('includeAll', String(Boolean(opts.includeAll)));
+    if (!opts.includeAll && opts.limit !== undefined) {
+      params.set('limit', String(opts.limit));
+    }
+    const raw = await apiClient.get<unknown>(`/api/v1/recipes/cook-first?${params.toString()}`);
+    return normalizeCookFirst(raw);
   },
 
   /**
