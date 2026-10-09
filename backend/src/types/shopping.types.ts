@@ -2,6 +2,8 @@
  * Shopping module DTO and input contracts (phase 04).
  */
 
+import type { CoveredEntry } from '../modules/intelligence/pantry-subtract';
+
 export interface ShoppingItemDto {
   readonly id: string;
   readonly shoppingListId: string;
@@ -46,6 +48,9 @@ export interface GenerateFromMealPlanResult {
   readonly list: ShoppingListDto;
   readonly added: number;
   readonly merged: number;
+  readonly covered: ReadonlyArray<CoveredEntry>;
+  readonly skippedStaples: ReadonlyArray<string>;
+  readonly pantryCapped: boolean;
 }
 
 export interface ShoppingHistoryEntryDto {

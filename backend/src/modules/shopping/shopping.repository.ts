@@ -59,22 +59,26 @@ export const loadListDto = async (
 };
 
 /**
- * Sets many item quantities in ONE statement (UPDATE ... FROM (VALUES ...)),
- * scoped to the given list. Callers hold the list row lock. Values are bound
- * parameters; nothing is interpolated into the SQL text.
+ * Sets many item quantities AND units in ONE statement
+ * (UPDATE ... FROM (VALUES ...)), scoped to the given list. Callers hold the
+ * list row lock. Values are bound parameters; nothing is interpolated into
+ * the SQL text.
  */
-export const bulkUpdateQuantities = async (
+export const bulkUpdateItems = async (
   tx: Prisma.TransactionClient,
   listId: string,
-  updates: ReadonlyArray<{ readonly id: string; readonly quantity: number }>,
+  updates: ReadonlyArray<{ readonly id: string; readonly quantity: number; readonly unit: string }>,
 ): Promise<void> => {
   if (updates.length === 0) return;
   const values = Prisma.join(
-    updates.map((u) => Prisma.sql`(${u.id}::text, ${u.quantity.toFixed(2)}::numeric(10,2))`),
+    updates.map(
+      (u) =>
+        Prisma.sql`(${u.id}::text, ${u.quantity.toFixed(2)}::numeric(10,2), ${u.unit}::text)`,
+    ),
   );
   await tx.$executeRaw`
     UPDATE shopping_list_items AS item
-    SET quantity = v.quantity, updated_at = now()
-    FROM (VALUES ${values}) AS v(id, quantity)
+    SET quantity = v.quantity, unit = v.unit, updated_at = now()
+    FROM (VALUES ${values}) AS v(id, quantity, unit)
     WHERE item.id = v.id AND item.shopping_list_id = ${listId}`;
 };
