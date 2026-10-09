@@ -2,15 +2,32 @@
 
 import { Edit2, Trash2, MapPin, Calendar, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { QuantityStepper } from '@/components/pantry/quantity-stepper';
+import { UsedUpBadge } from '@/components/pantry/used-up-badge';
+import { useDebouncedQuantity } from '@/lib/hooks/use-debounced-quantity';
+import type { PantryQuickPatch } from '@/lib/hooks/use-pantry';
+import { stepForUnit } from '@/lib/pantry/quantity';
 import type { PantryItem } from '@/types/pantry.types';
 
 interface PantryItemCardProps {
   item: PantryItem;
   onEdit: (item: PantryItem) => void;
   onDelete: (item: PantryItem) => void;
+  onPatch: (item: PantryItem, patch: PantryQuickPatch) => Promise<void>;
+  onRemoveUsedUp: (item: PantryItem) => void;
 }
 
-export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) {
+export function PantryItemCard({
+  item,
+  onEdit,
+  onDelete,
+  onPatch,
+  onRemoveUsedUp,
+}: PantryItemCardProps) {
+  const { value: quantity, change } = useDebouncedQuantity(Number(item.quantity), (next) =>
+    onPatch(item, { quantity: next })
+  );
+  const usedUp = Number(item.quantity) === 0 && quantity === 0;
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       protein: 'bg-red-100 text-red-800',
@@ -45,10 +62,10 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
     return null;
   };
 
-  const expiryStatus = getExpiryStatus();
+  const expiryStatus = usedUp ? null : getExpiryStatus();
 
   return (
-    <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
+    <Card className={`p-3 sm:p-4 hover:shadow-md transition-shadow ${usedUp ? 'bg-gray-50' : ''}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           {/* Item Name & Category */}
@@ -57,12 +74,30 @@ export function PantryItemCard({ item, onEdit, onDelete }: PantryItemCardProps) 
             <span className={`rounded-full px-2 py-0.5 text-sm font-semibold w-fit ${getCategoryColor(item.category)}`}>
               {item.category}
             </span>
+            {usedUp && <UsedUpBadge />}
           </div>
 
           {/* Quantity */}
-          <p className="mt-1 text-sm text-gray-600">
-            {item.quantity} {item.unit}
-          </p>
+          <div className="mt-2">
+            <QuantityStepper
+              value={quantity}
+              unitLabel={item.unit}
+              step={stepForUnit(item.unit)}
+              label={item.ingredientName}
+              onChange={change}
+            />
+          </div>
+
+          {usedUp && (
+            <button
+              type="button"
+              onClick={() => onRemoveUsedUp(item)}
+              className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-red-600"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Remove from pantry
+            </button>
+          )}
 
           {/* Location */}
           {item.location && (
