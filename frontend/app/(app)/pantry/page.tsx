@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Package, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Package, AlertCircle, AlertTriangle, ScanBarcode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/common/empty-state';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { AddPantryItemModal } from '@/components/pantry/add-pantry-item-modal';
 import { EditPantryItemModal } from '@/components/pantry/edit-pantry-item-modal';
+import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { PantryItemCard } from '@/components/pantry/pantry-item-card';
 import { pantryApi } from '@/lib/api/pantry';
 import { queryKeys } from '@/lib/react-query';
@@ -21,7 +22,19 @@ import {
   type PantryQuickPatch,
 } from '@/lib/hooks/use-pantry';
 import toast from 'react-hot-toast';
-import type { PantryItem } from '@/types/pantry.types';
+import { prefillFromOwnItem, prefillFromProduct } from '@/lib/scan/prefill';
+import type { BarcodeResolution } from '@/lib/scan/resolve-barcode';
+import type { FoodAttribution } from '@/lib/api/food';
+import type { CreatePantryItemData, PantryItem } from '@/types/pantry.types';
+
+interface AddPrefill {
+  initialValues?: Partial<CreatePantryItemData>;
+  notice: 'own' | null;
+  attribution: FoodAttribution | null;
+  focusName: boolean;
+}
+
+const EMPTY_PREFILL: AddPrefill = { notice: null, attribution: null, focusName: false };
 
 const CATEGORIES = [
   { value: '', label: 'All' },
@@ -44,6 +57,8 @@ export default function PantryPage() {
   const [appliedSearch, setAppliedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [addPrefill, setAddPrefill] = useState<AddPrefill>(EMPTY_PREFILL);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<PantryItem | null>(null);
@@ -80,6 +95,38 @@ export default function PantryPage() {
       toast.error(`Couldn't update ${item.ingredientName}. Your change was undone.`);
       throw error;
     }
+  };
+
+  const openAdd = () => {
+    setAddPrefill(EMPTY_PREFILL);
+    setShowAddModal(true);
+  };
+
+  const handleScanResolved = (resolution: BarcodeResolution) => {
+    if (resolution.kind === 'found') {
+      setAddPrefill({
+        initialValues: prefillFromProduct(resolution.product, resolution.barcode),
+        notice: null,
+        attribution: resolution.attribution,
+        focusName: false,
+      });
+      toast.success('Product found. Check the details and save.');
+    } else if (resolution.kind === 'own') {
+      setAddPrefill({
+        initialValues: prefillFromOwnItem(resolution.item),
+        notice: 'own',
+        attribution: null,
+        focusName: false,
+      });
+    } else {
+      setAddPrefill({
+        initialValues: { barcode: resolution.barcode },
+        notice: null,
+        attribution: null,
+        focusName: true,
+      });
+    }
+    setShowAddModal(true);
   };
 
   const handleEdit = (item: PantryItem) => {
@@ -128,10 +175,20 @@ export default function PantryPage() {
             Manage your pantry inventory and track expiration dates
           </p>
         </div>
-        <Button className="w-full sm:w-auto" onClick={() => setShowAddModal(true)}>
-          <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
+        <div className="flex gap-2">
+          <Button className="flex-1 sm:flex-none" onClick={openAdd}>
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Scan barcode"
+            onClick={() => setScanOpen(true)}
+          >
+            <ScanBarcode className="h-5 w-5" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
 
       {/* Expiring Soon Alert */}
@@ -226,7 +283,9 @@ export default function PantryPage() {
             title="Your pantry is empty"
             description="Add what you have at home to track expiry dates and get recipe ideas."
             actionLabel="Add first item"
-            onAction={() => setShowAddModal(true)}
+            onAction={openAdd}
+            secondaryActionLabel="Scan a barcode"
+            onSecondaryAction={() => setScanOpen(true)}
           />
         )
       ) : (
@@ -247,8 +306,24 @@ export default function PantryPage() {
       {/* Modals */}
       <AddPantryItemModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
+        onClose={() => {
+          setShowAddModal(false);
+          setAddPrefill(EMPTY_PREFILL);
+        }}
         onSuccess={() => void refreshItems()}
+        initialValues={addPrefill.initialValues}
+        notice={addPrefill.notice}
+        attribution={addPrefill.attribution}
+        focusName={addPrefill.focusName}
+        onScanBarcode={() => setScanOpen(true)}
+      />
+
+      <ScanSheet
+        isOpen={scanOpen}
+        mode="lookup"
+        onClose={() => setScanOpen(false)}
+        onResolved={handleScanResolved}
+        onAddWithoutBarcode={openAdd}
       />
 
       <EditPantryItemModal

@@ -11,6 +11,8 @@ import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { pantryApi } from '@/lib/api/pantry';
 import { BarcodeField } from '@/components/pantry/barcode-field';
+import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
+import { ScanBarcode } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { PantryItem, PantryItemCategory, PantryItemUnit } from '@/types/pantry.types';
 
@@ -81,6 +83,7 @@ export function EditPantryItemModal({
   barcodeOverride,
 }: EditPantryItemModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const {
     register,
@@ -155,6 +158,7 @@ export function EditPantryItemModal({
   };
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={handleClose} title="Edit Pantry Item" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information Section */}
@@ -177,7 +181,20 @@ export function EditPantryItemModal({
             onChange={(next) => setValue('barcode', next, { shouldValidate: true, shouldDirty: true })}
             error={errors.barcode?.message}
             disabled={isLoading}
-            trailing={barcodeAction}
+            trailing={
+              barcodeAction ?? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label="Scan barcode"
+                  disabled={isLoading}
+                  onClick={() => setScanOpen(true)}
+                >
+                  <ScanBarcode className="h-5 w-5" aria-hidden="true" />
+                </Button>
+              )
+            }
           />
 
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
@@ -307,5 +324,15 @@ export function EditPantryItemModal({
         </div>
       </form>
     </Modal>
+    {/* Outside the form: portal events would otherwise bubble into its onSubmit. */}
+    <ScanSheet
+      isOpen={scanOpen}
+      mode="return"
+      onClose={() => setScanOpen(false)}
+      onBarcode={(code) =>
+        setValue('barcode', code, { shouldValidate: true, shouldDirty: true })
+      }
+    />
+    </>
   );
 }

@@ -9,6 +9,7 @@ import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { ScanBarcode } from 'lucide-react';
 import { pantryApi } from '@/lib/api/pantry';
 import { BarcodeLookup } from '@/components/food/barcode-lookup';
 import { BarcodeField } from '@/components/pantry/barcode-field';
@@ -51,6 +52,8 @@ interface AddPantryItemModalProps {
   focusName?: boolean;
   /** Rendered directly under the title (the scan flow puts its button here). */
   headerSlot?: ReactNode;
+  /** When provided, shows the full-width "Scan barcode" button under the title. */
+  onScanBarcode?: () => void;
 }
 
 const categories: { value: PantryItemCategory; label: string }[] = [
@@ -91,6 +94,7 @@ export function AddPantryItemModal({
   attribution = null,
   focusName = false,
   headerSlot,
+  onScanBarcode,
 }: AddPantryItemModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -171,6 +175,18 @@ export function AddPantryItemModal({
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Pantry Item" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {headerSlot}
+        {onScanBarcode && (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full"
+            disabled={isLoading}
+            onClick={onScanBarcode}
+          >
+            <ScanBarcode className="h-5 w-5" aria-hidden="true" />
+            Scan barcode
+          </Button>
+        )}
         {notice === 'own' && (
           <p className="rounded-lg bg-primary-50 p-2 text-sm text-primary-700">
             You&apos;ve added this before. Details filled in from your pantry.
