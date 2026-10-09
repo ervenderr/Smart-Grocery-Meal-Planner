@@ -13,6 +13,7 @@ import type {
 } from '../../types/cook.types';
 import { resolveStaples } from '../intelligence/staples';
 import { COOK_ERROR_CODES, COOK_PANTRY_READ_CAP } from './cook.constants';
+import { alreadyCooked, mealNotFound, resolveCookTarget } from './cook.target';
 import { CookLot, CookUnitMismatchError, allocateDeduction, computeCookPlan } from './cook.plan';
 
 const PANTRY_LOT_SELECT = {
@@ -27,23 +28,11 @@ const PANTRY_LOT_SELECT = {
 const utcMidnight = (now: Date): Date =>
   new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-const notFound = (): AppError =>
-  new AppError('Recipe not found', 404, true, { code: COOK_ERROR_CODES.RECIPE_NOT_FOUND });
-
-async function findAccessibleRecipe(userId: string, recipeId: string) {
-  const recipe = await prisma.recipe.findFirst({
-    where: { id: recipeId, OR: [{ userId }, { isPublic: true }], deletedAt: null },
-    select: { id: true, title: true, servings: true, ingredientsList: true },
-  });
-  if (!recipe) throw notFound();
-  return recipe;
-}
-
 export async function previewCook(
   userId: string,
   input: CookPreviewInput,
 ): Promise<CookPreviewResponse> {
-  const recipe = await findAccessibleRecipe(userId, input.recipeId);
+  const { recipe, defaultServings, mealPlanItem } = await resolveCookTarget(userId, input);
   const [lots, prefs] = await Promise.all([
     prisma.pantryItem.findMany({
       where: { userId, deletedAt: null },
@@ -53,7 +42,7 @@ export async function previewCook(
     }),
     prisma.userPreference.findUnique({ where: { userId }, select: { stapleNames: true } }),
   ]);
-  const servings = input.servings ?? recipe.servings;
+  const servings = input.servings ?? defaultServings;
   const plan = computeCookPlan({
     recipe,
     servings,
@@ -65,8 +54,8 @@ export async function previewCook(
     recipe: { id: recipe.id, title: recipe.title, servings: recipe.servings },
     servings,
     ...plan,
-    mealPlanItemId: null,
-    alreadyCooked: false,
+    mealPlanItemId: mealPlanItem?.id ?? null,
+    alreadyCooked: mealPlanItem?.cookedAt != null,
   };
 }
 
@@ -103,14 +92,33 @@ async function applyDeductions(
   return { updated, usedUp, skipped };
 }
 
+/**
+ * Once-only marker: conditional update inside the apply transaction, so a replay
+ * or concurrent double apply loses (409) and a later failure rolls it back.
+ */
+async function markMealCooked(tx: Tx, userId: string, mealPlanItemId: string): Promise<void> {
+  const { count } = await tx.mealPlanItem.updateMany({
+    where: { id: mealPlanItemId, cookedAt: null, mealPlan: { userId, deletedAt: null } },
+    data: { cookedAt: new Date() },
+  });
+  if (count > 0) return;
+  const existing = await tx.mealPlanItem.findFirst({
+    where: { id: mealPlanItemId, mealPlan: { userId, deletedAt: null } },
+    select: { id: true },
+  });
+  throw existing ? alreadyCooked() : mealNotFound();
+}
+
 export async function applyCook(
   userId: string,
   input: CookApplyInput,
 ): Promise<CookApplyResponse> {
-  await findAccessibleRecipe(userId, input.recipeId);
-  // Extension point: 06-08 adds the optional mealPlanItemId once-only guard here.
+  const { mealPlanItem } = await resolveCookTarget(userId, input);
   try {
-    return await prisma.$transaction((tx) => applyDeductions(tx, userId, input.deductions));
+    return await prisma.$transaction(async (tx) => {
+      if (mealPlanItem) await markMealCooked(tx, userId, mealPlanItem.id);
+      return applyDeductions(tx, userId, input.deductions);
+    });
   } catch (error) {
     if (error instanceof CookUnitMismatchError) {
       throw new AppError(error.message, 400, true, {

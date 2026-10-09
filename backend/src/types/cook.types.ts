@@ -3,7 +3,8 @@
 import type { CookRow } from '../modules/cook/cook.plan';
 
 export interface CookPreviewInput {
-  readonly recipeId: string;
+  readonly recipeId?: string;
+  readonly mealPlanItemId?: string;
   readonly servings?: number;
 }
 
@@ -25,7 +26,8 @@ export interface CookDeductionInput {
 }
 
 export interface CookApplyInput {
-  readonly recipeId: string;
+  readonly recipeId?: string;
+  readonly mealPlanItemId?: string;
   readonly deductions: readonly CookDeductionInput[];
 }
 

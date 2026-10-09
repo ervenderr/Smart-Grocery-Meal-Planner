@@ -78,8 +78,11 @@ const addLot = async (t: TestUser, name: string, quantity: number, unit: string)
     })
   ).id;
 
-const qtyOf = async (id: string): Promise<number> =>
-  Number((await prisma.pantryItem.findUniqueOrThrow({ where: { id } })).quantity);
+/** FEFO may draw from any Eggs lot, so assert on the user's total. */
+const totalEggs = async (t: TestUser): Promise<number> => {
+  const lots = await prisma.pantryItem.findMany({ where: { userId: t.id } });
+  return lots.reduce((sum, l) => sum + Number(l.quantity), 0);
+};
 
 const preview = (t: TestUser, body: object) =>
   request(app).post('/api/v1/cook/preview').set(auth(t)).send(body);
@@ -119,16 +122,16 @@ describe('Cook a planned meal', () => {
 
   it('applies once, deducts, and marks the meal cooked', async () => {
     const { planId, itemId } = await createPlanItem(a, recipeId, 2);
-    const lot = await addLot(a, 'Eggs', 10, 'pieces');
+    await addLot(a, 'Eggs', 10, 'pieces');
     const pv = await preview(a, { mealPlanItemId: itemId }).expect(200);
     const key = pv.body.rows[0].key as string;
-    const before = await qtyOf(lot);
+    const before = await totalEggs(a);
 
     await apply(a, {
       mealPlanItemId: itemId,
       deductions: [{ key, unit: 'pieces', use: 4 }],
     }).expect(200);
-    const afterFirst = await qtyOf(lot);
+    const afterFirst = await totalEggs(a);
     expect(afterFirst).toBe(before - 4);
 
     const plan = await request(app).get(`/api/v1/mealplans/${planId}`).set(auth(a)).expect(200);
@@ -139,7 +142,7 @@ describe('Cook a planned meal', () => {
       deductions: [{ key, unit: 'pieces', use: 4 }],
     }).expect(409);
     expect(again.body.code).toBe('ALREADY_COOKED');
-    expect(await qtyOf(lot)).toBe(afterFirst);
+    expect(await totalEggs(a)).toBe(afterFirst);
 
     const pv2 = await preview(a, { mealPlanItemId: itemId }).expect(200);
     expect(pv2.body.alreadyCooked).toBe(true);
@@ -147,16 +150,16 @@ describe('Cook a planned meal', () => {
 
   it('lets exactly one of two concurrent applies win', async () => {
     const { itemId } = await createPlanItem(a, recipeId, 2);
-    const lot = await addLot(a, 'Eggs', 10, 'pieces');
+    await addLot(a, 'Eggs', 10, 'pieces');
     const pv = await preview(a, { mealPlanItemId: itemId }).expect(200);
     const key = pv.body.rows[0].key as string;
-    const before = await qtyOf(lot);
+    const before = await totalEggs(a);
     const body = { mealPlanItemId: itemId, deductions: [{ key, unit: 'pieces', use: 4 }] };
 
     const results = await Promise.all([apply(a, body), apply(a, body)]);
     const statuses = results.map((r) => r.status).sort();
     expect(statuses).toEqual([200, 409]);
-    expect(await qtyOf(lot)).toBe(before - 4);
+    expect(await totalEggs(a)).toBe(before - 4);
   });
 
   it('allows Mark as cooked with no deductions', async () => {
