@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Package, AlertTriangle, TrendingUp, Archive } from 'lucide-react';
+import type { PantryItem } from '@/types/pantry.types';
 import { pantryApi } from '@/lib/api/pantry';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 
@@ -14,7 +15,7 @@ export function PantryAnalytics() {
     topCategory: 'N/A',
     avgShelfLife: 0,
   });
-  const [topItems, setTopItems] = useState<any[]>([]);
+  const [topItems, setTopItems] = useState<PantryItem[]>([]);
 
   useEffect(() => {
     fetchPantryAnalytics();
@@ -32,7 +33,7 @@ export function PantryAnalytics() {
 
       // Calculate category counts
       const categoryCounts: Record<string, number> = {};
-      items.forEach((item: any) => {
+      items.forEach((item) => {
         const category = item.category || 'uncategorized';
         categoryCounts[category] = (categoryCounts[category] || 0) + 1;
       });
@@ -41,7 +42,7 @@ export function PantryAnalytics() {
 
       // Get top 5 items by quantity
       const sorted = [...items]
-        .sort((a: any, b: any) => b.quantity - a.quantity)
+        .sort((a, b) => Number(b.quantity) - Number(a.quantity))
         .slice(0, 5);
 
       setStats({
@@ -120,7 +121,7 @@ export function PantryAnalytics() {
               >
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="text-xs font-semibold text-gray-500 w-5 shrink-0">#{index + 1}</span>
-                  <span className="min-w-0 truncate text-sm font-medium text-gray-900 capitalize">{item.name}</span>
+                  <span className="min-w-0 truncate text-sm font-medium text-gray-900 capitalize">{item.ingredientName}</span>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-sm text-gray-600">

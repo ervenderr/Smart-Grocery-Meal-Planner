@@ -5,7 +5,6 @@ import type {
   CreatePantryItemData,
   UpdatePantryItemData,
   PantryItemsResponse,
-  ExpiringItem,
 } from '@/types/pantry.types';
 
 /**
@@ -62,8 +61,10 @@ export const pantryApi = {
   /**
    * Get items expiring soon
    */
-  getExpiringSoon: async (days?: number): Promise<ExpiringItem[]> => {
+  getExpiringSoon: async (days?: number): Promise<PantryItem[]> => {
     const url = `${API_ROUTES.PANTRY.EXPIRING_SOON}${days ? `?days=${days}` : ''}`;
-    return apiClient.get<ExpiringItem[]>(url);
+    // Backend returns flat items; derive days/status with toExpiringItems().
+    const result = await apiClient.get<PantryItem[]>(url);
+    return Array.isArray(result) ? result : [];
   },
 };

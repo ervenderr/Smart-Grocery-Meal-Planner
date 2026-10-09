@@ -2,16 +2,20 @@
  * Budget & Analytics Types
  */
 
+export type BudgetHealth = 'healthy' | 'warning' | 'exceeded';
+
+/** GET /alerts/budget/status */
 export interface BudgetStatus {
   weeklyBudgetCents: number;
   spentThisWeekCents: number;
   remainingCents: number;
   percentageUsed: number;
-  status: 'healthy' | 'warning' | 'exceeded';
+  status: BudgetHealth;
   weekStart: string;
   weekEnd: string;
 }
 
+/** One entry of GET /analytics/budget-comparison (also dashboard.budgetStatus). */
 export interface BudgetComparison {
   period: string;
   budgetCents: number;
@@ -29,25 +33,24 @@ export interface CategorySpending {
 }
 
 export interface SpendingTrend {
-  period: string;
+  date: string;
   totalSpentCents: number;
-  itemCount: number;
-  averagePerItem: number;
+  transactionCount: number;
 }
 
 export interface TopItem {
-  itemName: string;
-  totalSpentCents?: number;
-  totalQuantity?: number;
-  frequency?: number;
-  averagePriceCents?: number;
+  ingredientName: string;
+  totalQuantity: number;
+  totalSpentCents: number;
+  purchaseCount: number;
+  averagePriceCents: number;
 }
 
 export interface PriceTrend {
   ingredientName: string;
-  averagePriceCents: number;
-  trend: 'up' | 'down' | 'stable';
-  changePercentage: number;
+  trends: Array<{ date: string; averagePriceCents: number }>;
+  overallChange: number;
+  overallChangePercentage: number;
 }
 
 export interface SavingsInsight {
@@ -55,16 +58,27 @@ export interface SavingsInsight {
   title: string;
   description: string;
   amountSavedCents: number;
+  ingredientName?: string;
 }
 
-export interface AnalyticsDashboard {
-  budgetStatus: BudgetStatus;
-  spendingTrends: SpendingTrend[];
-  categoryBreakdown: CategorySpending[];
-  topItems: TopItem[];
-  savingsInsights: SavingsInsight[];
+export interface AnalyticsSummary {
   totalSpentCents: number;
-  averageWeeklySpendingCents: number;
+  averageWeeklySpentCents: number;
+  totalTransactions: number;
+  uniqueItemsPurchased: number;
+  topCategories: CategorySpending[];
+  budgetUtilization: number;
+}
+
+/** GET /analytics/dashboard (mirrors backend AnalyticsDashboardResponse). */
+export interface AnalyticsDashboard {
+  summary: AnalyticsSummary | null;
+  recentTrends: SpendingTrend[];
+  topCategories: CategorySpending[];
+  topItems: TopItem[];
+  /** Absent from the backend payload when no comparison period exists. */
+  budgetStatus: BudgetComparison | null;
+  savingsInsights: SavingsInsight[];
 }
 
 export interface Alert {

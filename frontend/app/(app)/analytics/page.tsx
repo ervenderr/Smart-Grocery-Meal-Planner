@@ -14,6 +14,8 @@ import { analyticsApi } from '@/lib/api/analytics';
 import toast from 'react-hot-toast';
 import { subDays, format } from 'date-fns';
 import Link from 'next/link';
+import { budgetFromAlertStatus } from '@/lib/analytics/budget';
+import type { BudgetStatus, CategorySpending, SpendingTrend } from '@/types/budget.types';
 import { useCurrency } from '@/lib/currency/currency-provider';
 
 type DateRange = '7d' | '30d' | '90d' | 'all';
@@ -22,9 +24,9 @@ export default function AnalyticsPage() {
   const { format: formatCurrency } = useCurrency();
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
-  const [budgetStatus, setBudgetStatus] = useState<any>(null);
-  const [spendingTrends, setSpendingTrends] = useState<any[]>([]);
-  const [categoryBreakdown, setCategoryBreakdown] = useState<any[]>([]);
+  const [budgetStatus, setBudgetStatus] = useState<BudgetStatus | null>(null);
+  const [spendingTrends, setSpendingTrends] = useState<SpendingTrend[]>([]);
+  const [categoryBreakdown, setCategoryBreakdown] = useState<CategorySpending[]>([]);
   const [stats, setStats] = useState({
     totalSpent: 0,
     avgWeeklySpending: 0,
@@ -68,19 +70,27 @@ export default function AnalyticsPage() {
       ]);
 
       setBudgetStatus(budgetData);
+      const budget = budgetFromAlertStatus(budgetData);
 
       // Ensure trendsData and categoryData are arrays
       const safeTrendsData = Array.isArray(trendsData) ? trendsData : [];
       const safeCategoryData = Array.isArray(categoryData) ? categoryData : [];
 
-      setSpendingTrends(safeTrendsData);
+      // Trends are weekly by default; attach the weekly budget so the
+      // comparison chart can show budget/savings (backend trends carry none).
+      const weeklyBudgetCents = budget?.budgetCents;
+      setSpendingTrends(
+        weeklyBudgetCents
+          ? safeTrendsData.map((t) => ({ ...t, budgetCents: weeklyBudgetCents }))
+          : safeTrendsData
+      );
       setCategoryBreakdown(safeCategoryData);
 
       // Calculate stats
       const totalSpent = safeTrendsData.reduce((sum: number, item: any) => sum + (item.totalSpentCents || 0), 0);
       const avgWeekly = safeTrendsData.length > 0 ? totalSpent / safeTrendsData.length : 0;
       const topCat = safeCategoryData.length > 0 ? safeCategoryData[0].category : 'N/A';
-      const savings = budgetData ? ((budgetData.remainingCents / budgetData.weeklyBudgetCents) * 100) : 0;
+      const savings = budget ? (budget.remainingCents / budget.budgetCents) * 100 : 0;
 
       setStats({
         totalSpent,
@@ -95,6 +105,8 @@ export default function AnalyticsPage() {
       setLoading(false);
     }
   };
+
+  const budgetSummary = budgetFromAlertStatus(budgetStatus);
 
   if (loading) {
     return (
@@ -137,7 +149,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Budget Adjustment CTA */}
-      {budgetStatus && (
+      {budgetSummary && (
         <Card className="p-4 bg-blue-50 border-blue-200">
           <div className="flex items-start gap-3">
             <div className="rounded-full bg-blue-100 p-2 flex-shrink-0">
@@ -146,7 +158,7 @@ export default function AnalyticsPage() {
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-blue-900">Manage Your Budget</h3>
               <p className="text-xs text-blue-700 mt-1">
-                Your current weekly budget is {formatCurrency(budgetStatus.weeklyBudgetCents)}.
+                Your current weekly budget is {formatCurrency(budgetSummary.budgetCents)}.
                 Adjust your budget and preferences to better track your spending.
               </p>
               <Link href="/settings?tab=preferences">

@@ -388,6 +388,36 @@ describe('Pantry Endpoints', () => {
       expect(hasExpiredItems).toBe(false);
     });
 
+    it('GET /pantry/expiring-soon returns FLAT pantry items (frontend contract)', async () => {
+      const response = await request(app)
+        .get('/api/v1/pantry/expiring-soon?days=7')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      const milk = response.body.find((item: any) => item.id === expiringItemId);
+      expect(milk).toBeDefined();
+
+      // Flat item: no { item, daysUntilExpiry, status } wrapper.
+      expect(milk).not.toHaveProperty('item');
+      expect(milk).not.toHaveProperty('status');
+      for (const key of [
+        'id',
+        'userId',
+        'ingredientName',
+        'quantity',
+        'unit',
+        'category',
+        'expiryDate',
+        'isExpired',
+        'daysUntilExpiry',
+      ]) {
+        expect(milk).toHaveProperty(key);
+      }
+      // expiryDate is a date-only string the frontend parses without timezone shifts.
+      expect(milk.expiryDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+
     it('should filter expired items', async () => {
       const response = await request(app)
         .get('/api/v1/pantry?expired=true')

@@ -13,13 +13,16 @@ import type {
   TopItemsParams,
   BudgetComparisonParams,
 } from '@/types/budget.types';
+import { normalizeDashboard, unwrapList } from '@/lib/analytics/normalize';
 
 export const analyticsApi = {
   /**
    * Get complete analytics dashboard
    */
   async getDashboard(days: number = 30): Promise<AnalyticsDashboard> {
-    return await apiClient.get<AnalyticsDashboard>(`/api/v1/analytics/dashboard?days=${days}`);
+    return normalizeDashboard(
+      await apiClient.get<unknown>(`/api/v1/analytics/dashboard?days=${days}`)
+    );
   },
 
   /**
@@ -43,7 +46,7 @@ export const analyticsApi = {
     }
     const query = searchParams.toString();
     const url = query ? `/api/v1/analytics/spending-trends?${query}` : '/api/v1/analytics/spending-trends';
-    return await apiClient.get<SpendingTrend[]>(url);
+    return unwrapList<SpendingTrend>(await apiClient.get<unknown>(url), 'trends');
   },
 
   /**
@@ -60,7 +63,7 @@ export const analyticsApi = {
     }
     const query = searchParams.toString();
     const url = query ? `/api/v1/analytics/category-breakdown?${query}` : '/api/v1/analytics/category-breakdown';
-    return await apiClient.get<CategorySpending[]>(url);
+    return unwrapList<CategorySpending>(await apiClient.get<unknown>(url), 'categories');
   },
 
   /**
@@ -77,7 +80,7 @@ export const analyticsApi = {
     }
     const query = searchParams.toString();
     const url = query ? `/api/v1/analytics/top-items?${query}` : '/api/v1/analytics/top-items';
-    return await apiClient.get<TopItem[]>(url);
+    return unwrapList<TopItem>(await apiClient.get<unknown>(url), 'items');
   },
 
   /**
@@ -94,20 +97,20 @@ export const analyticsApi = {
     }
     const query = searchParams.toString();
     const url = query ? `/api/v1/analytics/budget-comparison?${query}` : '/api/v1/analytics/budget-comparison';
-    return await apiClient.get<BudgetComparison[]>(url);
+    return unwrapList<BudgetComparison>(await apiClient.get<unknown>(url), 'comparisons');
   },
 
   /**
    * Get price trends
    */
   async getPriceTrends(): Promise<PriceTrend[]> {
-    return await apiClient.get<PriceTrend[]>('/api/v1/analytics/price-trends');
+    return unwrapList<PriceTrend>(await apiClient.get<unknown>('/api/v1/analytics/price-trends'), 'ingredients');
   },
 
   /**
    * Get savings insights
    */
   async getSavingsInsights(): Promise<SavingsInsight[]> {
-    return await apiClient.get<SavingsInsight[]>('/api/v1/analytics/savings-insights');
+    return unwrapList<SavingsInsight>(await apiClient.get<unknown>('/api/v1/analytics/savings-insights'), 'insights');
   },
 };

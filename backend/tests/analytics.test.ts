@@ -143,6 +143,26 @@ describe('Analytics Endpoints', () => {
       expect(response.body.summary).toHaveProperty('topCategories');
       expect(response.body.summary).toHaveProperty('budgetUtilization');
 
+      // Frontend contract: budgetStatus is a BudgetComparison (NOT the alerts
+      // BudgetStatus with weeklyBudgetCents/spentThisWeekCents/remainingCents).
+      expect(Object.keys(response.body.budgetStatus).sort()).toEqual(
+        [
+          'actualSpentCents',
+          'budgetCents',
+          'differenceCents',
+          'percentageUsed',
+          'period',
+          'status',
+        ].sort()
+      );
+      expect(response.body.budgetStatus.budgetCents).toBe(500000);
+      expect(response.body.budgetStatus.differenceCents).toBe(
+        response.body.budgetStatus.budgetCents - response.body.budgetStatus.actualSpentCents
+      );
+      expect(response.body.budgetStatus).not.toHaveProperty('weeklyBudgetCents');
+      expect(response.body.budgetStatus).not.toHaveProperty('remainingCents');
+      expect(response.body).not.toHaveProperty('categoryBreakdown');
+
       // Verify arrays
       expect(Array.isArray(response.body.recentTrends)).toBe(true);
       expect(Array.isArray(response.body.topCategories)).toBe(true);

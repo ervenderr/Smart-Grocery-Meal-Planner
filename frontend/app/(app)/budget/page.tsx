@@ -8,6 +8,7 @@ import { analyticsApi } from '@/lib/api/analytics';
 import toast from 'react-hot-toast';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { BudgetStatus, CategorySpending } from '@/types/budget.types';
+import { budgetFromAlertStatus, formatPercent } from '@/lib/analytics/budget';
 
 export default function BudgetPage() {
   const [budgetStatus, setBudgetStatus] = useState<BudgetStatus | null>(null);
@@ -70,6 +71,12 @@ export default function BudgetPage() {
     );
   }
 
+  const summary = budgetFromAlertStatus(budgetStatus);
+  const weekRange =
+    budgetStatus?.weekStart && budgetStatus?.weekEnd
+      ? `${new Date(budgetStatus.weekStart).toLocaleDateString()} - ${new Date(budgetStatus.weekEnd).toLocaleDateString()}`
+      : null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -81,33 +88,31 @@ export default function BudgetPage() {
       </div>
 
       {/* Budget Status Card */}
-      {budgetStatus && (
-        <Card className={`min-w-0 p-4 sm:p-6 border-2 ${getStatusColor(budgetStatus.status)}`}>
+      {summary && (
+        <Card className={`min-w-0 p-4 sm:p-6 border-2 ${getStatusColor(summary.status)}`}>
           <div className="flex items-start gap-4">
             <div className="rounded-full bg-white p-3">
-              {getStatusIcon(budgetStatus.status)}
+              {getStatusIcon(summary.status)}
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-lg font-semibold mb-1 capitalize">
-                {budgetStatus.status === 'healthy' ? 'On Track' : budgetStatus.status === 'warning' ? 'Approaching Limit' : 'Budget Exceeded'}
+                {summary.status === 'healthy' ? 'On Track' : summary.status === 'warning' ? 'Approaching Limit' : 'Budget Exceeded'}
               </h3>
-              <p className="text-sm mb-4">
-                Week of {new Date(budgetStatus.weekStart).toLocaleDateString()} - {new Date(budgetStatus.weekEnd).toLocaleDateString()}
-              </p>
+              {weekRange && <p className="text-sm mb-4">Week of {weekRange}</p>}
 
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-1">
                   <span className="font-medium">Budget Usage</span>
-                  <span className="font-semibold">{budgetStatus.percentageUsed.toFixed(0)}%</span>
+                  <span className="font-semibold">{formatPercent(summary.percentageUsed)}</span>
                 </div>
                 <div className="h-3 bg-white rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all ${
-                      budgetStatus.status === 'healthy' ? 'bg-green-500' :
-                      budgetStatus.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                      summary.status === 'healthy' ? 'bg-green-500' :
+                      summary.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
                     }`}
-                    style={{ width: `${Math.min(budgetStatus.percentageUsed, 100)}%` }}
+                    style={{ width: `${Math.min(summary.percentageUsed, 100)}%` }}
                   />
                 </div>
               </div>
@@ -116,15 +121,15 @@ export default function BudgetPage() {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                 <div>
                   <p className="text-xs opacity-75">Weekly Budget</p>
-                  <p className="text-lg font-bold">{formatCurrency(budgetStatus.weeklyBudgetCents)}</p>
+                  <p className="text-lg font-bold">{formatCurrency(summary.budgetCents)}</p>
                 </div>
                 <div>
                   <p className="text-xs opacity-75">Spent</p>
-                  <p className="text-lg font-bold">{formatCurrency(budgetStatus.spentThisWeekCents)}</p>
+                  <p className="text-lg font-bold">{formatCurrency(summary.spentCents)}</p>
                 </div>
                 <div>
                   <p className="text-xs opacity-75">Remaining</p>
-                  <p className="text-lg font-bold">{formatCurrency(budgetStatus.remainingCents)}</p>
+                  <p className="text-lg font-bold">{formatCurrency(summary.remainingCents)}</p>
                 </div>
               </div>
             </div>
@@ -159,7 +164,7 @@ export default function BudgetPage() {
       )}
 
       {/* Empty State */}
-      {!budgetStatus && !loading && (
+      {!summary && !loading && (
         <Card className="flex flex-col items-center justify-center p-12 text-center">
           <div className="rounded-full bg-gray-100 p-4">
             <TrendingDown className="h-12 w-12 text-gray-400" />

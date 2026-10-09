@@ -14,6 +14,8 @@ import { EmptyState } from '@/components/common/empty-state';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { ExpiringItem } from '@/types/pantry.types';
 import type { AnalyticsDashboard } from '@/types/budget.types';
+import { formatExpiryLabel, toExpiringItems } from '@/lib/pantry/expiry';
+import { budgetFromComparison, formatPercent } from '@/lib/analytics/budget';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -34,11 +36,11 @@ export default function DashboardPage() {
         pantryApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
         recipeApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
         mealPlanApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
-        pantryApi.getExpiringSoon(7).catch(() => [] as ExpiringItem[]),
+        pantryApi.getExpiringSoon(7).catch(() => []),
       ]);
 
       setAnalytics(analyticsData);
-      setExpiring(expiringData);
+      setExpiring(toExpiringItems(expiringData));
       setPantryCount(pantryData.pagination?.total || 0);
       setRecipeCount(recipesData.pagination?.total || 0);
       setMealPlanCount(mealPlansData.pagination?.total || 0);
@@ -74,6 +76,8 @@ export default function DashboardPage() {
     );
   }
 
+  const budget = budgetFromComparison(analytics?.budgetStatus);
+
   const stats = [
     {
       name: 'Pantry Items',
@@ -104,14 +108,16 @@ export default function DashboardPage() {
     },
     {
       name: 'Budget Status',
-      value: analytics?.budgetStatus ? `${analytics.budgetStatus.percentageUsed.toFixed(0)}%` : 'N/A',
+      value: budget ? formatPercent(budget.percentageUsed) : 'N/A',
       icon: TrendingUp,
-      change: analytics?.budgetStatus
-        ? `${formatCurrency(analytics.budgetStatus.remainingCents)} remaining`
+      change: budget
+        ? budget.remainingCents < 0
+          ? `${formatCurrency(Math.abs(budget.remainingCents))} over budget`
+          : `${formatCurrency(budget.remainingCents)} remaining`
         : 'No budget data',
-      changeType: analytics?.budgetStatus?.status === 'healthy' ? 'positive' :
-                   analytics?.budgetStatus?.status === 'warning' ? 'warning' : 'negative',
-      color: analytics?.budgetStatus ? getBudgetStatusColor(analytics.budgetStatus.status) : 'bg-gray-500',
+      changeType: budget?.status === 'healthy' ? 'positive' :
+                   budget?.status === 'warning' ? 'warning' : 'negative',
+      color: getBudgetStatusColor(budget?.status),
       onClick: () => router.push('/budget'),
     },
   ];
@@ -204,9 +210,9 @@ export default function DashboardPage() {
         {/* Spending Insights */}
         <Card className="min-w-0 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Spending Overview</h2>
-          {analytics?.categoryBreakdown && analytics.categoryBreakdown.length > 0 ? (
+          {analytics && analytics.topCategories.length > 0 ? (
             <div className="space-y-3">
-              {analytics.categoryBreakdown.slice(0, 3).map((cat, index) => (
+              {analytics.topCategories.slice(0, 3).map((cat, index) => (
                 <div key={index}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="font-medium capitalize">{cat.category}</span>
@@ -220,12 +226,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
-              {analytics.totalSpentCents !== undefined && (
+              {analytics.summary && (
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex justify-between">
                     <span className="text-sm font-semibold text-gray-900">Total Spent (30 days)</span>
                     <span className="text-sm font-bold text-primary-600">
-                      {formatCurrency(analytics.totalSpentCents)}
+                      {formatCurrency(analytics.summary.totalSpentCents)}
                     </span>
                   </div>
                 </div>
@@ -250,7 +256,7 @@ export default function DashboardPage() {
               <li key={entry.item.id} className="flex min-h-11 items-center justify-between gap-2 rounded-lg bg-gray-50 p-2 text-sm">
                 <span className="min-w-0 truncate font-medium capitalize text-gray-900">{entry.item.ingredientName}</span>
                 <span className="shrink-0 text-gray-600">
-                  {entry.daysUntilExpiry < 0 ? 'Expired' : `${entry.daysUntilExpiry}d left`}
+                  {formatExpiryLabel(entry.daysUntilExpiry)}
                 </span>
               </li>
             ))}
@@ -266,7 +272,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Savings Insights */}
-      {analytics?.savingsInsights && analytics.savingsInsights.length > 0 && (
+      {analytics && analytics.savingsInsights.length > 0 && (
         <Card className="min-w-0 border-green-200 bg-green-50 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-green-900 mb-4">Savings Opportunities</h2>
           <div className="space-y-3">

@@ -76,8 +76,15 @@ export interface PantryItemsResponse {
   };
 }
 
+export type ExpiryStatus = 'expired' | 'critical' | 'warning' | 'ok';
+
+/**
+ * Display entry for an expiring pantry item. NOT a backend shape:
+ * GET /pantry/expiring-soon returns flat PantryItem[]; days and status are
+ * computed client-side (see lib/pantry/expiry.ts).
+ */
 export interface ExpiringItem {
   item: PantryItem;
   daysUntilExpiry: number;
-  status: 'expired' | 'critical' | 'warning' | 'ok';
+  status: ExpiryStatus;
 }

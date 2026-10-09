@@ -1,0 +1,76 @@
+import type { ExpiringItem, ExpiryStatus, PantryItem } from '@/types/pantry.types';
+
+const MS_PER_DAY = 86_400_000;
+const DATE_PREFIX = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/;
+
+/** Items with this many days left or fewer are "critical". */
+export const CRITICAL_DAYS = 2;
+/** Items with this many days left or fewer are "warning". */
+export const WARNING_DAYS = 7;
+
+/** UTC-midnight day number for a calendar date, or null if it does not exist. */
+function toDayNumber(year: number, month: number, day: number): number | null {
+  const ms = Date.UTC(year, month - 1, day);
+  const check = new Date(ms);
+  if (
+    check.getUTCFullYear() !== year ||
+    check.getUTCMonth() !== month - 1 ||
+    check.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return ms / MS_PER_DAY;
+}
+
+/**
+ * Whole calendar days from "today" (the viewer's local date) until the
+ * expiry date. Only the date part of the expiry value is used, so the
+ * result is independent of timezone and time of day. Negative = expired.
+ * Returns null when there is no usable date.
+ */
+export function getDaysUntilExpiry(
+  expiryDate: string | null | undefined,
+  now: Date = new Date(),
+): number | null {
+  if (typeof expiryDate !== 'string') return null;
+  const match = DATE_PREFIX.exec(expiryDate.trim());
+  if (!match) return null;
+  const expiry = toDayNumber(Number(match[1]), Number(match[2]), Number(match[3]));
+  const today = toDayNumber(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  if (expiry === null || today === null) return null;
+  return expiry - today;
+}
+
+export function getExpiryStatus(daysUntilExpiry: number): ExpiryStatus {
+  if (daysUntilExpiry < 0) return 'expired';
+  if (daysUntilExpiry <= CRITICAL_DAYS) return 'critical';
+  if (daysUntilExpiry <= WARNING_DAYS) return 'warning';
+  return 'ok';
+}
+
+export function formatExpiryLabel(daysUntilExpiry: number): string {
+  if (daysUntilExpiry < 0) return 'Expired';
+  if (daysUntilExpiry === 0) return 'Today';
+  return `${daysUntilExpiry}d left`;
+}
+
+function isPantryItemLike(value: unknown): value is PantryItem {
+  return typeof value === 'object' && value !== null && 'id' in value;
+}
+
+/**
+ * Turn the flat items returned by GET /pantry/expiring-soon into display
+ * entries with client-computed days/status, soonest first. Items with a
+ * missing or invalid expiry date are dropped.
+ */
+export function toExpiringItems(payload: unknown, now: Date = new Date()): ExpiringItem[] {
+  if (!Array.isArray(payload)) return [];
+  const entries: ExpiringItem[] = [];
+  for (const raw of payload) {
+    if (!isPantryItemLike(raw)) continue;
+    const days = getDaysUntilExpiry(raw.expiryDate, now);
+    if (days === null) continue;
+    entries.push({ item: raw, daysUntilExpiry: days, status: getExpiryStatus(days) });
+  }
+  return entries.sort((a, b) => a.daysUntilExpiry - b.daysUntilExpiry);
+}
