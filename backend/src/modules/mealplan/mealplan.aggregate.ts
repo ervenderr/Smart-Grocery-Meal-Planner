@@ -45,7 +45,6 @@ export function aggregateGroups(items: ReadonlyArray<AggregateSourceItem>): {
   ingredientCount: number;
 } {
   const lines: IngredientLine[] = [];
-  let ingredientCount = 0;
 
   for (const item of items) {
     const list = item.recipe.ingredientsList;
@@ -53,7 +52,6 @@ export function aggregateGroups(items: ReadonlyArray<AggregateSourceItem>): {
     for (const raw of list) {
       const ing = readIngredient(raw);
       if (!ing) continue;
-      ingredientCount += 1;
       lines.push({
         name: ing.name,
         unit: ing.unit,
@@ -62,7 +60,7 @@ export function aggregateGroups(items: ReadonlyArray<AggregateSourceItem>): {
       });
     }
   }
-  return { groups: groupIngredients(lines), ingredientCount };
+  return { groups: groupIngredients(lines), ingredientCount: lines.length };
 }
 
 export function aggregateIngredients(
