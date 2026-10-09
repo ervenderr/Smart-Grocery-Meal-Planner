@@ -98,6 +98,9 @@ model UserPreference {
 
   // Shopping preferences
   preferredUnit               String   @default("kg") @map("preferred_unit") // "kg" or "lb"
+  // Ingredients assumed always on hand. Default MUST match DEFAULT_STAPLE_NAMES
+  // (intelligence/staples.ts) and migration 20261012000000_user_staple_names.
+  stapleNames                 String[] @default(["salt", "black pepper", "pepper", "water", "sugar", "flour", "all purpose flour", "cooking oil", "vegetable oil", "olive oil", "baking soda", "baking powder", "cornstarch", "vinegar", "soy sauce"]) @map("staple_names")
 
   // Onboarding (null = not yet completed; server-stamped, set once)
   onboardingCompletedAt       DateTime? @map("onboarding_completed_at")
