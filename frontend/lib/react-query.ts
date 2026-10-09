@@ -47,6 +47,7 @@ export const queryKeys = {
     all: ['shopping'] as const,
     active: () => ['shopping', 'active'] as const,
     history: (page: number) => ['shopping', 'history', page] as const,
+    lastGenerate: () => ['shopping', 'last-generate'] as const,
   },
   budget: {
     summary: () => ['budget', 'summary'] as const,
