@@ -297,7 +297,9 @@ code="$(req GET "$SHOP/history" -H "$AUTH")" || fail "12i history recheck: reque
 pass "12i finishing an empty list is rejected and history is unchanged"
 
 # (13) pantry-aware intelligence: staples, cook-first, pantry-subtracted generate.
-# The smoke user's data remains afterwards (no delete-account endpoint).
+# The smoke user's data remains afterwards (no delete-account endpoint), so every
+# recipe/ingredient name below carries the per-run $EPOCH tag and assertions only
+# look at those tagged names; the check does not depend on prior runs.
 TODAY="$(date +%F)"
 IN2="$(date -v+2d +%F 2>/dev/null || date -d '+2 days' +%F)"
 IN9="$(date -v+9d +%F 2>/dev/null || date -d '+9 days' +%F)"
@@ -321,13 +323,13 @@ code="$(req GET "$API/api/v1/users/preferences" -H "$AUTH")" || fail "13c rechec
 jq -e '.stapleNames == ["salt","olive oil"]' "$BODY_FILE" >/dev/null || fail "13c staples changed after rejected save"
 pass "13c 101 staples rejected with 400 and stored list unchanged"
 
-code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d "{\"ingredientName\":\"Smoke spinach\",\"quantity\":1,\"unit\":\"kg\",\"category\":\"vegetable\",\"expiryDate\":\"$IN2\"}")" || fail "13d pantry spinach: request failed"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d "{\"ingredientName\":\"Smoke spinach $EPOCH\",\"quantity\":1,\"unit\":\"kg\",\"category\":\"vegetable\",\"expiryDate\":\"$IN2\"}")" || fail "13d pantry spinach: request failed"
 [ "$code" = "201" ] || fail "13d pantry spinach: expected 201, got $code"
-code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d '{"ingredientName":"Smoke rice","quantity":1,"unit":"kg","category":"grains"}')" || fail "13d pantry rice: request failed"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d "{\"ingredientName\":\"Smoke rice $EPOCH\",\"quantity\":1,\"unit\":\"kg\",\"category\":\"grains\"}")" || fail "13d pantry rice: request failed"
 [ "$code" = "201" ] || fail "13d pantry rice: expected 201, got $code"
 pass "13d pantry items created (spinach expiring in 2 days, rice without expiry)"
 
-RECIPE_PAYLOAD='{"name":"Smoke stir fry","category":"dinner","difficulty":"easy","prepTimeMinutes":5,"cookTimeMinutes":10,"servings":2,"instructions":["Cook everything"],"ingredients":[{"ingredientName":"Smoke spinach","quantity":200,"unit":"grams"},{"ingredientName":"Smoke rice","quantity":500,"unit":"grams"},{"ingredientName":"salt","quantity":1,"unit":"tsp"},{"ingredientName":"Smoke bread flour","quantity":500,"unit":"grams"},{"ingredientName":"Smoke bread flour","quantity":1,"unit":"kg"}]}'
+RECIPE_PAYLOAD="$(jq -nc --arg t "$EPOCH" '{name:("Smoke stir fry " + $t),category:"dinner",difficulty:"easy",prepTimeMinutes:5,cookTimeMinutes:10,servings:2,instructions:["Cook everything"],ingredients:[{ingredientName:("Smoke spinach " + $t),quantity:200,unit:"grams"},{ingredientName:("Smoke rice " + $t),quantity:500,unit:"grams"},{ingredientName:"salt",quantity:1,unit:"tsp"},{ingredientName:("Smoke bread flour " + $t),quantity:500,unit:"grams"},{ingredientName:("Smoke bread flour " + $t),quantity:1,unit:"kg"}]}')"
 code="$(req POST "$API/api/v1/recipes" -H "$AUTH" -H "$JSON_H" -d "$RECIPE_PAYLOAD")" || fail "13e recipe: request failed"
 [ "$code" = "201" ] || fail "13e recipe: expected 201, got $code"
 RECIPE_ID="$(jq -r '.id // .data.id // empty' "$BODY_FILE")"
@@ -352,9 +354,15 @@ code="$(req POST "$SHOP/generate" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg p "
 jq -e '.skippedStaples | map(ascii_downcase) | index("salt") != null' "$BODY_FILE" >/dev/null || fail "13g generate: salt not in skippedStaples"
 jq -e '.covered | map(.status) | index("full") != null' "$BODY_FILE" >/dev/null || fail "13g generate: no fully covered ingredient"
 code="$(req GET "$SHOP/list" -H "$AUTH")" || fail "13g list: request failed"
-jq -e '.items | map(select(.itemName | test("smoke bread flour"; "i"))) | length == 1 and .[0].quantity == 1.5 and .[0].unit == "kg"' "$BODY_FILE" >/dev/null || fail "13g generate: bread flour not merged to 1.5 kg"
-jq -e '[.items[] | select(.itemName | test("smoke rice|salt"; "i"))] | length == 0' "$BODY_FILE" >/dev/null || fail "13g generate: covered rice or staple salt appears on the list"
+jq -e --arg t "$EPOCH" '.items | map(select(.itemName | test("smoke bread flour " + $t; "i"))) | length == 1 and .[0].quantity == 1.5 and .[0].unit == "kg"' "$BODY_FILE" >/dev/null || fail "13g generate: bread flour not merged to 1.5 kg"
+jq -e --arg t "$EPOCH" '[.items[] | select(.itemName | test("smoke rice " + $t + "|^salt"; "i"))] | length == 0' "$BODY_FILE" >/dev/null || fail "13g generate: covered rice or staple salt appears on the list"
 pass "13g generate skips staples, subtracts pantry, merges 500 g + 1 kg to 1.5 kg"
+
+code="$(req POST "$SHOP/generate" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg p "$PLAN_ID" '{mealPlanId:$p}')")" || fail "13h regenerate: request failed"
+[ "$code" = "200" ] || fail "13h regenerate: expected 200, got $code"
+jq -e '.added == 0 and .merged == 0' "$BODY_FILE" >/dev/null || fail "13h regenerate: second generate changed the list"
+jq -e --arg t "$EPOCH" '.list.items | map(select(.itemName | test("smoke bread flour " + $t; "i"))) | length == 1 and .[0].quantity == 1.5' "$BODY_FILE" >/dev/null || fail "13h regenerate: bread flour quantity changed"
+pass "13h generating the same plan twice adds nothing (already on your list)"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
