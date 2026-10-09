@@ -65,6 +65,7 @@ export interface FinishShoppingInput {
   carryOver?: CarryOverMode;
   /** User's local date, YYYY-MM-DD */
   receiptDate?: string;
+  addToPantry?: boolean;
 }
 
 export interface ShoppingHistoryEntry {
@@ -81,6 +82,7 @@ export interface ShoppingHistoryEntry {
 export interface FinishShoppingResult {
   history: ShoppingHistoryEntry;
   list: ShoppingList;
+  pantry?: { added: number; merged: number; failed: boolean };
 }
 
 export interface ShoppingHistoryPage {

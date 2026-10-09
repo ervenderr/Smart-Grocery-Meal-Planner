@@ -11,18 +11,26 @@ import type { CarryOverMode } from '@/types/shopping.types';
 
 export const HISTORY_PAGE_SIZE = 10;
 
+export interface FinishShoppingVariables {
+  carryOver: CarryOverMode;
+  addToPantry: boolean;
+}
+
 export function useFinishShopping() {
   const queryClient = useQueryClient();
   return useMutation({
     // Same scope as the item writes: Finish is sent only after every earlier
     // check-off/price edit has reached the server, so the saved total matches the sheet.
     scope: SHOPPING_MUTATION_SCOPE,
-    mutationFn: (carryOver: CarryOverMode) =>
-      shoppingApi.finish({ carryOver, receiptDate: localIsoDate(new Date()) }),
+    mutationFn: ({ carryOver, addToPantry }: FinishShoppingVariables) =>
+      shoppingApi.finish({ carryOver, receiptDate: localIsoDate(new Date()), addToPantry }),
     onSuccess: async (result) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.shopping.active() });
       queryClient.setQueryData(queryKeys.shopping.active(), result.list);
       void queryClient.invalidateQueries({ queryKey: [...queryKeys.shopping.all, 'history'] });
+      if (result.pantry && !result.pantry.failed) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
+      }
     },
     onError: (error) =>
       toast.error(getApiErrorMessage(error, "Couldn't finish this trip. Try again.")),
