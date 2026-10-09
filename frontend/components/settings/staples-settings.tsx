@@ -105,7 +105,7 @@ export function StaplesSettings() {
           <Input
             label="Add a staple"
             value={draft}
-            maxLength={MAX_STAPLE_LENGTH}
+            maxLength={MAX_STAPLE_LENGTH * 3}
             disabled={pending}
             onChange={(e) => {
               setDraft(e.target.value);
@@ -117,6 +117,9 @@ export function StaplesSettings() {
           Add
         </Button>
       </form>
+      <p className="mt-2 text-xs text-gray-600">
+        Separate several with commas, e.g. salt, black pepper.
+      </p>
       {error && (
         <p role="alert" className="mt-2 text-sm text-red-600">
           {error}

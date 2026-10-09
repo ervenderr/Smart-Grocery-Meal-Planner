@@ -3,6 +3,7 @@ import type { UserPreferences } from '@/types/preferences.types';
 import {
   MAX_STAPLES,
   MAX_STAPLE_LENGTH,
+  NO_LETTERS_MESSAGE,
   addStaple,
   normalizeStapleInput,
   readStaples,
@@ -41,6 +42,35 @@ describe('addStaple', () => {
     expect(addStaple(['salt'], 'SALT')).toEqual({
       ok: false,
       message: 'That staple is already on your list',
+    });
+  });
+
+  it('rejects text with no letters or numbers client-side', () => {
+    expect(addStaple(['salt'], '!!!')).toEqual({ ok: false, message: NO_LETTERS_MESSAGE });
+    expect(addStaple(['salt'], ' , ')).toEqual({ ok: false, message: NO_LETTERS_MESSAGE });
+  });
+
+  it('splits a comma list into separate canonical staples', () => {
+    expect(addStaple(['flour'], 'Salt, Pepper')).toEqual({ ok: true, list: ['flour', 'salt', 'pepper'] });
+  });
+
+  it('stores the same canonical value the server would', () => {
+    expect(addStaple([], 'Tomatoes')).toEqual({ ok: true, list: ['tomato'] });
+    expect(addStaple([], 'Oil (olive)')).toEqual({ ok: true, list: ['olive oil'] });
+  });
+
+  it('rejects plural/singular duplicates', () => {
+    expect(addStaple(['tomato'], 'Tomatoes')).toEqual({
+      ok: false,
+      message: 'That staple is already on your list',
+    });
+  });
+
+  it('rejects a comma list that would overflow the cap', () => {
+    const nearFull = Array.from({ length: MAX_STAPLES - 1 }, (_, i) => `item ${i}`);
+    expect(addStaple(nearFull, 'aa, bb')).toEqual({
+      ok: false,
+      message: 'You can keep up to 100 staples',
     });
   });
 

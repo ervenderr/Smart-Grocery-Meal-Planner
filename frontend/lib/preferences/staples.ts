@@ -1,3 +1,4 @@
+import { canonicalName } from './canonical';
 import type { UserPreferences } from '@/types/preferences.types';
 
 export const MAX_STAPLES = 100;
@@ -11,19 +12,36 @@ export function normalizeStapleInput(raw: string): string {
   return raw.trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
+export const NO_LETTERS_MESSAGE = 'Staples need at least one letter or number';
+
+/**
+ * Validates and canonicalizes with the same rule as the server, so the list
+ * shown here equals what is stored. A comma separates staples
+ * ("salt, pepper" adds two), so a single qualified name must be written
+ * without a comma ("black pepper", not "pepper, black").
+ */
 export function addStaple(list: readonly string[], raw: string): AddStapleResult {
-  const name = normalizeStapleInput(raw);
-  if (name.length === 0) return { ok: false, message: 'Type a staple first' };
-  if (name.length > MAX_STAPLE_LENGTH) {
+  const parts = raw.split(',').map((part) => part.trim()).filter((part) => part.length > 0);
+  if (parts.length === 0) {
+    return { ok: false, message: raw.trim().length === 0 ? 'Type a staple first' : NO_LETTERS_MESSAGE };
+  }
+  if (parts.some((part) => part.length > MAX_STAPLE_LENGTH)) {
     return { ok: false, message: `Keep staples under ${MAX_STAPLE_LENGTH} characters` };
   }
-  if (list.some((existing) => normalizeStapleInput(existing) === name)) {
-    return { ok: false, message: 'That staple is already on your list' };
+  const names = parts.map((part) => canonicalName(part));
+  if (names.some((name) => name === '')) return { ok: false, message: NO_LETTERS_MESSAGE };
+
+  const known = new Set(list.map((existing) => canonicalName(existing)));
+  const fresh: string[] = [];
+  for (const name of names) {
+    if (known.has(name) || fresh.includes(name)) continue;
+    fresh.push(name);
   }
-  if (list.length >= MAX_STAPLES) {
+  if (fresh.length === 0) return { ok: false, message: 'That staple is already on your list' };
+  if (list.length + fresh.length > MAX_STAPLES) {
     return { ok: false, message: `You can keep up to ${MAX_STAPLES} staples` };
   }
-  return { ok: true, list: [...list, name] };
+  return { ok: true, list: [...list, ...fresh] };
 }
 
 export function removeStaple(list: readonly string[], name: string): string[] {
