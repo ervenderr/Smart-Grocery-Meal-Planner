@@ -111,7 +111,7 @@ export function AddPantryItemModal({
     watch,
     getValues,
     setFocus,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     reset,
   } = useForm<PantryItemFormData>({
     resolver: zodResolver(pantryItemSchema),
@@ -136,7 +136,8 @@ export function AddPantryItemModal({
 
   const handleProductFound = (product: FoodProduct) => {
     const fullName = product.brand ? `${product.name} (${product.brand})` : product.name;
-    const name = fullName.length <= NAME_MAX_LENGTH ? fullName : product.name.slice(0, NAME_MAX_LENGTH);
+    const name =
+      fullName.length <= NAME_MAX_LENGTH ? fullName : product.name.slice(0, NAME_MAX_LENGTH);
     setValue('ingredientName', name, { shouldValidate: true });
     setValue('category', product.suggestedCategory, { shouldValidate: true });
     if (product.barcode) setValue('barcode', product.barcode, { shouldValidate: true });
@@ -151,7 +152,11 @@ export function AddPantryItemModal({
         : resolution.kind === 'own'
           ? prefillFromOwnItem(resolution.item)
           : { barcode: resolution.barcode };
-    const patch = mergeScanIntoForm(getValues(), incoming);
+    const patch = mergeScanIntoForm(getValues(), incoming, {
+      dirtyFields: new Set(
+        Object.keys(dirtyFields).filter((k) => dirtyFields[k as keyof typeof dirtyFields])
+      ),
+    });
     (Object.keys(patch) as (keyof typeof patch)[]).forEach((key) =>
       setValue(key, patch[key] as never, { shouldValidate: true, shouldDirty: true })
     );
@@ -170,7 +175,7 @@ export function AddPantryItemModal({
         unit: data.unit as PantryItemUnit,
         expiryDate: data.expiryDate || undefined,
         purchaseDate: data.purchaseDate || undefined,
-        location: data.location as any || undefined,
+        location: (data.location as any) || undefined,
         notes: data.notes || undefined,
         barcode: data.barcode || undefined,
       });
@@ -181,7 +186,8 @@ export function AddPantryItemModal({
       onClose();
     } catch (error: any) {
       console.error('Add pantry item error:', error);
-      const errorMessage = error?.response?.data?.message || 'Failed to add item. Please try again.';
+      const errorMessage =
+        error?.response?.data?.message || 'Failed to add item. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -213,14 +219,14 @@ export function AddPantryItemModal({
           </Button>
         )}
         {notice === 'own' && (
-          <p className="rounded-lg bg-primary-50 p-2 text-sm text-primary-700">
+          <p className="bg-primary-50 text-primary-700 rounded-lg p-2 text-sm">
             You&apos;ve added this before. Details filled in from your pantry.
           </p>
         )}
 
         {/* Basic Information Section */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
             Basic Information
           </h3>
 
@@ -248,7 +254,7 @@ export function AddPantryItemModal({
             disabled={isLoading}
           />
 
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Select
               label="Category"
               error={errors.category?.message}
@@ -282,11 +288,9 @@ export function AddPantryItemModal({
 
         {/* Quantity Section */}
         <div className="space-y-4 pt-2">
-          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-            Quantity
-          </h3>
+          <h3 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">Quantity</h3>
 
-          <div className="grid gap-4 grid-cols-2">
+          <div className="grid grid-cols-2 gap-4">
             <Input
               label="Amount"
               type="number"
@@ -317,11 +321,11 @@ export function AddPantryItemModal({
 
         {/* Dates Section */}
         <div className="space-y-4 pt-2">
-          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
             Dates (Optional)
           </h3>
 
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Input
                 label="Purchase Date"
@@ -348,7 +352,7 @@ export function AddPantryItemModal({
 
         {/* Notes Section */}
         <div className="space-y-4 pt-2">
-          <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+          <h3 className="text-sm font-semibold tracking-wide text-gray-900 uppercase">
             Additional Notes (Optional)
           </h3>
 
@@ -357,7 +361,7 @@ export function AddPantryItemModal({
               placeholder="Add any extra details about this item..."
               rows={3}
               disabled={isLoading}
-              className="flex w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base lg:text-sm text-gray-900 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+              className="focus:border-primary-500 focus:ring-primary-500/20 flex w-full resize-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 transition-colors focus:ring-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 lg:text-sm"
               {...register('notes')}
             />
             {errors.notes && <p className="mt-1 text-sm text-red-500">{errors.notes.message}</p>}
@@ -365,8 +369,14 @@ export function AddPantryItemModal({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-4 pb-safe border-t border-gray-200">
-          <Button type="button" variant="outline" fullWidth onClick={handleClose} disabled={isLoading}>
+        <div className="pb-safe flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            onClick={handleClose}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button type="submit" fullWidth loading={isLoading} disabled={isLoading}>

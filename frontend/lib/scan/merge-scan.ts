@@ -10,18 +10,33 @@ function isBlank(value: unknown): boolean {
   return false;
 }
 
+/** Form defaults that count as "not chosen yet" unless the user edited the field. */
+const FORM_DEFAULTS: Readonly<Record<string, unknown>> = { category: 'other', unit: 'pieces' };
+
+export interface MergeScanOptions {
+  /** Fields the user has edited (e.g. react-hook-form dirtyFields keys). */
+  dirtyFields?: ReadonlySet<string>;
+}
+
 /**
  * Patch to apply to a form that already has typed input: scanned values fill only
  * blank fields, but the scanned barcode always wins. Returns a new object.
  */
 export function mergeScanIntoForm(
   current: FormValues,
-  incoming: Partial<CreatePantryItemData>
+  incoming: Partial<CreatePantryItemData>,
+  options: MergeScanOptions = {}
 ): Partial<CreatePantryItemData> {
   const patch: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(incoming)) {
     if (value === undefined) continue;
-    if (key === 'barcode' || isBlank(current[key as keyof CreatePantryItemData])) {
+    const existing = current[key as keyof CreatePantryItemData];
+    const untouchedDefault =
+      options.dirtyFields !== undefined &&
+      key in FORM_DEFAULTS &&
+      existing === FORM_DEFAULTS[key] &&
+      !options.dirtyFields.has(key);
+    if (key === 'barcode' || isBlank(existing) || untouchedDefault) {
       patch[key] = value;
     }
   }

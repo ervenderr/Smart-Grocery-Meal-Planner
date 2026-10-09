@@ -36,6 +36,37 @@ describe('mergeScanIntoForm', () => {
   });
 });
 
+describe('mergeScanIntoForm defaults', () => {
+  const incoming = { category: 'dairy', unit: 'liters', barcode: '4800016644801' } as const;
+
+  it('replaces untouched default category and unit', () => {
+    const patch = mergeScanIntoForm({ category: 'other', unit: 'pieces' }, incoming, {
+      dirtyFields: new Set(),
+    });
+    expect(patch).toEqual({ category: 'dairy', unit: 'liters', barcode: '4800016644801' });
+  });
+
+  it('never overrides defaults the user edited', () => {
+    const patch = mergeScanIntoForm({ category: 'other', unit: 'pieces' }, incoming, {
+      dirtyFields: new Set(['category', 'unit']),
+    });
+    expect(patch).toEqual({ barcode: '4800016644801' });
+  });
+
+  it('never overrides non-default values', () => {
+    const patch = mergeScanIntoForm({ category: 'fruit', unit: 'kg' }, incoming, {
+      dirtyFields: new Set(),
+    });
+    expect(patch).toEqual({ barcode: '4800016644801' });
+  });
+
+  it('treats defaults as user choices when dirty info is absent', () => {
+    expect(mergeScanIntoForm({ category: 'other', unit: 'pieces' }, incoming)).toEqual({
+      barcode: '4800016644801',
+    });
+  });
+});
+
 describe('isCameraAvailable', () => {
   it('is false without mediaDevices', () => {
     expect(isCameraAvailable({ hasMediaDevices: false, failure: null })).toBe(false);
