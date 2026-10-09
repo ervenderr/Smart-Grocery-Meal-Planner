@@ -10,10 +10,13 @@ import { canonicalName } from './canonical';
 import { rankCookFirst } from './cook-first';
 import { resolveStaples } from './staples';
 
-const RECIPE_READ_CAP = 500;
-const PANTRY_READ_CAP = 2000;
+export const RECIPE_READ_CAP = 500;
+export const PANTRY_READ_CAP = 2000;
 const EXPIRING_WINDOW_DAYS = 7;
 const MS_PER_DAY = 86_400_000;
+
+/** True when a capped read returned as many rows as the cap (so rows may be missing). */
+export const isReadCapped = (rowCount: number, cap: number): boolean => rowCount >= cap;
 
 export interface CookFirstItem {
   readonly recipe: RecipeResponse;
@@ -36,7 +39,7 @@ const utcDay = (d: Date): number =>
 export async function getCookFirst(
   userId: string,
   opts: { limit: number; today: Date; includeAll: boolean }
-): Promise<{ items: CookFirstItem[]; expiringCount: number }> {
+): Promise<{ items: CookFirstItem[]; expiringCount: number; recipesCapped: boolean }> {
   const [recipes, pantry, prefs] = await Promise.all([
     prisma.recipe.findMany({
       where: { userId, deletedAt: null },
@@ -46,6 +49,8 @@ export async function getCookFirst(
     prisma.pantryItem.findMany({
       where: { userId, deletedAt: null },
       select: { ingredientName: true, expiryDate: true },
+      // Soonest-expiring first so the cap never drops the most urgent lots.
+      orderBy: [{ expiryDate: 'asc' }, { createdAt: 'asc' }],
       take: PANTRY_READ_CAP,
     }),
     prisma.userPreference.findUnique({ where: { userId }, select: { stapleNames: true } }),
@@ -88,5 +93,9 @@ export async function getCookFirst(
     if (left >= 0 && left <= EXPIRING_WINDOW_DAYS) expiring.add(canonicalName(lot.ingredientName));
   }
   expiring.delete('');
-  return { items, expiringCount: expiring.size };
+  return {
+    items,
+    expiringCount: expiring.size,
+    recipesCapped: isReadCapped(recipes.length, RECIPE_READ_CAP),
+  };
 }

@@ -5,6 +5,7 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
 import { prisma } from '../src/config/database.config';
+import { RECIPE_READ_CAP, isReadCapped } from '../src/modules/intelligence/cook-first.service';
 
 const app = createApp();
 const PREFIX = `cook-first-${Date.now()}`;
@@ -95,6 +96,7 @@ describe('GET /api/v1/recipes/cook-first', () => {
     expect(res.status).toBe(200);
     expect(names(res)).toEqual(['D', 'A', 'B']);
     expect(res.body.expiringCount).toBe(2);
+    expect(res.body.recipesCapped).toBe(false);
     expect(res.body.items[0]).toMatchObject({ score: 6, coveragePercent: 100 });
     expect(res.body.items[0].usesExpiring).toEqual([
       { name: 'spinach', daysLeft: 1 },
@@ -161,5 +163,12 @@ describe('GET /api/v1/recipes/cook-first', () => {
 
   it('requires auth', async () => {
     expect((await get(null)).status).toBe(401);
+  });
+});
+
+describe('isReadCapped (WR-03)', () => {
+  it('is true only when the read hit the cap', () => {
+    expect(isReadCapped(RECIPE_READ_CAP - 1, RECIPE_READ_CAP)).toBe(false);
+    expect(isReadCapped(RECIPE_READ_CAP, RECIPE_READ_CAP)).toBe(true);
   });
 });

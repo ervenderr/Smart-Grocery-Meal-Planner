@@ -16,6 +16,7 @@ import { RecipeCard } from '@/components/recipes/recipe-card';
 import { recipeApi } from '@/lib/api/recipes';
 import toast from 'react-hot-toast';
 import {
+  RECIPES_CAPPED_NOTE,
   expiringBadge,
   filterCookFirstEntries,
   localDateString,
@@ -53,6 +54,7 @@ function RecipesPageContent() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [expiringSort, setExpiringSort] = useState(false);
+  const [recipesCapped, setRecipesCapped] = useState(false);
   const [badges, setBadges] = useState<Map<string, string>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({
@@ -93,10 +95,12 @@ function RecipesPageContent() {
           if (badge) next.set(entry.recipe.id, badge);
         });
         setBadges(next);
+        setRecipesCapped(result.recipesCapped === true);
         setRecipes(entries.map((entry) => entry.recipe));
         return;
       }
       setBadges(new Map());
+      setRecipesCapped(false);
       const response = await recipeApi.getAll({
         ...activeFilters,
         search: search || undefined,
@@ -273,6 +277,10 @@ function RecipesPageContent() {
           </div>
         </div>
       </Card>
+
+      {expiringSort && recipesCapped && (
+        <p className="text-xs text-gray-600">{RECIPES_CAPPED_NOTE}</p>
+      )}
 
       {/* Recipes Grid */}
       {loading ? (

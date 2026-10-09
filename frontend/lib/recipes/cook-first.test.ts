@@ -34,10 +34,16 @@ describe('localDateString', () => {
 
 describe('normalizeCookFirst', () => {
   it('guards non-object payloads', () => {
-    const empty = { items: [], expiringCount: 0 };
+    const empty = { items: [], expiringCount: 0, recipesCapped: false };
     expect(normalizeCookFirst(null)).toEqual(empty);
     expect(normalizeCookFirst('x')).toEqual(empty);
     expect(normalizeCookFirst({})).toEqual(empty);
+  });
+
+  it('reads the optional recipesCapped flag strictly', () => {
+    expect(normalizeCookFirst({ items: [], recipesCapped: true }).recipesCapped).toBe(true);
+    expect(normalizeCookFirst({ items: [], recipesCapped: 'yes' }).recipesCapped).toBe(false);
+    expect(normalizeCookFirst({ items: [] }).recipesCapped).toBe(false);
   });
 
   it('drops malformed entries and clamps values', () => {
