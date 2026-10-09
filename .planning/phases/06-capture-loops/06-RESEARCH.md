@@ -386,7 +386,7 @@ export const clampQuantity = (n: number): number =>
 | A5 | CSP future needs `wasm-unsafe-eval` and jsDelivr allowance | Pitfall 10 | None now (no CSP) |
 | A6 | `purchasePriceCents` for bought-it = `actualCostCents ?? costEstimateCents` | Pattern 4 | Minor; planner may choose actual-only |
 
-## Open Questions
+## Open Questions (RESOLVED in 06-CONTEXT.md; camera-on-real-device deferred to 06-13)
 
 1. **Per-lot vs per-ingredient preview rows**
    - Known: UI-SPEC shows "item, have, use, left" per pantry item; pantry can hold several lots of one ingredient.
