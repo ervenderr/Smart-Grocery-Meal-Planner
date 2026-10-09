@@ -32,6 +32,16 @@ The pantry stays accurate with minimal typing as users scan, shop and cook: barc
 - Backend: reuse `PATCH /pantry/:id` if it supports partial updates, else add a lean one. Quantity never below 0; 0 shows a "used up" state with one-tap remove.
 - Delivery: as in Phases 4 and 5: additive migration and backend first (Railway, extend `scripts/smoke-prod.sh` with its own smoke user), then push the frontend to main (Vercel). CI stays green. Real-phone camera test is a final deferrable human checkpoint.
 
+### Resolved research questions (orchestrator decisions, 2026-10-09)
+- Cook preview shows one row per ingredient (matches UI-SPEC: item, have, use, left); FEFO allocation across pantry lots happens inside the apply step.
+- Soft-deleted recipe on cook preview/apply returns 404 `RECIPE_NOT_FOUND`; the UI shows the preview error state.
+- New `cook` backend module (`POST /cook/preview`, `POST /cook/apply`); `mealplan.service.ts` stays untouched except carrying `cookedAt` through meal rebuilds by (recipeId, dayOfWeek, mealType). Once-only guard = conditional `updateMany where cookedAt is null`, 409 `ALREADY_COOKED`.
+- `PATCH /pantry/:id` relaxes quantity to `>= 0` (update only); barcode added to create/update/response/types; `GET /pantry?barcode=` for repeat-scan prefill.
+- Bought-it runs after the finish transaction commits, in its own try/catch (never rolls back the finish); response carries `{added, merged, failed}`; units coerced through `resolveUnit` to the closed `PantryUnit` list.
+- Pantry page migrates to React Query (`queryKeys.pantry`) for the optimistic stepper; step table keyed on stored unit values (grams, liters, cups, lbs, fl_oz, ...).
+- Detect scanner support with `getSupportedFormats()`, not `'BarcodeDetector' in window`; add `barcode-detector` with an exact pinned version after a human-verify checkpoint; WASM from default CDN is acceptable (no CSP yet).
+- Integration tests run against a temporary local Postgres 16 (homebrew initdb) as in earlier phases.
+
 ### Claude's Discretion
 Module and file names, exact step sizes, sheet component structure, endpoint naming, plan splitting and waves.
 
