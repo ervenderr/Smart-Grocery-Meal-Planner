@@ -4,6 +4,7 @@
  * Business logic for budget alerts and notifications.
  */
 
+import { IN_STOCK } from "../pantry/pantry.stock";
 import { prisma } from '../../config/database.config';
 import { logger } from '../../config/logger.config';
 import { AppError } from '../../middleware/errorHandler';
@@ -305,7 +306,7 @@ export class AlertService {
     const expiringItems = await prisma.pantryItem.findMany({
       where: {
         userId,
-        deletedAt: null,
+        ...IN_STOCK,
         expiryDate: {
           gte: now,
           lte: threeDaysFromNow,

@@ -356,12 +356,13 @@ export class PantryService {
       ),
       expiringWithin7Days: items.filter(
         (item) =>
+          item.quantity.gt(0) &&
           item.expiryDate &&
           item.expiryDate >= today &&
           item.expiryDate <= sevenDaysFromNow
       ).length,
       expired: items.filter(
-        (item) => item.expiryDate && item.expiryDate < today
+        (item) => item.quantity.gt(0) && item.expiryDate && item.expiryDate < today
       ).length,
       byCategory: {},
       byLocation: {},

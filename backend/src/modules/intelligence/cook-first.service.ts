@@ -3,6 +3,7 @@
  * Read caps: 500 recipes (also the includeAll bound), 2000 pantry rows.
  */
 
+import { IN_STOCK } from '../pantry/pantry.stock';
 import { prisma } from '../../config/database.config';
 import { RecipeResponse } from '../../types/recipe.types';
 import { toRecipeResponse } from '../recipe/recipe.format';
@@ -47,7 +48,7 @@ export async function getCookFirst(
       take: RECIPE_READ_CAP,
     }),
     prisma.pantryItem.findMany({
-      where: { userId, deletedAt: null },
+      where: { userId, ...IN_STOCK },
       select: { ingredientName: true, expiryDate: true },
       // Soonest-expiring first so the cap never drops the most urgent lots.
       orderBy: [{ expiryDate: 'asc' }, { createdAt: 'asc' }],

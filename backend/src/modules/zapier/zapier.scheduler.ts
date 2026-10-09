@@ -9,6 +9,7 @@
  * - Daily Checks: Every day at 8 AM (expiry alerts, budget checks)
  */
 
+import { IN_STOCK } from "../pantry/pantry.stock";
 import { prisma } from "../../config/database.config";
 import { logger } from "../../config/logger.config";
 import {
@@ -126,7 +127,7 @@ export async function runWeeklySummaryJob(): Promise<void> {
         const expiredItems = await prisma.pantryItem.count({
           where: {
             userId,
-            deletedAt: null,
+            ...IN_STOCK,
             expiryDate: {
               gte: weekStart,
               lte: weekEnd,
@@ -234,7 +235,7 @@ export async function runDailyChecksJob(): Promise<void> {
     // Get users with expiring items
     const expiringItems = await prisma.pantryItem.findMany({
       where: {
-        deletedAt: null,
+        ...IN_STOCK,
         expiryDate: {
           gte: today,
           lte: threeDaysFromNow,

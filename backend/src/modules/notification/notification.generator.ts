@@ -4,6 +4,7 @@
  * Automatically generates notifications for various system events
  */
 
+import { IN_STOCK } from "../pantry/pantry.stock";
 import { prisma } from "../../config/database.config";
 import { logger } from "../../config/logger.config";
 import { NotificationService } from "./notification.service";
@@ -36,7 +37,7 @@ export class NotificationGenerator {
     const expiringItems = await prisma.pantryItem.findMany({
       where: {
         userId,
-        deletedAt: null,
+        ...IN_STOCK,
         expiryDate: {
           gte: today,
           lte: sevenDaysFromNow,
@@ -172,7 +173,7 @@ export class NotificationGenerator {
     const expiredItems = await prisma.pantryItem.findMany({
       where: {
         userId,
-        deletedAt: null,
+        ...IN_STOCK,
         expiryDate: {
           lt: today,
         },

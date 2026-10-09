@@ -210,6 +210,29 @@ describe('Alert Endpoints', () => {
       expect(response2.body.alertsCreated).toBe(0);
     });
 
+    it('should not create alerts for used-up (quantity 0) items', async () => {
+      const twoDaysFromNow = new Date();
+      twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+
+      await prisma.pantryItem.create({
+        data: {
+          userId,
+          ingredientName: 'used up milk',
+          quantity: 0,
+          unit: 'liters',
+          category: 'dairy',
+          expiryDate: twoDaysFromNow,
+        },
+      });
+
+      const response = await request(app)
+        .post('/api/v1/alerts/check-expiring')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.alertsCreated).toBe(0);
+    });
+
     it('should not create alerts for items not expiring soon', async () => {
       // Add pantry item expiring in 10 days
       const tenDaysFromNow = new Date();
