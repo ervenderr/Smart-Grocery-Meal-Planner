@@ -152,13 +152,19 @@ describe('POST /api/v1/shopping/generate', () => {
     expect(saved.body.items).toHaveLength(4);
   });
 
-  it('merges into unchecked items and adds a new line for checked ones', async () => {
+  it('generating the same plan twice adds nothing the second time (WR-05)', async () => {
     const second = await generate(a, { mealPlanId: planA }).expect(200);
     expect(second.body.added).toBe(0);
-    expect(second.body.merged).toBe(4);
+    expect(second.body.merged).toBe(0);
     const onion = second.body.list.items.find((i: any) => i.itemName === 'Onion');
-    expect(onion.quantity).toBe(6);
+    expect(onion.quantity).toBe(3);
+    expect(second.body.list.items).toHaveLength(4);
+    expect(second.body.covered.filter((c: any) => c.status === 'on_list')).toHaveLength(4);
+  });
 
+  it('does not count checked items as stock: a new line is added for them', async () => {
+    const list = (await getList(a).expect(200)).body;
+    const onion = list.items.find((i: any) => i.itemName === 'Onion');
     await request(app)
       .patch(`/api/v1/shopping/items/${onion.id}`)
       .set(auth(a))
@@ -167,9 +173,20 @@ describe('POST /api/v1/shopping/generate', () => {
 
     const third = await generate(a, { mealPlanId: planA }).expect(200);
     expect(third.body.added).toBe(1);
-    expect(third.body.merged).toBe(3);
+    expect(third.body.merged).toBe(0);
     const onions = third.body.list.items.filter((i: any) => i.itemName === 'Onion');
     expect(onions).toHaveLength(2);
+    expect(onions.map((i: any) => i.quantity).sort()).toEqual([3, 3]);
+  });
+
+  it('tops up the shortfall when the list holds only part of the need', async () => {
+    const list = (await getList(a).expect(200)).body;
+    const milk = list.items.find((i: any) => i.itemName === 'Milk');
+    await prisma.shoppingListItem.update({ where: { id: milk.id }, data: { quantity: 0.4 } });
+    const res = await generate(a, { mealPlanId: planA }).expect(200);
+    expect(res.body.merged).toBe(1);
+    const fresh = res.body.list.items.find((i: any) => i.itemName === 'Milk');
+    expect(fresh.quantity).toBe(1);
   });
 
   it('rejects a missing or non-uuid mealPlanId with VALIDATION_ERROR', async () => {
@@ -189,6 +206,23 @@ describe('POST /api/v1/shopping/generate', () => {
   it('returns 400 MEAL_PLAN_EMPTY when the plan has no ingredients', async () => {
     const res = await generate(b, { mealPlanId: planEmpty }).expect(400);
     expect(res.body.error?.code ?? res.body.code).toBe('MEAL_PLAN_EMPTY');
+  });
+
+  it('returns 400 MEAL_PLAN_EMPTY when every line has zero quantity (WR-07)', async () => {
+    const t = await signup('zero');
+    const r = await createRecipe(t, 'Zeros', [
+      { ingredientName: 'Salt', quantity: 0, unit: 'tsp' },
+      { ingredientName: 'Pepper', quantity: 0, unit: 'tsp' },
+    ]);
+    const plan = await createPlan(t, [r]);
+    const res = await generate(t, { mealPlanId: plan }).expect(400);
+    expect(res.body.error?.code ?? res.body.code).toBe('MEAL_PLAN_EMPTY');
+  });
+
+  it('rolls back the list it created when the plan is not found (WR-04)', async () => {
+    const t = await signup('rollback');
+    await generate(t, { mealPlanId: '00000000-0000-4000-8000-000000000000' }).expect(404);
+    expect(await prisma.shoppingList.count({ where: { userId: t.id } })).toBe(0);
   });
 
   it('returns 400 SHOPPING_LIST_FULL and writes nothing when over the cap', async () => {
@@ -275,7 +309,8 @@ describe('POST /api/v1/shopping/generate with a large merge', () => {
       res.body.list.items.map((i: { itemName: string; quantity: number }) => [i.itemName, i]),
     );
     for (let i = 0; i < MERGED + FRESH; i += 1) {
-      expect(byName.get(nameOf(i))?.quantity).toBe(i < MERGED ? 3.75 : 2.25);
+      // The 1.5 already on the list counts as stock (WR-05), so the merge tops up to the need.
+      expect(byName.get(nameOf(i))?.quantity).toBe(2.25);
     }
 
     const after = await prisma.shoppingListItem.findMany({ where: { id: { in: before.map((b) => b.id) } } });

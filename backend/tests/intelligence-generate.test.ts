@@ -196,7 +196,8 @@ describe('POST /api/v1/shopping/generate with pantry and staples', () => {
     expect(res.body.added).toBe(0);
     const fresh = (await getList(user).expect(200)).body.items;
     expect(fresh).toHaveLength(1);
-    expect(fresh[0]).toMatchObject({ quantity: 1.5, unit: 'kg' });
+    // 500 g already on the list counts as stock (WR-05): only the missing 500 g is added.
+    expect(fresh[0]).toMatchObject({ quantity: 1, unit: 'kg' });
   });
 
   it('returns 200 with added 0 when pantry and staples cover everything', async () => {
