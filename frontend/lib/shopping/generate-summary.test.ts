@@ -19,4 +19,28 @@ describe('describeGenerateResult', () => {
       'Your list already has everything from this plan'
     );
   });
+
+  const full = {
+    name: 'Rice',
+    needed: 1,
+    have: 2,
+    unit: 'kg',
+    status: 'full' as const,
+  };
+
+  it('says the pantry covers the plan when nothing was added', () => {
+    expect(describeGenerateResult({ added: 0, merged: 0, covered: [full] })).toBe(
+      'Your pantry already covers this plan'
+    );
+  });
+  it('says only staples when nothing else applies', () => {
+    expect(
+      describeGenerateResult({ added: 0, merged: 0, covered: [], skippedStaples: ['Salt'] })
+    ).toBe('Only staples in this plan, nothing to add');
+  });
+  it('mentions pantry-covered count when items were added', () => {
+    expect(describeGenerateResult({ added: 2, merged: 0, covered: [full, full] })).toBe(
+      '2 items added to your list (2 already in your pantry)'
+    );
+  });
 });
