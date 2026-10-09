@@ -8,6 +8,7 @@ import { QuantityStepper } from '@/components/pantry/quantity-stepper';
 import { UsedUpBadge } from '@/components/pantry/used-up-badge';
 import { useDebouncedQuantity } from '@/lib/hooks/use-debounced-quantity';
 import type { PantryQuickPatch } from '@/lib/hooks/use-pantry';
+import { formatExpiryDate, getExpiryBadge } from '@/lib/pantry/expiry';
 import { stepForUnit } from '@/lib/pantry/quantity';
 import type { PantryItem } from '@/types/pantry.types';
 
@@ -48,25 +49,8 @@ export function PantryItemCard({
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  const getExpiryStatus = () => {
-    if (!item.expiryDate) return null;
-
-    const today = new Date();
-    const expiry = new Date(item.expiryDate);
-    const daysUntilExpiry = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (daysUntilExpiry < 0) {
-      return { status: 'expired', label: 'Expired', color: 'text-red-600 bg-red-50' };
-    } else if (daysUntilExpiry <= 3) {
-      return { status: 'critical', label: `${daysUntilExpiry} days left`, color: 'text-red-600 bg-red-50' };
-    } else if (daysUntilExpiry <= 7) {
-      return { status: 'warning', label: `${daysUntilExpiry} days left`, color: 'text-amber-600 bg-amber-50' };
-    }
-    return null;
-  };
-
-  const expiryStatus = usedUp ? null : getExpiryStatus();
-  const expiryDateLabel = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '';
+  const expiryStatus = usedUp ? null : getExpiryBadge(item.expiryDate);
+  const expiryDateLabel = formatExpiryDate(item.expiryDate);
 
   return (
     <Card className={`p-3 sm:p-4 hover:shadow-md transition-shadow ${usedUp ? 'bg-gray-50' : ''}`}>
@@ -133,6 +117,7 @@ export function PantryItemCard({
               <button
                 type="button"
                 onClick={() => setExpiryOpen(true)}
+                aria-label={`Add expiry date for ${item.ingredientName}`}
                 className="inline-flex min-h-11 items-center gap-1 rounded-md border border-dashed border-gray-300 px-2 text-sm font-semibold text-gray-600"
               >
                 <Calendar className="h-3 w-3" aria-hidden="true" />

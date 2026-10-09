@@ -14,6 +14,7 @@ import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { PantryItemCard } from '@/components/pantry/pantry-item-card';
 import { pantryApi } from '@/lib/api/pantry';
 import { queryKeys } from '@/lib/react-query';
+import { getDaysUntilExpiry, WARNING_DAYS } from '@/lib/pantry/expiry';
 import { sortUsedUpLast } from '@/lib/pantry/quantity';
 import {
   useDeferredRemove,
@@ -155,11 +156,8 @@ export default function PantryPage() {
   const getExpiringCount = () => {
     const today = new Date();
     return items.filter((item) => {
-      if (!item.expiryDate) return false;
-      const daysUntilExpiry = Math.ceil(
-        (new Date(item.expiryDate).getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      return daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
+      const days = getDaysUntilExpiry(item.expiryDate, today);
+      return days !== null && days >= 0 && days <= WARNING_DAYS;
     }).length;
   };
 

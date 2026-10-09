@@ -106,3 +106,46 @@ export function addDaysShortcut(
   );
   return toIsoDate(new Date(y, m - 1, d + days));
 }
+
+/**
+ * Display string for a date-only expiry value, built from the calendar
+ * date parts so it never shifts with the viewer's timezone. Empty string
+ * when the value is missing or invalid.
+ */
+export function formatExpiryDate(
+  expiryDate: string | null | undefined,
+  locale?: string,
+): string {
+  if (typeof expiryDate !== 'string') return '';
+  const match = DATE_PREFIX.exec(expiryDate.trim());
+  if (!match) return '';
+  const [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  if (toDayNumber(y, m, d) === null) return '';
+  return new Date(y, m - 1, d).toLocaleDateString(locale);
+}
+
+export interface ExpiryBadge {
+  status: Exclude<ExpiryStatus, 'ok'>;
+  label: string;
+  color: string;
+}
+
+/** Badge for items that are expired or expiring within a week; null otherwise. */
+export function getExpiryBadge(
+  expiryDate: string | null | undefined,
+  now: Date = new Date(),
+): ExpiryBadge | null {
+  const days = getDaysUntilExpiry(expiryDate, now);
+  if (days === null) return null;
+  const status = getExpiryStatus(days);
+  if (status === 'ok') return null;
+  if (status === 'expired') {
+    return { status, label: 'Expired', color: 'text-red-600 bg-red-50' };
+  }
+  const label = days === 0 ? 'Expires today' : `${days} ${days === 1 ? 'day' : 'days'} left`;
+  return {
+    status,
+    label,
+    color: status === 'warning' ? 'text-amber-600 bg-amber-50' : 'text-red-600 bg-red-50',
+  };
+}
