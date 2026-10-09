@@ -144,3 +144,20 @@ export function ScanUnsupportedCard({ onTypeInstead }: { onTypeInstead: () => vo
     />
   );
 }
+
+export function CameraBusyCard({
+  onTypeInstead,
+  onRetry,
+}: {
+  onTypeInstead: () => void;
+  onRetry: () => void;
+}) {
+  return (
+    <CameraProblem
+      title="Camera is busy"
+      body="Camera is in use by another app or tab. Close it and try again, or type the barcode instead."
+      onTypeInstead={onTypeInstead}
+      onRetry={onRetry}
+    />
+  );
+}

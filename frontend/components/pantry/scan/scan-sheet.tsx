@@ -12,6 +12,7 @@ import { useBarcodeScanner } from '@/lib/scan/use-barcode-scanner';
 import { CameraView } from './camera-view';
 import { ManualBarcodeForm } from './manual-barcode-form';
 import {
+  CameraBusyCard,
   CameraDeniedCard,
   LookingUp,
   LookupFailedCard,
@@ -23,6 +24,7 @@ export type ScanState =
   | { name: 'requesting' }
   | { name: 'scanning' }
   | { name: 'denied' }
+  | { name: 'busy' }
   | { name: 'unsupported' }
   | { name: 'manual' }
   | { name: 'looking-up'; barcode: string }
@@ -55,6 +57,7 @@ const STATUS_TEXT: Record<ScanState['name'], string> = {
   requesting: 'Starting camera',
   scanning: 'Camera ready. Point at a barcode.',
   denied: 'Camera access is off',
+  busy: 'Camera is busy',
   unsupported: "Scanning isn't available here",
   manual: '',
   'looking-up': 'Barcode detected.',
@@ -174,7 +177,7 @@ function ScanBody({
       </>
     );
   }
-  if (view === 'denied' || view === 'unsupported') {
+  if (view === 'denied' || view === 'busy' || view === 'unsupported') {
     return (
       <>
         <LiveRegion text={STATUS_TEXT[view]} />
@@ -184,6 +187,8 @@ function ScanBody({
             onTypeInstead={toManual}
             onRetry={scanner.retry}
           />
+        ) : view === 'busy' ? (
+          <CameraBusyCard onTypeInstead={toManual} onRetry={scanner.retry} />
         ) : (
           <ScanUnsupportedCard onTypeInstead={toManual} />
         )}
@@ -272,6 +277,9 @@ function deriveView(
 ): ScanState['name'] {
   if (state.name !== 'requesting') return state.name;
   if (status === 'scanning') return 'scanning';
-  if (status === 'failed') return failure === 'denied' ? 'denied' : 'unsupported';
+  if (status === 'failed') {
+    if (failure === 'denied') return 'denied';
+    return failure === 'busy' ? 'busy' : 'unsupported';
+  }
   return 'requesting';
 }
