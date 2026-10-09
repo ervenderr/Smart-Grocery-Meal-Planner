@@ -396,3 +396,88 @@ describe("Users onboarding completion", () => {
     expect(second.body.onboardingCompletedAt).toBe(first.body.onboardingCompletedAt);
   });
 });
+
+describe("preferences staples", () => {
+  const DEFAULTS = [
+    "salt", "black pepper", "pepper", "water", "sugar", "flour",
+    "all purpose flour", "cooking oil", "vegetable oil", "olive oil",
+    "baking soda", "baking powder", "cornstarch", "vinegar", "soy sauce",
+  ];
+  let tokenA: string;
+  let tokenB: string;
+
+  const signup = async (tag: string): Promise<string> => {
+    const res = await request(app).post("/api/v1/auth/signup").send({
+      email: `users-test-staples-${tag}@example.com`,
+      password: "TestPass123",
+      firstName: "Staples",
+      lastName: tag,
+    });
+    return res.body.token as string;
+  };
+  const patch = (token: string, body: unknown) =>
+    request(app)
+      .patch("/api/v1/users/preferences")
+      .set("Authorization", `Bearer ${token}`)
+      .send(body as object);
+  const get = (token: string) =>
+    request(app).get("/api/v1/users/preferences").set("Authorization", `Bearer ${token}`);
+
+  beforeAll(async () => {
+    tokenA = await signup("a");
+    tokenB = await signup("b");
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany({ where: { email: { contains: "users-test-staples" } } });
+  });
+
+  it("returns the 15 defaults for a new signup plus defaultStapleNames", async () => {
+    const res = await get(tokenB).expect(200);
+    expect(res.body.stapleNames).toEqual(DEFAULTS);
+    expect(res.body.defaultStapleNames).toEqual(DEFAULTS);
+  });
+
+  it("canonicalizes, de-duplicates and persists on PATCH", async () => {
+    const res = await patch(tokenA, {
+      stapleNames: [" Salt ", "SALT", "Olive Oil", "Scallions"],
+    }).expect(200);
+    expect(res.body.stapleNames).toEqual(["salt", "olive oil", "green onion"]);
+    expect(res.body.defaultStapleNames).toEqual(DEFAULTS);
+    const after = await get(tokenA).expect(200);
+    expect(after.body.stapleNames).toEqual(["salt", "olive oil", "green onion"]);
+  });
+
+  it("does not change stapleNames when another field is patched", async () => {
+    await patch(tokenA, { currency: "USD" }).expect(200);
+    const after = await get(tokenA).expect(200);
+    expect(after.body.stapleNames).toEqual(["salt", "olive oil", "green onion"]);
+  });
+
+  it("does not leak one user's staples to another", async () => {
+    const res = await get(tokenB).expect(200);
+    expect(res.body.stapleNames).toEqual(DEFAULTS);
+  });
+
+  it.each([
+    ["101 entries", Array.from({ length: 101 }, (_, i) => `item ${i}`)],
+    ["61-char entry", ["a".repeat(61)]],
+    ["number entry", [123]],
+    ["null entry", [null]],
+    ["object body", {}],
+    ["string body", "salt"],
+    ["punctuation only", ["!!!"]],
+    ["empty string", [""]],
+  ])("rejects %s with 400 and changes nothing", async (_label, payload) => {
+    const res = await patch(tokenA, { stapleNames: payload });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body)).toContain("stapleNames");
+    const after = await get(tokenA).expect(200);
+    expect(after.body.stapleNames).toEqual(["salt", "olive oil", "green onion"]);
+  });
+
+  it("accepts an empty list", async () => {
+    const res = await patch(tokenA, { stapleNames: [] }).expect(200);
+    expect(res.body.stapleNames).toEqual([]);
+  });
+});
