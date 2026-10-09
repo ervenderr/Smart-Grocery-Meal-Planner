@@ -15,6 +15,7 @@ import { useCurrency } from '@/lib/currency/currency-provider';
 import type { ExpiringItem } from '@/types/pantry.types';
 import type { AnalyticsDashboard } from '@/types/budget.types';
 import { formatExpiryLabel, toExpiringItems } from '@/lib/pantry/expiry';
+import { CookFirstCard } from '@/components/dashboard/cook-first-card';
 import { budgetFromComparison, formatPercent } from '@/lib/analytics/budget';
 
 export default function DashboardPage() {
@@ -246,6 +247,8 @@ export default function DashboardPage() {
           )}
         </Card>
       </div>
+
+      <CookFirstCard />
 
       {/* Expiring Soon */}
       <Card className="min-w-0 p-4 sm:p-6">
