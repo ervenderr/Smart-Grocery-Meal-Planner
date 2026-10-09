@@ -19,6 +19,8 @@ interface QuantityStepperProps {
   label: string;
   onChange: (next: number) => void;
   disabled?: boolean;
+  /** Set false when the caller already announces the value, to avoid duplicate text. */
+  announce?: boolean;
 }
 
 const BUTTON_CLASS =
@@ -35,6 +37,7 @@ export function QuantityStepper({
   label,
   onChange,
   disabled = false,
+  announce = true,
 }: QuantityStepperProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -147,9 +150,11 @@ export function QuantityStepper({
           {error}
         </p>
       )}
-      <span aria-live="polite" className="sr-only">
-        {`${label}: ${formatQuantity(value)} ${unitLabel}`}
-      </span>
+      {announce && (
+        <span aria-live="polite" className="sr-only">
+          {`${label}: ${formatQuantity(value)} ${unitLabel}`}
+        </span>
+      )}
     </div>
   );
 }

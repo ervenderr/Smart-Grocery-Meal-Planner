@@ -241,7 +241,9 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
 
       {!cooked && !showError && (
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-gray-900">Servings you cooked</p>
+          <p id="cook-servings-label" className="text-sm font-semibold text-gray-900">
+            Servings you cooked
+          </p>
           <QuantityStepper
             value={effectiveServings}
             unitLabel={effectiveServings === 1 ? 'serving' : 'servings'}
@@ -251,6 +253,7 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
             label="Servings"
             onChange={setServings}
             disabled={applying || showLoading}
+            announce={false}
           />
         </div>
       )}
@@ -294,7 +297,9 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
         </p>
       )}
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      {/* Pinned footer: sticks to the bottom of the sheet's scroll area; negative
+          margins cancel the Modal content padding so it sits flush with the edge. */}
+      <div className="sticky bottom-0 -mx-4 -mb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col-reverse gap-2 border-t border-gray-200 bg-white px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
         <Button variant={secondaryVariant} onClick={onClose} disabled={applying}>
           {secondaryLabel}
         </Button>
