@@ -54,6 +54,12 @@ export const API_ROUTES = {
   },
 
 
+  // Cook ("Cooked it")
+  COOK: {
+    PREVIEW: `/api/${API_VERSION}/cook/preview`,
+    APPLY: `/api/${API_VERSION}/cook/apply`,
+  },
+
   // Budget & Pricing
   BUDGET: {
     SUMMARY: `/api/${API_VERSION}/budget/summary`,

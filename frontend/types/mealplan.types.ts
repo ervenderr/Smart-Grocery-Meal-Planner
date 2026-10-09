@@ -15,6 +15,7 @@ export interface MealPlanItem {
   servings: number;
   costCents: number | null;
   calories: number | null;
+  cookedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   recipe?: {
