@@ -69,7 +69,10 @@ async function detectOnce(detector: Detector, video: HTMLVideoElement) {
   }
 }
 
-export function useBarcodeScanner({ active, onDetected }: UseBarcodeScannerOptions): BarcodeScanner {
+export function useBarcodeScanner({
+  active,
+  onDetected,
+}: UseBarcodeScannerOptions): BarcodeScanner {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

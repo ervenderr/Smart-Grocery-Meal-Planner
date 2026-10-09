@@ -1,16 +1,28 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { foodApi } from '@/lib/api/food';
 import { pantryApi } from '@/lib/api/pantry';
+import { isIosSafari, isStandalone } from '@/lib/pwa/detect-ios';
 import { resolveBarcode, type BarcodeResolution } from '@/lib/scan/resolve-barcode';
+import { useBarcodeScanner } from '@/lib/scan/use-barcode-scanner';
+import { CameraView } from './camera-view';
 import { ManualBarcodeForm } from './manual-barcode-form';
-import { LookingUp, LookupFailedCard, UnknownProductCard } from './scan-states';
+import {
+  CameraDeniedCard,
+  LookingUp,
+  LookupFailedCard,
+  ScanUnsupportedCard,
+  UnknownProductCard,
+} from './scan-states';
 
-/** 06-11 adds 'requesting' | 'scanning' | 'denied' | 'unsupported'. */
 export type ScanState =
+  | { name: 'requesting' }
+  | { name: 'scanning' }
+  | { name: 'denied' }
+  | { name: 'unsupported' }
   | { name: 'manual' }
   | { name: 'looking-up'; barcode: string }
   | { name: 'unknown'; barcode: string }
@@ -39,9 +51,13 @@ const realDeps = {
 };
 
 const STATUS_TEXT: Record<ScanState['name'], string> = {
+  requesting: 'Starting camera',
+  scanning: 'Camera ready. Point at a barcode.',
+  denied: 'Camera access is off',
+  unsupported: "Scanning isn't available here",
   manual: '',
-  'looking-up': 'Looking up barcode',
-  unknown: "We don't know this product yet",
+  'looking-up': 'Barcode detected.',
+  unknown: 'Product not found.',
   failed: "Couldn't look up this product",
 };
 
@@ -51,7 +67,7 @@ export function ScanSheet({ isOpen, onClose, ...rest }: ScanSheetProps) {
       <Dialog.Portal>
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-0 z-50 flex h-dvh flex-col bg-white pt-safe pb-safe animate-fade-in focus:outline-none"
+          className="animate-fade-in fixed inset-0 z-50 flex h-dvh flex-col bg-white focus:outline-none"
         >
           {/* Mounted only while open, so state resets to 'manual' on every open. */}
           <ScanBody onClose={onClose} {...rest} />
@@ -68,8 +84,19 @@ function ScanBody({
   onBarcode,
   onAddWithoutBarcode,
 }: Omit<ScanSheetProps, 'isOpen'>) {
-  const [state, setState] = useState<ScanState>({ name: 'manual' });
+  const [state, setState] = useState<ScanState>(() =>
+    typeof navigator !== 'undefined' && navigator.mediaDevices
+      ? { name: 'requesting' }
+      : { name: 'unsupported' }
+  );
   const busyRef = useRef(false);
+  const lookupRef = useRef<(barcode: string) => void>(() => undefined);
+  const handleDetected = useCallback((code: string) => lookupRef.current(code), []);
+  const scanner = useBarcodeScanner({
+    active: state.name === 'requesting',
+    onDetected: handleDetected,
+  });
+  const view = deriveView(state, scanner.status, scanner.failure);
 
   const lookup = useCallback(
     async (barcode: string) => {
@@ -95,6 +122,23 @@ function ScanBody({
     [onClose, onResolved]
   );
 
+  const handleDetectedCode = (barcode: string) => {
+    if (mode === 'return') {
+      onBarcode?.(barcode);
+      onClose();
+      return;
+    }
+    void lookup(barcode);
+  };
+  useEffect(() => {
+    lookupRef.current = handleDetectedCode;
+  });
+
+  const toManual = () => {
+    scanner.stop();
+    setState({ name: 'manual' });
+  };
+
   const handleSubmit = (barcode: string) => {
     if (mode === 'return') {
       onBarcode?.(barcode);
@@ -117,21 +161,50 @@ function ScanBody({
         }
       : undefined;
 
+  if (view === 'requesting' || view === 'scanning') {
+    return (
+      <>
+        <LiveRegion text={STATUS_TEXT[view]} />
+        <CameraView
+          videoRef={scanner.videoRef}
+          scanning={view === 'scanning'}
+          torch={scanner.torch}
+          slowHint={scanner.slowHint}
+          onTypeInstead={toManual}
+        />
+      </>
+    );
+  }
+  if (view === 'denied' || view === 'unsupported') {
+    return (
+      <>
+        <LiveRegion text={STATUS_TEXT[view]} />
+        {view === 'denied' ? (
+          <CameraDeniedCard
+            iosStandalone={isIosStandalone()}
+            onTypeInstead={toManual}
+            onRetry={scanner.retry}
+          />
+        ) : (
+          <ScanUnsupportedCard onTypeInstead={toManual} />
+        )}
+      </>
+    );
+  }
+
   return (
-    <>
+    <div className="pt-safe pb-safe flex h-full flex-col">
       <div className="flex h-14 items-center gap-2 border-b border-gray-200 px-4">
         <Dialog.Close
           aria-label="Close scanner"
-          className="-ml-2 flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="focus-visible:ring-primary-500 -ml-2 flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 focus-visible:ring-2 focus-visible:outline-none"
         >
           <X className="h-5 w-5" aria-hidden="true" />
         </Dialog.Close>
         <Dialog.Title className="text-xl font-semibold text-gray-900">Scan barcode</Dialog.Title>
       </div>
 
-      <div role="status" aria-live="polite" className="sr-only">
-        {STATUS_TEXT[state.name]}
-      </div>
+      <LiveRegion text={STATUS_TEXT[state.name]} />
 
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="mx-auto w-full max-w-md">
@@ -140,6 +213,8 @@ function ScanBody({
               onSubmit={handleSubmit}
               onAddWithoutBarcode={withoutBarcode}
               submitLabel={mode === 'return' ? 'Use this barcode' : 'Look up barcode'}
+              cameraAvailable={scanner.status !== 'failed'}
+              onScanWithCamera={() => setState({ name: 'requesting' })}
             />
           )}
           {state.name === 'looking-up' && <LookingUp barcode={state.barcode} />}
@@ -147,7 +222,7 @@ function ScanBody({
             <UnknownProductCard
               barcode={state.barcode}
               onAddManually={() => addManually(state.barcode)}
-              onSecondary={() => setState({ name: 'manual' })}
+              onSecondary={() => setState({ name: 'requesting' })}
             />
           )}
           {state.name === 'failed' && (
@@ -159,6 +234,38 @@ function ScanBody({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
+}
+
+function LiveRegion({ text }: { text: string }) {
+  return (
+    <div role="status" aria-live="polite" className="sr-only">
+      {text}
+    </div>
+  );
+}
+
+function isIosStandalone(): boolean {
+  if (typeof window === 'undefined') return false;
+  const nav = window.navigator as Navigator & { standalone?: boolean };
+  return (
+    isIosSafari(nav) &&
+    isStandalone({
+      navigatorStandalone: nav.standalone,
+      displayModeStandalone: window.matchMedia('(display-mode: standalone)').matches,
+    })
+  );
+}
+
+/** Maps the sheet state plus live camera status to the view that should render. */
+function deriveView(
+  state: ScanState,
+  status: ReturnType<typeof useBarcodeScanner>['status'],
+  failure: ReturnType<typeof useBarcodeScanner>['failure']
+): ScanState['name'] {
+  if (state.name !== 'requesting') return state.name;
+  if (status === 'scanning') return 'scanning';
+  if (status === 'failed') return failure === 'denied' ? 'denied' : 'unsupported';
+  return 'requesting';
 }

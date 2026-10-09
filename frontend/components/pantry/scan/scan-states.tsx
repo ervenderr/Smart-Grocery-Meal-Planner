@@ -1,10 +1,11 @@
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, CameraOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CameraTopBar } from './camera-view';
 
 export function LookingUp({ barcode }: { barcode: string }) {
   return (
     <div className="flex flex-col items-center gap-3 py-12 text-gray-700">
-      <Loader2 className="h-8 w-8 animate-spin text-primary-500" aria-hidden="true" />
+      <Loader2 className="text-primary-500 h-8 w-8 animate-spin" aria-hidden="true" />
       <p className="text-base">Looking up {barcode}...</p>
     </div>
   );
@@ -76,6 +77,70 @@ export function LookupFailedCard({ onAddManually, onSecondary }: ResultCardProps
       onPrimary={onSecondary}
       secondaryLabel="Add manually"
       onSecondary={onAddManually}
+    />
+  );
+}
+
+interface CameraProblemProps {
+  title: string;
+  body: string;
+  extra?: string;
+  onTypeInstead: () => void;
+  onRetry?: () => void;
+}
+
+function CameraProblem({ title, body, extra, onTypeInstead, onRetry }: CameraProblemProps) {
+  return (
+    <div className="flex h-full flex-col bg-black">
+      <CameraTopBar />
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 overflow-y-auto px-6 text-center text-white">
+        <CameraOff className="h-12 w-12 text-gray-300" aria-hidden="true" />
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <p className="text-base text-gray-300">{body}</p>
+        {extra && <p className="text-base text-gray-300">{extra}</p>}
+        <div className="pb-safe w-full max-w-sm space-y-3">
+          <Button fullWidth onClick={onTypeInstead}>
+            Type the barcode
+          </Button>
+          {onRetry && (
+            <Button variant="outline" fullWidth onClick={onRetry}>
+              Try again
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CameraDeniedCard({
+  iosStandalone,
+  onTypeInstead,
+  onRetry,
+}: {
+  iosStandalone: boolean;
+  onTypeInstead: () => void;
+  onRetry: () => void;
+}) {
+  return (
+    <CameraProblem
+      title="Camera access is off"
+      body="Allow camera access in your browser settings to scan, or type the barcode instead."
+      extra={
+        iosStandalone ? 'On iPhone: Settings > Safari > Camera, or Settings > Kitcha.' : undefined
+      }
+      onTypeInstead={onTypeInstead}
+      onRetry={onRetry}
+    />
+  );
+}
+
+export function ScanUnsupportedCard({ onTypeInstead }: { onTypeInstead: () => void }) {
+  return (
+    <CameraProblem
+      title="Scanning isn't available here"
+      body="This device or browser can't use the camera. Type the barcode instead."
+      onTypeInstead={onTypeInstead}
     />
   );
 }
