@@ -15,7 +15,7 @@ Kitcha already works locally. This milestone makes it real: patch the vulnerable
 - [x] **Phase 3: Mobile-First Shell** - Bottom nav, 375px-ready screens, home-screen install, onboarding, empty states, currency (completed 2026-10-08)
 - [x] **Phase 4: Persistent Shopping List** - Backend-stored lists with manual items, check-off, grouping, shopping mode, spend tracking (completed 2026-10-08)
 - [x] **Phase 5: Pantry-Aware Intelligence** - Ingredient parsing, merged and pantry-subtracted lists, staples, "Cook this first" (completed 2026-10-09)
-- [ ] **Phase 6: Capture Loops** - Barcode scan, bought-it and cooked-it pantry updates, quick pantry edits
+- [x] **Phase 6: Capture Loops** - Barcode scan, bought-it and cooked-it pantry updates, quick pantry edits (completed 2026-10-09)
 
 ## Phase Details
 
@@ -160,18 +160,18 @@ Plans:
   5. User can adjust pantry quantity (+/-) and expiry directly from the list without opening a form
 **Plans**: 13 plans
 Plans:
-- [ ] 06-01-PLAN.md — Pantry quantity stepper: PATCH allows 0, React Query pantry page, QuantityStepper, Used up + Undo (CAP-05)
-- [ ] 06-02-PLAN.md — Human legitimacy checkpoint, then barcode-detector 3.2.2 exact pin with clean lockfile (CAP-01)
-- [ ] 06-03-PLAN.md — Cook module API for recipes: pure plan + FEFO allocation, POST /cook/preview and /cook/apply (CAP-04)
-- [ ] 06-04-PLAN.md — Bought-it API: finish with addToPantry, after-commit merge/create with unit coercion (CAP-03)
-- [ ] 06-05-PLAN.md — Expiry quick-edit sheet with +1/+3/+7 day shortcuts and clear (CAP-05)
-- [ ] 06-06-PLAN.md — [BLOCKING] pantry barcode migration, barcode create/update/filter API, barcode field on forms (CAP-01, CAP-02)
-- [ ] 06-07-PLAN.md — Finish-sheet "Add checked items to pantry" switch, merge-aware toasts (CAP-03)
-- [ ] 06-08-PLAN.md — [BLOCKING] meal_plan_items.cooked_at migration, cookedAt carry-forward, cook a planned meal once (409) (CAP-04)
-- [ ] 06-09-PLAN.md — Scan sheet with typed-barcode lookup, prefill (OFF / own item), unknown/failed fallbacks, entry points (CAP-01, CAP-02)
-- [ ] 06-10-PLAN.md — "Cooked it?" preview/confirm sheet, recipe and meal-plan entry points, Cooked badge (CAP-04)
-- [ ] 06-11-PLAN.md — Camera scanning: native BarcodeDetector or lazy ZXing ponyfill, permission/unsupported states (CAP-01, CAP-02)
-- [ ] 06-12-PLAN.md — Smoke check 14, all gates, Railway backend first, then push main (CI + Vercel) (CAP-01..05)
+- [x] 06-01-PLAN.md — Pantry quantity stepper: PATCH allows 0, React Query pantry page, QuantityStepper, Used up + Undo (CAP-05)
+- [x] 06-02-PLAN.md — Human legitimacy checkpoint, then barcode-detector 3.2.2 exact pin with clean lockfile (CAP-01)
+- [x] 06-03-PLAN.md — Cook module API for recipes: pure plan + FEFO allocation, POST /cook/preview and /cook/apply (CAP-04)
+- [x] 06-04-PLAN.md — Bought-it API: finish with addToPantry, after-commit merge/create with unit coercion (CAP-03)
+- [x] 06-05-PLAN.md — Expiry quick-edit sheet with +1/+3/+7 day shortcuts and clear (CAP-05)
+- [x] 06-06-PLAN.md — [BLOCKING] pantry barcode migration, barcode create/update/filter API, barcode field on forms (CAP-01, CAP-02)
+- [x] 06-07-PLAN.md — Finish-sheet "Add checked items to pantry" switch, merge-aware toasts (CAP-03)
+- [x] 06-08-PLAN.md — [BLOCKING] meal_plan_items.cooked_at migration, cookedAt carry-forward, cook a planned meal once (409) (CAP-04)
+- [x] 06-09-PLAN.md — Scan sheet with typed-barcode lookup, prefill (OFF / own item), unknown/failed fallbacks, entry points (CAP-01, CAP-02)
+- [x] 06-10-PLAN.md — "Cooked it?" preview/confirm sheet, recipe and meal-plan entry points, Cooked badge (CAP-04)
+- [x] 06-11-PLAN.md — Camera scanning: native BarcodeDetector or lazy ZXing ponyfill, permission/unsupported states (CAP-01, CAP-02)
+- [x] 06-12-PLAN.md — Smoke check 14, all gates, Railway backend first, then push main (CI + Vercel) (CAP-01..05)
 - [ ] 06-13-PLAN.md — Real-phone camera and touch walkthrough (deferrable human checkpoint) (CAP-01..05)
 **UI hint**: yes
 
@@ -187,4 +187,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 | 3. Mobile-First Shell | 13/14 | Complete    | 2026-10-08 |
 | 4. Persistent Shopping List | 11/12 | Complete    | 2026-10-08 |
 | 5. Pantry-Aware Intelligence | 12/13 | Complete    | 2026-10-09 |
-| 6. Capture Loops | 0/TBD | Not started | - |
+| 6. Capture Loops | 12/13 | Complete    | 2026-10-09 |

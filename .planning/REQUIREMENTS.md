@@ -54,11 +54,11 @@
 
 ### Capture Loops (CAP)
 
-- [ ] **CAP-01**: User can scan a barcode with the phone camera (library fallback on iOS) to prefill a pantry item from Open Food Facts
-- [ ] **CAP-02**: When scan fails, permission is denied or the product is unknown, user can enter the item manually with the barcode kept
-- [ ] **CAP-03**: Checking off a shopping item can add it to the pantry ("bought it")
-- [ ] **CAP-04**: Marking a recipe or meal as cooked deducts its ingredients from the pantry ("cooked it")
-- [ ] **CAP-05**: User can quick-edit pantry quantity (+/-) and expiry from the list without opening a form
+- [x] **CAP-01**: User can scan a barcode with the phone camera (library fallback on iOS) to prefill a pantry item from Open Food Facts
+- [x] **CAP-02**: When scan fails, permission is denied or the product is unknown, user can enter the item manually with the barcode kept
+- [x] **CAP-03**: Checking off a shopping item can add it to the pantry ("bought it")
+- [x] **CAP-04**: Marking a recipe or meal as cooked deducts its ingredients from the pantry ("cooked it")
+- [x] **CAP-05**: User can quick-edit pantry quantity (+/-) and expiry from the list without opening a form
 
 ## v2 Requirements
 
@@ -94,7 +94,7 @@
 | MOB-01..06 | Phase 3 | Complete (real-phone walkthrough deferred) |
 | SHOP-01..05 | Phase 4 | Complete (real-phone check deferred) |
 | INT-01..05 | Phase 5 | Complete (real-phone check deferred) |
-| CAP-01..05 | Phase 6 | Pending |
+| CAP-01..05 | Phase 6 | Complete (real-phone check 06-13 deferred) |
 
 **Coverage:**
 - v1 requirements: 37 total
