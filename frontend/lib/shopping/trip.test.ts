@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeTripTotal, describeDifference, localIsoDate } from './trip';
+import { computeTripTotal, describeDifference, differenceLabel, localIsoDate } from './trip';
 
 const item = (isChecked: boolean, est: number | null, actual: number | null) => ({
   isChecked,
@@ -41,5 +41,17 @@ describe('describeDifference', () => {
     expect(describeDifference(-250)).toEqual({ tone: 'under', amountCents: 250 });
     expect(describeDifference(300)).toEqual({ tone: 'over', amountCents: 300 });
     expect(describeDifference(0)).toEqual({ tone: 'even', amountCents: 0 });
+  });
+});
+
+describe('differenceLabel', () => {
+  it('words the difference as priced items vs their own estimate', () => {
+    expect(differenceLabel('under', '₱15.00')).toBe('Priced items: ₱15.00 under estimate');
+    expect(differenceLabel('over', '₱15.00')).toBe('Priced items: ₱15.00 over estimate');
+    expect(differenceLabel('even', '₱0.00')).toBe('Priced items: on estimate');
+  });
+
+  it('returns null when nothing is priced yet', () => {
+    expect(differenceLabel('none', '₱0.00')).toBeNull();
   });
 });

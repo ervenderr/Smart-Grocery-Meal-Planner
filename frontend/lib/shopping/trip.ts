@@ -35,6 +35,23 @@ export function describeDifference(differenceCents: number | null): {
   return { tone: 'even', amountCents: 0 };
 }
 
+/**
+ * Unambiguous wording for the summary difference: it only compares the items
+ * that have an actual price against their own estimates.
+ */
+export function differenceLabel(tone: DifferenceTone, formattedAmount: string): string | null {
+  switch (tone) {
+    case 'under':
+      return `Priced items: ${formattedAmount} under estimate`;
+    case 'over':
+      return `Priced items: ${formattedAmount} over estimate`;
+    case 'even':
+      return 'Priced items: on estimate';
+    default:
+      return null;
+  }
+}
+
 /** The user's local calendar date as YYYY-MM-DD (not UTC). */
 export function localIsoDate(date: Date): string {
   const y = date.getFullYear();
