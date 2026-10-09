@@ -9,9 +9,10 @@ interface RecipeCardProps {
   onEdit: (recipe: Recipe) => void;
   onDelete: (recipe: Recipe) => void;
   onView: (recipe: Recipe) => void;
+  badge?: string | null;
 }
 
-export function RecipeCard({ recipe, onEdit, onDelete, onView }: RecipeCardProps) {
+export function RecipeCard({ recipe, onEdit, onDelete, onView, badge }: RecipeCardProps) {
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
       breakfast: 'bg-yellow-100 text-yellow-800',
@@ -56,6 +57,12 @@ export function RecipeCard({ recipe, onEdit, onDelete, onView }: RecipeCardProps
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="font-semibold text-gray-900 line-clamp-2 min-w-0 flex-1 break-words">{recipe.name}</h3>
         </div>
+
+        {badge && (
+          <span className="mb-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-800">
+            {badge}
+          </span>
+        )}
 
         <div className="flex flex-wrap gap-1.5 mb-3">
           <span className={`rounded-full px-2 py-0.5 text-sm font-semibold ${getCategoryColor(recipe.category)}`}>

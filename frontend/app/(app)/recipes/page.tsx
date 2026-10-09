@@ -15,6 +15,11 @@ import { AIRecipeSuggestionsModal } from '@/components/ai/ai-recipe-suggestions-
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import { recipeApi } from '@/lib/api/recipes';
 import toast from 'react-hot-toast';
+import {
+  expiringBadge,
+  filterCookFirstEntries,
+  localDateString,
+} from '@/lib/recipes/cook-first';
 import type { Recipe, RecipeFilters } from '@/types/recipe.types';
 
 const CATEGORY_CHIPS = [
@@ -47,6 +52,8 @@ function RecipesPageContent() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [expiringSort, setExpiringSort] = useState(false);
+  const [badges, setBadges] = useState<Map<string, string>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({
     category: undefined,
@@ -64,11 +71,32 @@ function RecipesPageContent() {
 
   const fetchRecipes = async (
     activeFilters: RecipeFilters = filters,
-    search: string = searchQuery
+    search: string = searchQuery,
+    byExpiring: boolean = expiringSort
   ) => {
     setLoading(true);
     setLoadError(false);
     try {
+      if (byExpiring) {
+        const result = await recipeApi.getCookFirst({
+          includeAll: true,
+          today: localDateString(),
+        });
+        const entries = filterCookFirstEntries(result.items, {
+          search,
+          category: activeFilters.category,
+          difficulty: activeFilters.difficulty,
+        });
+        const next = new Map<string, string>();
+        entries.forEach((entry) => {
+          const badge = expiringBadge(entry);
+          if (badge) next.set(entry.recipe.id, badge);
+        });
+        setBadges(next);
+        setRecipes(entries.map((entry) => entry.recipe));
+        return;
+      }
+      setBadges(new Map());
       const response = await recipeApi.getAll({
         ...activeFilters,
         search: search || undefined,
@@ -85,7 +113,7 @@ function RecipesPageContent() {
 
   useEffect(() => {
     fetchRecipes();
-  }, [filters]);
+  }, [filters, expiringSort]);
 
   useEffect(() => {
     if (searchParams.get('ai') === 'suggestions') {
@@ -143,6 +171,15 @@ function RecipesPageContent() {
       ...prev,
       [key]: value || undefined,
     }));
+  };
+
+  const handleSortChange = (value: string) => {
+    if (value === 'expiring') {
+      setExpiringSort(true);
+      return;
+    }
+    setExpiringSort(false);
+    handleFilterChange('sortBy', value);
   };
 
   return (
@@ -223,14 +260,15 @@ function RecipesPageContent() {
             </Select>
 
             <Select
-              value={filters.sortBy || 'createdAt'}
-              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+              value={expiringSort ? 'expiring' : filters.sortBy || 'createdAt'}
+              onChange={(e) => handleSortChange(e.target.value)}
             >
               <option value="createdAt">Newest First</option>
               <option value="name">Name (A-Z)</option>
               <option value="totalTime">Total Time</option>
               <option value="prepTime">Prep Time</option>
               <option value="cookTime">Cook Time</option>
+              <option value="expiring">Use expiring first</option>
             </Select>
           </div>
         </div>
@@ -275,6 +313,7 @@ function RecipesPageContent() {
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
+              badge={expiringSort ? badges.get(recipe.id) ?? null : null}
               onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
