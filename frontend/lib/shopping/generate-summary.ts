@@ -19,7 +19,9 @@ export function describeGenerateResult({
   covered,
   skippedStaples,
 }: GenerateCounts): string {
-  const coveredCount = Array.isArray(covered) ? covered.length : 0;
+  const entries = Array.isArray(covered) ? covered : [];
+  const coveredCount = entries.filter((c) => c.status !== 'on_list').length;
+  const onListCount = entries.length - coveredCount;
   if (added > 0 && merged > 0) {
     return `${added} ${itemWord(added)} added, ${merged} merged into your list`;
   }
@@ -28,7 +30,8 @@ export function describeGenerateResult({
     return coveredCount > 0 ? `${base} (${coveredCount} already in your pantry)` : base;
   }
   if (merged > 0) return `${merged} ${itemWord(merged)} merged into your list`;
-  if (nonEmpty(covered)) return 'Your pantry already covers this plan';
+  if (coveredCount > 0) return 'Your pantry already covers this plan';
+  if (onListCount > 0) return 'Already on your list, nothing new to add';
   if (nonEmpty(skippedStaples)) return 'Only staples in this plan, nothing to add';
   return 'Your list already has everything from this plan';
 }

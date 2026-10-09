@@ -43,4 +43,12 @@ describe('describeGenerateResult', () => {
       '2 items added to your list (2 already in your pantry)'
     );
   });
+
+  it('reports plans that are already on the list without blaming the pantry', () => {
+    const covered = [{ name: 'Onion', needed: 3, have: 3, unit: 'pieces', status: 'on_list' as const }];
+    expect(describeGenerateResult({ added: 0, merged: 0, covered })).toBe(
+      'Already on your list, nothing new to add',
+    );
+    expect(describeGenerateResult({ added: 2, merged: 0, covered })).toBe('2 items added to your list');
+  });
 });

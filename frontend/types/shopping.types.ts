@@ -47,7 +47,7 @@ export interface CoveredItem {
   needed: number;
   have: number;
   unit: string;
-  status: 'full' | 'partial' | 'incompatible';
+  status: 'full' | 'partial' | 'incompatible' | 'on_list';
   haveUnit?: string;
 }
 

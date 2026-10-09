@@ -30,6 +30,8 @@ export function toLastGenerateResult(
   };
 }
 
+export const ON_LIST_TEXT = 'Already on your list';
+
 const formatNumber = (n: number): string => String(Math.round(n * 100) / 100);
 
 export function formatCoveredLine(item: CoveredItem): string {
@@ -37,6 +39,9 @@ export function formatCoveredLine(item: CoveredItem): string {
   if (item.status === 'incompatible') {
     const haveUnit = unitLabel(item.haveUnit ?? item.unit);
     return `${item.name}: can't compare units (have ${formatNumber(item.have)} ${haveUnit}), added in full`;
+  }
+  if (item.status === 'on_list') {
+    return `${item.name}: ${ON_LIST_TEXT} (${formatNumber(item.have)} of ${formatNumber(item.needed)} ${unit})`;
   }
   const line = `${item.name}: have ${formatNumber(item.have)} ${unit}, need ${formatNumber(item.needed)} ${unit}`;
   return item.status === 'partial' ? `${line} (added the rest)` : line;

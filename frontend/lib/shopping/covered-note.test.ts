@@ -34,6 +34,11 @@ describe('formatCoveredLine', () => {
     const u = unitLabel('kg');
     expect(formatCoveredLine(item)).toBe(`Milk: have 0.33 ${u}, need 1.5 ${u} (added the rest)`);
   });
+  it('formats an item already on the list', () => {
+    const item: CoveredItem = { name: 'Onion', needed: 3, have: 3, unit: 'pieces', status: 'on_list' };
+    expect(formatCoveredLine(item)).toBe('Onion: Already on your list (3 of 3 Pieces)');
+  });
+
   it('formats an incompatible item', () => {
     const item: CoveredItem = {
       name: 'Milk', needed: 2, have: 1, unit: 'cups', status: 'incompatible', haveUnit: 'pieces',
