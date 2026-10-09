@@ -92,6 +92,10 @@ describe('POST /api/v1/shopping/generate', () => {
     a = await signup('a');
     b = await signup('b');
     c = await signup('c');
+    // Phase 5: disable default staples so Phase 4 expectations (Salt: coarse is added) stay valid
+    for (const u of [a, b, c]) {
+      await prisma.userPreference.update({ where: { userId: u.id }, data: { stapleNames: [] } });
+    }
     const r1 = await createRecipe(a, 'Soup', [
       { ingredientName: 'Onion', quantity: 1, unit: 'pieces' },
       { ingredientName: 'Salt: coarse', quantity: 1, unit: 'tsp' },
