@@ -214,8 +214,8 @@ export class PantryService {
     }
 
     // Validate quantity if provided
-    if (data.quantity !== undefined && data.quantity <= 0) {
-      throw new AppError("Quantity must be greater than 0", 400);
+    if (data.quantity !== undefined && data.quantity < 0) {
+      throw new AppError("Quantity must be 0 or greater", 400);
     }
 
     // Prepare update data
@@ -266,6 +266,7 @@ export class PantryService {
     });
 
     // Check for low stock and dispatch Zapier event
+    // Quantity 0 (used up) intentionally does not fire stock_low
     const currentQuantity = Number(item.quantity);
     if (currentQuantity <= LOW_STOCK_THRESHOLD && currentQuantity > 0) {
       zapierService

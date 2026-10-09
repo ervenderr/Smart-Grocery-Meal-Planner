@@ -106,8 +106,8 @@ export const validateUpdateItem: ValidationChain[] = [
 
   body('quantity')
     .optional()
-    .isFloat({ gt: 0 })
-    .withMessage('Quantity must be greater than 0'),
+    .isFloat({ min: 0, max: 99999 })
+    .withMessage('Quantity must be between 0 and 99999'),
 
   body('unit')
     .optional()
