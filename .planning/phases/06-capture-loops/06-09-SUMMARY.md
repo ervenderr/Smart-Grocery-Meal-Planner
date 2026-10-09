@@ -33,8 +33,8 @@ completed: 2026-10-09
 Typing a barcode from any scan entry point now resolves (own pantry first, then Open Food Facts) to a prefilled Add form, or to amber unknown/failed cards that always lead to manual entry with the barcode kept; the Edit modal scan icon fills only the Barcode field.
 
 ## Commits
-- 1ae0c9c-class RED: test(06-09): add failing scan helper tests
-- feat(06-09): add barcode normalize, prefill and resolution helpers (GREEN, 23 tests)
+- f355bb4 test(06-09): add failing scan helper tests
+- dc54b5f feat(06-09): add barcode normalize, prefill and resolution helpers (GREEN, 23 tests)
 - 2510b84 feat(06-09): add scan sheet with manual lookup
 - 34cf075 feat(06-09): wire barcode scan entry points and prefill
 
