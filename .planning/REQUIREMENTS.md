@@ -46,11 +46,11 @@
 
 ### Pantry-aware Intelligence (INT)
 
-- [ ] **INT-01**: Ingredients are parsed into quantity, unit and canonical name; quantities are stored without float drift
-- [ ] **INT-02**: Generated lists merge the same ingredient across recipes and convert compatible units (count units are never converted to volume/weight)
-- [ ] **INT-03**: Generated lists subtract what the pantry already has
-- [ ] **INT-04**: User can mark staples (salt, oil...) that are excluded from generated lists
-- [ ] **INT-05**: A "Cook this first" view ranks the user's own recipes by how many soon-to-expire pantry items they use, with no AI call
+- [x] **INT-01**: Ingredients are parsed into quantity, unit and canonical name; quantities are stored without float drift
+- [x] **INT-02**: Generated lists merge the same ingredient across recipes and convert compatible units (count units are never converted to volume/weight)
+- [x] **INT-03**: Generated lists subtract what the pantry already has
+- [x] **INT-04**: User can mark staples (salt, oil...) that are excluded from generated lists
+- [x] **INT-05**: A "Cook this first" view ranks the user's own recipes by how many soon-to-expire pantry items they use, with no AI call
 
 ### Capture Loops (CAP)
 
@@ -93,7 +93,7 @@
 | AI-01..07 | Phase 2 | Complete (browser UAT deferred) |
 | MOB-01..06 | Phase 3 | Complete (real-phone walkthrough deferred) |
 | SHOP-01..05 | Phase 4 | Complete (real-phone check deferred) |
-| INT-01..05 | Phase 5 | Pending |
+| INT-01..05 | Phase 5 | Complete (real-phone check deferred) |
 | CAP-01..05 | Phase 6 | Pending |
 
 **Coverage:**
