@@ -112,3 +112,38 @@ describe('filterStaples', () => {
     expect(skipped).toEqual(['Salt', 'Sea Salt']);
   });
 });
+
+describe('filterStaples collisions (CR-02)', () => {
+  const g = (canonical: string, displayName: string, family = 'volume', countLabel = '') =>
+    Object.freeze({ canonical, displayName, family, countLabel });
+  const run = (groups: ReturnType<typeof g>[], staples: string[]) =>
+    filterStaples(groups, new Set(staples));
+
+  it('keeps counted "3 peppers" even though pepper is a staple', () => {
+    const { kept, skipped } = run([g('pepper', 'peppers', 'count', 'pieces')], ['pepper']);
+    expect(kept).toHaveLength(1);
+    expect(skipped).toEqual([]);
+  });
+  it('still skips measured pepper', () => {
+    expect(run([g('pepper', 'pepper')], ['pepper']).skipped).toEqual(['pepper']);
+  });
+  it('keeps bell pepper and chili pepper', () => {
+    const { kept } = run([g('bell pepper', 'Bell peppers'), g('chili pepper', 'Chili pepper')], ['pepper']);
+    expect(kept).toHaveLength(2);
+  });
+  it('salt does not match salted butter', () => {
+    expect(run([g('salted butter', 'Salted butter')], ['salt']).kept).toHaveLength(1);
+  });
+  it('oil does not match sesame oil or olive oil', () => {
+    const { kept } = run(
+      [g(canonicalName('oil, sesame'), 'Oil, sesame'), g('olive oil', 'olive oil')],
+      ['oil'],
+    );
+    expect(kept).toHaveLength(2);
+  });
+  it('black pepper default matches "Pepper, black"', () => {
+    const staples = resolveStaples(null);
+    expect(staples.has(canonicalName('Pepper, black'))).toBe(true);
+    expect(staples.has(canonicalName('Brown sugar'))).toBe(false);
+  });
+});

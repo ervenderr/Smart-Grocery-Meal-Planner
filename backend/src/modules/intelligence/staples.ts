@@ -74,15 +74,31 @@ export function resolveStaples(
   return new Set(sanitizeStapleNames([...stored]));
 }
 
-/** Split groups into kept vs skipped staples (exact canonical equality). */
-export function filterStaples<T extends { readonly canonical: string; readonly displayName: string }>(
-  groups: readonly T[],
-  staples: ReadonlySet<string>
-): { kept: T[]; skipped: string[] } {
+/**
+ * A bare discrete count ("3 peppers", unit "pieces") is a thing you buy, not a
+ * pantry seasoning, so it is never treated as a staple. This stops the staple
+ * `pepper` from swallowing "peppers" (plural folds to the same canonical key).
+ */
+const isDiscreteCount = (g: { readonly family?: string; readonly countLabel?: string }): boolean =>
+  g.family === 'count' && g.countLabel === 'pieces';
+
+/**
+ * Split groups into kept vs skipped staples. Matching is exact equality on the
+ * canonical name (never substring), so "oil" does not match "sesame oil" and
+ * "salt" does not match "salted butter".
+ */
+export function filterStaples<
+  T extends {
+    readonly canonical: string;
+    readonly displayName: string;
+    readonly family?: string;
+    readonly countLabel?: string;
+  },
+>(groups: readonly T[], staples: ReadonlySet<string>): { kept: T[]; skipped: string[] } {
   const kept: T[] = [];
   const skipped: string[] = [];
   for (const group of groups) {
-    if (!staples.has(group.canonical)) {
+    if (!staples.has(group.canonical) || isDiscreteCount(group)) {
       kept.push(group);
     } else if (!skipped.includes(group.displayName)) {
       skipped.push(group.displayName);
