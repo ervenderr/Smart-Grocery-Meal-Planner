@@ -31,7 +31,11 @@
     <td align="center"><img src="./docs/screenshots/mobile-more.png" width="220" alt="More sheet"><br><sub><b>More sheet</b></sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="./docs/screenshots/mobile-budget.png" width="220" alt="Budget tracking"><br><sub><b>Budget</b></sub></td>
+    <td align="center"><img src="./docs/screenshots/mobile-dashboard-lower.png" width="220" alt="Expiring soon list and savings"><br><sub><b>Expiring soon and savings</b></sub></td>
     <td align="center"><img src="./docs/screenshots/mobile-settings.png" width="220" alt="Settings with currency picker"><br><sub><b>Settings and currency</b></sub></td>
+  </tr>
+  <tr>
     <td align="center"><img src="./docs/screenshots/mobile-onboarding.png" width="220" alt="Onboarding step 1"><br><sub><b>Onboarding</b></sub></td>
     <td align="center"><img src="./docs/screenshots/mobile-login.png" width="220" alt="Login"><br><sub><b>Login</b></sub></td>
   </tr>
