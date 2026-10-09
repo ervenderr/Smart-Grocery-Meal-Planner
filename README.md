@@ -38,6 +38,7 @@
   <tr>
     <td align="center"><img src="./docs/screenshots/mobile-onboarding.png" width="220" alt="Onboarding step 1"><br><sub><b>Onboarding</b></sub></td>
     <td align="center"><img src="./docs/screenshots/mobile-login.png" width="220" alt="Login"><br><sub><b>Login</b></sub></td>
+    <td align="center"><img src="./docs/screenshots/mobile-analytics.png" width="220" alt="Analytics with spending trends and category breakdown"><br><sub><b>Analytics</b></sub></td>
   </tr>
 </table>
 </details>
