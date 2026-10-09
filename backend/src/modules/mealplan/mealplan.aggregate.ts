@@ -1,6 +1,10 @@
 /**
- * Pure aggregation of meal plan ingredients across recipes.
+ * Pure, exact aggregation of meal plan ingredients across recipes.
+ * Groups by canonical name + unit family (INT-02); math is Decimal (INT-01).
  */
+
+import { IngredientGroup, IngredientLine, displayOf, groupIngredients } from '../intelligence/merge-groups';
+import { Dec, finalizeQuantity, toDec } from '../intelligence/quantity';
 
 export interface AggregateSourceItem {
   readonly servings: number;
@@ -18,18 +22,10 @@ export interface AggregatedIngredient {
   readonly recipes: string[];
 }
 
-interface Accumulator {
-  readonly ingredientName: string;
-  readonly unit: string;
-  quantity: number;
-  readonly recipes: Set<string>;
-}
-
-const KEY_SEPARATOR = '\u0000';
-
-const multiplierFor = (itemServings: number, recipeServings: number): number => {
-  const ratio = itemServings / recipeServings;
-  return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+const scaleFor = (q: Dec, itemServings: number, recipeServings: number): Dec => {
+  const valid =
+    Number.isFinite(itemServings) && Number.isFinite(recipeServings) && itemServings > 0 && recipeServings > 0;
+  return valid ? q.times(itemServings).div(recipeServings) : q;
 };
 
 const readIngredient = (
@@ -44,40 +40,41 @@ const readIngredient = (
   return { name, unit, quantity };
 };
 
-export function aggregateIngredients(
-  items: ReadonlyArray<AggregateSourceItem>,
-): AggregatedIngredient[] {
-  const map = new Map<string, Accumulator>();
+export function aggregateGroups(items: ReadonlyArray<AggregateSourceItem>): {
+  groups: IngredientGroup[];
+  ingredientCount: number;
+} {
+  const lines: IngredientLine[] = [];
+  let ingredientCount = 0;
 
   for (const item of items) {
     const list = item.recipe.ingredientsList;
     if (!Array.isArray(list)) continue;
-    const multiplier = multiplierFor(item.servings, item.recipe.servings);
-
     for (const raw of list) {
       const ing = readIngredient(raw);
       if (!ing) continue;
-      const key = `${ing.name.toLowerCase()}${KEY_SEPARATOR}${ing.unit.toLowerCase()}`;
-      const scaled = ing.quantity * multiplier;
-      const existing = map.get(key);
-      if (existing) {
-        existing.quantity += scaled;
-        existing.recipes.add(item.recipe.title);
-      } else {
-        map.set(key, {
-          ingredientName: ing.name,
-          unit: ing.unit,
-          quantity: scaled,
-          recipes: new Set([item.recipe.title]),
-        });
-      }
+      ingredientCount += 1;
+      lines.push({
+        name: ing.name,
+        unit: ing.unit,
+        quantity: scaleFor(toDec(ing.quantity), item.servings, item.recipe.servings),
+        source: item.recipe.title,
+      });
     }
   }
+  return { groups: groupIngredients(lines), ingredientCount };
+}
 
-  return Array.from(map.values()).map((acc) => ({
-    ingredientName: acc.ingredientName,
-    quantity: Math.round(acc.quantity * 100) / 100,
-    unit: acc.unit,
-    recipes: Array.from(acc.recipes),
-  }));
+export function aggregateIngredients(
+  items: ReadonlyArray<AggregateSourceItem>,
+): AggregatedIngredient[] {
+  return aggregateGroups(items).groups.map((group) => {
+    const display = displayOf(group);
+    return {
+      ingredientName: group.displayName,
+      quantity: finalizeQuantity(display.quantity),
+      unit: display.unit,
+      recipes: [...group.sources],
+    };
+  });
 }
