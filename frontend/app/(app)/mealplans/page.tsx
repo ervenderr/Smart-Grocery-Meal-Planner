@@ -13,6 +13,7 @@ import { MealPlanDetailModal } from '@/components/mealplans/meal-plan-detail-mod
 import { MealPlanCard } from '@/components/mealplans/meal-plan-card';
 import { AIMealPlanModal } from '@/components/ai/ai-meal-plan-modal';
 import { mealPlanApi } from '@/lib/api/mealplans';
+import { PantryNote } from '@/components/shopping/pantry-note';
 import { useGenerateShoppingList } from '@/lib/hooks/use-generate-shopping-list';
 import toast from 'react-hot-toast';
 import type { MealPlan } from '@/types/mealplan.types';
@@ -167,6 +168,7 @@ export default function MealPlansPage() {
               )}
             </div>
           )}
+          {selectedPreviewPlan && <PantryNote mealPlanId={selectedPreviewPlan.id} />}
           <div className="bg-white rounded-lg p-4 max-h-96 overflow-y-auto">
             <div className="space-y-2">
               {shoppingListData.items.map((item: any, index: number) => (

@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { CategorySection } from '@/components/shopping/category-section';
 import { FinishSheet } from '@/components/shopping/finish-sheet';
 import { GenerateFromPlan } from '@/components/shopping/generate-from-plan';
+import { PantryNote } from '@/components/shopping/pantry-note';
 import { ItemEditSheet } from '@/components/shopping/item-edit-sheet';
 import { QUICK_ADD_INPUT_ID, QuickAdd, type QuickAddCallbacks } from '@/components/shopping/quick-add';
 import { ShoppingHistory } from '@/components/shopping/shopping-history';
@@ -181,6 +182,7 @@ export default function ShoppingPage() {
           />
 
           <GenerateFromPlan defaultExpanded={items.length === 0} />
+          <PantryNote />
         </>
       )}
 
