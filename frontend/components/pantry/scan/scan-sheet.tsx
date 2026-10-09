@@ -7,6 +7,7 @@ import { foodApi } from '@/lib/api/food';
 import { pantryApi } from '@/lib/api/pantry';
 import { isIosSafari, isStandalone } from '@/lib/pwa/detect-ios';
 import { resolveBarcode, type BarcodeResolution } from '@/lib/scan/resolve-barcode';
+import { isCameraAvailable } from '@/lib/scan/merge-scan';
 import { useBarcodeScanner } from '@/lib/scan/use-barcode-scanner';
 import { CameraView } from './camera-view';
 import { ManualBarcodeForm } from './manual-barcode-form';
@@ -85,9 +86,7 @@ function ScanBody({
   onAddWithoutBarcode,
 }: Omit<ScanSheetProps, 'isOpen'>) {
   const [state, setState] = useState<ScanState>(() =>
-    typeof navigator !== 'undefined' && navigator.mediaDevices
-      ? { name: 'requesting' }
-      : { name: 'unsupported' }
+    hasMediaDevices() ? { name: 'requesting' } : { name: 'unsupported' }
   );
   const busyRef = useRef(false);
   const lookupRef = useRef<(barcode: string) => void>(() => undefined);
@@ -213,7 +212,10 @@ function ScanBody({
               onSubmit={handleSubmit}
               onAddWithoutBarcode={withoutBarcode}
               submitLabel={mode === 'return' ? 'Use this barcode' : 'Look up barcode'}
-              cameraAvailable={scanner.status !== 'failed'}
+              cameraAvailable={isCameraAvailable({
+                hasMediaDevices: hasMediaDevices(),
+                failure: scanner.failure,
+              })}
               onScanWithCamera={() => setState({ name: 'requesting' })}
             />
           )}
@@ -244,6 +246,10 @@ function LiveRegion({ text }: { text: string }) {
       {text}
     </div>
   );
+}
+
+function hasMediaDevices(): boolean {
+  return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 }
 
 function isIosStandalone(): boolean {
