@@ -10,6 +10,9 @@
  *   limiter skips /api/<version>/shopping ONLY for requests carrying a valid
  *   JWT, so aisle check-offs are not throttled while unauthenticated or
  *   bad-token floods still hit the per-IP general limit)
+ * - Notification stats (GET /api/<version>/notifications/stats): 300 requests
+ *   per 15 minutes per user. Same JWT-gated skip as shopping, because the
+ *   frontend polls this read-only unread count from every open tab.
  * - AI endpoints: 10 requests per minute per user (burst limit; the daily cap
  *   is enforced by the DB quota, not here)
  *
@@ -39,6 +42,17 @@ const SHOPPING_PATH_PATTERN = new RegExp(
 export const isShoppingRequest = (originalUrl: string): boolean =>
   SHOPPING_PATH_PATTERN.test(originalUrl);
 
+const NOTIFICATION_STATS_PATH_PATTERN = new RegExp(
+  `^/api/${escapeRegExp(config.apiVersion)}/notifications/stats/?(\\?.*)?$`,
+);
+
+export const NOTIFICATION_STATS_RATE_LIMIT_MAX = 300;
+const NOTIFICATION_STATS_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+
+/** True only for the read-only GET /api/<version>/notifications/stats poll. */
+export const isNotificationStatsRequest = (method: string, originalUrl: string): boolean =>
+  method === 'GET' && NOTIFICATION_STATS_PATH_PATTERN.test(originalUrl);
+
 /** True when the request carries a bearer token with a valid signature and expiry. */
 export const hasValidBearerToken = (req: Request): boolean => {
   const token = extractTokenFromHeader(req.headers.authorization);
@@ -66,7 +80,10 @@ export const apiLimiter = rateLimit({
   // Mounted at '/api/', so req.path is relative; match on originalUrl.
   // Shopping has its own per-user limiter, but only for requests with a valid
   // token; unauthenticated traffic stays under this per-IP limit.
-  skip: (req: Request) => isShoppingRequest(req.originalUrl) && hasValidBearerToken(req),
+  skip: (req: Request) =>
+    (isShoppingRequest(req.originalUrl) ||
+      isNotificationStatsRequest(req.method, req.originalUrl)) &&
+    hasValidBearerToken(req),
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Skip rate limiting for successful requests in some cases
@@ -158,6 +175,33 @@ export const createShoppingLimiter = (limit: number = SHOPPING_RATE_LIMIT_MAX) =
   });
 
 export const shoppingLimiter = createShoppingLimiter();
+
+const NOTIFICATION_STATS_RATE_LIMIT_MESSAGE =
+  'Too many notification checks. Please wait a moment and try again.';
+
+/** Per-user limiter for the notification unread-count poll (IPv6-safe IP fallback). */
+export const createNotificationStatsLimiter = (limit: number = NOTIFICATION_STATS_RATE_LIMIT_MAX) =>
+  rateLimit({
+    windowMs: NOTIFICATION_STATS_RATE_LIMIT_WINDOW_MS,
+    limit,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req: Request) => {
+      const userId = (req as Request & { user?: { id?: string } }).user?.id;
+      return userId ?? ipKeyGenerator(req.ip ?? '');
+    },
+    handler: (_req: Request, res: Response) => {
+      res.status(429).json({
+        status: 'error',
+        statusCode: 429,
+        code: 'NOTIFICATION_RATE_LIMITED',
+        message: NOTIFICATION_STATS_RATE_LIMIT_MESSAGE,
+        error: NOTIFICATION_STATS_RATE_LIMIT_MESSAGE,
+      });
+    },
+  });
+
+export const notificationStatsLimiter = createNotificationStatsLimiter();
 
 const FOOD_RATE_LIMIT_MESSAGE = 'Too many product lookups. Please wait a minute and try again.';
 

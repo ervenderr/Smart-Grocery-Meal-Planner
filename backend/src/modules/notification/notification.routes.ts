@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import { NotificationController } from './notification.controller';
 import { authenticate } from '../../middleware/auth.middleware';
+import { notificationStatsLimiter } from '../../middleware/rateLimiter';
 import { asyncHandler } from '../../middleware/errorHandler';
 import { validateCreateNotification } from './notification.validation';
 import { validationResult } from 'express-validator';
@@ -35,7 +36,7 @@ router.use(authenticate);
  * GET /api/v1/notifications/stats
  * Get notification statistics (unread count, by type, etc.)
  */
-router.get('/stats', asyncHandler(notificationController.getStats.bind(notificationController)));
+router.get('/stats', notificationStatsLimiter, asyncHandler(notificationController.getStats.bind(notificationController)));
 
 /**
  * POST /api/v1/notifications/read-all
