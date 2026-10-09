@@ -1,0 +1,506 @@
+[
+  {
+    "input": "2 1/2 cups all-purpose flour",
+    "expected": {
+      "quantity": "2.50",
+      "unit": "cups",
+      "name": "all-purpose flour",
+      "note": null
+    }
+  },
+  {
+    "input": "½ tsp salt",
+    "expected": {
+      "quantity": "0.50",
+      "unit": "tsp",
+      "name": "salt",
+      "note": null
+    }
+  },
+  {
+    "input": "1½ cups milk",
+    "expected": {
+      "quantity": "1.50",
+      "unit": "cups",
+      "name": "milk",
+      "note": null
+    }
+  },
+  {
+    "input": "1 ½ cups milk",
+    "expected": {
+      "quantity": "1.50",
+      "unit": "cups",
+      "name": "milk",
+      "note": null
+    }
+  },
+  {
+    "input": "1-1/2 cups milk",
+    "expected": {
+      "quantity": "1.50",
+      "unit": "cups",
+      "name": "milk",
+      "note": null
+    }
+  },
+  {
+    "input": "2-3 tbsp oil",
+    "expected": {
+      "quantity": "3.00",
+      "unit": "tbsp",
+      "name": "oil",
+      "note": null
+    }
+  },
+  {
+    "input": "2 to 3 lbs chicken",
+    "expected": {
+      "quantity": "3.00",
+      "unit": "lbs",
+      "name": "chicken",
+      "note": null
+    }
+  },
+  {
+    "input": "2–3 cups rice",
+    "expected": {
+      "quantity": "3.00",
+      "unit": "cups",
+      "name": "rice",
+      "note": null
+    }
+  },
+  {
+    "input": "1/2-1 cup rice",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "cups",
+      "name": "rice",
+      "note": null
+    }
+  },
+  {
+    "input": "1,000 g flour",
+    "expected": {
+      "quantity": "1000.00",
+      "unit": "grams",
+      "name": "flour",
+      "note": null
+    }
+  },
+  {
+    "input": ".5 kg sugar",
+    "expected": {
+      "quantity": "0.50",
+      "unit": "kg",
+      "name": "sugar",
+      "note": null
+    }
+  },
+  {
+    "input": "2 cups of flour",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "cups",
+      "name": "flour",
+      "note": null
+    }
+  },
+  {
+    "input": "a pinch of salt",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "salt",
+      "note": null
+    }
+  },
+  {
+    "input": "salt to taste",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "salt",
+      "note": null
+    }
+  },
+  {
+    "input": "some parsley",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "parsley",
+      "note": null
+    }
+  },
+  {
+    "input": "pepper, to taste",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "pepper",
+      "note": null
+    }
+  },
+  {
+    "input": "a handful of spinach",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "spinach",
+      "note": null
+    }
+  },
+  {
+    "input": "a clove garlic",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "clove",
+      "name": "garlic",
+      "note": null
+    }
+  },
+  {
+    "input": "2 cloves garlic",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "clove",
+      "name": "garlic",
+      "note": null
+    }
+  },
+  {
+    "input": "3 eggs",
+    "expected": {
+      "quantity": "3.00",
+      "unit": "pieces",
+      "name": "eggs",
+      "note": null
+    }
+  },
+  {
+    "input": "2 large eggs",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "pieces",
+      "name": "large eggs",
+      "note": null
+    }
+  },
+  {
+    "input": "1 (14 oz) can tomatoes",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "can",
+      "name": "tomatoes",
+      "note": "14 oz"
+    }
+  },
+  {
+    "input": "2 kg rice",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "kg",
+      "name": "rice",
+      "note": null
+    }
+  },
+  {
+    "input": "1/3 cup sugar",
+    "expected": {
+      "quantity": "0.33",
+      "unit": "cups",
+      "name": "sugar",
+      "note": null
+    }
+  },
+  {
+    "input": "8 oz milk",
+    "expected": {
+      "quantity": "8.00",
+      "unit": "oz",
+      "name": "milk",
+      "note": null
+    }
+  },
+  {
+    "input": "2 l milk",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "liters",
+      "name": "milk",
+      "note": null
+    }
+  },
+  {
+    "input": "1.5 L water",
+    "expected": {
+      "quantity": "1.50",
+      "unit": "liters",
+      "name": "water",
+      "note": null
+    }
+  },
+  {
+    "input": "2 T butter",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "pieces",
+      "name": "T butter",
+      "note": null
+    }
+  },
+  {
+    "input": "0 cups x",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "x",
+      "note": null
+    }
+  },
+  {
+    "input": "100000 g flour",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "flour",
+      "note": null
+    }
+  },
+  {
+    "input": "0.004 kg salt",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "salt",
+      "note": null
+    }
+  },
+  {
+    "input": "",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "",
+      "note": null
+    }
+  },
+  {
+    "input": "2% milk",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "2% milk",
+      "note": null
+    }
+  },
+  {
+    "input": "2 % milk",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "2 % milk",
+      "note": null
+    }
+  },
+  {
+    "input": "2 percent milk",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "2 percent milk",
+      "note": null
+    }
+  },
+  {
+    "input": "100% juice",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "100% juice",
+      "note": null
+    }
+  },
+  {
+    "input": "7up",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "7up",
+      "note": null
+    }
+  },
+  {
+    "input": "7up soda",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "7up soda",
+      "note": null
+    }
+  },
+  {
+    "input": "3M tape",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "3M tape",
+      "note": null
+    }
+  },
+  {
+    "input": "1 pizza",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "pieces",
+      "name": "pizza",
+      "note": null
+    }
+  },
+  {
+    "input": "2kg rice",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "kg",
+      "name": "rice",
+      "note": null
+    }
+  },
+  {
+    "input": "2 tablespoons olive oil",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "tbsp",
+      "name": "olive oil",
+      "note": null
+    }
+  },
+  {
+    "input": "1 fl oz vodka",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "fl_oz",
+      "name": "vodka",
+      "note": null
+    }
+  },
+  {
+    "input": "Milk",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "Milk",
+      "note": null
+    }
+  },
+  {
+    "input": "2",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "pieces",
+      "name": "",
+      "note": null
+    }
+  },
+  {
+    "input": "  3   cans   beans  ",
+    "expected": {
+      "quantity": "3.00",
+      "unit": "can",
+      "name": "beans",
+      "note": null
+    }
+  },
+  {
+    "input": "1 1/2 lb ground beef",
+    "expected": {
+      "quantity": "1.50",
+      "unit": "lbs",
+      "name": "ground beef",
+      "note": null
+    }
+  },
+  {
+    "input": "¾ cup sugar",
+    "expected": {
+      "quantity": "0.75",
+      "unit": "cups",
+      "name": "sugar",
+      "note": null
+    }
+  },
+  {
+    "input": "2 tsp. salt",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "tsp",
+      "name": "salt",
+      "note": null
+    }
+  },
+  {
+    "input": "an apple",
+    "expected": {
+      "quantity": null,
+      "unit": null,
+      "name": "an apple",
+      "note": null
+    }
+  },
+  {
+    "input": "1 dozen eggs",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "dozen",
+      "name": "eggs",
+      "note": null
+    }
+  },
+  {
+    "input": "2 Cups Flour",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "cups",
+      "name": "Flour",
+      "note": null
+    }
+  },
+  {
+    "input": "2 pinches salt",
+    "expected": {
+      "quantity": "2.00",
+      "unit": "pinch",
+      "name": "salt",
+      "note": null
+    }
+  },
+  {
+    "input": "3 slices bread",
+    "expected": {
+      "quantity": "3.00",
+      "unit": "slice",
+      "name": "bread",
+      "note": null
+    }
+  },
+  {
+    "input": "99999 g rice",
+    "expected": {
+      "quantity": "99999.00",
+      "unit": "grams",
+      "name": "rice",
+      "note": null
+    }
+  },
+  {
+    "input": "1 head cabbage",
+    "expected": {
+      "quantity": "1.00",
+      "unit": "head",
+      "name": "cabbage",
+      "note": null
+    }
+  }
+]
