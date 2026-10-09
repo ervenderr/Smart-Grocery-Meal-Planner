@@ -11,6 +11,9 @@ export interface UserPreferences {
   preferredUnit: string;
   /** Optional: an older backend omits this field. */
   onboardingCompletedAt?: string | null;
+  /** Optional: an older backend omits these fields. */
+  stapleNames?: string[];
+  defaultStapleNames?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -26,5 +29,6 @@ export type UpdatePreferencesData = Partial<
     | 'mealsPerDay'
     | 'dietaryRestrictions'
     | 'preferredUnit'
+    | 'stapleNames'
   >
 >;
