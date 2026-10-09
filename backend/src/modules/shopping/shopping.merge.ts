@@ -1,15 +1,14 @@
 /**
  * Pure merge of incoming ingredients into existing shopping list items.
- * Only UNCHECKED existing items absorb incoming quantities.
+ * Only UNCHECKED existing items absorb incoming quantities. Matching is by
+ * canonical name + unit family; math is exact (Decimal) in base units.
  */
 
-import {
-  MAX_ITEM_NAME_LENGTH,
-  MAX_QUANTITY,
-  MIN_QUANTITY,
-} from './shopping.constants';
+import { IngredientGroup, displayOf, groupIngredients, groupKey } from '../intelligence/merge-groups';
+import { Dec, ZERO, finalizeQuantity, parseDec } from '../intelligence/quantity';
+import { resolveUnit, toBase, toDisplay } from '../intelligence/units';
+import { MAX_ITEM_NAME_LENGTH } from './shopping.constants';
 import { inferCategory } from './shopping.category';
-import { coerceUnit } from './shopping.units';
 
 export interface ExistingItem {
   readonly id: string;
@@ -21,12 +20,16 @@ export interface ExistingItem {
 
 export interface IncomingItem {
   readonly itemName: string;
-  readonly quantity: number;
+  readonly quantity: number | Dec;
   readonly unit: string;
 }
 
 export interface MergePlan {
-  readonly updates: ReadonlyArray<{ readonly id: string; readonly quantity: number }>;
+  readonly updates: ReadonlyArray<{
+    readonly id: string;
+    readonly quantity: number;
+    readonly unit: string;
+  }>;
   readonly inserts: ReadonlyArray<{
     readonly itemName: string;
     readonly quantity: number;
@@ -35,49 +38,22 @@ export interface MergePlan {
   }>;
 }
 
-const SEP = '\u0000';
-const MAX_HUNDREDTHS = Math.round(MAX_QUANTITY * 100);
-const MIN_HUNDREDTHS = Math.round(MIN_QUANTITY * 100);
+export const mergeKey = (name: string, unit: string): string => groupKey(name, unit);
 
-export const mergeKey = (name: string, unit: string): string =>
-  `${name.trim().toLowerCase()}${SEP}${unit.trim().toLowerCase()}`;
+const cleanName = (raw: string): string =>
+  raw.replace(/\s+/g, ' ').trim().slice(0, MAX_ITEM_NAME_LENGTH).trim();
 
-/** Positive amounts round to hundredths, clamped to [MIN_QUANTITY, MAX_QUANTITY]. */
-const toHundredths = (q: number): number =>
-  Math.min(MAX_HUNDREDTHS, Math.max(MIN_HUNDREDTHS, Math.round(q * 100)));
-
-interface Clean {
-  readonly itemName: string;
-  readonly unit: string;
-  readonly hundredths: number;
-}
-
-/**
- * Rule: incoming lines with a zero, negative or non-finite quantity (for
- * example "salt, 0 tsp") are skipped rather than coerced to 1.
- */
-const clean = (item: IncomingItem): Clean | null => {
-  if (!Number.isFinite(item.quantity) || item.quantity <= 0) return null;
-  const itemName = item.itemName.replace(/\s+/g, ' ').trim().slice(0, MAX_ITEM_NAME_LENGTH).trim();
-  if (itemName.length === 0) return null;
-  return { itemName, unit: coerceUnit(item.unit), hundredths: toHundredths(item.quantity) };
-};
-
-/** Collapses duplicate incoming items (first-seen text wins). */
-const collapseIncoming = (incoming: readonly IncomingItem[]): Clean[] => {
-  const map = new Map<string, Clean>();
-  for (const raw of incoming) {
-    const c = clean(raw);
-    if (!c) continue;
-    const key = mergeKey(c.itemName, c.unit);
-    const prev = map.get(key);
-    map.set(
-      key,
-      prev ? { ...prev, hundredths: Math.min(MAX_HUNDREDTHS, prev.hundredths + c.hundredths) } : c,
-    );
-  }
-  return Array.from(map.values());
-};
+/** Collapses incoming items into groups; zero, negative and non-finite amounts are skipped (WR-04). */
+const groupIncoming = (incoming: readonly IncomingItem[]): IngredientGroup[] =>
+  groupIngredients(
+    incoming.flatMap((item) => {
+      const quantity = parseDec(item.quantity);
+      const name = cleanName(item.itemName);
+      return quantity && quantity.gt(0) && name.length > 0
+        ? [{ name, quantity, unit: item.unit }]
+        : [];
+    }),
+  );
 
 export function mergeIntoItems(
   existing: readonly ExistingItem[],
@@ -89,20 +65,31 @@ export function mergeIntoItems(
     if (!item.isChecked && !unchecked.has(key)) unchecked.set(key, item);
   }
 
-  const updates: Array<{ id: string; quantity: number }> = [];
+  const updates: Array<MergePlan['updates'][number]> = [];
   const inserts: Array<MergePlan['inserts'][number]> = [];
 
-  for (const c of collapseIncoming(incoming)) {
-    const match = unchecked.get(mergeKey(c.itemName, c.unit));
+  for (const group of groupIncoming(incoming)) {
+    const match = unchecked.get(group.key);
     if (match) {
-      const sum = Math.min(MAX_HUNDREDTHS, Math.round(match.quantity * 100) + c.hundredths);
-      updates.push({ id: match.id, quantity: sum / 100 });
+      // List quantities are stored at 2 dp, so the merge starts from the rounded
+      // stored value (accepted drift, see RESEARCH).
+      const unit = resolveUnit(match.unit);
+      const existingQty = parseDec(match.quantity);
+      const total = (existingQty ? toBase(existingQty, unit) : ZERO).plus(group.baseTotal);
+      const shown = toDisplay({
+        family: group.family,
+        countLabel: group.countLabel,
+        baseTotal: total,
+        inputUnitKeys: [unit.unitKey, ...group.inputUnitKeys],
+      });
+      updates.push({ id: match.id, quantity: finalizeQuantity(shown.quantity), unit: shown.unit });
     } else {
+      const shown = displayOf(group);
       inserts.push({
-        itemName: c.itemName,
-        quantity: c.hundredths / 100,
-        unit: c.unit,
-        category: inferCategory(c.itemName),
+        itemName: group.displayName,
+        quantity: finalizeQuantity(shown.quantity),
+        unit: shown.unit,
+        category: inferCategory(group.displayName),
       });
     }
   }
