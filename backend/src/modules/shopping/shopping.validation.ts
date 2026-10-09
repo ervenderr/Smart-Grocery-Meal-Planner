@@ -122,6 +122,11 @@ export const validateGenerate: ValidationChain[] = [
 ];
 
 export const validateFinish: ValidationChain[] = [
+  body('addToPantry')
+    .optional()
+    .isBoolean({ strict: true })
+    .withMessage('addToPantry must be a boolean')
+    .toBoolean(),
   body('carryOver')
     .optional()
     .isIn(['carry', 'discard'])

@@ -67,6 +67,29 @@ export interface ShoppingHistoryEntryDto {
 export interface FinishShoppingResult {
   readonly history: ShoppingHistoryEntryDto;
   readonly list: ShoppingListDto;
+  /** Present only when the request set addToPantry. */
+  readonly pantry?: {
+    readonly added: number;
+    readonly merged: number;
+    readonly failed: boolean;
+  };
+}
+
+/** Checked list item as finished (internal; never serialized to the client). */
+export interface FinishedCheckedItem {
+  readonly itemName: string;
+  readonly quantity: unknown;
+  readonly unit: string | null;
+  readonly category: string | null;
+  readonly actualCostCents: number | null;
+  readonly costEstimateCents: number | null;
+}
+
+/** Internal finish outcome: the HTTP result plus data for the after-commit pantry step. */
+export interface FinishShoppingOutcome {
+  readonly result: FinishShoppingResult;
+  readonly checkedItems: readonly FinishedCheckedItem[];
+  readonly receiptDate: Date;
 }
 
 export interface ShoppingHistoryPage {

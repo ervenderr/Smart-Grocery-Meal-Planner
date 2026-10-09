@@ -6,7 +6,7 @@ import { prisma } from '../../config/database.config';
 import { AppError } from '../../middleware/errorHandler';
 import type {
   CarryOverMode,
-  FinishShoppingResult,
+  FinishShoppingOutcome,
   ShoppingHistoryPage,
 } from '../../types/shopping.types';
 import { SHOPPING_ERROR_CODES } from './shopping.constants';
@@ -39,7 +39,7 @@ export async function finishShopping(
   userId: string,
   carryOver: CarryOverMode = 'carry',
   receiptDate?: string,
-): Promise<FinishShoppingResult> {
+): Promise<FinishShoppingOutcome> {
   return prisma.$transaction(async (tx) => {
     const listId = await findActiveListIdForUpdate(tx, userId);
     if (!listId) throw emptyError();
@@ -92,8 +92,21 @@ export async function finishShopping(
     }
 
     return {
-      history: toHistoryDto(history, totals, list.name),
-      list: await loadListDto(tx, newListId),
+      result: {
+        history: toHistoryDto(history, totals, list.name),
+        list: await loadListDto(tx, newListId),
+      },
+      checkedItems: items
+        .filter((i) => i.isChecked)
+        .map((i) => ({
+          itemName: i.itemName,
+          quantity: i.quantity,
+          unit: i.unit,
+          category: i.category,
+          actualCostCents: i.actualCostCents,
+          costEstimateCents: i.costEstimateCents,
+        })),
+      receiptDate: date,
     };
   });
 }

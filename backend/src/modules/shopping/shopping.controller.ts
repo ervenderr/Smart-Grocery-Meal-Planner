@@ -9,7 +9,9 @@ import type {
   UpdateShoppingItemInput,
 } from '../../types/shopping.types';
 import type { CarryOverMode } from '../../types/shopping.types';
+import { logger } from '../../config/logger.config';
 import { finishShopping, getHistory } from './shopping-finish.service';
+import { applyPantryMerge } from './shopping-pantry.service';
 import { HISTORY_PAGE_LIMIT_DEFAULT } from './shopping.constants';
 import { generateFromMealPlan } from './shopping-generate.service';
 import { ShoppingService } from './shopping.service';
@@ -72,11 +74,37 @@ export class ShoppingController {
   }
 
   async finish(req: Request, res: Response): Promise<void> {
-    const { carryOver, receiptDate } = matchedData(req, { locations: ['body'] }) as {
+    const { carryOver, receiptDate, addToPantry } = matchedData(req, {
+      locations: ['body'],
+    }) as {
       carryOver?: CarryOverMode;
       receiptDate?: string;
+      addToPantry?: boolean;
     };
-    res.status(200).json(await finishShopping(userIdOf(req), carryOver, receiptDate));
+    const userId = userIdOf(req);
+    const outcome = await finishShopping(userId, carryOver, receiptDate);
+    if (addToPantry !== true) {
+      res.status(200).json(outcome.result);
+      return;
+    }
+    // The finish transaction has committed; a pantry failure must never undo it.
+    try {
+      const { added, merged } = await applyPantryMerge(
+        userId,
+        outcome.checkedItems,
+        outcome.receiptDate,
+      );
+      res.status(200).json({ ...outcome.result, pantry: { added, merged, failed: false } });
+    } catch (error) {
+      logger.error('Bought-it pantry merge failed', {
+        userId,
+        itemCount: outcome.checkedItems.length,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      res
+        .status(200)
+        .json({ ...outcome.result, pantry: { added: 0, merged: 0, failed: true } });
+    }
   }
 
   async history(req: Request, res: Response): Promise<void> {
