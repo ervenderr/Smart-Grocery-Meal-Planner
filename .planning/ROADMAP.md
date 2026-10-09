@@ -130,7 +130,21 @@ Plans:
   3. Generated lists leave out what the pantry already covers
   4. User can mark staples such as salt and oil, and they never appear in generated lists
   5. A "Cook this first" view ranks the user's recipes by how many soon-to-expire pantry items they use, with no AI call
-**Plans**: TBD
+**Plans**: 13 plans
+Plans:
+- [ ] 05-01-PLAN.md — Intelligence core: exact Decimal quantities, unit registry + display ladder, canonical names (wave 1)
+- [ ] 05-02-PLAN.md — Housekeeping: ISO week-year analytics period keys (wave 1)
+- [ ] 05-03-PLAN.md — Ingredient line parser (backend + mirrored frontend, shared fixture) and one-line quick-add (wave 2)
+- [ ] 05-04-PLAN.md — Staples backend: stapleNames migration, sanitizer/filter, preferences validation (wave 2)
+- [ ] 05-05-PLAN.md — Pure grouping by canonical name + unit family and pantry subtraction (wave 2)
+- [ ] 05-06-PLAN.md — Settings Staples section (chips, add, remove, reset to defaults) (wave 3)
+- [ ] 05-07-PLAN.md — Rewire meal plan aggregation and list merge onto the engine; update Phase 4 tests (wave 3)
+- [ ] 05-08-PLAN.md — Cook-first ranking and GET /recipes/cook-first (wave 3)
+- [ ] 05-09-PLAN.md — Generate pipeline: staples, pantry subtraction, unit-aware updates, additive response (wave 4)
+- [ ] 05-10-PLAN.md — Dashboard "Cook this first" card and Recipes "Use expiring first" sort (wave 4)
+- [ ] 05-11-PLAN.md — "Already in your pantry" / "Skipped staples" notes on Shopping and Meal Plans (wave 5)
+- [ ] 05-12-PLAN.md — Ship: smoke check 13, Railway backend first, then push main (wave 6)
+- [ ] 05-13-PLAN.md — Real-phone verification (deferrable checkpoint) (wave 7)
 **UI hint**: yes
 
 ### Phase 6: Capture Loops
@@ -158,5 +172,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6. Phases 2 and 3 touc
 | 2. Reliable AI Suggestions | 8/8 | Complete    | 2026-10-08 |
 | 3. Mobile-First Shell | 13/14 | Complete    | 2026-10-08 |
 | 4. Persistent Shopping List | 11/12 | Complete    | 2026-10-08 |
-| 5. Pantry-Aware Intelligence | 0/TBD | Not started | - |
+| 5. Pantry-Aware Intelligence | 0/13 | Planned | - |
 | 6. Capture Loops | 0/TBD | Not started | - |
