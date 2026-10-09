@@ -52,7 +52,7 @@ export class MealPlanService {
     }
 
     // Check if all recipes exist
-    const recipeIds = meals.map((m) => m.recipeId);
+    const recipeIds = [...new Set(meals.map((m) => m.recipeId))];
     const recipes = await prisma.recipe.findMany({
       where: {
         id: { in: recipeIds },
@@ -344,7 +344,7 @@ export class MealPlanService {
       }
 
       // Check if all recipes exist
-      const recipeIds = data.meals.map((m) => m.recipeId);
+      const recipeIds = [...new Set(data.meals.map((m) => m.recipeId))];
       const recipes = await prisma.recipe.findMany({
         where: {
           id: { in: recipeIds },
