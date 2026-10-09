@@ -105,9 +105,11 @@ describe('GET /api/v1/recipes/cook-first', () => {
   it('applies limit, includeAll and ignores limit with includeAll', async () => {
     expect(names(await get(user, `?today=${TODAY}&limit=1`))).toEqual(['D']);
     const all = await get(user, `?today=${TODAY}&includeAll=true`);
-    expect(names(all).slice(0, 4)).toEqual(['D', 'A', 'B', 'C']);
+    // Zero-score recipes (C and the malformed ones) follow the ranked ones.
+    expect(names(all).slice(0, 3)).toEqual(['D', 'A', 'B']);
+    expect(names(all)).toContain('C');
     const ignored = await get(user, `?today=${TODAY}&includeAll=true&limit=1`);
-    expect(names(ignored).slice(0, 4)).toEqual(['D', 'A', 'B', 'C']);
+    expect(names(ignored)).toEqual(names(all));
   });
 
   it('shifts daysLeft with today and excludes expired items', async () => {

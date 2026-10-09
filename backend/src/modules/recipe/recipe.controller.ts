@@ -7,6 +7,7 @@
 import { Request, Response } from 'express';
 import { RecipeService } from './recipe.service';
 import { asyncHandler } from '../../middleware/errorHandler';
+import { getCookFirst } from '../intelligence/cook-first.service';
 import {
   CreateRecipeRequest,
   UpdateRecipeRequest,
@@ -116,5 +117,23 @@ export class RecipeController {
     const stats = await this.recipeService.getStats(userId);
 
     res.status(200).json(stats);
+  });
+
+  /**
+   * Recipes ranked by soon-to-expire pantry usage (no AI)
+   * GET /api/v1/recipes/cook-first
+   */
+  getCookFirst = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const includeAll = req.query.includeAll === 'true';
+    const limit = req.query.limit ? Number(req.query.limit) : 3;
+    const today =
+      typeof req.query.today === 'string'
+        ? new Date(`${req.query.today}T00:00:00.000Z`)
+        : new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z');
+
+    const result = await getCookFirst(userId, { limit, today, includeAll });
+
+    res.status(200).json(result);
   });
 }

@@ -12,6 +12,7 @@ import {
   validateUpdateRecipe,
   validateGetRecipes,
   validateRecipeId,
+  validateCookFirst,
   validate,
 } from './recipe.validation';
 
@@ -23,6 +24,9 @@ router.use(authenticate);
 
 // GET /stats must come before /:id to avoid treating 'stats' as an ID
 router.get('/stats', recipeController.getStats);
+
+// GET /cook-first must also come before /:id to avoid treating 'cook-first' as an ID
+router.get('/cook-first', validateCookFirst, validate, recipeController.getCookFirst);
 
 // Recipe CRUD operations
 router.post('/', validateCreateRecipe, validate, recipeController.createRecipe);

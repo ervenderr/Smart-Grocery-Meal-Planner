@@ -4,7 +4,9 @@
  * Business logic for recipe management.
  */
 
+import { Recipe } from '@prisma/client';
 import { prisma } from '../../config/database.config';
+import { toRecipeResponse } from './recipe.format';
 import { logger } from '../../config/logger.config';
 import { AppError } from '../../middleware/errorHandler';
 import {
@@ -14,7 +16,6 @@ import {
   GetRecipesQuery,
   PaginatedRecipeResponse,
   RecipeStats,
-  RecipeIngredient,
 } from '../../types/recipe.types';
 
 export class RecipeService {
@@ -424,26 +425,7 @@ export class RecipeService {
   /**
    * Format recipe for response
    */
-  private formatRecipe(recipe: any): RecipeResponse {
-    return {
-      id: recipe.id,
-      userId: recipe.userId,
-      name: recipe.title,
-      description: recipe.description,
-      category: recipe.category,
-      difficulty: recipe.difficulty,
-      prepTimeMinutes: recipe.prepTimeMinutes,
-      cookTimeMinutes: recipe.cookTimeMinutes,
-      totalTimeMinutes: recipe.prepTimeMinutes + recipe.cookTimeMinutes,
-      servings: recipe.servings,
-      ingredients: recipe.ingredientsList as RecipeIngredient[],
-      instructions: recipe.instructions,
-      imageUrl: recipe.imageUrl,
-      tags: recipe.tags,
-      dietaryRestrictions: recipe.dietaryRestrictions,
-      isPublic: recipe.isPublic,
-      createdAt: recipe.createdAt.toISOString(),
-      updatedAt: recipe.updatedAt.toISOString(),
-    };
+  private formatRecipe(recipe: Recipe): RecipeResponse {
+    return toRecipeResponse(recipe);
   }
 }

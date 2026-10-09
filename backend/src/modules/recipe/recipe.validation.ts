@@ -341,3 +341,25 @@ export const validateGetRecipes: ValidationChain[] = [
 export const validateRecipeId: ValidationChain[] = [
   param('id').isUUID().withMessage('Invalid recipe ID'),
 ];
+
+/** True when YYYY-MM-DD is a real calendar date (rejects 2021-02-30). */
+export const isRealCalendarDate = (value: string): boolean => {
+  const [y, m, d] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+};
+
+/**
+ * Validation for GET /recipes/cook-first
+ */
+export const validateCookFirst: ValidationChain[] = [
+  query('limit').optional().isInt({ min: 1, max: 200 }).withMessage('limit must be 1-200').toInt(),
+  query('today')
+    .optional()
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage('today must be YYYY-MM-DD')
+    .bail()
+    .custom(isRealCalendarDate)
+    .withMessage('today must be a real calendar date'),
+  query('includeAll').optional().isIn(['true', 'false']).withMessage('includeAll must be true or false'),
+];
