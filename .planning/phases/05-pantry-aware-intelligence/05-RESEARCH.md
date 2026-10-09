@@ -467,14 +467,19 @@ await tx.$executeRaw`
 | A7 | Recipes number in tens to low hundreds and pantry items in tens to low hundreds per user (no counts verified in prod) | Cook This First / Pantry | If thousands, still fine in memory; add the 500-recipe safety cap |
 | A8 | `mergeIntoItems` has no callers other than generate and tests (not grepped across `finish`) | Runtime notes | Planner must grep callers before changing `MergePlan` |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All three were resolved by the orchestrator on 2026-10-09; see 05-CONTEXT.md, "Resolved research questions".
 
 1. **Same-unit single-input groups through the ladder (2000 grams -> 2 kg)?**
    - Known: context example is 1500 g -> 1.5 kg after a mix. Phase 4 kept units as-is.
    - Unclear: whether users want unit changes when all inputs share a unit.
    - Recommendation: ladder always (consistent, predictable); keep the rule in one function so it is a one-line change.
+   - RESOLVED (05-CONTEXT.md, Resolved research questions): the display ladder applies even to single-unit groups (2000 g -> 2 kg); affected Phase 4 test expectations are updated explicitly (plans 05-07, 05-09).
 2. **Recipes page sort wiring.** Recommendation above (separate `cook-first` fetch with `includeAll`). Planner confirm `RecipeCard` field needs.
+   - RESOLVED (05-CONTEXT.md, Resolved research questions): separate cook-first fetch with `includeAll` so all recipes are ranked; the endpoint returns full recipe payloads for `RecipeCard` (plans 05-08, 05-10).
 3. **Reset-to-defaults source.** Recommend backend `defaultStapleNames`; frontend-constant alternative acceptable.
+   - RESOLVED (05-CONTEXT.md, Resolved research questions): the backend supplies `defaultStapleNames`, with a parity test across the TS constant, `schema.prisma` and the migration SQL (plans 05-04, 05-06).
 
 ## Environment Availability
 
