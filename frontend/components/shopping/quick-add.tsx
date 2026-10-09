@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { nameAfterAddSuccess, parseQuantityInput } from '@/lib/shopping/item-input';
+import { quickAddFromLine } from '@/lib/shopping/parse-line';
 import {
   DEFAULT_UNIT,
   MAX_ITEM_NAME_LENGTH,
@@ -46,7 +47,11 @@ export function QuickAdd({ onAdd, disabled = false, isFull = false }: QuickAddPr
     const trimmed = name.trim();
     if (!trimmed || isDisabled || inFlight.current) return;
 
-    const parsed = parseQuantityInput(quantity);
+    // One-line entry ("2 kg rice") only when the options were left untouched.
+    const fromLine = quantity === '' && unit === DEFAULT_UNIT ? quickAddFromLine(trimmed) : null;
+    const parsed = fromLine
+      ? ({ ok: true, quantity: fromLine.quantity } as const)
+      : parseQuantityInput(quantity);
     if (!parsed.ok) {
       setQuantityError(parsed.message);
       setShowOptions(true);
@@ -58,9 +63,9 @@ export function QuickAdd({ onAdd, disabled = false, isFull = false }: QuickAddPr
     setPending(true);
     onAdd(
       {
-        itemName: trimmed,
+        itemName: fromLine ? fromLine.itemName : trimmed,
         quantity: parsed.quantity,
-        unit,
+        unit: fromLine ? fromLine.unit : unit,
         ...(category ? { category } : {}),
       },
       {
@@ -85,7 +90,7 @@ export function QuickAdd({ onAdd, disabled = false, isFull = false }: QuickAddPr
             maxLength={MAX_ITEM_NAME_LENGTH}
             enterKeyHint="done"
             autoComplete="off"
-            placeholder="e.g. Eggs"
+            placeholder="Add an item, e.g. 2 kg rice"
             disabled={isDisabled}
           />
         </div>
