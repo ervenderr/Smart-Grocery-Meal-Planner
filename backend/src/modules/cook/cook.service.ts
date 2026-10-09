@@ -11,6 +11,7 @@ import type {
   CookPreviewInput,
   CookPreviewResponse,
 } from '../../types/cook.types';
+import { lockUserPantry } from '../pantry/pantry.lock';
 import { resolveStaples } from '../intelligence/staples';
 import { COOK_ERROR_CODES, COOK_PANTRY_READ_CAP } from './cook.constants';
 import { alreadyCooked, mealNotFound, resolveCookTarget } from './cook.target';
@@ -66,6 +67,8 @@ async function applyDeductions(
   userId: string,
   deductions: CookApplyInput['deductions'],
 ): Promise<CookApplyResponse> {
+  // Serialise against quick-edits and parallel applies before reading stock.
+  await lockUserPantry(tx, userId);
   const lots: CookLot[] = await tx.pantryItem.findMany({
     where: { userId, deletedAt: null },
     select: PANTRY_LOT_SELECT,

@@ -203,6 +203,15 @@ describe('POST /api/v1/cook/apply', () => {
     expect(get.status).toBe(200);
   });
 
+  it('does not lose a deduction when two applies race on the same lot', async () => {
+    const lot = await addLot(a, 'Flour', 12, 'pieces');
+    const key = await keyFor(a, { ingredientName: 'flour', quantity: 3, unit: 'pieces' });
+    const body = { recipeId, deductions: [{ key, unit: 'pieces', use: 3 }] };
+    const [r1, r2] = await Promise.all([apply(a, body), apply(a, body)]);
+    expect([r1.status, r2.status]).toEqual([200, 200]);
+    expect(await qtyOf(lot)).toBe(6);
+  });
+
   it('floors at zero and keeps the row', async () => {
     const lot = await addLot(a, 'Bananas', 8, 'pieces');
     const key = await keyFor(a, { ingredientName: 'bananas', quantity: 1, unit: 'pieces' });
