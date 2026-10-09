@@ -15,10 +15,11 @@ import {
   PaginatedMealPlanResponse,
   MealPlanStats,
   ShoppingListFromMealPlan,
-  MealPlanItemResponse,
   MealPlanItemInput,
 } from "../../types/mealplan.types";
 import { aggregateIngredients } from "./mealplan.aggregate";
+import { carryCookedAt } from "./mealplan.cooked";
+import { formatMealPlan } from "./mealplan.format";
 import { RecipeCategory, RecipeDifficulty } from "../../types/recipe.types";
 import { zapierService } from "../zapier";
 
@@ -125,7 +126,7 @@ export class MealPlanService {
     });
 
     // Dispatch Zapier event for meal plan created
-    const formattedMealPlan = this.formatMealPlan(mealPlan);
+    const formattedMealPlan = formatMealPlan(mealPlan);
     zapierService
       .dispatchEvent(userId, "meal_plan_created", {
         mealPlanId: mealPlan.id,
@@ -225,7 +226,7 @@ export class MealPlanService {
     });
 
     return {
-      items: mealPlans.map((plan) => this.formatMealPlan(plan)),
+      items: mealPlans.map((plan) => formatMealPlan(plan)),
       pagination: {
         page,
         limit,
@@ -269,7 +270,7 @@ export class MealPlanService {
       throw new AppError("Meal plan not found", 404);
     }
 
-    return this.formatMealPlan(mealPlan);
+    return formatMealPlan(mealPlan);
   }
 
   /**
@@ -360,13 +361,20 @@ export class MealPlanService {
       updateData.totalCostCents = totalCostCents;
       updateData.totalCalories = totalCalories;
 
+      // Keep the cooked marker on meals whose (recipe, day, type) survives the edit
+      const previousMeals = await prisma.mealPlanItem.findMany({
+        where: { mealPlanId },
+        select: { recipeId: true, dayOfWeek: true, mealType: true, cookedAt: true },
+      });
+      const carriedCookedAt = carryCookedAt(previousMeals, data.meals);
+
       // Delete existing meal plan items and create new ones
       await prisma.mealPlanItem.deleteMany({
         where: { mealPlanId },
       });
 
       updateData.mealPlanItems = {
-        create: data.meals.map((meal) => {
+        create: data.meals.map((meal, index) => {
           const recipe = recipes.find((r) => r.id === meal.recipeId)!;
           const servings = meal.servings || 1;
 
@@ -383,6 +391,7 @@ export class MealPlanService {
             calories: recipe.caloriesPerServing
               ? recipe.caloriesPerServing * servings
               : null,
+            cookedAt: carriedCookedAt[index],
           };
         }),
       };
@@ -415,7 +424,7 @@ export class MealPlanService {
       mealPlanId,
     });
 
-    return this.formatMealPlan(mealPlan);
+    return formatMealPlan(mealPlan);
   }
 
   /**
@@ -749,7 +758,7 @@ export class MealPlanService {
       recipesCreated: recipeMap.size,
     });
 
-    return this.formatMealPlan(mealPlan);
+    return formatMealPlan(mealPlan);
   }
 
   /**
@@ -762,44 +771,5 @@ export class MealPlanService {
     if (mealTypeLower === "dinner") return RecipeCategory.DINNER;
     if (mealTypeLower === "snack") return RecipeCategory.SNACK;
     return RecipeCategory.DINNER; // Default
-  }
-
-  /**
-   * Format meal plan for response
-   */
-  private formatMealPlan(mealPlan: any): MealPlanResponse {
-    return {
-      id: mealPlan.id,
-      userId: mealPlan.userId,
-      name: mealPlan.name,
-      startDate: mealPlan.startDate.toISOString().split("T")[0],
-      endDate: mealPlan.endDate.toISOString().split("T")[0],
-      totalCostCents: mealPlan.totalCostCents,
-      totalCalories: mealPlan.totalCalories,
-      isFavorite: mealPlan.isFavorite,
-      notes: mealPlan.notes,
-      meals: mealPlan.mealPlanItems.map(
-        (item: any): MealPlanItemResponse => ({
-          id: item.id,
-          recipeId: item.recipeId,
-          dayOfWeek: item.dayOfWeek,
-          mealType: item.mealType,
-          servings: item.servings,
-          costCents: item.costCents,
-          calories: item.calories,
-          recipe: item.recipe
-            ? {
-                id: item.recipe.id,
-                name: item.recipe.title,
-                imageUrl: item.recipe.imageUrl,
-                prepTimeMinutes: item.recipe.prepTimeMinutes,
-                cookTimeMinutes: item.recipe.cookTimeMinutes,
-              }
-            : undefined,
-        })
-      ),
-      createdAt: mealPlan.createdAt.toISOString(),
-      updatedAt: mealPlan.updatedAt.toISOString(),
-    };
   }
 }

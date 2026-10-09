@@ -48,6 +48,7 @@ export interface MealPlanItemResponse {
   servings: number;
   costCents?: number;
   calories?: number;
+  cookedAt: string | null;
   recipe?: {
     id: string;
     name: string;
