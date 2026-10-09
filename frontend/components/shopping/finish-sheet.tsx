@@ -11,6 +11,7 @@ import type { CarryOverMode } from '@/types/shopping.types';
 export const NOTHING_CHECKED_HINT = 'Check off at least one item to finish this trip.';
 export const NOTHING_CHECKED_HINT_ID = 'finish-nothing-checked-hint';
 const PANTRY_LABEL_ID = 'finish-pantry-label';
+const PANTRY_SWITCH_ID = 'finish-pantry-switch';
 const PANTRY_HELPER_ID = 'finish-pantry-helper';
 
 interface FinishSheetProps {
@@ -75,23 +76,29 @@ export function FinishSheet({ isOpen, onClose, items, onConfirm, isPending }: Fi
           </fieldset>
         )}
 
-        <div className="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4">
+        <label
+          htmlFor={PANTRY_SWITCH_ID}
+          className={`flex min-h-14 items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-2 ${
+            nothingChecked || isPending ? 'cursor-not-allowed' : 'cursor-pointer'
+          }`}
+        >
           <div>
-            <p id={PANTRY_LABEL_ID} className="text-base font-semibold text-gray-900">
+            <span id={PANTRY_LABEL_ID} className="block text-base font-semibold text-gray-900">
               Add checked items to pantry
-            </p>
+            </span>
             <p id={PANTRY_HELPER_ID} className="text-sm text-gray-600">
               {pantryToggleHelper(checkedCount, pantryOn)}
             </p>
           </div>
           <Switch
+            id={PANTRY_SWITCH_ID}
             checked={pantryOn}
             onCheckedChange={setAddToPantry}
             disabled={nothingChecked || isPending}
             labelledBy={PANTRY_LABEL_ID}
             describedBy={PANTRY_HELPER_ID}
           />
-        </div>
+        </label>
 
         {nothingChecked && (
           <p id={NOTHING_CHECKED_HINT_ID} className="text-sm text-gray-600">

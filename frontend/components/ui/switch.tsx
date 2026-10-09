@@ -28,16 +28,21 @@ export function Switch({
       aria-describedby={describedBy}
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
-      className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-        checked ? 'bg-primary-500' : 'bg-gray-300'
-      }`}
+      className="group inline-flex h-11 min-w-14 shrink-0 items-center justify-center rounded-full focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
     >
+      {/* 44px-tall hit area (button) around the 32px visual track */}
       <span
         aria-hidden="true"
-        className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-7' : 'translate-x-1'
+        className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors group-focus-visible:ring-2 group-focus-visible:ring-primary-500 group-focus-visible:ring-offset-2 ${
+          checked ? 'bg-primary-500' : 'bg-gray-300'
         }`}
-      />
+      >
+        <span
+          className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
+            checked ? 'translate-x-7' : 'translate-x-1'
+          }`}
+        />
+      </span>
     </button>
   );
 }
