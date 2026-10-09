@@ -158,7 +158,21 @@ Plans:
   3. Checking off a shopping item can add it to the pantry ("bought it")
   4. Marking a recipe or meal as cooked deducts its ingredients from the pantry ("cooked it")
   5. User can adjust pantry quantity (+/-) and expiry directly from the list without opening a form
-**Plans**: TBD
+**Plans**: 13 plans
+Plans:
+- [ ] 06-01-PLAN.md — Pantry quantity stepper: PATCH allows 0, React Query pantry page, QuantityStepper, Used up + Undo (CAP-05)
+- [ ] 06-02-PLAN.md — Human legitimacy checkpoint, then barcode-detector 3.2.2 exact pin with clean lockfile (CAP-01)
+- [ ] 06-03-PLAN.md — Cook module API for recipes: pure plan + FEFO allocation, POST /cook/preview and /cook/apply (CAP-04)
+- [ ] 06-04-PLAN.md — Bought-it API: finish with addToPantry, after-commit merge/create with unit coercion (CAP-03)
+- [ ] 06-05-PLAN.md — Expiry quick-edit sheet with +1/+3/+7 day shortcuts and clear (CAP-05)
+- [ ] 06-06-PLAN.md — [BLOCKING] pantry barcode migration, barcode create/update/filter API, barcode field on forms (CAP-01, CAP-02)
+- [ ] 06-07-PLAN.md — Finish-sheet "Add checked items to pantry" switch, merge-aware toasts (CAP-03)
+- [ ] 06-08-PLAN.md — [BLOCKING] meal_plan_items.cooked_at migration, cookedAt carry-forward, cook a planned meal once (409) (CAP-04)
+- [ ] 06-09-PLAN.md — Scan sheet with typed-barcode lookup, prefill (OFF / own item), unknown/failed fallbacks, entry points (CAP-01, CAP-02)
+- [ ] 06-10-PLAN.md — "Cooked it?" preview/confirm sheet, recipe and meal-plan entry points, Cooked badge (CAP-04)
+- [ ] 06-11-PLAN.md — Camera scanning: native BarcodeDetector or lazy ZXing ponyfill, permission/unsupported states (CAP-01, CAP-02)
+- [ ] 06-12-PLAN.md — Smoke check 14, all gates, Railway backend first, then push main (CI + Vercel) (CAP-01..05)
+- [ ] 06-13-PLAN.md — Real-phone camera and touch walkthrough (deferrable human checkpoint) (CAP-01..05)
 **UI hint**: yes
 
 ## Progress
