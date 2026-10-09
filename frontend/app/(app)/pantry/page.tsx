@@ -313,7 +313,7 @@ export default function PantryPage() {
         notice={addPrefill.notice}
         attribution={addPrefill.attribution}
         focusName={addPrefill.focusName}
-        onScanBarcode={() => setScanOpen(true)}
+        enableScan
       />
 
       <ScanSheet

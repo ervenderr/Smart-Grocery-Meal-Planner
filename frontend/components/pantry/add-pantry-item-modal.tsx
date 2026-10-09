@@ -11,6 +11,10 @@ import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { ScanBarcode } from 'lucide-react';
 import { pantryApi } from '@/lib/api/pantry';
+import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
+import { mergeScanIntoForm } from '@/lib/scan/merge-scan';
+import { prefillFromOwnItem, prefillFromProduct } from '@/lib/scan/prefill';
+import type { BarcodeResolution } from '@/lib/scan/resolve-barcode';
 import { BarcodeLookup } from '@/components/food/barcode-lookup';
 import { BarcodeField } from '@/components/pantry/barcode-field';
 import { FoodDataAttribution } from '@/components/food/food-data-attribution';
@@ -52,8 +56,8 @@ interface AddPantryItemModalProps {
   focusName?: boolean;
   /** Rendered directly under the title (the scan flow puts its button here). */
   headerSlot?: ReactNode;
-  /** When provided, shows the full-width "Scan barcode" button under the title. */
-  onScanBarcode?: () => void;
+  /** Shows the full-width "Scan barcode" button; the scan sheet is nested in this modal. */
+  enableScan?: boolean;
 }
 
 const categories: { value: PantryItemCategory; label: string }[] = [
@@ -94,15 +98,18 @@ export function AddPantryItemModal({
   attribution = null,
   focusName = false,
   headerSlot,
-  onScanBarcode,
+  enableScan = false,
 }: AddPantryItemModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanAttribution, setScanAttribution] = useState<FoodAttribution | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    getValues,
     setFocus,
     formState: { errors },
     reset,
@@ -133,6 +140,23 @@ export function AddPantryItemModal({
     setValue('ingredientName', name, { shouldValidate: true });
     setValue('category', product.suggestedCategory, { shouldValidate: true });
     if (product.barcode) setValue('barcode', product.barcode, { shouldValidate: true });
+  };
+
+  // Merge into the open form (never reset) so typed input survives a scan.
+  const handleScanResolved = (resolution: BarcodeResolution) => {
+    if (resolution.kind === 'failed') return;
+    const incoming =
+      resolution.kind === 'found'
+        ? prefillFromProduct(resolution.product, resolution.barcode)
+        : resolution.kind === 'own'
+          ? prefillFromOwnItem(resolution.item)
+          : { barcode: resolution.barcode };
+    const patch = mergeScanIntoForm(getValues(), incoming);
+    (Object.keys(patch) as (keyof typeof patch)[]).forEach((key) =>
+      setValue(key, patch[key] as never, { shouldValidate: true, shouldDirty: true })
+    );
+    setScanAttribution(resolution.kind === 'found' ? resolution.attribution : null);
+    if (resolution.kind === 'found') toast.success('Product found. Check the details and save.');
   };
 
   const onSubmit = async (data: PantryItemFormData) => {
@@ -167,6 +191,7 @@ export function AddPantryItemModal({
   const handleClose = () => {
     if (!isLoading) {
       reset();
+      setScanAttribution(null);
       onClose();
     }
   };
@@ -175,13 +200,13 @@ export function AddPantryItemModal({
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Pantry Item" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {headerSlot}
-        {onScanBarcode && (
+        {enableScan && (
           <Button
             type="button"
             variant="outline"
             className="h-11 w-full"
             disabled={isLoading}
-            onClick={onScanBarcode}
+            onClick={() => setScanOpen(true)}
           >
             <ScanBarcode className="h-5 w-5" aria-hidden="true" />
             Scan barcode
@@ -349,8 +374,21 @@ export function AddPantryItemModal({
           </Button>
         </div>
 
-        {attribution && <FoodDataAttribution attribution={attribution} />}
+        {(scanAttribution ?? attribution) && (
+          <FoodDataAttribution attribution={(scanAttribution ?? attribution) as FoodAttribution} />
+        )}
       </form>
+      {/* Nested in the modal's React tree (outside the form) so Radix does not treat
+          the scan sheet as an outside interaction and dismiss this modal. */}
+      {enableScan && (
+        <ScanSheet
+          isOpen={scanOpen}
+          mode="lookup"
+          onClose={() => setScanOpen(false)}
+          onResolved={handleScanResolved}
+          onAddWithoutBarcode={() => undefined}
+        />
+      )}
     </Modal>
   );
 }
