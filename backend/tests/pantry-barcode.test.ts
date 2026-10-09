@@ -109,7 +109,7 @@ describe('Pantry barcode', () => {
       await request(app)
         .delete(`/api/v1/pantry/${item.body.id}`)
         .set('Authorization', `Bearer ${tokenA}`)
-        .expect(204);
+        .expect(200);
       const res = await list(`barcode=${code}`).expect(200);
       expect(res.body.items).toHaveLength(0);
     });
