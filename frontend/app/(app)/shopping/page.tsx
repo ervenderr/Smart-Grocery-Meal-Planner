@@ -19,7 +19,8 @@ import { SummaryBar } from '@/components/shopping/summary-bar';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import { useWakeLock } from '@/lib/hooks/use-wake-lock';
-import { useFinishShopping } from '@/lib/hooks/use-finish-shopping';
+import { useFinishShopping, type FinishShoppingVariables } from '@/lib/hooks/use-finish-shopping';
+import { finishToast } from '@/lib/shopping/finish-toast';
 import {
   useAddShoppingItem,
   useDeleteShoppingItem,
@@ -68,11 +69,18 @@ export default function ShoppingPage() {
       return next;
     });
 
-  const handleFinish = (carryOver: CarryOverMode) => {
-    finishShopping.mutate(carryOver, {
+  const handleFinish = (input: FinishShoppingVariables) => {
+    finishShopping.mutate(input, {
       onSuccess: (result) => {
         setFinishOpen(false);
-        toast.success(`Trip saved: ${format(result.history.totalCents)}`);
+        const pantryToast = finishToast(result, input.addToPantry);
+        if (!pantryToast) {
+          toast.success(`Trip saved: ${format(result.history.totalCents)}`);
+        } else if (pantryToast.kind === 'error') {
+          toast.error(pantryToast.message);
+        } else {
+          toast.success(pantryToast.message);
+        }
       },
     });
   };

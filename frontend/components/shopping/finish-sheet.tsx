@@ -1,19 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/modal';
+import { Switch } from '@/components/ui/switch';
+import { pantryToggleHelper } from '@/lib/shopping/finish-toast';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import { computeTripTotal, type TripItem } from '@/lib/shopping/trip';
 import type { CarryOverMode } from '@/types/shopping.types';
 
 export const NOTHING_CHECKED_HINT = 'Check off at least one item to finish this trip.';
 export const NOTHING_CHECKED_HINT_ID = 'finish-nothing-checked-hint';
+const PANTRY_LABEL_ID = 'finish-pantry-label';
+const PANTRY_HELPER_ID = 'finish-pantry-helper';
 
 interface FinishSheetProps {
   isOpen: boolean;
   onClose: () => void;
   items: readonly TripItem[];
-  onConfirm: (carryOver: CarryOverMode) => void;
+  onConfirm: (input: { carryOver: CarryOverMode; addToPantry: boolean }) => void;
   isPending: boolean;
 }
 
@@ -27,6 +31,13 @@ export function FinishSheet({ isOpen, onClose, items, onConfirm, isPending }: Fi
   const [carryOver, setCarryOver] = useState<CarryOverMode>('carry');
   const { totalCents, checkedCount, uncheckedCount } = computeTripTotal(items);
   const nothingChecked = checkedCount === 0;
+  const [addToPantry, setAddToPantry] = useState(true);
+  const pantryOn = addToPantry && !nothingChecked;
+
+  // The toggle is ON by default every time the sheet opens.
+  useEffect(() => {
+    if (isOpen) setAddToPantry(true);
+  }, [isOpen]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Finish shopping">
@@ -64,6 +75,24 @@ export function FinishSheet({ isOpen, onClose, items, onConfirm, isPending }: Fi
           </fieldset>
         )}
 
+        <div className="flex min-h-14 items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4">
+          <div>
+            <p id={PANTRY_LABEL_ID} className="text-base font-semibold text-gray-900">
+              Add checked items to pantry
+            </p>
+            <p id={PANTRY_HELPER_ID} className="text-sm text-gray-600">
+              {pantryToggleHelper(checkedCount, pantryOn)}
+            </p>
+          </div>
+          <Switch
+            checked={pantryOn}
+            onCheckedChange={setAddToPantry}
+            disabled={nothingChecked || isPending}
+            labelledBy={PANTRY_LABEL_ID}
+            describedBy={PANTRY_HELPER_ID}
+          />
+        </div>
+
         {nothingChecked && (
           <p id={NOTHING_CHECKED_HINT_ID} className="text-sm text-gray-600">
             {NOTHING_CHECKED_HINT}
@@ -80,7 +109,9 @@ export function FinishSheet({ isOpen, onClose, items, onConfirm, isPending }: Fi
           </button>
           <button
             type="button"
-            onClick={() => onConfirm(uncheckedCount > 0 ? carryOver : 'carry')}
+            onClick={() =>
+              onConfirm({ carryOver: uncheckedCount > 0 ? carryOver : 'carry', addToPantry: pantryOn })
+            }
             disabled={isPending || checkedCount === 0}
             aria-describedby={nothingChecked ? NOTHING_CHECKED_HINT_ID : undefined}
             className="min-h-11 rounded-lg bg-primary-600 px-4 text-base font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
