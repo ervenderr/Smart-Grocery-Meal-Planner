@@ -1,36 +1,10 @@
+import { readFileSync } from 'fs';
+import path from 'path';
 import { canonicalName } from '../src/modules/intelligence/canonical';
 
-const ROWS: ReadonlyArray<readonly [string, string]> = [
-  ['  Tomatoes ', 'tomato'],
-  ['Berries', 'berry'],
-  ['Peaches', 'peach'],
-  ['Potatoes', 'potato'],
-  ['Radishes', 'radish'],
-  ['Scallions', 'green onion'],
-  ['Green Onions', 'green onion'],
-  ['spring onion', 'green onion'],
-  ['Aubergine', 'eggplant'],
-  ['Garbanzo Beans', 'chickpea'],
-  ["Confectioner's sugar", 'powdered sugar'],
-  ['Plain flour', 'all purpose flour'],
-  ['Hummus', 'hummus'],
-  ['Asparagus', 'asparagus'],
-  ['Couscous', 'couscous'],
-  ['Molasses', 'molasses'],
-  ['Rolled Oats', 'rolled oats'],
-  ['Cloves', 'clove'],
-  ['All-Purpose Flour', 'all purpose flour'],
-  ['Salt: coarse', 'salt'],
-  ['onion, finely diced', 'onion'],
-  ['Garlic (minced)', 'garlic'],
-  ['Chicken Breasts', 'chicken breast'],
-  ['pepper', 'pepper'],
-  ['Bell Peppers', 'bell pepper'],
-  ['almond flour', 'almond flour'],
-  ['  ', ''],
-  ['!!!', ''],
-  ['', ''],
-];
+const ROWS: ReadonlyArray<readonly [string, string]> = JSON.parse(
+  readFileSync(path.join(__dirname, 'fixtures', 'canonical-cases.json'), 'utf8'),
+);
 
 describe('canonicalName', () => {
   it.each(ROWS)('%p -> %p', (input, expected) => {
@@ -40,6 +14,20 @@ describe('canonicalName', () => {
   it('keeps distinct keys distinct', () => {
     expect(canonicalName('almond flour')).not.toBe(canonicalName('flour'));
     expect(canonicalName('Bell Peppers')).not.toBe(canonicalName('pepper'));
+  });
+
+  it('keeps qualifier-distinct ingredients distinct (CR-01)', () => {
+    const names = [
+      'Pepper, black', 'Pepper, red flakes', 'Oil, olive', 'Oil, sesame',
+      'Sugar (brown)', 'Sugar (powdered)', 'Chicken, breast', 'Chicken, thigh',
+    ].map(canonicalName);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('matches reordered category names (CR-01)', () => {
+    expect(canonicalName('Pepper, black')).toBe(canonicalName('Black pepper'));
+    expect(canonicalName('Oil, olive')).toBe(canonicalName('olive oil'));
+    expect(canonicalName('Sugar (brown)')).toBe(canonicalName('Brown sugar'));
   });
 
   it.each([[123], [null], [undefined], [{}]])('non-string %p -> empty', (input) => {

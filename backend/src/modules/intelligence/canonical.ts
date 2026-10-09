@@ -52,15 +52,73 @@ function singularizeLast(text: string): string {
   return head + singularizeWord(idx >= 0 ? text.slice(idx + 1) : text);
 }
 
-function cleanText(input: string): string {
-  let text = input.slice(0, MAX_INPUT_LENGTH).normalize('NFKC').toLowerCase();
-  text = text.replace(/&/g, ' and ').replace(/\([^)]*\)/g, ' ');
-  const cut = text.search(/[,:]/);
-  if (cut >= 0) text = text.slice(0, cut);
-  return text
-    .replace(/['‘’]/g, '')
+/**
+ * Prep/serving notes that never change which ingredient it is. A comma,
+ * colon or parenthetical segment is dropped ONLY when every word is listed
+ * here; anything else is a qualifier ("black", "olive", "brown") and stays
+ * part of the identity.
+ */
+export const NOTE_WORDS: ReadonlySet<string> = new Set([
+  'chopped', 'diced', 'minced', 'sliced', 'divided', 'melted', 'softened',
+  'fresh', 'freshly', 'finely', 'roughly', 'coarsely', 'thinly', 'peeled',
+  'grated', 'shredded', 'cubed', 'halved', 'sifted', 'drained', 'rinsed',
+  'packed', 'room', 'temperature', 'to', 'taste', 'optional', 'as', 'needed',
+  'for', 'garnish', 'serving', 'more', 'extra', 'plus', 'or', 'and',
+]);
+
+/**
+ * Head nouns that are a category rather than a product ("pepper, black").
+ * For these the qualifier moves in front so "Pepper, black" and "Black
+ * pepper" share a key. Any other head keeps its written order.
+ */
+export const CATEGORY_HEADS: ReadonlySet<string> = new Set([
+  'pepper', 'oil', 'sugar', 'flour', 'vinegar', 'sauce', 'salt', 'cheese',
+  'milk', 'cream', 'butter', 'rice', 'syrup', 'juice', 'stock', 'broth',
+  'powder', 'paste', 'seed', 'bean', 'onion',
+]);
+
+/** Parenthetical words that mark a measurement, not a qualifier. */
+const MEASURE_WORDS: ReadonlySet<string> = new Set([
+  'cup', 'cups', 'tbsp', 'tsp', 'oz', 'lb', 'lbs', 'g', 'kg', 'ml', 'l',
+  'stick', 'sticks', 'can', 'cans', 'pinch', 'clove', 'cloves', 'about', 'approx',
+]);
+
+const toWords = (segment: string): string[] =>
+  segment
+    .replace(/['\u2018\u2019]/g, '')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .trim();
+    .trim()
+    .split(' ')
+    .filter((w) => w.length > 0);
+
+/** Parenthetical: keep its content as a qualifier segment unless it is a measurement. */
+function parenSegment(content: string): string {
+  const words = toWords(content);
+  const measure = /\d/.test(content) || words.some((w) => MEASURE_WORDS.has(w));
+  return measure ? ' ' : `,${content},`;
+}
+
+/** Splits into a head plus qualifier words (prep notes removed). */
+function splitIdentity(input: string): { head: string[]; qualifiers: string[] } {
+  const text = input
+    .slice(0, MAX_INPUT_LENGTH)
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/\(([^)]*)\)/g, (_m, content: string) => parenSegment(content));
+  const [first = '', ...rest] = text.split(/[,:]/);
+  const qualifiers = rest
+    .map(toWords)
+    .filter((words) => words.length > 0 && !words.every((w) => NOTE_WORDS.has(w)))
+    .flat();
+  return { head: toWords(first), qualifiers };
+}
+
+function cleanText(input: string): string {
+  const { head, qualifiers } = splitIdentity(input);
+  if (qualifiers.length === 0) return head.join(' ');
+  const headIsCategory = head.length > 0 && CATEGORY_HEADS.has(singularizeWord(head[head.length - 1]));
+  return (headIsCategory ? [...qualifiers, ...head] : [...head, ...qualifiers]).join(' ');
 }
 
 export function canonicalName(raw: unknown): string {
