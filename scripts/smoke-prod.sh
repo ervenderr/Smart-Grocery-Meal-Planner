@@ -7,6 +7,7 @@
 #   --ai-live   make real (cached-twice) provider calls in check (9); needs AI_API_KEY on the server
 #   Check (11) covers the currency allow-list and onboarding completion contract.
 #   Check (12) covers the persistent shopping list (add, check with price, finish, history).
+#   Check (13) covers pantry-aware intelligence (staples, cook-first, pantry-subtracted generate).
 #   FE=https://kitcha-ai.vercel.app (optional, default shown)
 #
 # Requires curl and jq. Exits non-zero on the first failing check.
@@ -294,6 +295,66 @@ code="$(req POST "$SHOP/finish" -H "$AUTH" -H "$JSON_H" -d '{}')" || fail "12i e
 code="$(req GET "$SHOP/history" -H "$AUTH")" || fail "12i history recheck: request failed"
 [ "$(jq -r '.pagination.total' "$BODY_FILE")" = "$HIST_TOTAL" ] || fail "12i history total changed after rejected finish"
 pass "12i finishing an empty list is rejected and history is unchanged"
+
+# (13) pantry-aware intelligence: staples, cook-first, pantry-subtracted generate.
+# The smoke user's data remains afterwards (no delete-account endpoint).
+TODAY="$(date +%F)"
+IN2="$(date -v+2d +%F 2>/dev/null || date -d '+2 days' +%F)"
+IN9="$(date -v+9d +%F 2>/dev/null || date -d '+9 days' +%F)"
+
+code="$(req GET "$API/api/v1/users/preferences" -H "$AUTH")" || fail "13a staples default: request failed"
+[ "$code" = "200" ] || fail "13a staples default: expected 200, got $code"
+jq -e '.stapleNames | index("salt") != null' "$BODY_FILE" >/dev/null || fail "13a staples default: salt missing from stapleNames"
+jq -e '.defaultStapleNames | length >= 10' "$BODY_FILE" >/dev/null || fail "13a staples default: defaultStapleNames has fewer than 10 entries"
+pass "13a new user has default staples (salt) and a default list of 10+"
+
+code="$(req PATCH "$API/api/v1/users/preferences" -H "$AUTH" -H "$JSON_H" -d '{"stapleNames":[" Salt ","SALT","Olive Oil"]}')" || fail "13b save staples: request failed"
+[ "$code" = "200" ] || fail "13b save staples: expected 200, got $code"
+jq -e '.stapleNames == ["salt","olive oil"]' "$BODY_FILE" >/dev/null || fail "13b save staples: not canonicalised to [salt, olive oil]"
+pass "13b staples saved in canonical form"
+
+BIG_STAPLES="$(jq -nc '{stapleNames: [range(101) | "item\(.)"]}')"
+code="$(req PATCH "$API/api/v1/users/preferences" -H "$AUTH" -H "$JSON_H" -d "$BIG_STAPLES")" || fail "13c 101 staples: request failed"
+[ "$code" = "400" ] || fail "13c 101 staples: expected 400, got $code"
+[ "$(jq -r '.code // empty' "$BODY_FILE")" = "VALIDATION_ERROR" ] || fail "13c 101 staples: code is not VALIDATION_ERROR"
+code="$(req GET "$API/api/v1/users/preferences" -H "$AUTH")" || fail "13c recheck: request failed"
+jq -e '.stapleNames == ["salt","olive oil"]' "$BODY_FILE" >/dev/null || fail "13c staples changed after rejected save"
+pass "13c 101 staples rejected with 400 and stored list unchanged"
+
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d "{\"ingredientName\":\"Smoke spinach\",\"quantity\":1,\"unit\":\"kg\",\"category\":\"vegetable\",\"expiryDate\":\"$IN2\"}")" || fail "13d pantry spinach: request failed"
+[ "$code" = "201" ] || fail "13d pantry spinach: expected 201, got $code"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d '{"ingredientName":"Smoke rice","quantity":1,"unit":"kg","category":"grains"}')" || fail "13d pantry rice: request failed"
+[ "$code" = "201" ] || fail "13d pantry rice: expected 201, got $code"
+pass "13d pantry items created (spinach expiring in 2 days, rice without expiry)"
+
+RECIPE_PAYLOAD='{"name":"Smoke stir fry","category":"dinner","difficulty":"easy","prepTimeMinutes":5,"cookTimeMinutes":10,"servings":2,"instructions":["Cook everything"],"ingredients":[{"ingredientName":"Smoke spinach","quantity":200,"unit":"grams"},{"ingredientName":"Smoke rice","quantity":500,"unit":"grams"},{"ingredientName":"salt","quantity":1,"unit":"tsp"},{"ingredientName":"Smoke bread flour","quantity":500,"unit":"grams"},{"ingredientName":"Smoke bread flour","quantity":1,"unit":"kg"}]}'
+code="$(req POST "$API/api/v1/recipes" -H "$AUTH" -H "$JSON_H" -d "$RECIPE_PAYLOAD")" || fail "13e recipe: request failed"
+[ "$code" = "201" ] || fail "13e recipe: expected 201, got $code"
+RECIPE_ID="$(jq -r '.id // .data.id // empty' "$BODY_FILE")"
+[ -n "$RECIPE_ID" ] || fail "13e recipe: id missing"
+pass "13e recipe created"
+
+code="$(req GET "$API/api/v1/recipes/cook-first?today=$TODAY&limit=3" -H "$AUTH")" || fail "13f cook-first: request failed"
+[ "$code" = "200" ] || fail "13f cook-first: expected 200, got $code"
+jq -e --arg id "$RECIPE_ID" '.items[0].recipe.id == $id' "$BODY_FILE" >/dev/null || fail "13f cook-first: smoke recipe is not ranked first"
+jq -e '.items[0].usesExpiring[0].daysLeft == 2' "$BODY_FILE" >/dev/null || fail "13f cook-first: usesExpiring daysLeft is not 2"
+code="$(req GET "$API/api/v1/recipes/cook-first?limit=0" -H "$AUTH")" || fail "13f cook-first limit=0: request failed"
+[ "$code" = "400" ] || fail "13f cook-first limit=0: expected 400, got $code"
+pass "13f cook-first ranks the expiring-spinach recipe first; limit=0 rejected"
+
+PLAN_PAYLOAD="$(jq -nc --arg r "$RECIPE_ID" --arg s "$TODAY" --arg e "$IN9" '{name:"Smoke plan",startDate:$s,endDate:$e,meals:[{recipeId:$r,dayOfWeek:0,mealType:"lunch",servings:2}]}')"
+code="$(req POST "$API/api/v1/mealplans" -H "$AUTH" -H "$JSON_H" -d "$PLAN_PAYLOAD")" || fail "13g meal plan: request failed"
+[ "$code" = "201" ] || fail "13g meal plan: expected 201, got $code"
+PLAN_ID="$(jq -r '.id // .data.id // empty' "$BODY_FILE")"
+[ -n "$PLAN_ID" ] || fail "13g meal plan: id missing"
+code="$(req POST "$SHOP/generate" -H "$AUTH" -H "$JSON_H" -d "$(jq -nc --arg p "$PLAN_ID" '{mealPlanId:$p}')")" || fail "13g generate: request failed"
+[ "$code" = "200" ] || fail "13g generate: expected 200, got $code"
+jq -e '.skippedStaples | map(ascii_downcase) | index("salt") != null' "$BODY_FILE" >/dev/null || fail "13g generate: salt not in skippedStaples"
+jq -e '.covered | map(.status) | index("full") != null' "$BODY_FILE" >/dev/null || fail "13g generate: no fully covered ingredient"
+code="$(req GET "$SHOP/list" -H "$AUTH")" || fail "13g list: request failed"
+jq -e '.items | map(select(.itemName | test("smoke bread flour"; "i"))) | length == 1 and .[0].quantity == 1.5 and .[0].unit == "kg"' "$BODY_FILE" >/dev/null || fail "13g generate: bread flour not merged to 1.5 kg"
+jq -e '[.items[] | select(.itemName | test("smoke rice|salt"; "i"))] | length == 0' "$BODY_FILE" >/dev/null || fail "13g generate: covered rice or staple salt appears on the list"
+pass "13g generate skips staples, subtracts pantry, merges 500 g + 1 kg to 1.5 kg"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
