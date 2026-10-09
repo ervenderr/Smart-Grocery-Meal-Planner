@@ -46,6 +46,14 @@ Generated shopping lists contain only what the user actually needs to buy, and t
 ### Housekeeping to fold in (small)
 - Backend `getPeriodKey` in analytics builds the week key with the calendar year + ISO week number (e.g. Dec 30 can become `2024-W01`): fix to use the ISO week-year, with tests, as one small task (frontend parser from the dashboard fix already tolerates both).
 
+### Resolved research questions (orchestrator decisions, 2026-10-09)
+- Display ladder applies even to a single-unit group (2000 g -> 2 kg); update the affected Phase 4 merge/aggregate test expectations accordingly (document in the plan).
+- The Recipes page "Use expiring first" sort uses a separate cook-first fetch with an `includeAll` option so all recipes are ranked, not just the top few.
+- The backend supplies `defaultStapleNames` (preferences response and/or a small endpoint) so "Reset to defaults" has a single source of truth; keep a parity test between the TS constant, `schema.prisma` default and the migration SQL.
+- Send `today=YYYY-MM-DD` (viewer's local date) as a query param to cook-first (and any days-left logic) to avoid UTC vs local drift.
+- `UsersService.updatePreferences` hand-whitelists fields: add `stapleNames`; register `/recipes/cook-first` before `/:id`; `bulkUpdateQuantities` needs a variant that also sets `unit`; a fully covered or staple-only plan must NOT raise `MEAL_PLAN_EMPTY` (return added 0 with covered/skippedStaples populated); persist the last generate result in a React Query cache key so it survives navigation between Meal Plans and Shopping; the planner must check all callers of `mergeIntoItems`.
+- Integration tests run against a temporary local Postgres 16 (homebrew initdb) in executors, exactly as in earlier phases.
+
 ### Claude's Discretion
 Module and file names, exact starter staples list, display-unit rule details, alias map contents, scoring weights, plan splitting and waves.
 
