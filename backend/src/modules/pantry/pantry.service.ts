@@ -39,6 +39,7 @@ export class PantryService {
       purchasePriceCents,
       location,
       notes,
+      barcode,
     } = data;
 
     // Validate quantity
@@ -59,6 +60,7 @@ export class PantryService {
         purchasePriceCents,
         location,
         notes,
+        barcode: barcode ?? null,
       },
     });
 
@@ -85,6 +87,7 @@ export class PantryService {
       expiringSoon,
       expired,
       search,
+      barcode,
       sortBy = "createdAt",
       sortOrder = "desc",
       page = 1,
@@ -103,6 +106,10 @@ export class PantryService {
 
     if (location) {
       where.location = location;
+    }
+
+    if (barcode) {
+      where.barcode = barcode;
     }
 
     if (search) {
@@ -251,6 +258,9 @@ export class PantryService {
     }
     if (data.notes !== undefined) {
       updateData.notes = data.notes;
+    }
+    if (data.barcode !== undefined) {
+      updateData.barcode = data.barcode;
     }
 
     // Update item
@@ -412,6 +422,7 @@ export class PantryService {
       purchasePriceCents: item.purchasePriceCents,
       location: item.location,
       notes: item.notes,
+      barcode: item.barcode ?? null,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
       isExpired,

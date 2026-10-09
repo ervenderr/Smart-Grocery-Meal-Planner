@@ -68,6 +68,7 @@ export interface CreatePantryItemRequest {
   purchasePriceCents?: number;
   location?: string;
   notes?: string;
+  barcode?: string; // 8-14 digits
 }
 
 /**
@@ -83,6 +84,7 @@ export interface UpdatePantryItemRequest {
   purchasePriceCents?: number | null;
   location?: string | null;
   notes?: string | null;
+  barcode?: string | null; // 8-14 digits or null to clear
 }
 
 /**
@@ -100,6 +102,7 @@ export interface PantryItemResponse {
   purchasePriceCents: number | null;
   location: string | null;
   notes: string | null;
+  barcode: string | null;
   createdAt: string; // ISO datetime string
   updatedAt: string;
   isExpired?: boolean; // Computed field
@@ -115,6 +118,7 @@ export interface GetPantryItemsQuery {
   expiringSoon?: boolean; // Items expiring within 7 days
   expired?: boolean; // Only expired items
   search?: string; // Search by ingredient name
+  barcode?: string; // Exact barcode match (repeat-scan prefill)
   sortBy?: 'name' | 'expiryDate' | 'quantity' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
   page?: number;

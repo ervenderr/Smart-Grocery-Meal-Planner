@@ -45,6 +45,7 @@ export class PantryController {
       expiringSoon: req.query.expiringSoon === 'true',
       expired: req.query.expired === 'true',
       search: req.query.search as string,
+      barcode: req.query.barcode as string,
       sortBy: req.query.sortBy as any,
       sortOrder: req.query.sortOrder as any,
       page: req.query.page ? parseInt(req.query.page as string) : undefined,

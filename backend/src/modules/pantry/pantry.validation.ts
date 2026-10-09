@@ -10,6 +10,8 @@ import { validationResult } from 'express-validator';
 import { AppError } from '../../middleware/errorHandler';
 import { PantryCategory, PantryUnit, PantryLocation } from '../../types/pantry.types';
 
+const BARCODE_PATTERN = /^\d{8,14}$/;
+
 /**
  * Validation middleware wrapper
  */
@@ -88,6 +90,12 @@ export const validateCreateItem: ValidationChain[] = [
     .trim()
     .isLength({ max: 500 })
     .withMessage('Notes must be at most 500 characters'),
+
+  body('barcode')
+    .optional()
+    .isString()
+    .matches(BARCODE_PATTERN)
+    .withMessage('Barcode must be 8 to 14 digits'),
 ];
 
 /**
@@ -155,6 +163,11 @@ export const validateUpdateItem: ValidationChain[] = [
       return value.trim().length <= 500;
     })
     .withMessage('Notes must be at most 500 characters or null'),
+
+  body('barcode')
+    .optional({ nullable: true })
+    .custom((value) => value === null || (typeof value === 'string' && BARCODE_PATTERN.test(value)))
+    .withMessage('Barcode must be 8 to 14 digits or null'),
 ];
 
 /**
@@ -210,6 +223,12 @@ export const validateGetItems: ValidationChain[] = [
     .optional()
     .isInt({ min: 1, max: 100 })
     .withMessage('limit must be between 1 and 100'),
+
+  query('barcode')
+    .optional()
+    .isString()
+    .matches(BARCODE_PATTERN)
+    .withMessage('Barcode must be 8 to 14 digits'),
 ];
 
 /**
