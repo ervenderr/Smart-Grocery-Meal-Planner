@@ -16,7 +16,8 @@ export interface PantryStockItem {
   readonly expiryDate: Date | null;
 }
 
-export type CoveredStatus = 'full' | 'partial' | 'incompatible';
+/** 'on_list': the same item (name + unit family) is already UNCHECKED on the active list. */
+export type CoveredStatus = 'full' | 'partial' | 'incompatible' | 'on_list';
 
 export interface CoveredEntry {
   readonly name: string;
@@ -62,7 +63,7 @@ function indexStock(pantry: readonly PantryStockItem[], todayUtc: Date): StockIn
   return { byKey, otherByName };
 }
 
-function coveredEntry(
+export function coveredEntry(
   group: IngredientGroup,
   stockBase: Dec,
   status: CoveredStatus,
