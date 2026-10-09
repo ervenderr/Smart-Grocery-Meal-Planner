@@ -162,6 +162,9 @@ export function AddPantryItemModal({
     );
     setScanAttribution(resolution.kind === 'found' ? resolution.attribution : null);
     if (resolution.kind === 'found') toast.success('Product found. Check the details and save.');
+    else if (resolution.kind === 'own')
+      toast.success("You've added this before. Details filled in from your pantry.");
+    else toast("We don't know this product yet. Barcode saved, add the details yourself.");
   };
 
   const onSubmit = async (data: PantryItemFormData) => {
