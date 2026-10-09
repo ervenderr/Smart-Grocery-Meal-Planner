@@ -53,8 +53,9 @@ export class CookUnitMismatchError extends Error {
 const MS_PER_DAY = 86_400_000;
 const dayNumber = (d: Date): number => Math.floor(d.getTime() / MS_PER_DAY);
 
-export const cookKey = (name: string, unit: string): string =>
-  `${canonicalName(name)}|${familyKey(resolveUnit(unit))}`;
+export function cookKey(name: string, unit: string): string {
+  return `${canonicalName(name)}|${familyKey(resolveUnit(unit))}`;
+}
 
 interface UsableLot {
   readonly lot: CookLot;
