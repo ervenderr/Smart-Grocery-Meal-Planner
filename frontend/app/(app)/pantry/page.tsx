@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Package, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,14 @@ import { AddPantryItemModal } from '@/components/pantry/add-pantry-item-modal';
 import { EditPantryItemModal } from '@/components/pantry/edit-pantry-item-modal';
 import { PantryItemCard } from '@/components/pantry/pantry-item-card';
 import { pantryApi } from '@/lib/api/pantry';
+import { queryKeys } from '@/lib/react-query';
+import { sortUsedUpLast } from '@/lib/pantry/quantity';
+import {
+  useDeferredRemove,
+  usePantryList,
+  usePantryPatch,
+  type PantryQuickPatch,
+} from '@/lib/hooks/use-pantry';
 import toast from 'react-hot-toast';
 import type { PantryItem } from '@/types/pantry.types';
 
@@ -30,50 +39,47 @@ const CATEGORIES = [
 ];
 
 export default function PantryPage() {
-  const [items, setItems] = useState<PantryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<PantryItem | null>(null);
 
-  const fetchItems = async (
-    category: string = selectedCategory,
-    search: string = searchQuery
-  ) => {
-    setLoading(true);
-    setLoadError(false);
-    try {
-      const response = await pantryApi.getAll({
-        category: category || undefined,
-        search: search || undefined,
-      });
-      setItems(response.items || []);
-    } catch (error: any) {
-      console.error('Fetch pantry items error:', error);
-      setLoadError(true);
-      toast.error('Failed to load pantry items');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: fetched,
+    isLoading: loading,
+    isError: loadError,
+    refetch,
+  } = usePantryList({ category: selectedCategory, search: appliedSearch });
+  const patchMutation = usePantryPatch();
+  const { remove: removeUsedUp } = useDeferredRemove();
 
-  useEffect(() => {
-    fetchItems();
-  }, [selectedCategory]);
+  const items = useMemo(() => sortUsedUpLast(fetched ?? []), [fetched]);
+
+  const refreshItems = () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
 
   const handleClearFilters = () => {
     setSearchQuery('');
+    setAppliedSearch('');
     setSelectedCategory('');
-    fetchItems('', '');
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchItems();
+    setAppliedSearch(searchQuery.trim());
+  };
+
+  const handlePatch = async (item: PantryItem, patch: PantryQuickPatch) => {
+    try {
+      await patchMutation.mutateAsync({ id: item.id, patch });
+    } catch (error) {
+      toast.error(`Couldn't update ${item.ingredientName}. Your change was undone.`);
+      throw error;
+    }
   };
 
   const handleEdit = (item: PantryItem) => {
@@ -86,7 +92,7 @@ export default function PantryPage() {
       try {
         await pantryApi.delete(item.id);
         toast.success('Item deleted successfully');
-        fetchItems();
+        await refreshItems();
         setDeleteConfirm(null);
       } catch (error: any) {
         console.error('Delete error:', error);
@@ -203,10 +209,10 @@ export default function PantryPage() {
           title="Couldn't load your pantry"
           description="Check your connection and try again."
           actionLabel="Try again"
-          onAction={() => fetchItems()}
+          onAction={() => void refetch()}
         />
       ) : items.length === 0 ? (
-        searchQuery || selectedCategory ? (
+        appliedSearch || selectedCategory ? (
           <EmptyState
             icon={Search}
             title="No matching items"
@@ -231,6 +237,8 @@ export default function PantryPage() {
               item={item}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onPatch={handlePatch}
+              onRemoveUsedUp={removeUsedUp}
             />
           ))}
         </div>
@@ -240,7 +248,7 @@ export default function PantryPage() {
       <AddPantryItemModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSuccess={() => fetchItems()}
+        onSuccess={() => void refreshItems()}
       />
 
       <EditPantryItemModal
@@ -249,7 +257,7 @@ export default function PantryPage() {
           setShowEditModal(false);
           setEditingItem(null);
         }}
-        onSuccess={() => fetchItems()}
+        onSuccess={() => void refreshItems()}
         item={editingItem}
       />
     </div>
