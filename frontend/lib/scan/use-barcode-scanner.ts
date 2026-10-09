@@ -183,6 +183,12 @@ export function useBarcodeScanner({
     return () => {
       cancelled = true;
       release();
+      // Deactivated or backgrounded: do not leave a stale 'scanning' UI behind.
+      // A failure stays visible until retry; start() sets 'requesting' again.
+      setStatus((prev) => (prev === 'failed' ? prev : 'idle'));
+      setTorchAvailable(false);
+      setTorchOn(false);
+      setSlowHint(false);
     };
   }, [active, visible, attempt, release]);
 
