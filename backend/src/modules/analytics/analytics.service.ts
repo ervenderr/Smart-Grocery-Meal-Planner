@@ -6,6 +6,7 @@
 
 import { prisma } from '../../config/database.config';
 import { AppError } from '../../middleware/errorHandler';
+import { periodKey as computePeriodKey } from './iso-week';
 import {
   SpendingTrendsQuery,
   SpendingTrendsResponse,
@@ -509,31 +510,10 @@ export class AnalyticsService {
   }
 
   /**
-   * Helper: Get period key for grouping
+   * Helper: Get period key for grouping (ISO week-year, UTC)
    */
   private getPeriodKey(date: Date, period: string): string {
-    if (period === 'daily') {
-      return date.toISOString().split('T')[0];
-    } else if (period === 'weekly') {
-      const year = date.getFullYear();
-      const week = this.getWeekNumber(date);
-      return `${year}-W${String(week).padStart(2, '0')}`;
-    } else {
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      return `${year}-${String(month).padStart(2, '0')}`;
-    }
-  }
-
-  /**
-   * Helper: Get week number
-   */
-  private getWeekNumber(date: Date): number {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    return computePeriodKey(date, period);
   }
 
   /**
