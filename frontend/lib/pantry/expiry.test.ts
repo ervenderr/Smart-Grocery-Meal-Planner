@@ -4,6 +4,9 @@ import {
   getDaysUntilExpiry,
   getExpiryStatus,
   toExpiringItems,
+  addDaysShortcut,
+  todayIso,
+  toIsoDate,
 } from './expiry';
 
 // Local-time constructor: 2026-03-10 at 23:30 local, then 00:15 local.
@@ -111,5 +114,47 @@ describe('toExpiringItems', () => {
     expect(toExpiringItems(null, justAfterMidnight)).toEqual([]);
     expect(toExpiringItems({ items: [] }, justAfterMidnight)).toEqual([]);
     expect(toExpiringItems([null, 5, flat('c', 'z', '2026-03-10')], justAfterMidnight)).toHaveLength(1);
+  });
+});
+
+describe('expiry shortcut helpers', () => {
+  const now = new Date(2026, 9, 9, 12, 0, 0);
+
+  it('uses today when the field is empty', () => {
+    expect(addDaysShortcut('', 1, now)).toBe('2026-10-10');
+    expect(addDaysShortcut(null, 7, now)).toBe('2026-10-16');
+    expect(addDaysShortcut(undefined, 3, now)).toBe('2026-10-12');
+  });
+
+  it('adds to a future base', () => {
+    expect(addDaysShortcut('2026-10-20', 3, now)).toBe('2026-10-23');
+  });
+
+  it('falls back to today for a past base', () => {
+    expect(addDaysShortcut('2026-10-01', 3, now)).toBe('2026-10-12');
+  });
+
+  it('accepts today as the base', () => {
+    expect(addDaysShortcut('2026-10-09', 1, now)).toBe('2026-10-10');
+  });
+
+  it('rolls over months, years and leap days', () => {
+    expect(addDaysShortcut('2026-12-30', 3, now)).toBe('2027-01-02');
+    expect(addDaysShortcut('', 3, new Date(2028, 1, 27))).toBe('2028-03-01');
+    expect(addDaysShortcut('2028-02-28', 1, new Date(2028, 1, 1))).toBe('2028-02-29');
+  });
+
+  it('treats invalid text as empty', () => {
+    expect(addDaysShortcut('abc', 1, now)).toBe('2026-10-10');
+    expect(addDaysShortcut('2026-02-30', 1, now)).toBe('2026-10-10');
+  });
+
+  it('formats local dates and does not mutate input', () => {
+    const late = new Date(2026, 9, 9, 23, 59);
+    const before = late.getTime();
+    expect(todayIso(late)).toBe('2026-10-09');
+    expect(toIsoDate(late)).toBe('2026-10-09');
+    addDaysShortcut('', 3, late);
+    expect(late.getTime()).toBe(before);
   });
 });
