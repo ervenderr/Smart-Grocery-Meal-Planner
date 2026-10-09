@@ -5,6 +5,7 @@
  */
 
 import { prisma } from "../../config/database.config";
+import type { Prisma } from "@prisma/client";
 import { logger } from "../../config/logger.config";
 import { AppError } from "../../middleware/errorHandler";
 import {
@@ -317,6 +318,8 @@ export class MealPlanService {
 
     // Prepare update data
     const updateData: any = {};
+    // Meal rebuild (read cooked markers, delete, recreate) runs in the update transaction.
+    let rebuildMeals: ((tx: Prisma.TransactionClient) => Promise<void>) | null = null;
 
     if (data.name !== undefined) {
       updateData.name = data.name.trim();
@@ -361,62 +364,72 @@ export class MealPlanService {
       updateData.totalCostCents = totalCostCents;
       updateData.totalCalories = totalCalories;
 
-      // Keep the cooked marker on meals whose (recipe, day, type) survives the edit
-      const previousMeals = await prisma.mealPlanItem.findMany({
-        where: { mealPlanId },
-        select: { recipeId: true, dayOfWeek: true, mealType: true, cookedAt: true },
-      });
-      const carriedCookedAt = carryCookedAt(previousMeals, data.meals);
+      const meals = data.meals;
+      rebuildMeals = async (tx) => {
+        // Lock the current items so a concurrent cook-apply cannot mark one
+        // cooked between the read below and the delete (that marker would be lost).
+        await tx.$queryRaw`
+          SELECT id FROM meal_plan_items WHERE meal_plan_id = ${mealPlanId} ORDER BY id FOR UPDATE`;
+        // Keep the cooked marker on meals whose (recipe, day, type) survives the edit
+        const previousMeals = await tx.mealPlanItem.findMany({
+          where: { mealPlanId },
+          select: { recipeId: true, dayOfWeek: true, mealType: true, cookedAt: true },
+        });
+        const carriedCookedAt = carryCookedAt(previousMeals, meals);
 
-      // Delete existing meal plan items and create new ones
-      await prisma.mealPlanItem.deleteMany({
-        where: { mealPlanId },
-      });
+        // Delete existing meal plan items and create new ones
+        await tx.mealPlanItem.deleteMany({
+          where: { mealPlanId },
+        });
 
-      updateData.mealPlanItems = {
-        create: data.meals.map((meal, index) => {
-          const recipe = recipes.find((r) => r.id === meal.recipeId)!;
-          const servings = meal.servings || 1;
+        updateData.mealPlanItems = {
+          create: meals.map((meal, index) => {
+            const recipe = recipes.find((r) => r.id === meal.recipeId)!;
+            const servings = meal.servings || 1;
 
-          return {
-            recipeId: meal.recipeId,
-            dayOfWeek: meal.dayOfWeek,
-            mealType: meal.mealType,
-            servings,
-            costCents: recipe.estimatedTotalCostCents
-              ? Math.round(
-                  (recipe.estimatedTotalCostCents / recipe.servings) * servings
-                )
-              : null,
-            calories: recipe.caloriesPerServing
-              ? recipe.caloriesPerServing * servings
-              : null,
-            cookedAt: carriedCookedAt[index],
-          };
-        }),
+            return {
+              recipeId: meal.recipeId,
+              dayOfWeek: meal.dayOfWeek,
+              mealType: meal.mealType,
+              servings,
+              costCents: recipe.estimatedTotalCostCents
+                ? Math.round(
+                    (recipe.estimatedTotalCostCents / recipe.servings) * servings
+                  )
+                : null,
+              calories: recipe.caloriesPerServing
+                ? recipe.caloriesPerServing * servings
+                : null,
+              cookedAt: carriedCookedAt[index],
+            };
+          }),
+        };
       };
     }
 
     // Update meal plan
-    const mealPlan = await prisma.mealPlan.update({
-      where: { id: mealPlanId },
-      data: updateData,
-      include: {
-        mealPlanItems: {
-          include: {
-            recipe: {
-              select: {
-                id: true,
-                title: true,
-                imageUrl: true,
-                prepTimeMinutes: true,
-                cookTimeMinutes: true,
+    const mealPlan = await prisma.$transaction(async (tx) => {
+      if (rebuildMeals) await rebuildMeals(tx);
+      return tx.mealPlan.update({
+        where: { id: mealPlanId },
+        data: updateData,
+        include: {
+          mealPlanItems: {
+            include: {
+              recipe: {
+                select: {
+                  id: true,
+                  title: true,
+                  imageUrl: true,
+                  prepTimeMinutes: true,
+                  cookTimeMinutes: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+      });
 
     logger.info("Meal plan updated", {
       service: "kitcha-api",

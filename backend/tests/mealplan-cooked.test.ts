@@ -151,4 +151,22 @@ describe('Meal plan cookedAt over HTTP', () => {
     ]).expect(200);
     expect(res.body.meals[0].cookedAt).toBeNull();
   });
+
+  it('rolls back the item rebuild (and keeps cookedAt) when the update fails', async () => {
+    const item = await prisma.mealPlanItem.findFirstOrThrow({ where: { mealPlanId: planId } });
+    await prisma.mealPlanItem.update({ where: { id: item.id }, data: { cookedAt: T } });
+    const before = await prisma.mealPlanItem.count({ where: { mealPlanId: planId } });
+    // Calories overflow the Int column, so the nested create fails after the delete.
+    await prisma.recipe.update({ where: { id: r2 }, data: { caloriesPerServing: 2_000_000_000 } });
+
+    const res = await patchMeals([
+      { recipeId: r2, dayOfWeek: 2, mealType: 'dinner', servings: 5 },
+    ]);
+    expect(res.status).toBeGreaterThanOrEqual(400);
+
+    const after = await prisma.mealPlanItem.findMany({ where: { mealPlanId: planId } });
+    expect(after).toHaveLength(before);
+    const kept = after.find((m) => m.id === item.id);
+    expect(kept?.cookedAt?.toISOString()).toBe(T.toISOString());
+  });
 });
