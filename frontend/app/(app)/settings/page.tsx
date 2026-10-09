@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { ProfileSettings } from '@/components/settings/profile-settings';
 import { PasswordSettings } from '@/components/settings/password-settings';
 import { PreferencesSettings } from '@/components/settings/preferences-settings';
+import { StaplesSettings } from '@/components/settings/staples-settings';
 import { DataSettings } from '@/components/settings/data-settings';
 
 type SettingsTab = 'profile' | 'password' | 'preferences' | 'data';
@@ -36,7 +37,12 @@ export default function SettingsPage() {
       case 'password':
         return <PasswordSettings />;
       case 'preferences':
-        return <PreferencesSettings />;
+        return (
+          <div className="space-y-6">
+            <PreferencesSettings />
+            <StaplesSettings />
+          </div>
+        );
       case 'data':
         return <DataSettings />;
       default:
