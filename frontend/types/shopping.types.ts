@@ -42,10 +42,23 @@ export type UpdateShoppingItemInput = Partial<CreateShoppingItemInput>;
 
 export type CarryOverMode = 'carry' | 'discard';
 
+export interface CoveredItem {
+  name: string;
+  needed: number;
+  have: number;
+  unit: string;
+  status: 'full' | 'partial' | 'incompatible';
+  haveUnit?: string;
+}
+
 export interface GenerateShoppingListResult {
   list: ShoppingList;
   added: number;
   merged: number;
+  // Optional because an older backend omits these fields.
+  covered?: CoveredItem[];
+  skippedStaples?: string[];
+  pantryCapped?: boolean;
 }
 
 export interface FinishShoppingInput {
