@@ -45,7 +45,8 @@ export interface PantryCreate {
 }
 
 export interface PantryMergePlan {
-  updates: { id: string; quantity: number }[];
+  /** `expiryDate: null` is set when merging into a used-up lot (stale expiry is dropped). */
+  updates: { id: string; quantity: number; expiryDate?: null }[];
   creates: PantryCreate[];
   /** Pantry rows created (same-trip duplicates collapse into one row). */
   added: number;
@@ -80,6 +81,8 @@ interface WorkingLot {
   readonly expiryMs: number | null;
   readonly createdMs: number;
   readonly changed: boolean;
+  /** True when the lot was used up (qty <= 0) before this trip: its old expiry no longer applies. */
+  readonly usedUp: boolean;
   readonly create: PantryCreate | null;
   readonly coercedFrom: string | null;
 }
@@ -120,6 +123,7 @@ const toWorkingLot = (lot: PantryLotRow, todayMs: number): WorkingLot | null => 
     expiryMs,
     createdMs: lot.createdAt.getTime(),
     changed: false,
+    usedUp: qty.lte(0),
     create: null,
     coercedFrom: null,
   };
@@ -163,7 +167,10 @@ function step(
     return { ...state, skipped: state.skipped + 1 };
   }
   const key = keyOf(name, coerced.unit);
-  const target = [...state.lots.filter((l) => l.key === key)].sort(byExpiry)[0];
+  const candidates = state.lots.filter((l) => l.key === key);
+  // Prefer lots that still hold stock; a used-up lot is only a fallback target.
+  const inStock = candidates.filter((l) => !l.usedUp);
+  const target = [...(inStock.length > 0 ? inStock : candidates)].sort(byExpiry)[0];
   if (!target) {
     const create = newCreate(item, name, qty, coerced, purchaseDate);
     const lot: WorkingLot = {
@@ -175,6 +182,7 @@ function step(
       expiryMs: null,
       createdMs: Number.MAX_SAFE_INTEGER,
       changed: true,
+      usedUp: false,
       create,
       coercedFrom: coerced.coercedFrom,
     };
@@ -183,7 +191,9 @@ function step(
   const added = fromBase(toBase(qty, resolveUnit(coerced.unit)), target.unitKey);
   const total = cap(target.quantity.plus(added));
   const lots = state.lots.map((l) =>
-    l.ref === target.ref ? { ...l, quantity: total, changed: true } : l,
+    l.ref === target.ref
+      ? { ...l, quantity: total, changed: true, expiryMs: l.usedUp ? null : l.expiryMs }
+      : l,
   );
   return { ...state, lots, merged: state.merged + (target.origin === 'lot' ? 1 : 0) };
 }
@@ -191,6 +201,7 @@ function step(
 /**
  * Merge keeps the target lot's expiry: a fresh purchase merged into an older
  * lot inherits that lot's (sooner) expiry. This is the locked CONTEXT decision.
+ * Exception: a used-up (qty 0) lot holds no food, so its stale expiry is cleared.
  */
 export function planPantryMerge(args: {
   checked: readonly CheckedItem[];
@@ -218,6 +229,10 @@ export function planPantryMerge(args: {
     }));
   const updates = end.lots
     .filter((l) => l.origin === 'lot' && l.changed)
-    .map((l) => ({ id: l.ref, quantity: l.quantity.toNumber() }));
+    .map((l) => ({
+      id: l.ref,
+      quantity: l.quantity.toNumber(),
+      ...(l.usedUp ? { expiryDate: null } : {}),
+    }));
   return { updates, creates, added: creates.length, merged: end.merged, skipped: end.skipped };
 }

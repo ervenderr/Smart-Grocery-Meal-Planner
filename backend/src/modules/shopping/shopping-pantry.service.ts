@@ -38,7 +38,7 @@ export async function applyPantryMerge(
     ...plan.updates.map((u) =>
       prisma.pantryItem.updateMany({
         where: { id: u.id, userId },
-        data: { quantity: u.quantity },
+        data: u.expiryDate === null ? { quantity: u.quantity, expiryDate: null } : { quantity: u.quantity },
       }),
     ),
     prisma.pantryItem.createMany({

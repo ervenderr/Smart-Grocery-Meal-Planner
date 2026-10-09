@@ -89,8 +89,27 @@ describe('planPantryMerge: merge', () => {
 
   it('merges into a used-up (quantity 0) lot', () => {
     const p = plan([item()], [lot({ quantity: 0, unit: 'liters' })]);
-    expect(p.updates).toEqual([{ id: 'lot-1', quantity: 1 }]);
+    expect(p.updates).toEqual([{ id: 'lot-1', quantity: 1, expiryDate: null }]);
     expect(p.merged).toBe(1);
+  });
+
+  it('drops the stale expiry when merging into a used-up lot', () => {
+    const p = plan(
+      [item()],
+      [lot({ quantity: 0, unit: 'liters', expiryDate: new Date('2026-10-12T00:00:00.000Z') })],
+    );
+    expect(p.updates).toEqual([{ id: 'lot-1', quantity: 1, expiryDate: null }]);
+  });
+
+  it('prefers an in-stock lot over a used-up lot with an earlier expiry', () => {
+    const p = plan(
+      [item()],
+      [
+        lot({ id: 'empty', quantity: 0, unit: 'liters', expiryDate: new Date('2026-10-10T00:00:00.000Z') }),
+        lot({ id: 'stock', quantity: 1, unit: 'liters', expiryDate: new Date('2026-10-20T00:00:00.000Z') }),
+      ],
+    );
+    expect(p.updates).toEqual([{ id: 'stock', quantity: 2 }]);
   });
 
   it('does not merge across families', () => {
