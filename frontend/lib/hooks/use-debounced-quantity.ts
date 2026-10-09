@@ -1,23 +1,24 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createDebouncedCommitter } from './debounced-commit';
 
 const DEBOUNCE_MS = 400;
 
 /**
  * Local pending quantity for one item. Changes show instantly; a single commit
  * with the final value fires after 400 ms of quiet. Resets to the server value
- * when it changes and nothing is pending.
+ * when it changes and nothing is pending. A change still waiting on the timer
+ * is flushed (not dropped) on unmount, and commits are sent in order.
  */
 export function useDebouncedQuantity(
   serverValue: number,
   commit: (value: number) => Promise<void>
 ) {
   const [value, setValue] = useState(serverValue);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pending = useRef<number | null>(null);
   const commitRef = useRef(commit);
   const serverRef = useRef(serverValue);
+  const committer = useRef<ReturnType<typeof createDebouncedCommitter> | null>(null);
 
   useEffect(() => {
     commitRef.current = commit;
@@ -25,39 +26,27 @@ export function useDebouncedQuantity(
   });
 
   useEffect(() => {
-    if (pending.current === null) setValue(serverValue);
+    if (!committer.current?.hasPending()) setValue(serverValue);
   }, [serverValue]);
 
-  const clear = () => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = null;
-  };
+  useEffect(() => {
+    const current = createDebouncedCommitter({
+      delayMs: DEBOUNCE_MS,
+      getCommit: () => commitRef.current,
+      // Rollback or settle: fall back to whatever the server value is now.
+      onSettled: () => setValue(serverRef.current),
+    });
+    committer.current = current;
+    return () => {
+      current.flush();
+      committer.current = null;
+    };
+  }, []);
 
-  useEffect(() => clear, []);
-
-  const change = useCallback(
-    (next: number) => {
-      setValue(next);
-      pending.current = next;
-      clear();
-      timer.current = setTimeout(() => {
-        const final = pending.current;
-        timer.current = null;
-        if (final === null) return;
-        commitRef
-          .current(final)
-          .catch(() => undefined)
-          .finally(() => {
-            if (pending.current === final) {
-              pending.current = null;
-              // Rollback or settle: fall back to whatever the server value is now.
-              setValue(serverRef.current);
-            }
-          });
-      }, DEBOUNCE_MS);
-    },
-    []
-  );
+  const change = useCallback((next: number) => {
+    setValue(next);
+    committer.current?.change(next);
+  }, []);
 
   return { value, change };
 }
