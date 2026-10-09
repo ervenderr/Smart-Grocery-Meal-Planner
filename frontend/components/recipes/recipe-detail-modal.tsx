@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Clock, Users, ChefHat, Calendar, Sparkles } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { CookedItSheet } from '@/components/cook/cooked-it-sheet';
 import { AISubstitutionModal } from '@/components/ai/ai-substitution-modal';
 import type { Recipe } from '@/types/recipe.types';
 
@@ -15,6 +16,7 @@ interface RecipeDetailModalProps {
 
 export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModalProps) {
   const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
+  const [showCookedIt, setShowCookedIt] = useState(false);
 
   if (!recipe) return null;
 
@@ -46,6 +48,11 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={recipe.name} size="xl">
       <div className="space-y-6">
+        <Button className="h-11 w-full sm:w-auto" onClick={() => setShowCookedIt(true)}>
+          <ChefHat className="h-4 w-4" aria-hidden="true" />
+          Cooked it
+        </Button>
+
         {/* Image */}
         {recipe.imageUrl ? (
           <div className="w-full h-48 sm:h-64 rounded-lg overflow-hidden bg-gray-200">
@@ -200,6 +207,13 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
           </div>
         </div>
       </div>
+
+      <CookedItSheet
+        isOpen={showCookedIt}
+        onClose={() => setShowCookedIt(false)}
+        target={{ recipeId: recipe.id }}
+        title={recipe.name}
+      />
 
       {/* AI Substitution Modal */}
       <AISubstitutionModal

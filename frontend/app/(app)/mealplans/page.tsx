@@ -97,6 +97,18 @@ export default function MealPlansPage() {
     }
   };
 
+  // Quiet refresh (no spinner) so the open detail modal flips to "Cooked".
+  const refreshAfterCook = async () => {
+    try {
+      const response = await mealPlanApi.getAll({ sortBy: 'startDate', sortOrder: 'desc' });
+      const items = response.items || [];
+      setMealPlans(items);
+      setSelectedMealPlan((current) => items.find((p) => p.id === current?.id) ?? current);
+    } catch (error) {
+      console.error('Refresh after cook error:', error);
+    }
+  };
+
   const handleAIMealPlanSaved = () => {
     fetchMealPlans();
   };
@@ -240,6 +252,7 @@ export default function MealPlansPage() {
           setSelectedMealPlan(null);
         }}
         mealPlan={selectedMealPlan}
+        onCooked={refreshAfterCook}
       />
 
       <AIMealPlanModal

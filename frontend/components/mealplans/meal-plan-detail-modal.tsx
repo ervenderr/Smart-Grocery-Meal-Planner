@@ -1,6 +1,9 @@
 'use client';
 
-import { Calendar, Banknote, Flame, Heart, Clock, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, Banknote, Flame, Heart, Clock, Users, ChefHat, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CookedItSheet } from '@/components/cook/cooked-it-sheet';
 import { Modal } from '@/components/ui/modal';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { MealPlan, MealPlanItem } from '@/types/mealplan.types';
@@ -9,12 +12,16 @@ interface MealPlanDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   mealPlan: MealPlan | null;
+  /** Called after a meal is marked cooked so the caller can refresh plan data. */
+  onCooked?: () => void;
 }
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetailModalProps) {
+export function MealPlanDetailModal({ isOpen, onClose, mealPlan, onCooked }: MealPlanDetailModalProps) {
   const { format } = useCurrency();
+  const [cookingMeal, setCookingMeal] = useState<MealPlanItem | null>(null);
+  const [justCooked, setJustCooked] = useState<readonly string[]>([]);
   if (!mealPlan) return null;
 
   const formatDate = (dateString: string) => {
@@ -48,6 +55,27 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
   };
 
   const mealsByDay = getMealsByDay();
+
+  const renderCookAction = (meal: MealPlanItem) => {
+    const cookedAt = meal.cookedAt ?? (justCooked.includes(meal.id) ? new Date().toISOString() : null);
+    if (cookedAt) {
+      return (
+        <span
+          title={`Cooked ${new Date(cookedAt).toLocaleDateString()}`}
+          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-sm font-semibold text-gray-700"
+        >
+          <CheckCircle className="h-4 w-4" aria-hidden="true" />
+          Cooked
+        </span>
+      );
+    }
+    return (
+      <Button variant="secondary" className="h-11 shrink-0 text-sm" onClick={() => setCookingMeal(meal)}>
+        <ChefHat className="h-4 w-4" aria-hidden="true" />
+        Cooked it
+      </Button>
+    );
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={mealPlan.name} size="xl">
@@ -156,6 +184,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
                                 </div>
                               )}
                             </div>
+                            {meal.recipe && renderCookAction(meal)}
                           </div>
                         </div>
                       ))}
@@ -167,6 +196,20 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan }: MealPlanDetai
           </div>
         </div>
       </div>
+
+      {cookingMeal?.recipe && (
+        <CookedItSheet
+          isOpen
+          onClose={() => setCookingMeal(null)}
+          target={{ mealPlanItemId: cookingMeal.id }}
+          title={cookingMeal.recipe.name}
+          plannedServings={cookingMeal.servings}
+          onCooked={() => {
+            setJustCooked((ids) => [...ids, cookingMeal.id]);
+            onCooked?.();
+          }}
+        />
+      )}
     </Modal>
   );
 }
