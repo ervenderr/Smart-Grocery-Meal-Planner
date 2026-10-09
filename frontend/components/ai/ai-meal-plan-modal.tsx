@@ -18,6 +18,7 @@ import { centsToMajorString } from '@/lib/currency/format';
 import { parseBudgetInput } from '@/lib/currency/budget';
 import { DietFilterNotice } from './diet-filter-notice';
 import toast from 'react-hot-toast';
+import { todayCalendarDate } from '@/lib/utils/calendar-date';
 
 const aiMealPlanSchema = z.object({
   daysCount: z.number().min(1).max(14),
@@ -51,8 +52,8 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 function defaultSaveDates() {
   const now = Date.now();
   return {
-    startDate: new Date(now).toISOString().split('T')[0],
-    endDate: new Date(now + WEEK_MS).toISOString().split('T')[0],
+    startDate: todayCalendarDate(new Date(now)),
+    endDate: todayCalendarDate(new Date(now + WEEK_MS)),
   };
 }
 

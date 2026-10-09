@@ -4,6 +4,7 @@ import { Edit2, Trash2, Calendar, Banknote, Flame, Heart, ShoppingCart } from 'l
 import { Card } from '@/components/ui/card';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { MealPlan } from '@/types/mealplan.types';
+import { formatCalendarDate, inclusiveDayCount } from '@/lib/utils/calendar-date';
 
 interface MealPlanCardProps {
   mealPlan: MealPlan;
@@ -16,7 +17,7 @@ interface MealPlanCardProps {
 export function MealPlanCard({ mealPlan, onEdit, onDelete, onView, onGenerateShoppingList }: MealPlanCardProps) {
   const { format } = useCurrency();
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatCalendarDate(dateString, { month: 'short', day: 'numeric' });
   };
 
   const formatCost = (cents: number | null) => {
@@ -24,12 +25,7 @@ export function MealPlanCard({ mealPlan, onEdit, onDelete, onView, onGenerateSho
     return format(cents);
   };
 
-  const getDaysDuration = () => {
-    const start = new Date(mealPlan.startDate);
-    const end = new Date(mealPlan.endDate);
-    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    return days;
-  };
+  const getDaysDuration = () => inclusiveDayCount(mealPlan.startDate, mealPlan.endDate) ?? 0;
 
   return (
     <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => onView(mealPlan)}>

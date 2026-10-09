@@ -7,6 +7,7 @@ import { CookedItSheet } from '@/components/cook/cooked-it-sheet';
 import { Modal } from '@/components/ui/modal';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { MealPlan, MealPlanItem } from '@/types/mealplan.types';
+import { formatCalendarDate } from '@/lib/utils/calendar-date';
 
 interface MealPlanDetailModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan, onCooked }: Mea
   if (!mealPlan) return null;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    return formatCalendarDate(dateString, { month: 'long', day: 'numeric', year: 'numeric' });
   };
 
   const formatCost = (cents: number | null) => {

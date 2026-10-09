@@ -9,6 +9,7 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { mealPlanApi } from '@/lib/api/mealplans';
 import { useGenerateShoppingList } from '@/lib/hooks/use-generate-shopping-list';
 import { queryKeys } from '@/lib/react-query';
+import { formatCalendarDate } from '@/lib/utils/calendar-date';
 
 const RECENT_PLANS_LIMIT = 10;
 const CONTENT_ID = 'generate-from-plan-content';
@@ -19,7 +20,7 @@ interface GenerateFromPlanProps {
 
 function formatRange(start: string, end: string): string {
   const fmt = (value: string) =>
-    new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    formatCalendarDate(value, { month: 'short', day: 'numeric' });
   return `${fmt(start)} - ${fmt(end)}`;
 }
 

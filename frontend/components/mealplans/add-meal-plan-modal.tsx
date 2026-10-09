@@ -14,6 +14,7 @@ import { recipeApi } from '@/lib/api/recipes';
 import toast from 'react-hot-toast';
 import type { MealType, DayOfWeek } from '@/types/mealplan.types';
 import type { Recipe } from '@/types/recipe.types';
+import { todayCalendarDate } from '@/lib/utils/calendar-date';
 
 const mealPlanSchema = z.object({
   name: z.string().min(1, 'Meal plan name is required').max(200, 'Name too long'),
@@ -133,7 +134,7 @@ export function AddMealPlanModal({ isOpen, onClose, onSuccess }: AddMealPlanModa
   };
 
   const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0];
+    return todayCalendarDate();
   };
 
   return (
