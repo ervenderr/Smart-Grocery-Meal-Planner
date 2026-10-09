@@ -30,6 +30,13 @@ describe('resolveUnit aliases', () => {
     ['clove', 'count', 'clove'],
     ['cloves', 'count', 'clove'],
     ['Cans', 'count', 'can'],
+    ['bunch', 'count', 'bunch'],
+    ['bunches', 'count', 'bunch'],
+    ['pinch', 'count', 'pinch'],
+    ['pinches', 'count', 'pinch'],
+    ['slice', 'count', 'slice'],
+    ['slices', 'count', 'slice'],
+    ['can', 'count', 'can'],
   ])('%p -> %s/%s', (raw, family, key) => {
     const r = resolveUnit(raw);
     expect(r.family).toBe(family);

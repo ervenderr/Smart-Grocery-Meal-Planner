@@ -59,11 +59,15 @@ const PIECE_WORDS: ReadonlySet<string> = new Set([
 const normalizeKey = (raw: string): string =>
   raw.toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ').trim();
 
-/** Conservative depluralization: strip one trailing 's' (not 'ss'/'us'/'is'), keep >= 3 chars. */
+/**
+ * Conservative depluralization of a count unit, matching canonical.ts:
+ * "bunches"->"bunch", "pinches"->"pinch", "cloves"->"clove", "cans"->"can".
+ * Keeps >= 3 chars and never strips "ss"/"us"/"is" endings.
+ */
 function depluralize(word: string): string {
-  if (word.length > 3 && word.endsWith('s') && !/(ss|us|is)$/.test(word)) {
-    return word.slice(0, -1);
-  }
+  if (/(ss|us|is)$/.test(word)) return word;
+  if (/(ch|sh|x)es$/.test(word) && word.length - 2 >= 3) return word.slice(0, -2);
+  if (word.length > 3 && word.endsWith('s')) return word.slice(0, -1);
   return word;
 }
 
