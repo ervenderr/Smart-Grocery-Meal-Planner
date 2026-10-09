@@ -38,6 +38,7 @@ export interface PantryItem {
   purchaseDate?: string | null;
   location?: PantryItemLocation | null;
   notes?: string | null;
+  barcode?: string | null;
   createdAt: string;
   updatedAt: string;
   isExpired?: boolean;
@@ -53,6 +54,7 @@ export interface CreatePantryItemData {
   purchaseDate?: string;
   location?: PantryItemLocation;
   notes?: string;
+  barcode?: string;
 }
 
 export interface UpdatePantryItemData {
@@ -64,6 +66,7 @@ export interface UpdatePantryItemData {
   purchaseDate?: string | null;
   location?: PantryItemLocation | null;
   notes?: string | null;
+  barcode?: string | null;
 }
 
 export interface PantryItemsResponse {

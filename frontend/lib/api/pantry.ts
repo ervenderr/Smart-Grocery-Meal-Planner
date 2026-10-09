@@ -19,12 +19,18 @@ export const pantryApi = {
     limit?: number;
     category?: string;
     search?: string;
+    barcode?: string;
+    sortBy?: 'name' | 'expiryDate' | 'quantity' | 'createdAt';
+    sortOrder?: 'asc' | 'desc';
   }): Promise<PantryItemsResponse> => {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.category) queryParams.append('category', params.category);
     if (params?.search) queryParams.append('search', params.search);
+    if (params?.barcode) queryParams.append('barcode', params.barcode);
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
     const url = `${API_ROUTES.PANTRY.BASE}${queryParams.toString() ? `?${queryParams}` : ''}`;
     return apiClient.get<PantryItemsResponse>(url);

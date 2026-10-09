@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { pantryApi } from '@/lib/api/pantry';
+import { BarcodeField } from '@/components/pantry/barcode-field';
 import toast from 'react-hot-toast';
 import type { PantryItem, PantryItemCategory, PantryItemUnit } from '@/types/pantry.types';
 
@@ -21,6 +23,11 @@ const pantryItemSchema = z.object({
   purchaseDate: z.string().optional(),
   location: z.string().optional(),
   notes: z.string().optional(),
+  barcode: z
+    .string()
+    .regex(/^\d{8,14}$/, 'Barcode must be 8 to 14 digits.')
+    .optional()
+    .or(z.literal('')),
 });
 
 type PantryItemFormData = z.infer<typeof pantryItemSchema>;
@@ -30,6 +37,10 @@ interface EditPantryItemModalProps {
   onClose: () => void;
   onSuccess: () => void;
   item: PantryItem | null;
+  /** Trailing control of the Barcode field (the scan icon button). */
+  barcodeAction?: ReactNode;
+  /** When this changes to a non-empty value it replaces the Barcode field value. */
+  barcodeOverride?: string;
 }
 
 const categories: { value: PantryItemCategory; label: string }[] = [
@@ -61,12 +72,21 @@ const units: { value: PantryItemUnit; label: string }[] = [
   { value: 'items', label: 'Items' },
 ];
 
-export function EditPantryItemModal({ isOpen, onClose, onSuccess, item }: EditPantryItemModalProps) {
+export function EditPantryItemModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  item,
+  barcodeAction,
+  barcodeOverride,
+}: EditPantryItemModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
     reset,
   } = useForm<PantryItemFormData>({
@@ -84,9 +104,18 @@ export function EditPantryItemModal({ isOpen, onClose, onSuccess, item }: EditPa
         purchaseDate: item.purchaseDate ? item.purchaseDate.split('T')[0] : '',
         location: item.location || '',
         notes: item.notes || '',
+        barcode: item.barcode || '',
       });
     }
   }, [item, reset]);
+
+  useEffect(() => {
+    if (barcodeOverride) {
+      setValue('barcode', barcodeOverride, { shouldValidate: true, shouldDirty: true });
+    }
+  }, [barcodeOverride, setValue]);
+
+  const barcodeValue = watch('barcode') ?? '';
 
   const onSubmit = async (data: PantryItemFormData) => {
     if (!item) return;
@@ -103,6 +132,7 @@ export function EditPantryItemModal({ isOpen, onClose, onSuccess, item }: EditPa
         purchaseDate: data.purchaseDate || undefined,
         location: data.location as any || undefined,
         notes: data.notes || undefined,
+        barcode: data.barcode || null,
       });
 
       toast.success('Pantry item updated successfully!');
@@ -140,6 +170,14 @@ export function EditPantryItemModal({ isOpen, onClose, onSuccess, item }: EditPa
             disabled={isLoading}
             required
             {...register('ingredientName')}
+          />
+
+          <BarcodeField
+            value={barcodeValue}
+            onChange={(next) => setValue('barcode', next, { shouldValidate: true, shouldDirty: true })}
+            error={errors.barcode?.message}
+            disabled={isLoading}
+            trailing={barcodeAction}
           />
 
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">

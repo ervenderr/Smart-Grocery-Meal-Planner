@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,9 +11,15 @@ import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { pantryApi } from '@/lib/api/pantry';
 import { BarcodeLookup } from '@/components/food/barcode-lookup';
-import type { FoodProduct } from '@/lib/api/food';
+import { BarcodeField } from '@/components/pantry/barcode-field';
+import { FoodDataAttribution } from '@/components/food/food-data-attribution';
+import type { FoodAttribution, FoodProduct } from '@/lib/api/food';
 import toast from 'react-hot-toast';
-import type { PantryItemCategory, PantryItemUnit } from '@/types/pantry.types';
+import type {
+  CreatePantryItemData,
+  PantryItemCategory,
+  PantryItemUnit,
+} from '@/types/pantry.types';
 
 const pantryItemSchema = z.object({
   ingredientName: z.string().min(1, 'Item name is required'),
@@ -23,6 +30,11 @@ const pantryItemSchema = z.object({
   purchaseDate: z.string().optional(),
   location: z.string().optional(),
   notes: z.string().optional(),
+  barcode: z
+    .string()
+    .regex(/^\d{8,14}$/, 'Barcode must be 8 to 14 digits.')
+    .optional()
+    .or(z.literal('')),
 });
 
 type PantryItemFormData = z.infer<typeof pantryItemSchema>;
@@ -31,6 +43,14 @@ interface AddPantryItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  /** Prefill values; the form resets from these each time the modal opens. */
+  initialValues?: Partial<CreatePantryItemData>;
+  /** 'own' shows the repeat-scan banner. */
+  notice?: 'own' | null;
+  attribution?: FoodAttribution | null;
+  focusName?: boolean;
+  /** Rendered directly under the title (the scan flow puts its button here). */
+  headerSlot?: ReactNode;
 }
 
 const categories: { value: PantryItemCategory; label: string }[] = [
@@ -62,18 +82,44 @@ const units: { value: PantryItemUnit; label: string }[] = [
   { value: 'items', label: 'Items' },
 ];
 
-export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItemModalProps) {
+export function AddPantryItemModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialValues,
+  notice = null,
+  attribution = null,
+  focusName = false,
+  headerSlot,
+}: AddPantryItemModalProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
+    setFocus,
     formState: { errors },
     reset,
   } = useForm<PantryItemFormData>({
     resolver: zodResolver(pantryItemSchema),
   });
+
+  const initialRef = useRef(initialValues);
+  initialRef.current = initialValues;
+  const initialKey = JSON.stringify(initialValues ?? {});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    reset({ ...initialRef.current });
+    if (focusName) {
+      const timer = setTimeout(() => setFocus('ingredientName'), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, initialKey, focusName, reset, setFocus]);
+
+  const barcodeValue = watch('barcode') ?? '';
 
   const NAME_MAX_LENGTH = 100;
 
@@ -82,6 +128,7 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
     const name = fullName.length <= NAME_MAX_LENGTH ? fullName : product.name.slice(0, NAME_MAX_LENGTH);
     setValue('ingredientName', name, { shouldValidate: true });
     setValue('category', product.suggestedCategory, { shouldValidate: true });
+    if (product.barcode) setValue('barcode', product.barcode, { shouldValidate: true });
   };
 
   const onSubmit = async (data: PantryItemFormData) => {
@@ -97,6 +144,7 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
         purchaseDate: data.purchaseDate || undefined,
         location: data.location as any || undefined,
         notes: data.notes || undefined,
+        barcode: data.barcode || undefined,
       });
 
       toast.success('Pantry item added successfully!');
@@ -122,6 +170,13 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Pantry Item" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {headerSlot}
+        {notice === 'own' && (
+          <p className="rounded-lg bg-primary-50 p-2 text-sm text-primary-700">
+            You&apos;ve added this before. Details filled in from your pantry.
+          </p>
+        )}
+
         {/* Basic Information Section */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
@@ -142,6 +197,14 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
             disabled={isLoading}
             required
             {...register('ingredientName')}
+          />
+
+          <BarcodeField
+            collapsible
+            value={barcodeValue}
+            onChange={(next) => setValue('barcode', next, { shouldValidate: true })}
+            error={errors.barcode?.message}
+            disabled={isLoading}
           />
 
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
@@ -269,6 +332,8 @@ export function AddPantryItemModal({ isOpen, onClose, onSuccess }: AddPantryItem
             {isLoading ? 'Adding...' : 'Add Item'}
           </Button>
         </div>
+
+        {attribution && <FoodDataAttribution attribution={attribution} />}
       </form>
     </Modal>
   );
