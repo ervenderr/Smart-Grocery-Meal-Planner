@@ -281,6 +281,7 @@ model MealPlanItem {
 
   costCents     Int?     @map("cost_cents")
   calories      Int?
+  cookedAt      DateTime? @map("cooked_at") // set once by POST /cook/apply; carried across meal edits
 
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
