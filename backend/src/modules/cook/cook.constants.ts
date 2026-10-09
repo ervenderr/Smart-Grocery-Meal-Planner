@@ -1,0 +1,15 @@
+/** Cook module constants. */
+
+export const COOK_ERROR_CODES = Object.freeze({
+  RECIPE_NOT_FOUND: 'RECIPE_NOT_FOUND',
+  ALREADY_COOKED: 'ALREADY_COOKED',
+  MEAL_NOT_FOUND: 'MEAL_NOT_FOUND',
+  DEDUCTION_UNIT_MISMATCH: 'DEDUCTION_UNIT_MISMATCH',
+});
+
+export const COOK_PANTRY_READ_CAP = 2000;
+export const MAX_DEDUCTIONS = 100;
+export const MAX_SERVINGS = 99;
+export const MAX_DEDUCTION_USE = 99999;
+export const MAX_DEDUCTION_KEY_LENGTH = 200;
+export const MAX_DEDUCTION_UNIT_LENGTH = 20;
