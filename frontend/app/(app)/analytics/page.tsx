@@ -9,6 +9,7 @@ import { SpendingTrendsChart } from '@/components/analytics/spending-trends-char
 import { CategorySpendingChart } from '@/components/analytics/category-spending-chart';
 import { PantryAnalytics } from '@/components/analytics/pantry-analytics';
 import { RecipeAnalytics } from '@/components/analytics/recipe-analytics';
+import { ChartBoundary } from '@/components/analytics/chart-boundary';
 import { WeeklyComparisonChart } from '@/components/analytics/weekly-comparison-chart';
 import { analyticsApi } from '@/lib/api/analytics';
 import toast from 'react-hot-toast';
@@ -87,16 +88,21 @@ export default function AnalyticsPage() {
       setCategoryBreakdown(safeCategoryData);
 
       // Calculate stats
-      const totalSpent = safeTrendsData.reduce((sum: number, item: any) => sum + (item.totalSpentCents || 0), 0);
+      const totalSpent = safeTrendsData.reduce(
+        (sum: number, item) =>
+          sum + (Number.isFinite(item?.totalSpentCents) ? item.totalSpentCents : 0),
+        0
+      );
       const avgWeekly = safeTrendsData.length > 0 ? totalSpent / safeTrendsData.length : 0;
-      const topCat = safeCategoryData.length > 0 ? safeCategoryData[0].category : 'N/A';
-      const savings = budget ? (budget.remainingCents / budget.budgetCents) * 100 : 0;
+      const topCat = safeCategoryData[0]?.category || 'N/A';
+      const savings =
+        budget && budget.budgetCents > 0 ? (budget.remainingCents / budget.budgetCents) * 100 : 0;
 
       setStats({
         totalSpent,
         avgWeeklySpending: avgWeekly,
         topCategory: topCat,
-        savingsRate: Math.max(0, savings),
+        savingsRate: Number.isFinite(savings) ? Math.max(0, savings) : 0,
       });
     } catch (error) {
       console.error('Fetch analytics error:', error);
@@ -243,17 +249,27 @@ export default function AnalyticsPage() {
 
       {/* Charts Row 1 */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <SpendingTrendsChart data={spendingTrends} dateRange={dateRange} />
-        <CategorySpendingChart data={categoryBreakdown} />
+        <ChartBoundary title="Spending Trends">
+          <SpendingTrendsChart data={spendingTrends} />
+        </ChartBoundary>
+        <ChartBoundary title="Category Breakdown">
+          <CategorySpendingChart data={categoryBreakdown} />
+        </ChartBoundary>
       </div>
 
       {/* Weekly Comparison */}
-      <WeeklyComparisonChart data={spendingTrends} />
+      <ChartBoundary title="Weekly Comparison">
+        <WeeklyComparisonChart data={spendingTrends} />
+      </ChartBoundary>
 
       {/* Analytics Row 2 */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <PantryAnalytics />
-        <RecipeAnalytics />
+        <ChartBoundary title="Pantry Insights">
+          <PantryAnalytics />
+        </ChartBoundary>
+        <ChartBoundary title="Recipe Insights">
+          <RecipeAnalytics />
+        </ChartBoundary>
       </div>
     </div>
   );

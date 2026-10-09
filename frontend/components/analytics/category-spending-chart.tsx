@@ -3,23 +3,18 @@
 import { Card } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Package } from 'lucide-react';
+import { toCategoryChartPoints } from '@/lib/analytics/chart-data';
 import { useCurrency } from '@/lib/currency/currency-provider';
 
 interface CategorySpendingChartProps {
-  data: any[];
+  data: unknown;
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
   const { format: formatMoney } = useCurrency();
-  // Transform data for chart
-  const chartData = data.slice(0, 8).map((item) => ({
-    name: item.category.charAt(0).toUpperCase() + item.category.slice(1),
-    value: item.totalSpentCents / 100, // Major units
-    percentage: item.percentage,
-    count: item.itemCount,
-  }));
+  const chartData = toCategoryChartPoints(data, 8);
 
   const totalSpent = chartData.reduce((sum, item) => sum + item.value, 0);
 

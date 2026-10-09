@@ -3,27 +3,16 @@
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Calendar } from 'lucide-react';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { toWeeklyComparisonPoints } from '@/lib/analytics/chart-data';
 import { useCurrency } from '@/lib/currency/currency-provider';
 
 interface WeeklyComparisonChartProps {
-  data: any[];
+  data: unknown;
 }
 
 export function WeeklyComparisonChart({ data }: WeeklyComparisonChartProps) {
   const { format: formatMoney, compact } = useCurrency();
-  // Transform data for weekly comparison
-  const chartData = data.slice(0, 8).map((item) => {
-    const weekStart = new Date(item.weekStart || item.date);
-    const weekEnd = endOfWeek(weekStart);
-
-    return {
-      week: `${format(weekStart, 'MMM dd')} - ${format(weekEnd, 'dd')}`,
-      spent: item.totalSpentCents / 100,
-      budget: item.budgetCents ? item.budgetCents / 100 : 0,
-      savings: item.budgetCents ? (item.budgetCents - item.totalSpentCents) / 100 : 0,
-    };
-  }).reverse(); // Show oldest to newest
+  const chartData = toWeeklyComparisonPoints(data, 8);
 
   const formatAxis = (value: number) => compact(Math.round(value * 100));
   const formatMajor = (value: number) => formatMoney(Math.round(value * 100));

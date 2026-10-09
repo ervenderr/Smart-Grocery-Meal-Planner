@@ -3,22 +3,17 @@
 import { Card } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { format } from 'date-fns';
+import { toTrendChartPoints } from '@/lib/analytics/chart-data';
 import { useCurrency } from '@/lib/currency/currency-provider';
 
 interface SpendingTrendsChartProps {
-  data: any[];
-  dateRange: string;
+  data: unknown;
+  dateRange?: string;
 }
 
-export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProps) {
+export function SpendingTrendsChart({ data }: SpendingTrendsChartProps) {
   const { format: formatMoney, compact } = useCurrency();
-  // Transform data for chart
-  const chartData = data.map((item) => ({
-    date: format(new Date(item.weekStart || item.date), 'MMM dd'),
-    spent: item.totalSpentCents / 100, // Major units for the chart
-    budget: item.budgetCents ? item.budgetCents / 100 : null,
-  }));
+  const chartData = toTrendChartPoints(data);
 
   const formatAxis = (value: number) => compact(Math.round(value * 100));
 
@@ -26,7 +21,7 @@ export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProp
     if (active && payload && payload.length) {
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium text-gray-900 mb-2">{payload[0].payload.date}</p>
+          <p className="text-sm font-medium text-gray-900 mb-2">{payload[0].payload.fullLabel}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: <span className="font-semibold">{formatMoney(Math.round(entry.value * 100))}</span>
@@ -56,7 +51,7 @@ export function SpendingTrendsChart({ data, dateRange }: SpendingTrendsChartProp
           <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
-              dataKey="date"
+              dataKey="label"
               tick={{ fontSize: 14, fill: '#6b7280' }}
               stroke="#e5e7eb"
               interval="preserveStartEnd"
