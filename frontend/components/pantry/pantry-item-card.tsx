@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Edit2, Trash2, MapPin, Calendar, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { ExpirySheet } from '@/components/pantry/expiry-sheet';
 import { QuantityStepper } from '@/components/pantry/quantity-stepper';
 import { UsedUpBadge } from '@/components/pantry/used-up-badge';
 import { useDebouncedQuantity } from '@/lib/hooks/use-debounced-quantity';
@@ -27,6 +29,7 @@ export function PantryItemCard({
   const { value: quantity, change } = useDebouncedQuantity(Number(item.quantity), (next) =>
     onPatch(item, { quantity: next })
   );
+  const [expiryOpen, setExpiryOpen] = useState(false);
   const usedUp = Number(item.quantity) === 0 && quantity === 0;
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -63,6 +66,7 @@ export function PantryItemCard({
   };
 
   const expiryStatus = usedUp ? null : getExpiryStatus();
+  const expiryDateLabel = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : '';
 
   return (
     <Card className={`p-3 sm:p-4 hover:shadow-md transition-shadow ${usedUp ? 'bg-gray-50' : ''}`}>
@@ -107,21 +111,35 @@ export function PantryItemCard({
             </div>
           )}
 
-          {/* Expiry Warning */}
-          {expiryStatus && (
-            <div className={`mt-2 flex items-center gap-1 rounded-md px-2 py-1 text-sm font-semibold ${expiryStatus.color}`}>
-              <AlertTriangle className="h-3 w-3" />
-              {expiryStatus.label}
-            </div>
-          )}
-
-          {/* Expiry Date */}
-          {item.expiryDate && !expiryStatus && (
-            <div className="mt-2 flex items-center gap-1 text-sm text-gray-500">
-              <Calendar className="h-3 w-3" />
-              Expires: {new Date(item.expiryDate).toLocaleDateString()}
-            </div>
-          )}
+          {/* Expiry chip: always a button that opens the expiry sheet */}
+          <div className="mt-2">
+            {item.expiryDate ? (
+              <button
+                type="button"
+                onClick={() => setExpiryOpen(true)}
+                aria-label={`Change expiry date for ${item.ingredientName}, currently ${expiryDateLabel}`}
+                className={`inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-semibold ${
+                  expiryStatus ? expiryStatus.color : 'text-gray-600'
+                }`}
+              >
+                {expiryStatus ? (
+                  <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                ) : (
+                  <Calendar className="h-3 w-3" aria-hidden="true" />
+                )}
+                {expiryStatus ? expiryStatus.label : `Expires: ${expiryDateLabel}`}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setExpiryOpen(true)}
+                className="inline-flex min-h-11 items-center gap-1 rounded-md border border-dashed border-gray-300 px-2 text-sm font-semibold text-gray-600"
+              >
+                <Calendar className="h-3 w-3" aria-hidden="true" />
+                Add expiry date
+              </button>
+            )}
+          </div>
 
           {/* Notes */}
           {item.notes && (
@@ -151,6 +169,13 @@ export function PantryItemCard({
           </button>
         </div>
       </div>
+      <ExpirySheet
+        isOpen={expiryOpen}
+        onClose={() => setExpiryOpen(false)}
+        itemName={item.ingredientName}
+        currentDate={item.expiryDate ? item.expiryDate.slice(0, 10) : null}
+        onSave={(expiryDate) => onPatch(item, { expiryDate })}
+      />
     </Card>
   );
 }
