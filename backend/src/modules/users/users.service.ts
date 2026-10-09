@@ -21,6 +21,7 @@ import {
   UserPreferencesResponse,
 } from '@/types/user.types';
 import { logger } from '@/config/logger.config';
+import { DEFAULT_STAPLE_NAMES } from '@/modules/intelligence/staples';
 
 export class UsersService {
   /**
@@ -131,7 +132,7 @@ export class UsersService {
       throw new AppError('User preferences not found', 404);
     }
 
-    return preferences;
+    return { ...preferences, defaultStapleNames: [...DEFAULT_STAPLE_NAMES] };
   }
 
   /**
@@ -179,12 +180,13 @@ export class UsersService {
         mealsPerDay: data.mealsPerDay,
         dietaryRestrictions: data.dietaryRestrictions,
         preferredUnit: data.preferredUnit,
+        stapleNames: data.stapleNames,
       },
     });
 
     logger.info('User preferences updated', { userId });
 
-    return preferences;
+    return { ...preferences, defaultStapleNames: [...DEFAULT_STAPLE_NAMES] };
   }
 
   /**

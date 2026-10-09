@@ -6,6 +6,11 @@
 
 import { body } from 'express-validator';
 import { SUPPORTED_CURRENCIES } from '../../constants/currencies';
+import {
+  MAX_STAPLES,
+  everyStapleIsValid,
+  sanitizeStapleNames,
+} from '../intelligence/staples';
 
 /**
  * Validation rules for updating profile
@@ -86,6 +91,16 @@ export const updatePreferencesValidation = [
     .isString()
     .isIn(['kg', 'lb', 'g', 'oz'])
     .withMessage('Preferred unit must be one of: kg, lb, g, oz'),
+
+  // One chain: the sanitizer only ever sees a validated array of valid strings.
+  body('stapleNames')
+    .optional()
+    .isArray({ max: MAX_STAPLES })
+    .withMessage(`stapleNames must be a list of at most ${MAX_STAPLES} items`)
+    .bail()
+    .custom(everyStapleIsValid)
+    .bail()
+    .customSanitizer(sanitizeStapleNames),
 ];
 
 /**

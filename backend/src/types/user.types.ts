@@ -33,6 +33,7 @@ export interface UpdatePreferencesRequest {
   mealsPerDay?: number;
   dietaryRestrictions?: string[];
   preferredUnit?: string;
+  stapleNames?: string[];
 }
 
 /**
@@ -62,6 +63,8 @@ export interface UserPreferencesResponse {
   mealsPerDay: number;
   dietaryRestrictions: string[];
   preferredUnit: string;
+  stapleNames: string[];
+  defaultStapleNames: string[];
   onboardingCompletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
