@@ -77,6 +77,7 @@ export async function issueRefreshToken(
       userId,
       tokenHash: hashRefreshToken(refreshToken),
       familyId: resolvedFamilyId,
+      familyStartedAt,
       expiresAt: refreshExpiresAt,
     },
   });
@@ -98,15 +99,6 @@ async function enforceFamilyCap(client: Client, userId: string, now: Date): Prom
     where: { userId, familyId: { in: overflow }, revokedAt: null },
     data: { revokedAt: now, revokedReason: 'family_cap' },
   });
-}
-
-async function familyStart(
-  tx: Prisma.TransactionClient,
-  familyId: string,
-  fallback: Date
-): Promise<Date> {
-  const agg = await tx.refreshToken.aggregate({ where: { familyId }, _min: { createdAt: true } });
-  return agg._min.createdAt ?? fallback;
 }
 
 async function revokeFamily(
@@ -159,7 +151,9 @@ async function rotateInTransaction(
     return handleRevoked(tx, current, now);
   }
 
-  const startedAt = await familyStart(tx, row.familyId, row.createdAt);
+  // Persisted on every row and copied forward, so pruning rotated rows cannot
+  // move the family origin (WR-08). Legacy rows (null) fall back to createdAt.
+  const startedAt = row.familyStartedAt ?? row.createdAt;
   if (startedAt.getTime() + MAX_FAMILY_DAYS * DAY_MS <= now.getTime()) return invalid();
 
   const next = await issueRefreshToken(row.userId, row.familyId, tx, now, startedAt);

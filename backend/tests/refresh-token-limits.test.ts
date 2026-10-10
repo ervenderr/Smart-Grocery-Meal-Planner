@@ -33,7 +33,7 @@ describe('refresh token family limits (WR-04)', () => {
     const started = new Date(Date.now() - (MAX_FAMILY_DAYS - 1) * DAY);
     await prisma.refreshToken.updateMany({
       where: { userId },
-      data: { createdAt: started, expiresAt: new Date(Date.now() + 30 * DAY) },
+      data: { familyStartedAt: started, expiresAt: new Date(Date.now() + 30 * DAY) },
     });
     const next = await rotateRefreshToken(a.refreshToken);
     expect(next.refreshExpiresAt.getTime()).toBeLessThanOrEqual(started.getTime() + MAX_FAMILY_DAYS * DAY);
@@ -46,6 +46,47 @@ describe('refresh token family limits (WR-04)', () => {
     await prisma.refreshToken.updateMany({
       where: { userId },
       data: {
+        familyStartedAt: new Date(Date.now() - (MAX_FAMILY_DAYS + 1) * DAY),
+        expiresAt: new Date(Date.now() + 30 * DAY),
+      },
+    });
+    await expect(rotateRefreshToken(a.refreshToken)).rejects.toMatchObject({ statusCode: 401 });
+  });
+
+  it('still enforces the cap after earlier rotated rows were pruned (WR-08)', async () => {
+    const userId = await makeUser('pruned');
+    const a = await issueRefreshToken(userId);
+    const origin = new Date(Date.now() - (MAX_FAMILY_DAYS - 1) * DAY);
+    await prisma.refreshToken.updateMany({
+      where: { userId },
+      data: { familyStartedAt: origin, expiresAt: new Date(Date.now() + 30 * DAY) },
+    });
+    const b = await rotateRefreshToken(a.refreshToken);
+    // Prune every rotated predecessor, as the daily cleanup eventually does.
+    await prisma.refreshToken.deleteMany({ where: { userId, revokedReason: 'rotated' } });
+    const c = await rotateRefreshToken(b.refreshToken);
+    expect(c.refreshExpiresAt.getTime()).toBeLessThanOrEqual(origin.getTime() + MAX_FAMILY_DAYS * DAY);
+    const survivors = await prisma.refreshToken.findMany({ where: { userId } });
+    expect(survivors.every((r) => r.familyStartedAt?.getTime() === origin.getTime())).toBe(true);
+
+    // Push the origin past the cap on the surviving rows: rotation must now fail.
+    await prisma.refreshToken.updateMany({
+      where: { userId },
+      data: {
+        familyStartedAt: new Date(Date.now() - (MAX_FAMILY_DAYS + 1) * DAY),
+        expiresAt: new Date(Date.now() + 30 * DAY),
+      },
+    });
+    await expect(rotateRefreshToken(c.refreshToken)).rejects.toMatchObject({ statusCode: 401 });
+  });
+
+  it('falls back to createdAt for legacy rows without familyStartedAt (WR-08)', async () => {
+    const userId = await makeUser('legacy');
+    const a = await issueRefreshToken(userId);
+    await prisma.refreshToken.updateMany({
+      where: { userId },
+      data: {
+        familyStartedAt: null,
         createdAt: new Date(Date.now() - (MAX_FAMILY_DAYS + 1) * DAY),
         expiresAt: new Date(Date.now() + 30 * DAY),
       },
