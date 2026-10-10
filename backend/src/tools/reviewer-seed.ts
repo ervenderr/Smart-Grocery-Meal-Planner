@@ -11,6 +11,13 @@ import { hashPassword } from '../utils/password.util';
 
 export const REVIEWER_DEFAULT_EMAIL = 'app-review@kitcha-demo.com';
 
+const REVIEWER_FIRST_NAME = 'App';
+const REVIEWER_LAST_NAME = 'Reviewer';
+
+function isSeededReviewer(user: { firstName: string | null; lastName: string | null }): boolean {
+  return user.firstName === REVIEWER_FIRST_NAME && user.lastName === REVIEWER_LAST_NAME;
+}
+
 const LOCAL_HOSTS: readonly string[] = ['localhost', '127.0.0.1', '[::1]', 'postgres', 'db'];
 
 function looksLocal(databaseUrl: string | undefined): boolean {
@@ -200,6 +207,16 @@ export async function seedReviewer(
   prisma: PrismaClient,
   { email, password }: SeedReviewerInput
 ): Promise<SeedReviewerResult> {
+  const existing = await prisma.user.findUnique({
+    where: { email },
+    select: { firstName: true, lastName: true },
+  });
+  if (existing && !isSeededReviewer(existing)) {
+    throw new Error(
+      `Refusing to seed: ${email} belongs to an existing non-reviewer account (seeding wipes its data)`
+    );
+  }
+
   const passwordHash = await hashPassword(password);
   const now = new Date();
 
@@ -208,8 +225,8 @@ export async function seedReviewer(
     create: {
       email,
       passwordHash,
-      firstName: 'App',
-      lastName: 'Reviewer',
+      firstName: REVIEWER_FIRST_NAME,
+      lastName: REVIEWER_LAST_NAME,
       isActive: true,
       aiConsentAt: null,
       aiConsentVersion: null,

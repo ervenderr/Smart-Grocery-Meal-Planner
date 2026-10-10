@@ -148,4 +148,24 @@ describe('seedReviewer', () => {
       await prisma.user.delete({ where: { id: other.id } });
     }
   });
+
+  it('refuses to wipe an existing real (non-reviewer) account', async () => {
+    const realEmail = `real-${randomBytes(6).toString('hex')}@example.com`;
+    const real = await prisma.user.create({
+      data: { email: realEmail, passwordHash: 'x', firstName: 'Real', lastName: 'Person' },
+    });
+    try {
+      await prisma.pantryItem.create({
+        data: { userId: real.id, ingredientName: 'rice', quantity: 1, unit: 'kg', category: 'grains' },
+      });
+      await expect(seedReviewer(prisma, { email: realEmail, password })).rejects.toThrow(
+        /non-reviewer account/
+      );
+      expect(await prisma.pantryItem.count({ where: { userId: real.id } })).toBe(1);
+      const after = await prisma.user.findUniqueOrThrow({ where: { id: real.id } });
+      expect(after.passwordHash).toBe('x');
+    } finally {
+      await prisma.user.delete({ where: { id: real.id } });
+    }
+  });
 });

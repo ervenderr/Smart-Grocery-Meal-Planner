@@ -15,7 +15,14 @@ From `backend/`, with a local database:
 REVIEWER_PASSWORD=<strong password> npm run seed:reviewer
 ```
 
-The seed is idempotent (re-running resets the demo data), refuses `NODE_ENV=production` and non-local databases, and prints only the email and counts. Seeding the production database is a separate, owner-approved step and has not been done.
+The seed is idempotent (re-running resets the demo data), refuses `NODE_ENV=production` and non-local databases, and prints only the email and counts. The seed also refuses to run if `REVIEWER_EMAIL` already belongs to an account that is not a seeded reviewer (name "App Reviewer"), because seeding deletes that account's data.
+
+### Production procedure (owner-approved, not yet done)
+
+1. Run only from a trusted shell, never in CI.
+2. Use a dedicated reviewer email (default `app-review@kitcha-demo.com`), never a real user's address.
+3. The seed refuses `NODE_ENV=production`, so run it with `NODE_ENV=development ALLOW_SEED=true DATABASE_URL=<target>` and double-check the `DATABASE_URL` host before pressing enter. Do not leave `ALLOW_SEED` set in any shell profile.
+4. Confirm the printed email and counts, then unset the variables.
 
 ## What to try
 
