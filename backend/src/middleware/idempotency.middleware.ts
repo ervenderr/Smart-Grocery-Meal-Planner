@@ -8,6 +8,10 @@
  * persist 2xx response BEFORE sending it -> replay stored response on retry.
  * Non-2xx responses are never cached (the reservation is released).
  *
+ * Client disconnects never release the reservation; the handler finishes and
+ * its completion is persisted so a retry replays instead of double-applying.
+ * A truly crashed request is recovered by the stale-takeover timeout.
+ *
  * Accepted residual risk (research A3): if the process dies after the business
  * commit but before the completion write, a retry can double-apply. Railway
  * runs a single replica and the window is one UPDATE.
@@ -130,18 +134,14 @@ function instrumentResponse(res: Response, id: string, userId: string, route: st
     if (handled) return originalJson(body);
     handled = true;
     // Persist-before-send: any response a client sees is already recorded.
-    void persistOrRelease(id, userId, route, res.statusCode, body).then(() => originalJson(body));
+    // A client disconnect must NOT release the reservation: the handler keeps
+    // running and its effect commits, so the completion has to be persisted for
+    // the retry to replay (CR-01). Only send if the socket is still usable.
+    void persistOrRelease(id, userId, route, res.statusCode, body).then(() => {
+      if (!res.writableEnded && !res.destroyed) originalJson(body);
+    });
     return res;
   }) as Response['json'];
-
-  res.on('close', () => {
-    if (!handled) {
-      handled = true;
-      release(id).catch((error: Error) =>
-        logger.error('Idempotency release failed', { userId, route, error: error.message })
-      );
-    }
-  });
 }
 
 export const idempotency: RequestHandler = async (
