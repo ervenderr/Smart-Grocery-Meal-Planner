@@ -22,7 +22,11 @@ function expiryFrom(now: Date): Date {
   return new Date(now.getTime() + config.idempotency.ttlHours * 3_600_000);
 }
 
-/** Returns the new row id when we own the key, null when it already exists. */
+/**
+ * Timestamps are cast through timestamptz AT TIME ZONE 'UTC' so the stored
+ * value matches Prisma's UTC writes regardless of the DB session time zone
+ * (claim tokens compare created_at exactly).
+ * Returns the new row id when we own the key, null when it already exists. */
 export async function reserve(input: ReserveInput): Promise<string | null> {
   const { userId, key, method, route, requestHash, now } = input;
   try {
@@ -31,7 +35,9 @@ export async function reserve(input: ReserveInput): Promise<string | null> {
         (id, user_id, key, method, route, request_hash, status, expires_at, created_at)
       VALUES
         (${randomUUID()}, ${userId}, ${key}, ${method}, ${route}, ${requestHash},
-         ${IDEMPOTENCY_STATUS.IN_PROGRESS}, ${expiryFrom(now)}, ${now})
+         ${IDEMPOTENCY_STATUS.IN_PROGRESS},
+         (${expiryFrom(now)}::timestamptz AT TIME ZONE 'UTC'),
+         (${now}::timestamptz AT TIME ZONE 'UTC'))
       ON CONFLICT (user_id, key) DO NOTHING
       RETURNING id`;
     return rows.length > 0 ? rows[0].id : null;
@@ -78,19 +84,27 @@ export async function takeOver(
   return result.count === 1;
 }
 
+/**
+ * Claim-conditional completion (WR-02): `claimedAt` is the created_at written
+ * by reserve/takeOver and acts as the claim token. A handler whose reservation
+ * was taken over by a newer request no longer matches and is ignored.
+ * Returns false when the claim was lost.
+ */
 export async function complete(
   id: string,
+  claimedAt: Date,
   responseStatus: number,
   responseBody: Prisma.InputJsonValue
-): Promise<void> {
-  await prisma.idempotencyKey.update({
-    where: { id },
+): Promise<boolean> {
+  const result = await prisma.idempotencyKey.updateMany({
+    where: { id, createdAt: claimedAt, status: IDEMPOTENCY_STATUS.IN_PROGRESS },
     data: { status: IDEMPOTENCY_STATUS.COMPLETED, responseStatus, responseBody },
   });
+  return result.count === 1;
 }
 
-export async function release(id: string): Promise<void> {
+export async function release(id: string, claimedAt: Date): Promise<void> {
   await prisma.idempotencyKey.deleteMany({
-    where: { id, status: IDEMPOTENCY_STATUS.IN_PROGRESS },
+    where: { id, createdAt: claimedAt, status: IDEMPOTENCY_STATUS.IN_PROGRESS },
   });
 }

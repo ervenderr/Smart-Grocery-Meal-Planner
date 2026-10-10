@@ -51,7 +51,7 @@ interface Claim {
 }
 
 type Outcome =
-  | { readonly kind: 'owned'; readonly id: string }
+  | { readonly kind: 'owned'; readonly id: string; readonly claimedAt: Date }
   | { readonly kind: 'responded' };
 
 function inFlight(res: Response): AppError {
@@ -72,7 +72,7 @@ async function claimExisting(claim: Claim, res: Response): Promise<Outcome> {
   if (!row) {
     // Deleted between INSERT conflict and SELECT (released); caller retries via reserve.
     const id = await reserve({ ...claim, now });
-    if (id) return { kind: 'owned', id };
+    if (id) return { kind: 'owned', id, claimedAt: now };
     throw inFlight(res);
   }
 
@@ -89,7 +89,7 @@ async function claimExisting(claim: Claim, res: Response): Promise<Outcome> {
   if (expired || stale) {
     const won = await takeOver(row.id, row.createdAt, { ...claim, now });
     if (!won) throw inFlight(res);
-    return { kind: 'owned', id: row.id };
+    return { kind: 'owned', id: row.id, claimedAt: now };
   }
   if (row.status === IDEMPOTENCY_STATUS.IN_PROGRESS) throw inFlight(res);
 
@@ -99,6 +99,7 @@ async function claimExisting(claim: Claim, res: Response): Promise<Outcome> {
 
 async function persistOrRelease(
   id: string,
+  claimedAt: Date,
   userId: string,
   route: string,
   statusCode: number,
@@ -112,9 +113,15 @@ async function persistOrRelease(
       serialised !== undefined &&
       Buffer.byteLength(serialised) <= IDEMPOTENCY_MAX_STORED_BODY_BYTES;
     if (storable) {
-      await complete(id, statusCode, JSON.parse(serialised) as Prisma.InputJsonValue);
+      const kept = await complete(
+        id,
+        claimedAt,
+        statusCode,
+        JSON.parse(serialised) as Prisma.InputJsonValue
+      );
+      if (!kept) logger.warn('Idempotency claim lost before completion', { userId, route });
     } else {
-      await release(id);
+      await release(id, claimedAt);
     }
   } catch (error) {
     // Never log the key or body.
@@ -126,7 +133,13 @@ async function persistOrRelease(
   }
 }
 
-function instrumentResponse(res: Response, id: string, userId: string, route: string): void {
+function instrumentResponse(
+  res: Response,
+  id: string,
+  claimedAt: Date,
+  userId: string,
+  route: string
+): void {
   const originalJson = res.json.bind(res);
   let handled = false;
 
@@ -137,7 +150,7 @@ function instrumentResponse(res: Response, id: string, userId: string, route: st
     // A client disconnect must NOT release the reservation: the handler keeps
     // running and its effect commits, so the completion has to be persisted for
     // the retry to replay (CR-01). Only send if the socket is still usable.
-    void persistOrRelease(id, userId, route, res.statusCode, body).then(() => {
+    void persistOrRelease(id, claimedAt, userId, route, res.statusCode, body).then(() => {
       if (!res.writableEnded && !res.destroyed) originalJson(body);
     });
     return res;
@@ -174,11 +187,14 @@ export const idempotency: RequestHandler = async (
       requestHash: computeRequestHash(req.method, route, req.body, req.query),
     };
 
-    const id = await reserve({ ...claim, now: new Date() });
-    const outcome: Outcome = id ? { kind: 'owned', id } : await claimExisting(claim, res);
+    const reservedAt = new Date();
+    const id = await reserve({ ...claim, now: reservedAt });
+    const outcome: Outcome = id
+      ? { kind: 'owned', id, claimedAt: reservedAt }
+      : await claimExisting(claim, res);
     if (outcome.kind === 'responded') return;
 
-    instrumentResponse(res, outcome.id, claim.userId, route);
+    instrumentResponse(res, outcome.id, outcome.claimedAt, claim.userId, route);
     next();
   } catch (error) {
     next(error);
