@@ -60,25 +60,24 @@ describe('shopping client ids', () => {
     await prisma.user.deleteMany({ where: { id: { in: ids } } });
   });
 
-  it('creates with the client id (201) and replays identical content with 200', async () => {
+  it('creates with the client id (201) and replays with 200 without applying changes', async () => {
     const id = randomUUID();
     const first = await post(a, { id, itemName: 'Milk', quantity: 2 }).expect(201);
     expect(first.body.id).toBe(id);
     const before = await countItems(a.id);
 
-    const replay = await post(a, { id, itemName: 'Milk', quantity: 2 }).expect(200);
+    const replay = await post(a, { id, itemName: 'Milk', quantity: 9 }).expect(200);
     expect(replay.body.id).toBe(id);
     expect(replay.body.quantity).toBe(2);
     expect(await countItems(a.id)).toBe(before);
   });
 
-  it('409 CLIENT_ID_CONFLICT when a replayed create has different content (WR-07)', async () => {
+  it('a stale create replay after a later edit returns the edited row, not 409 (WR-09)', async () => {
     const id = randomUUID();
     await post(a, { id, itemName: 'Eggs', quantity: 2 }).expect(201);
-    const res = await post(a, { id, itemName: 'Eggs', quantity: 9 }).expect(409);
-    expect(res.body.code ?? res.body.error?.code).toBe('CLIENT_ID_CONFLICT');
-    const row = await prisma.shoppingListItem.findUniqueOrThrow({ where: { id } });
-    expect(Number(row.quantity)).toBe(2);
+    await prisma.shoppingListItem.update({ where: { id }, data: { quantity: 7 } });
+    const res = await post(a, { id, itemName: 'Eggs', quantity: 2 }).expect(200);
+    expect(res.body.quantity).toBe(7);
   });
 
   it('replays 200 even when the list is full', async () => {
