@@ -22,7 +22,7 @@ describe("parseEnv", () => {
   it("applies defaults for a valid dev env", () => {
     const env = parseEnv(base());
     expect(env.NODE_ENV).toBe("development");
-    expect(env.JWT_EXPIRES_IN).toBe("7d");
+    expect(env.JWT_EXPIRES_IN).toBe("1h");
     expect(env.API_VERSION).toBe("v1");
     expect(env.LOG_LEVEL).toBe("info");
     expect(env.CORS_ORIGIN).toEqual(["http://localhost:3000"]);
@@ -186,5 +186,45 @@ describe("parseEnv legacy variables", () => {
   it("ignores a leftover GEMINI_AI_API_KEY instead of failing startup", () => {
     const env = parseEnv(base({ GEMINI_AI_API_KEY: "leftover-value" }));
     expect(env).not.toHaveProperty("GEMINI_AI_API_KEY");
+  });
+});
+
+describe("parseEnv offline-sync settings", () => {
+  it("applies defaults for refresh token and idempotency settings", () => {
+    const env = parseEnv(base());
+    expect(env.REFRESH_TOKEN_TTL_DAYS).toBe(90);
+    expect(env.REFRESH_REUSE_GRACE_SECONDS).toBe(60);
+    expect(env.IDEMPOTENCY_TTL_HOURS).toBe(48);
+    expect(env.JWT_EXPIRES_IN).toBe("1h");
+  });
+
+  it("still accepts an explicit JWT_EXPIRES_IN=7d", () => {
+    expect(parseEnv(base({ JWT_EXPIRES_IN: "7d" })).JWT_EXPIRES_IN).toBe("7d");
+  });
+
+  it.each([
+    ["REFRESH_TOKEN_TTL_DAYS", "0"],
+    ["REFRESH_TOKEN_TTL_DAYS", "366"],
+    ["REFRESH_TOKEN_TTL_DAYS", "1.5"],
+    ["REFRESH_REUSE_GRACE_SECONDS", "-1"],
+    ["REFRESH_REUSE_GRACE_SECONDS", "301"],
+    ["IDEMPOTENCY_TTL_HOURS", "0"],
+    ["IDEMPOTENCY_TTL_HOURS", "169"],
+    ["IDEMPOTENCY_TTL_HOURS", "abc"],
+  ])("rejects %s=%s", (key, value) => {
+    expect(() => parseEnv(base({ [key]: value }))).toThrow(/^Invalid environment configuration/);
+  });
+
+  it("accepts boundary values", () => {
+    const env = parseEnv(
+      base({
+        REFRESH_TOKEN_TTL_DAYS: "365",
+        REFRESH_REUSE_GRACE_SECONDS: "0",
+        IDEMPOTENCY_TTL_HOURS: "168",
+      })
+    );
+    expect(env.REFRESH_TOKEN_TTL_DAYS).toBe(365);
+    expect(env.REFRESH_REUSE_GRACE_SECONDS).toBe(0);
+    expect(env.IDEMPOTENCY_TTL_HOURS).toBe(168);
   });
 });
