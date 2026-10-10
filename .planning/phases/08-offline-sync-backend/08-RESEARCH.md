@@ -348,16 +348,16 @@ const tokenHash = createHash('sha256').update(raw).digest('hex');
 | A6 | Cross-user client-id collision returns 409 (research doc suggested 404) | Pattern 3 | Low; either is acceptable, pick one and test it |
 | A7 | Express request-level timeout of Prisma interactive tx (5 s default) is enough for finish+merge | Pitfall 7 | Low; configurable |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should adjust/finish write the idempotency completion inside the business transaction?**
    - Known: middleware approach leaves a one-statement crash window. Cook-apply is already replay-safe via `cookedAt` (409).
-   - Recommendation: ship the generic middleware; treat in-tx hardening as an optional follow-up task, not a requirement.
+   - RESOLVED: ship the generic middleware; treat in-tx hardening as an optional follow-up task, not a requirement.
 2. **Access-token TTL in production**
    - Unknown: current Railway `JWT_EXPIRES_IN` value and frontend deploy ordering.
-   - Recommendation: plan a deploy-order note; change code default now, change Railway var only after the frontend ships.
+   - RESOLVED: plan a deploy-order note; change code default now, change Railway var only after the frontend ships.
 3. **Allow replaying 2xx only vs also deterministic 4xx (e.g. 409 already cooked)?**
-   - Recommendation: 2xx only (simplest, safe).
+   - RESOLVED: 2xx only (simplest, safe).
 
 ## Environment Availability
 
