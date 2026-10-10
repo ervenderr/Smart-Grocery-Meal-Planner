@@ -115,9 +115,6 @@ export function LoginForm() {
           />
           <span className="text-sm text-gray-600">Remember me</span>
         </label>
-        <Link href="/forgot-password" className="inline-flex min-h-11 items-center text-sm text-primary-500 hover:text-primary-600">
-          Forgot password?
-        </Link>
       </div>
 
       {/* Submit Button */}

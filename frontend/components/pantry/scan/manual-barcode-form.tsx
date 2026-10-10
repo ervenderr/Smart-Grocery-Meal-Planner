@@ -48,11 +48,16 @@ export function ManualBarcodeForm({
           maxLength={BARCODE_MAX_LENGTH}
           placeholder="e.g. 4800016644801"
           value={value}
-          error={showError ? 'Enter 8 to 14 digits.' : undefined}
+          aria-invalid={showError || undefined}
           onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))}
           onBlur={() => setTouched(true)}
         />
-        <p className="mt-1 text-sm text-gray-500">8 to 14 digits, found under the barcode.</p>
+        <p
+          className={`mt-1 text-sm ${showError ? 'text-red-600' : 'text-gray-500'}`}
+          role={showError ? 'alert' : undefined}
+        >
+          {showError ? 'Enter 8 to 14 digits.' : '8 to 14 digits, found under the barcode.'}
+        </p>
       </div>
       <Button type="submit" fullWidth disabled={!valid}>
         {submitLabel}

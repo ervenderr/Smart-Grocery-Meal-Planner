@@ -168,7 +168,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan, onCooked }: Mea
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Users className="h-3 w-3" />
-                                    <span>{meal.servings} servings</span>
+                                    <span>{meal.servings} {meal.servings === 1 ? 'serving' : 'servings'}</span>
                                   </div>
                                   {meal.calories && (
                                     <div className="flex items-center gap-1">

@@ -119,6 +119,7 @@ export default function PantryPage() {
         attribution: null,
         focusName: false,
       });
+      toast.success("You've added this before. Details filled in from your pantry.");
     } else {
       setAddPrefill({
         initialValues: { barcode: resolution.barcode },
@@ -126,6 +127,7 @@ export default function PantryPage() {
         attribution: null,
         focusName: true,
       });
+      toast("We don't know this product yet. Barcode saved, add the details yourself.");
     }
     setShowAddModal(true);
   };
