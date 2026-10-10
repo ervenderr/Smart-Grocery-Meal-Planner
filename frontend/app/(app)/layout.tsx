@@ -6,6 +6,7 @@ import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate';
 import { IosInstallHint } from '@/components/pwa/ios-install-hint';
+import { AiConsentHost } from '@/components/ai/ai-consent-host';
 
 export default function AppLayout({
   children,
@@ -39,6 +40,7 @@ export default function AppLayout({
       <BottomNav />
       <OnboardingGate />
       <IosInstallHint />
+      <AiConsentHost />
     </ProtectedRoute>
   );
 }

@@ -2,6 +2,8 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosE
 import { API_BASE_URL } from '@/lib/constants/api-routes';
 import { queryClient } from '@/lib/react-query';
 import { clearUserSessionState } from '@/lib/auth/session-cleanup';
+import { isAiConsentRequiredError } from '@/lib/ai/consent-flow';
+import { useAiConsentStore } from '@/lib/ai/consent-store';
 
 /**
  * API Client Configuration
@@ -67,7 +69,13 @@ class ApiClient {
               break;
             case 403:
               // Forbidden
-              console.error('Access forbidden');
+              if (isAiConsentRequiredError(error)) {
+                if (typeof window !== 'undefined') {
+                  useAiConsentStore.getState().request();
+                }
+              } else {
+                console.error('Access forbidden');
+              }
               break;
             case 404:
               // Not found
