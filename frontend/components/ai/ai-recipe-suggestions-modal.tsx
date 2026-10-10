@@ -8,6 +8,11 @@ import { aiApi, type RecipeSuggestion } from '@/lib/api/ai';
 import { recipeApi } from '@/lib/api/recipes';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { DietFilterNotice } from './diet-filter-notice';
+import { AiBadge } from './ai-badge';
+import { AiDisclaimer } from './ai-disclaimer';
+import { ReportSuggestionButton } from './report-suggestion';
+import { useAiConsent } from '@/lib/hooks/use-ai-consent';
+import { AI_GENERATED_TAG } from '@/lib/ai/ai-origin';
 import toast from 'react-hot-toast';
 
 interface AIRecipeSuggestionsModalProps {
@@ -27,6 +32,7 @@ export function AIRecipeSuggestionsModal({
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeSuggestion | null>(null);
   const [filteredOut, setFilteredOut] = useState(0);
   const [savingRecipe, setSavingRecipe] = useState(false);
+  const { runWithAiConsent } = useAiConsent();
 
   const handleGenerateSuggestions = async (refresh = false) => {
     setLoading(true);
@@ -59,7 +65,7 @@ export function AIRecipeSuggestionsModal({
           unit: ing.unit as any, // AI may return various unit formats
         })),
         instructions: suggestion.instructions,
-        tags: ['AI Generated'],
+        tags: [AI_GENERATED_TAG],
         dietaryRestrictions: [],
       });
 
@@ -129,7 +135,7 @@ export function AIRecipeSuggestionsModal({
               <p className="text-sm text-gray-600 mb-6 max-w-sm mx-auto">
                 Let AI analyze your pantry items and suggest delicious recipes you can make right now
               </p>
-              <Button onClick={() => handleGenerateSuggestions()} disabled={loading}>
+              <Button onClick={() => runWithAiConsent(() => { void handleGenerateSuggestions(); })} disabled={loading}>
                 {loading ? (
                   <>
                     <LoadingSpinner size="sm" />
@@ -160,6 +166,7 @@ export function AIRecipeSuggestionsModal({
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
+                      <AiBadge className="mb-2" />
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">
                         {suggestion.name}
                       </h3>
@@ -222,11 +229,16 @@ export function AIRecipeSuggestionsModal({
                   >
                     {selectedRecipe === suggestion ? 'Hide Details' : 'View Details'}
                   </button>
+                  <div className="mt-2">
+                    <ReportSuggestionButton kind="recipe" item={suggestion} />
+                  </div>
                 </div>
               ))}
 
+              <AiDisclaimer />
+
               <div className="text-center pt-4">
-                <Button variant="outline" onClick={() => handleGenerateSuggestions(true)} disabled={loading}>
+                <Button variant="outline" onClick={() => runWithAiConsent(() => { void handleGenerateSuggestions(true); })} disabled={loading}>
                   {loading ? (
                     <>
                       <LoadingSpinner size="sm" />

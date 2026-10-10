@@ -10,6 +10,10 @@ import { getApiErrorMessage } from '@/lib/api/errors';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import { centsToMajorString, parseMajorToCents } from '@/lib/currency/format';
 import { DietFilterNotice } from './diet-filter-notice';
+import { AiBadge } from './ai-badge';
+import { AiDisclaimer } from './ai-disclaimer';
+import { ReportSuggestionButton } from './report-suggestion';
+import { useAiConsent } from '@/lib/hooks/use-ai-consent';
 import toast from 'react-hot-toast';
 
 const DEFAULT_BUDGET_CENTS = 50000;
@@ -44,6 +48,7 @@ export function AISubstitutionModal({
   const [budgetInput, setBudgetInput] = useState(centsToMajorString(DEFAULT_BUDGET_CENTS));
   const [budgetError, setBudgetError] = useState<string | undefined>(undefined);
   const { currency } = useCurrency();
+  const { runWithAiConsent } = useAiConsent();
 
   const handleBudgetChange = (value: string) => {
     setBudgetInput(value);
@@ -215,7 +220,7 @@ export function AISubstitutionModal({
               </div>
 
               <Button
-                onClick={handleGenerateSubstitutions}
+                onClick={() => runWithAiConsent(() => { void handleGenerateSubstitutions(); })}
                 className="w-full"
                 disabled={loading || selectedIngredients.length === 0 || Boolean(budgetError)}
               >
@@ -259,6 +264,7 @@ export function AISubstitutionModal({
                     <div className="flex items-start gap-4">
                       {/* Original → Substitute */}
                       <div className="flex-1">
+                        <AiBadge className="mb-2" />
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex-1">
                             <p className="text-sm text-gray-500 mb-1">Original</p>
@@ -291,6 +297,9 @@ export function AISubstitutionModal({
                             </span>
                           </div>
                         )}
+                        <div className="mt-2">
+                          <ReportSuggestionButton kind="substitution" item={suggestion} />
+                        </div>
                       </div>
 
                       {/* Apply Button */}
@@ -308,6 +317,8 @@ export function AISubstitutionModal({
                   </div>
                 ))}
               </div>
+
+              <AiDisclaimer />
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t">
