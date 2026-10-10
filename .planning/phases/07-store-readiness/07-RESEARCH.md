@@ -293,12 +293,12 @@ model AiReport {
 | A5 | Suggested rate limit for reports (5/hour/user) | Pitfall 7 | Tuning only |
 | A6 | Legal text content adequacy (PH Data Privacy Act, GDPR) | Legal pages | Owner/legal review required; drafts only |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Keep `DELETE /users/account` (deactivate)?**
+1. RESOLVED: **Keep `DELETE /users/account` (deactivate)?**
    - Known: no UI should call it after this phase. Recommendation: keep route (low risk), add `DELETE /users/me` for hard delete with a distinct, non-401 wrong-password response; update route docs.
-2. **Does AI result carry an id for `refId`?** Suggestions are ephemeral (cache payloads, no saved id; Recipe has no AI-origin flag). Recommendation: store `snapshot` (capped JSON of the displayed item) and leave `refId` null; do not add a Recipe column (UI-SPEC "if flagged" is therefore skipped).
-3. **Consent for existing users:** all existing users start unconsented; first AI use shows the sheet. Acceptable.
+2. RESOLVED: **Does AI result carry an id for `refId`?** Suggestions are ephemeral (cache payloads, no saved id; Recipe has no AI-origin flag). Recommendation: store `snapshot` (capped JSON of the displayed item) and leave `refId` null; do not add a Recipe column (UI-SPEC "if flagged" is therefore skipped).
+3. RESOLVED: **Consent for existing users:** all existing users start unconsented; first AI use shows the sheet. Acceptable.
 
 ## Environment Availability
 

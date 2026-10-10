@@ -49,7 +49,20 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   3. Every AI-generated recipe or plan shows an "AI-generated" label and a health/nutrition disclaimer, and the user can report an item
   4. Privacy Policy, Terms of Use and Support pages are reachable at public URLs and linked from the app settings and sign-up screen
   5. A reviewer demo account with sample data and written review notes exist, and the app name is either cleared or replaced
-**Plans**: TBD
+**Plans**: 12 plans
+Plans:
+- [ ] 07-01-PLAN.md — Wave 0: local Postgres 16 + backend/.env, additive migration (consent columns, ai_reports), consent-by-default test helper
+- [ ] 07-02-PLAN.md — Public /privacy, /terms, /support pages, shared AI disclosure constants, sign-up legal links
+- [ ] 07-03-PLAN.md — Frontend AI consent infrastructure (pure logic, store, hook, consent sheet, central 403 handling)
+- [ ] 07-04-PLAN.md — AI badge, disclaimer, Report suggestion sheet and capped report payload helper
+- [ ] 07-05-PLAN.md — Delete account UI (Danger zone, password sheet, state cleanup, login notice)
+- [ ] 07-06-PLAN.md — Backend hard delete DELETE /users/me (ordered transaction, ai_usage cleanup, DMMF completeness test)
+- [ ] 07-07-PLAN.md — Backend requireAiConsent gate on AI routes + rate-limited POST /ai/reports
+- [ ] 07-08-PLAN.md — Reviewer demo seed (idempotent, prod-guarded) + REVIEW-NOTES + NAME-CHECK docs
+- [ ] 07-09-PLAN.md — Wire consent gate, badge, disclaimer, report into all AI modals and saved AI recipes
+- [ ] 07-10-PLAN.md — Settings Privacy tab (AI consent switch, withdrawal, legal links)
+- [ ] 07-11-PLAN.md — Backend consent endpoints GET/POST/DELETE /users/me/ai-consent + profile fields
+- [ ] 07-12-PLAN.md — Phase gate: full suites, next build, legal page smoke, human browser pass
 **UI hint**: yes
 
 ### Phase 8: Offline Sync Backend
