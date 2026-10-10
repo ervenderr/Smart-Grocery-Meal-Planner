@@ -5,7 +5,7 @@ Paste the relevant parts into App Store Connect > App Review Information (and th
 ## Demo account
 
 - Email: the value of `REVIEWER_EMAIL` used when seeding (default `app-review@kitcha-demo.com`).
-- Password: entered in App Store Connect > App Review Information. It is not stored in this repo.
+- Password (set in App Store Connect): entered in App Store Connect > App Review Information. It is not stored in this repo.
 
 ## How to seed it
 
@@ -30,12 +30,12 @@ The demo account has onboarding completed and is pre-populated:
 
 - The demo account has NOT given AI consent. The first time an AI feature is used, the "Use AI features?" consent sheet is shown by design. Accepting enables AI suggestions; declining leaves the rest of the app fully usable.
 - AI responses carry an "AI-generated" badge, a health/nutrition disclaimer, and a "Report suggestion" action.
-- Only ingredient names, quantities and dietary tags are sent to the AI provider; no name, email or address.
+- AI-generated content is always labelled. Only ingredient names, quantities and dietary tags are sent to the AI provider; no name, email or address.
 - Each user has a daily AI request limit (default 20). Hitting it shows a friendly message.
 
 ## Account deletion
 
-Settings > Data > Delete account. The password is required to confirm, and all of the user's data is removed immediately.
+Where: Settings > Data > Delete account. The password is required to confirm, and all of the user's data is removed immediately.
 
 ## Legal and support URLs
 
