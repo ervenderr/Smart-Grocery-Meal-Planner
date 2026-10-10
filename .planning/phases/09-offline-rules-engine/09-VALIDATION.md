@@ -1,9 +1,9 @@
 ---
 phase: 9
 slug: offline-rules-engine
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-10-10
 ---
 
@@ -17,40 +17,41 @@ created: 2026-10-10
 
 | Property | Value |
 |----------|-------|
-| **Framework** | {pytest 7.x / jest 29.x / vitest / go test / other} |
-| **Config file** | {path or "none — Wave 0 installs"} |
-| **Quick run command** | `{quick command}` |
-| **Full suite command** | `{full command}` |
-| **Estimated runtime** | ~9 seconds |
+| **Framework** | vitest 5 (frontend, node env, `lib/**/*.test.ts`) plus jest (backend parity tests) |
+| **Config file** | `frontend/vitest.config.ts`, `backend/jest.config.*` (both exist) |
+| **Quick run command** | `cd frontend && npx vitest run lib/rules` |
+| **Full suite command** | `cd frontend && npm test && npm run type-check && npm run lint && npm run build; cd ../backend && npx jest tests/rules-parity --coverage=false` |
+| **Estimated runtime** | ~30 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `{quick run command}`
-- **After every plan wave:** Run `{full suite command}`
-- **Before `/gsd:verify-work`:** Full suite must be green
-- **Max feedback latency:** 9 seconds
+- **After every task commit:** quick run command
+- **After every plan wave:** full suite command
+- **Before verify-work:** full suite green
+- **Max feedback latency:** 30 seconds
 
 ---
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 9-01-01 | 01 | 1 | REQ-{XX} | T-9-01 / — | {expected secure behavior or "N/A"} | unit | `{command}` | ✅ / ❌ W0 | ⬜ pending |
-
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+| Plan | Wave | Requirement | Test Type | Automated Command | Status |
+|------|------|-------------|-----------|-------------------|--------|
+| 01 units/diet | 1 | OFF-08 | unit + parity | `cd frontend && npx vitest run lib/rules/units.test.ts lib/rules/diet.test.ts` + backend `rules-parity-units/diet` | pending |
+| 02 substitution data | 1 | OFF-08 | unit (schema integrity) | `cd frontend && npx vitest run lib/rules/substitutions-data.test.ts` | pending |
+| 03 rank | 2 | OFF-08 | unit | `npx vitest run lib/rules/rank.test.ts lib/rules/pantry-index.test.ts lib/rules/staples-default.test.ts` | pending |
+| 04 substitutes | 2 | OFF-08 | unit | `npx vitest run lib/rules/format-amount.test.ts lib/rules/substitutions.test.ts` | pending |
+| 05 parity/perf | 3 | OFF-08 | parity + perf + determinism | `npx vitest run lib/rules/parity.test.ts lib/rules/rank.bench.test.ts lib/rules/determinism.test.ts` | pending |
+| 06 data/hook | 3 | OFF-08 | unit + typecheck | `npx vitest run lib/rules/cook-data.test.ts lib/rules/view-model.test.ts` | pending |
+| 07 components | 4 | OFF-08 | typecheck + lint | `npm run type-check && npx eslint components/recipes/cook` | pending |
+| 08 page | 5 | OFF-08 | build + manual | `npm test && npm run type-check && npm run build` | pending |
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `{tests/test_file.py}` — stubs for REQ-{XX}
-- [ ] `{tests/conftest.py}` — shared fixtures
-- [ ] `{framework install}` — if no framework detected
-
-*If none: "Existing infrastructure covers all phase requirements."*
+Existing infrastructure covers all phase requirements. TDD plans 01-05 create their tests before implementation. `@vitest/coverage-v8` is not installed; coverage is approximated by testing every exported function.
 
 ---
 
@@ -58,19 +59,17 @@ created: 2026-10-10
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| {behavior} | REQ-{XX} | {reason} | {steps} |
-
-*If none: "All phase behaviors have automated verification."*
+| Page works with network off after one online load | OFF-08 | Needs browser DevTools offline | Plan 08 checkpoint. Cold-start offline is deferred to Phase 11. |
 
 ---
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 9s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** {pending / approved YYYY-MM-DD}
+**Approval:** approved 2026-10-10
