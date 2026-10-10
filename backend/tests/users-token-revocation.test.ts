@@ -1,5 +1,6 @@
 /**
- * WR-05: password change revokes refresh tokens atomically with the update. Real DB.
+ * WR-05 / WR-06: password change and deactivation revoke refresh tokens
+ * atomically with the user update. Real DB.
  */
 
 import request from 'supertest';
@@ -48,5 +49,31 @@ describe('password change (WR-05)', () => {
     expect(res.status).toBeGreaterThanOrEqual(500);
     await request(app).post('/api/v1/auth/login').send({ email: u.email, password: 'TestPass123' }).expect(200);
     expect(await activeTokens(u.id)).toBeGreaterThan(0);
+  });
+});
+
+describe('deactivation (WR-06)', () => {
+  it('revokes refresh tokens with reason inactive', async () => {
+    const u = await signup();
+    await request(app)
+      .delete('/api/v1/users/account')
+      .set('Authorization', `Bearer ${u.token}`)
+      .send({ password: 'TestPass123' })
+      .expect(200);
+    expect(await activeTokens(u.id)).toBe(0);
+    const row = await prisma.refreshToken.findFirst({ where: { userId: u.id } });
+    expect(row?.revokedReason).toBe('inactive');
+  });
+
+  it('keeps the user active when revocation fails', async () => {
+    const u = await signup();
+    jest.spyOn(refreshService, 'revokeAllForUser').mockRejectedValueOnce(new Error('boom'));
+    const res = await request(app)
+      .delete('/api/v1/users/account')
+      .set('Authorization', `Bearer ${u.token}`)
+      .send({ password: 'TestPass123' });
+    expect(res.status).toBeGreaterThanOrEqual(500);
+    const user = await prisma.user.findUnique({ where: { id: u.id } });
+    expect(user?.isActive).toBe(true);
   });
 });

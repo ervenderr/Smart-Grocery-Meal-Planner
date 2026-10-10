@@ -316,9 +316,13 @@ export class UsersService {
     }
 
     // Deactivate account
-    await prisma.user.update({
-      where: { id: userId },
-      data: { isActive: false },
+    // Atomic with refresh-token revocation so reactivation cannot resurrect sessions (WR-06).
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { isActive: false },
+      });
+      await revokeAllForUser(userId, 'inactive', tx);
     });
 
     logger.warn('User account deactivated', { userId });
