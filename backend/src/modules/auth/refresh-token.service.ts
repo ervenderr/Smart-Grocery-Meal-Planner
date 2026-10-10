@@ -20,9 +20,13 @@ import { AppError } from '@/middleware/errorHandler';
 
 const REFRESH_TOKEN_BYTES = 32;
 const DAY_MS = 24 * 60 * 60 * 1000;
+/** Absolute lifetime of a token family, regardless of rotations (WR-04). */
+export const MAX_FAMILY_DAYS = 180;
+/** Max concurrently active families (devices/sessions) per user (WR-04). */
+export const MAX_ACTIVE_FAMILIES_PER_USER = 10;
 const INVALID_MESSAGE = 'Invalid or expired refresh token';
 
-export type RevokeReason = 'rotated' | 'logout' | 'reuse' | 'password_change' | 'inactive';
+export type RevokeReason = 'rotated' | 'logout' | 'reuse' | 'password_change' | 'inactive' | 'family_cap';
 
 export interface IssuedRefreshToken {
   readonly refreshToken: string;
@@ -51,18 +55,58 @@ function generateRawToken(): string {
   return randomBytes(REFRESH_TOKEN_BYTES).toString('base64url');
 }
 
+/**
+ * Issues a token. `familyStartedAt` (rotation) caps expiry at the family's
+ * absolute lifetime; a brand-new family also enforces the per-user family cap.
+ */
 export async function issueRefreshToken(
   userId: string,
-  familyId: string = randomUUID(),
+  familyId?: string,
   client: Client = prisma,
-  now: Date = new Date()
+  now: Date = new Date(),
+  familyStartedAt: Date = now
 ): Promise<IssuedRefreshToken> {
+  const isNewFamily = familyId === undefined;
+  const resolvedFamilyId = familyId ?? randomUUID();
   const refreshToken = generateRawToken();
-  const refreshExpiresAt = new Date(now.getTime() + config.refreshToken.ttlDays * DAY_MS);
+  const slidingExpiry = now.getTime() + config.refreshToken.ttlDays * DAY_MS;
+  const absoluteExpiry = familyStartedAt.getTime() + MAX_FAMILY_DAYS * DAY_MS;
+  const refreshExpiresAt = new Date(Math.min(slidingExpiry, absoluteExpiry));
   await client.refreshToken.create({
-    data: { userId, tokenHash: hashRefreshToken(refreshToken), familyId, expiresAt: refreshExpiresAt },
+    data: {
+      userId,
+      tokenHash: hashRefreshToken(refreshToken),
+      familyId: resolvedFamilyId,
+      expiresAt: refreshExpiresAt,
+    },
   });
-  return { refreshToken, refreshExpiresAt, familyId };
+  if (isNewFamily) await enforceFamilyCap(client, userId, now);
+  return { refreshToken, refreshExpiresAt, familyId: resolvedFamilyId };
+}
+
+/** Revokes the least-recently-rotated active families beyond the per-user cap. */
+async function enforceFamilyCap(client: Client, userId: string, now: Date): Promise<void> {
+  const active = await client.refreshToken.findMany({
+    where: { userId, revokedAt: null, expiresAt: { gt: now } },
+    orderBy: { createdAt: 'desc' },
+    select: { familyId: true },
+  });
+  const families = [...new Set(active.map((r) => r.familyId))];
+  const overflow = families.slice(MAX_ACTIVE_FAMILIES_PER_USER);
+  if (overflow.length === 0) return;
+  await client.refreshToken.updateMany({
+    where: { userId, familyId: { in: overflow }, revokedAt: null },
+    data: { revokedAt: now, revokedReason: 'family_cap' },
+  });
+}
+
+async function familyStart(
+  tx: Prisma.TransactionClient,
+  familyId: string,
+  fallback: Date
+): Promise<Date> {
+  const agg = await tx.refreshToken.aggregate({ where: { familyId }, _min: { createdAt: true } });
+  return agg._min.createdAt ?? fallback;
 }
 
 async function revokeFamily(
@@ -115,7 +159,10 @@ async function rotateInTransaction(
     return handleRevoked(tx, current, now);
   }
 
-  const next = await issueRefreshToken(row.userId, row.familyId, tx, now);
+  const startedAt = await familyStart(tx, row.familyId, row.createdAt);
+  if (startedAt.getTime() + MAX_FAMILY_DAYS * DAY_MS <= now.getTime()) return invalid();
+
+  const next = await issueRefreshToken(row.userId, row.familyId, tx, now, startedAt);
   return {
     ok: true,
     value: {
