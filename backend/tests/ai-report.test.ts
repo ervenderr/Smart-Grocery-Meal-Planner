@@ -64,6 +64,7 @@ describe('POST /api/v1/ai/reports', () => {
     ['unknown kind', () => ({ ...validBody(), kind: 'video' })],
     ['unknown reason', () => ({ ...validBody(), reason: 'meh' })],
     ['note over 500 chars', () => ({ ...validBody(), note: 'a'.repeat(501) })],
+    ['empty refId', () => ({ ...validBody(), refId: '   ' })],
     ['refId over 100 chars', () => ({ ...validBody(), refId: 'a'.repeat(101) })],
     ['snapshot over 8192 bytes', () => ({ ...validBody(), snapshot: { blob: 'a'.repeat(9000) } })],
     ['snapshot is a string', () => ({ ...validBody(), snapshot: 'text' })],
@@ -78,6 +79,33 @@ describe('POST /api/v1/ai/reports', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('strips PII keys, control chars and over-deep nesting server-side', async () => {
+    const { token } = await newUser();
+    let deep: Record<string, unknown> = { leaf: 1 };
+    for (let i = 0; i < 12; i++) deep = { n: deep };
+    const res = await send(token, {
+      ...validBody(),
+      note: 'bad\u0000note',
+      snapshot: {
+        name: 'Adobo\u0000',
+        email: 'a@b.com',
+        nested: { userId: 'u1', firstName: 'X', keep: 'ok' },
+        list: [{ lastName: 'Y', v: 1 }],
+        deep,
+      },
+    });
+
+    expect(res.status).toBe(201);
+    const row = await prisma.aiReport.findUnique({ where: { id: res.body.id } });
+    expect(row?.note).toBe('badnote');
+    const snap = row?.snapshot as Record<string, unknown>;
+    expect(snap.name).toBe('Adobo');
+    expect(snap).not.toHaveProperty('email');
+    expect(snap.nested).toEqual({ keep: 'ok' });
+    expect(snap.list).toEqual([{ v: 1 }]);
+    expect(JSON.stringify(snap.deep)).not.toContain('leaf');
   });
 
   it('requires authentication', async () => {
