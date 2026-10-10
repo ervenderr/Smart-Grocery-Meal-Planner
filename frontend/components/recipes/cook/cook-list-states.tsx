@@ -6,7 +6,7 @@ import type { CookStatus } from '@/lib/rules/cook-data';
 
 export function CookListSkeleton() {
   return (
-    <div aria-busy="true" className="space-y-4">
+    <div role="status" aria-label="Loading recipes" aria-busy="true" className="space-y-4">
       {[0, 1, 2].map((i) => (
         <Card key={i} className="space-y-3 p-4">
           <Skeleton className="h-5 w-3/4" />

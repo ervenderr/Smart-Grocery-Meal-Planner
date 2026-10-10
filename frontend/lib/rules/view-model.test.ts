@@ -4,6 +4,7 @@ import {
   dietSummary,
   formatMatchLine,
   substituteContextLine,
+  resultsAnnouncement,
   truncationNote,
 } from './view-model';
 import type { IngredientMatch, RankedRecipe } from './types';
@@ -125,5 +126,15 @@ describe('unspecified amounts (needed 0)', () => {
     expect(substituteContextLine(match({ needed: 0, name: 'Butter' }))).toBe(
       'Recipe uses Butter (amount not specified).',
     );
+  });
+});
+
+describe('resultsAnnouncement', () => {
+  it('announces loading, counts, and empty filter results', () => {
+    expect(resultsAnnouncement('loading', 0)).toBe('');
+    expect(resultsAnnouncement('ready', 1)).toBe('1 recipe');
+    expect(resultsAnnouncement('ready', 12)).toBe('12 recipes');
+    expect(resultsAnnouncement('filteredOut', 0)).toBe('Nothing matches your filters');
+    expect(resultsAnnouncement('emptyPantry', 0)).toBe('');
   });
 });

@@ -76,6 +76,20 @@ export function substituteContextLine(m: IngredientMatch): string {
   return `Recipe needs ${amount(m.needed, m.unit)} ${m.name}.`;
 }
 
+/** Live-region text for result changes. Loading is announced by the skeleton's own status role. */
+export function resultsAnnouncement(status: string, count: number): string {
+  switch (status) {
+    case 'ready':
+      return count === 1 ? '1 recipe' : `${count} recipes`;
+    case 'filteredOut':
+      return 'Nothing matches your filters';
+    case 'error':
+      return "Couldn't work out what you can cook";
+    default:
+      return '';
+  }
+}
+
 export function truncationNote(total: number, shown: number): string | null {
   return shown < total ? `Showing top ${shown} of ${total} recipes.` : null;
 }

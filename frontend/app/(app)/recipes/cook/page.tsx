@@ -8,6 +8,7 @@ import { SubstituteSheet } from '@/components/recipes/cook/substitute-sheet';
 import { CookEmptyState, CookListSkeleton } from '@/components/recipes/cook/cook-list-states';
 import { useCookFromPantry } from '@/lib/hooks/use-cook-from-pantry';
 import { relativeTimeAgo } from '@/lib/rules/relative-time';
+import { resultsAnnouncement } from '@/lib/rules/view-model';
 import type { IngredientMatch } from '@/lib/rules';
 import { CookResultsList } from './cook-results-list';
 
@@ -59,6 +60,10 @@ export default function CookFromPantryPage() {
         onToggleDiet={() => setApplyDiet((v) => !v)}
         onToggleReady={() => setOnlyReady((v) => !v)}
       />
+
+      <p role="status" aria-live="polite" className="sr-only">
+        {resultsAnnouncement(status, result?.items.length ?? 0)}
+      </p>
 
       {status === 'loading' && <CookListSkeleton />}
       {status === 'ready' && result ? (
