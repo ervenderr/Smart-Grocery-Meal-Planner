@@ -15,13 +15,13 @@ Research: `.planning/research-v2/` (01 native path, 02 on-device AI, 03 offline 
 - [ ] **STORE-05**: Reviewer demo account and review notes exist; app name is cleared (App Store + trademark check) or replaced
 
 ### Backend Offline Groundwork (SYNC)
-- [ ] **SYNC-01**: Mutating requests accept an `Idempotency-Key`; a replay returns the original result without double-applying
-- [ ] **SYNC-02**: Pantry quantity can be adjusted by a delta (`POST /pantry/:id/adjust`), clamped at 0, so queued offline taps merge correctly
-- [ ] **SYNC-03**: Clients can create pantry/shopping rows with a client-generated id (safe retries)
-- [ ] **SYNC-04**: API accepts the Capacitor origin (CORS) and issues refresh tokens so a session survives offline periods and token expiry
-- [ ] **SYNC-05**: Finish-shopping-trip accepts an `occurredAt` and a wider receipt-date window, and merges to pantry in the same transaction
-- [ ] **SYNC-06**: A bootstrap endpoint returns everything the app needs to cache (pantry, shopping list, recipes, meal plans) in one paged call; pantry list is no longer capped at 50 rows
-- [ ] **SYNC-07**: A 401 no longer wipes unsynced local work
+- [x] **SYNC-01**: Mutating requests accept an `Idempotency-Key`; a replay returns the original result without double-applying
+- [x] **SYNC-02**: Pantry quantity can be adjusted by a delta (`POST /pantry/:id/adjust`), clamped at 0, so queued offline taps merge correctly
+- [x] **SYNC-03**: Clients can create pantry/shopping rows with a client-generated id (safe retries)
+- [x] **SYNC-04**: API accepts the Capacitor origin (CORS) and issues refresh tokens so a session survives offline periods and token expiry
+- [x] **SYNC-05**: Finish-shopping-trip accepts an `occurredAt` and a wider receipt-date window, and merges to pantry in the same transaction
+- [x] **SYNC-06**: A bootstrap endpoint returns everything the app needs to cache (pantry, shopping list, recipes, meal plans) in one paged call; pantry list is no longer capped at 50 rows
+- [x] **SYNC-07**: A 401 no longer wipes unsynced local work
 
 ### Native Shell (SHELL)
 - [ ] **SHELL-01**: `mobile/` contains a Capacitor 8 iOS project built from a static export of the Next.js frontend, launching to the real app with no server dependency for the UI
@@ -80,13 +80,13 @@ Research: `.planning/research-v2/` (01 native path, 02 on-device AI, 03 offline 
 | STORE-03 | Phase 7 | Pending |
 | STORE-04 | Phase 7 | Pending |
 | STORE-05 | Phase 7 | Pending |
-| SYNC-01 | Phase 8 | Pending |
-| SYNC-02 | Phase 8 | Pending |
-| SYNC-03 | Phase 8 | Pending |
-| SYNC-04 | Phase 8 | Pending |
-| SYNC-05 | Phase 8 | Pending |
-| SYNC-06 | Phase 8 | Pending |
-| SYNC-07 | Phase 8 | Pending |
+| SYNC-01 | Phase 8 | Complete |
+| SYNC-02 | Phase 8 | Complete |
+| SYNC-03 | Phase 8 | Complete |
+| SYNC-04 | Phase 8 | Complete |
+| SYNC-05 | Phase 8 | Complete |
+| SYNC-06 | Phase 8 | Complete |
+| SYNC-07 | Phase 8 | Complete |
 | OFF-08 | Phase 9 | Pending |
 | SHELL-01 | Phase 10 | Pending |
 | SHELL-02 | Phase 10 | Pending |

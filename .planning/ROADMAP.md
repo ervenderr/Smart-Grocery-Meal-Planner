@@ -28,7 +28,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 **Human gates legend:** Phases marked HUMAN GATE contain steps an agent cannot do alone (Xcode install, real iPhone, Apple Developer enrollment, account or legal decisions). Agents prepare everything up to the gate and the work pauses there for the user. The user's Mac currently has only Command Line Tools (no Xcode).
 
 - [ ] **Phase 7: Store Readiness** - Account deletion, AI consent and labels, legal pages, reviewer account, name check (HUMAN GATE: name/trademark decision)
-- [ ] **Phase 8: Offline Sync Backend** - Idempotency, delta adjust, client ids, refresh tokens, bootstrap endpoint, safe 401 handling
+- [x] **Phase 8: Offline Sync Backend** - Idempotency, delta adjust, client ids, refresh tokens, bootstrap endpoint, safe 401 handling (completed 2026-10-10)
 - [ ] **Phase 9: Offline Rules Engine** - Network-free "what can I cook" ranking and ingredient substitutions
 - [ ] **Phase 10: Capacitor iOS Shell** - Static-export Capacitor app with secure token storage, native scan, local notifications, simulator smoke test (HUMAN GATE: install Xcode, real iPhone)
 - [ ] **Phase 11: Offline Core** - SQLite read cache and write outbox so the whole app works with no signal
@@ -78,17 +78,17 @@ Plans:
   6. Finishing a shopping trip with an `occurredAt` and an older receipt date merges purchased items into the pantry in the same transaction
 **Plans**: 11 plans
 Plans:
-- [ ] 08-01-PLAN.md — Wave 1: additive migration (idempotency_keys, refresh_tokens), account-deletion coverage + DMMF fixtures, refresh/idempotency config, 1h access default
-- [ ] 08-02-PLAN.md — Wave 1: Capacitor origins + Idempotency-Key header in CORS; per-user pantry/sync limiters, refresh limiter
-- [ ] 08-03-PLAN.md — Wave 1: finish trip occurredAt, 14-day receipt window, pantry merge in the same transaction
-- [ ] 08-04-PLAN.md — Wave 1: frontend pantry pager (no 50-row cap) for list, export, analytics
-- [ ] 08-05-PLAN.md — Wave 2: generic Idempotency-Key middleware on pantry/shopping/mealplan/cook + daily cleanup cron
-- [ ] 08-06-PLAN.md — Wave 2: rotating hashed refresh tokens with 60 s grace, /auth/refresh, revoking logout, password-change revocation
-- [ ] 08-07-PLAN.md — Wave 2: client-generated ids for shopping items (pre-check under list lock)
-- [ ] 08-08-PLAN.md — Wave 2: GET /sync/bootstrap keyset-paged snapshot (pantry, recipes, meal plans, shopping list, serverTime)
-- [ ] 08-09-PLAN.md — Wave 3: POST /pantry/:id/adjust delta (Decimal, clamp, lock) + pantry client ids
-- [ ] 08-10-PLAN.md — Wave 3: frontend single-flight refresh; 401 clears only on definitive refresh failure
-- [ ] 08-11-PLAN.md — Wave 4: smoke check 15 + full quality gate and deploy-ordering note
+- [x] 08-01-PLAN.md — Wave 1: additive migration (idempotency_keys, refresh_tokens), account-deletion coverage + DMMF fixtures, refresh/idempotency config, 1h access default
+- [x] 08-02-PLAN.md — Wave 1: Capacitor origins + Idempotency-Key header in CORS; per-user pantry/sync limiters, refresh limiter
+- [x] 08-03-PLAN.md — Wave 1: finish trip occurredAt, 14-day receipt window, pantry merge in the same transaction
+- [x] 08-04-PLAN.md — Wave 1: frontend pantry pager (no 50-row cap) for list, export, analytics
+- [x] 08-05-PLAN.md — Wave 2: generic Idempotency-Key middleware on pantry/shopping/mealplan/cook + daily cleanup cron
+- [x] 08-06-PLAN.md — Wave 2: rotating hashed refresh tokens with 60 s grace, /auth/refresh, revoking logout, password-change revocation
+- [x] 08-07-PLAN.md — Wave 2: client-generated ids for shopping items (pre-check under list lock)
+- [x] 08-08-PLAN.md — Wave 2: GET /sync/bootstrap keyset-paged snapshot (pantry, recipes, meal plans, shopping list, serverTime)
+- [x] 08-09-PLAN.md — Wave 3: POST /pantry/:id/adjust delta (Decimal, clamp, lock) + pantry client ids
+- [x] 08-10-PLAN.md — Wave 3: frontend single-flight refresh; 401 clears only on definitive refresh failure
+- [x] 08-11-PLAN.md — Wave 4: smoke check 15 + full quality gate and deploy-ordering note
 
 ### Phase 9: Offline Rules Engine
 **Goal**: Users get useful "what can I cook" and substitution answers computed locally, with no network and no model
@@ -188,7 +188,7 @@ Phases execute in numeric order. Phases 7, 8 and 9 are independent and need no X
 | 5. Pantry-Aware Intelligence | v1.0 | 12/13 | Complete | 2026-10-09 |
 | 6. Capture Loops | v1.0 | 12/13 | Complete | 2026-10-09 |
 | 7. Store Readiness | v2.0 | 0/0 | Not started | - |
-| 8. Offline Sync Backend | v2.0 | 0/11 | Planned | - |
+| 8. Offline Sync Backend | v2.0 | 11/11 | Complete    | 2026-10-10 |
 | 9. Offline Rules Engine | v2.0 | 0/8 | Planned | - |
 | 10. Capacitor iOS Shell | v2.0 | 0/0 | Not started | - |
 | 11. Offline Core | v2.0 | 0/0 | Not started | - |
