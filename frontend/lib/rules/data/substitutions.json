@@ -1741,7 +1741,6 @@
           },
           "note": "Swap 1 to 1; saltier, so cut added salt.",
           "tags": [
-            "vegetarian",
             "gluten_free",
             "nut_free"
           ],
@@ -1760,7 +1759,6 @@
           },
           "note": "Swap 1 to 1 for a milder flavor.",
           "tags": [
-            "vegetarian",
             "gluten_free",
             "nut_free"
           ],
@@ -1810,9 +1808,6 @@
           },
           "note": "Swap 1 to 1; sharper.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -1831,9 +1826,6 @@
           },
           "note": "Swap 1 to 1; melts well.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -1860,9 +1852,6 @@
           },
           "note": "Swap 1 to 1; milder.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -1881,9 +1870,6 @@
           },
           "note": "Swap 1 to 1; nuttier flavor.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -1902,9 +1888,6 @@
           },
           "note": "Swap 1 to 1; milder.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -1931,9 +1914,6 @@
           },
           "note": "Swap 1 to 1; creamier and less salty.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -1952,9 +1932,6 @@
           },
           "note": "Swap 1 to 1.",
           "tags": [
-            "vegetarian",
-            "halal",
-            "kosher",
             "gluten_free",
             "nut_free"
           ],
@@ -4695,6 +4672,6936 @@
             "nut_free"
           ],
           "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "lemon juice",
+      "aliases": [
+        "fresh lemon juice"
+      ],
+      "swaps": [
+        {
+          "name": "lime juice",
+          "pantryNames": [
+            "lime juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; slightly different flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white vinegar",
+          "pantryNames": [
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use half as much; sharper. Fine for dressings and marinades.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "white wine",
+          "pantryNames": [
+            "white wine"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 in cooking. Contains alcohol.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "lime juice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white vinegar",
+          "pantryNames": [
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use half as much plus a pinch of sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "white vinegar",
+      "aliases": [
+        "distilled white vinegar"
+      ],
+      "swaps": [
+        {
+          "name": "apple cider vinegar",
+          "pantryNames": [
+            "apple cider vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; fruitier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "rice vinegar",
+          "pantryNames": [
+            "rice vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "apple cider vinegar",
+      "aliases": [
+        "cider vinegar"
+      ],
+      "swaps": [
+        {
+          "name": "white wine vinegar",
+          "pantryNames": [
+            "white wine vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white vinegar",
+          "pantryNames": [
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; harsher. Add a pinch of sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "red wine vinegar",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "balsamic vinegar",
+          "pantryNames": [
+            "balsamic vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter and darker.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "apple cider vinegar",
+          "pantryNames": [
+            "apple cider vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "white wine vinegar",
+          "pantryNames": [
+            "white wine vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "white wine vinegar",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "rice vinegar",
+          "pantryNames": [
+            "rice vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "apple cider vinegar",
+          "pantryNames": [
+            "apple cider vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "rice vinegar",
+      "aliases": [
+        "rice wine vinegar"
+      ],
+      "swaps": [
+        {
+          "name": "apple cider vinegar",
+          "pantryNames": [
+            "apple cider vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; add a pinch of sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white wine vinegar",
+          "pantryNames": [
+            "white wine vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 in dressings.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "balsamic vinegar",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "red wine vinegar + sugar",
+          "pantryNames": [
+            "red wine vinegar",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tbsp red wine vinegar plus 1/2 tsp sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "apple cider vinegar + honey",
+          "pantryNames": [
+            "apple cider vinegar",
+            "honey"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tbsp vinegar plus 1/2 tsp honey.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "soy sauce",
+      "aliases": [
+        "soya sauce"
+      ],
+      "swaps": [
+        {
+          "name": "coconut aminos",
+          "pantryNames": [
+            "coconut aminos"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter and less salty, so add salt to taste.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tamari",
+          "pantryNames": [
+            "tamari"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1. Many are gluten-free but check the label.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "worcestershire sauce",
+          "pantryNames": [
+            "worcestershire sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; contains fish and gluten may vary. Check label.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "tamari",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "soy sauce",
+          "pantryNames": [
+            "soy sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; contains wheat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut aminos",
+          "pantryNames": [
+            "coconut aminos"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter, add salt to taste.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "coconut amino",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "soy sauce",
+          "pantryNames": [
+            "soy sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; saltier. Contains wheat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tamari",
+          "pantryNames": [
+            "tamari"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; saltier. Check label for gluten.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "fish sauce",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "soy sauce + seaweed",
+          "pantryNames": [
+            "soy sauce",
+            "nori"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tbsp soy sauce with a pinch of crushed nori for vegan umami.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "soy sauce + lime juice",
+          "pantryNames": [
+            "soy sauce",
+            "lime juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 1 tbsp soy sauce with 1/2 tsp lime juice.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "worcestershire sauce",
+          "pantryNames": [
+            "worcestershire sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; milder, contains anchovy.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "oyster sauce",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "hoisin sauce",
+          "pantryNames": [
+            "hoisin sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter. Contains soy and wheat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "soy sauce + sugar",
+          "pantryNames": [
+            "soy sauce",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 1 tbsp soy sauce with 1/2 tsp sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "mushroom stir fry sauce",
+          "pantryNames": [
+            "mushroom sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 for a vegan option.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "worcestershire sauce",
+      "aliases": [
+        "worcester sauce"
+      ],
+      "swaps": [
+        {
+          "name": "soy sauce + vinegar",
+          "pantryNames": [
+            "soy sauce",
+            "apple cider vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 1 tbsp soy sauce with a dash of vinegar and pinch of sugar. Fish-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "soy sauce",
+          "pantryNames": [
+            "soy sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; saltier and less tangy.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "steak sauce",
+          "pantryNames": [
+            "steak sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "hoisin sauce",
+      "aliases": [
+        "hoisin"
+      ],
+      "swaps": [
+        {
+          "name": "soy sauce + peanut butter",
+          "pantryNames": [
+            "soy sauce",
+            "peanut butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 2 tsp soy sauce, 1 tsp peanut butter and a pinch of sugar and garlic.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "barbecue sauce",
+          "pantryNames": [
+            "barbecue sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 with a dash of soy sauce.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "mirin",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "rice vinegar + sugar",
+          "pantryNames": [
+            "rice vinegar",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 1 tbsp rice vinegar with 1/2 tsp sugar. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "dry sherry + sugar",
+          "pantryNames": [
+            "dry sherry",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 1 tbsp sherry with 1/2 tsp sugar. Contains alcohol.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "white grape juice",
+          "pantryNames": [
+            "grape juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 and add a splash of vinegar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "sake",
+      "aliases": [
+        "rice wine"
+      ],
+      "swaps": [
+        {
+          "name": "rice vinegar + water",
+          "pantryNames": [
+            "rice vinegar",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix equal parts. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "dry white wine",
+          "pantryNames": [
+            "white wine"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1. Contains alcohol.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "chicken broth",
+          "pantryNames": [
+            "chicken broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 with a drop of vinegar. Alcohol-free.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "white wine",
+      "aliases": [
+        "dry white wine"
+      ],
+      "swaps": [
+        {
+          "name": "chicken broth + vinegar",
+          "pantryNames": [
+            "chicken broth",
+            "white wine vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup broth plus 1 tbsp vinegar. Alcohol-free.",
+          "tags": [
+            "nut_free",
+            "halal"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "vegetable broth + lemon juice",
+          "pantryNames": [
+            "vegetable broth",
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup broth plus 1 tbsp lemon juice. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "white grape juice + vinegar",
+          "pantryNames": [
+            "grape juice",
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup juice plus 1 tbsp vinegar. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "red wine",
+      "aliases": [
+        "dry red wine"
+      ],
+      "swaps": [
+        {
+          "name": "beef broth + red wine vinegar",
+          "pantryNames": [
+            "beef broth",
+            "red wine vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup broth plus 1 tbsp vinegar. Alcohol-free.",
+          "tags": [
+            "nut_free",
+            "halal"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "vegetable broth + balsamic vinegar",
+          "pantryNames": [
+            "vegetable broth",
+            "balsamic vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup broth plus 1 tbsp vinegar. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "grape juice",
+          "pantryNames": [
+            "grape juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use unsweetened red grape juice with a splash of vinegar. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "beer",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "chicken broth",
+          "pantryNames": [
+            "chicken broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in stews. Alcohol-free.",
+          "tags": [
+            "nut_free",
+            "halal"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "apple juice + vinegar",
+          "pantryNames": [
+            "apple juice",
+            "apple cider vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup juice plus 1 tbsp vinegar. Alcohol-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "sparkling water",
+          "pantryNames": [
+            "sparkling water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in batters for lightness.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "ketchup",
+      "aliases": [
+        "catsup"
+      ],
+      "swaps": [
+        {
+          "name": "tomato paste + sugar + vinegar",
+          "pantryNames": [
+            "tomato paste",
+            "white sugar",
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1/2 cup tomato paste with 1 tbsp sugar, 1 tbsp vinegar and a splash of water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tomato sauce + sugar",
+          "pantryNames": [
+            "tomato sauce",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Add 1 tbsp sugar and 1 tbsp vinegar per cup of tomato sauce.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "barbecue sauce",
+          "pantryNames": [
+            "barbecue sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; smokier.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "mayonnaise",
+      "aliases": [
+        "mayo"
+      ],
+      "swaps": [
+        {
+          "name": "greek yogurt",
+          "pantryNames": [
+            "greek yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; tangier, lighter.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sour cream",
+          "pantryNames": [
+            "sour cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "mashed avocado",
+          "pantryNames": [
+            "avocado"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in sandwiches and salads; egg-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "vegan mayo",
+          "pantryNames": [
+            "vegan mayonnaise"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; egg-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "dijon mustard",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "yellow mustard",
+          "pantryNames": [
+            "yellow mustard"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; milder, brighter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "whole grain mustard",
+          "pantryNames": [
+            "whole grain mustard"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dry mustard + vinegar",
+          "pantryNames": [
+            "dry mustard",
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 1 tsp dry mustard with 1 tsp vinegar and 1 tsp water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "dry mustard",
+      "aliases": [
+        "mustard powder",
+        "ground mustard"
+      ],
+      "swaps": [
+        {
+          "name": "prepared mustard",
+          "pantryNames": [
+            "dijon mustard"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1 tbsp prepared mustard per tsp dry; reduce other liquid slightly.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "wasabi powder",
+          "pantryNames": [
+            "wasabi"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; hotter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "hot sauce",
+      "aliases": [
+        "tabasco"
+      ],
+      "swaps": [
+        {
+          "name": "cayenne + vinegar",
+          "pantryNames": [
+            "cayenne",
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix 1/4 tsp cayenne into 1 tsp vinegar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sriracha",
+          "pantryNames": [
+            "sriracha"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; thicker and sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "red pepper flake + vinegar",
+          "pantryNames": [
+            "red pepper flakes",
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Steep 1/2 tsp flakes in 1 tsp vinegar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "sriracha",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "hot sauce + sugar",
+          "pantryNames": [
+            "hot sauce",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix a pinch of sugar and garlic into hot sauce.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sambal oelek",
+          "pantryNames": [
+            "sambal oelek"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; chunkier and less sweet.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "chili garlic sauce",
+          "pantryNames": [
+            "chili garlic sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "tomato paste",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "tomato sauce",
+          "pantryNames": [
+            "tomato sauce"
+          ],
+          "ratio": {
+            "amount": 3,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 3 tbsp tomato sauce per tbsp paste and simmer to reduce.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "ketchup",
+          "pantryNames": [
+            "ketchup"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter, skip added sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "canned tomato",
+          "pantryNames": [
+            "canned tomatoes"
+          ],
+          "ratio": {
+            "amount": 3,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Simmer 3 tbsp crushed tomatoes down per tbsp paste.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "tomato sauce",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "tomato paste + water",
+          "pantryNames": [
+            "tomato paste",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1/4 cup paste with 3/4 cup water; season to taste.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "canned tomato",
+          "pantryNames": [
+            "canned tomatoes"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crush and simmer 10 minutes to thicken.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "ketchup",
+          "pantryNames": [
+            "ketchup"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1/2 cup ketchup plus 1/2 cup water; sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "canned tomato",
+      "aliases": [
+        "crushed tomatoes",
+        "diced tomatoes"
+      ],
+      "swaps": [
+        {
+          "name": "fresh tomato",
+          "pantryNames": [
+            "fresh tomatoes"
+          ],
+          "ratio": {
+            "amount": 1.5,
+            "unit": "lbs",
+            "per": 14,
+            "perUnit": "oz"
+          },
+          "note": "Use about 1 1/2 lb chopped and simmer 20 minutes to soften.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tomato sauce",
+          "pantryNames": [
+            "tomato sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; smoother.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "fresh tomato",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "canned tomato",
+          "pantryNames": [
+            "canned tomatoes"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Drain well; swap 1 to 1 in cooked dishes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sun dried tomato",
+          "pantryNames": [
+            "sun dried tomatoes"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Rehydrate in hot water; use in cooked dishes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "chicken broth",
+      "aliases": [
+        "chicken stock"
+      ],
+      "swaps": [
+        {
+          "name": "vegetable broth",
+          "pantryNames": [
+            "vegetable broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Vegetarian-friendly.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "stock cube + water",
+          "pantryNames": [
+            "stock cube",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Dissolve 1 cube in 1 cup hot water.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "water + soy sauce",
+          "pantryNames": [
+            "water",
+            "soy sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup water plus 1 tbsp soy sauce in a pinch.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "beef broth",
+      "aliases": [
+        "beef stock"
+      ],
+      "swaps": [
+        {
+          "name": "vegetable broth + soy sauce",
+          "pantryNames": [
+            "vegetable broth",
+            "soy sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup broth plus 1 tsp soy sauce for depth.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "chicken broth",
+          "pantryNames": [
+            "chicken broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; lighter.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "mushroom broth",
+          "pantryNames": [
+            "mushroom broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; earthy and vegan.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "vegetable broth",
+      "aliases": [
+        "vegetable stock"
+      ],
+      "swaps": [
+        {
+          "name": "chicken broth",
+          "pantryNames": [
+            "chicken broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 if meat is fine.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "stock cube + water",
+          "pantryNames": [
+            "stock cube",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Dissolve 1 cube in 1 cup hot water. Check label for vegan.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "water + miso",
+          "pantryNames": [
+            "water",
+            "miso"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Stir 1 tbsp miso into 1 cup hot water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "stock cube",
+      "aliases": [
+        "bouillon cube",
+        "bouillon"
+      ],
+      "swaps": [
+        {
+          "name": "broth",
+          "pantryNames": [
+            "chicken broth"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1 cup ready broth in place of 1 cube plus 1 cup water.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "salt + herbs",
+          "pantryNames": [
+            "salt",
+            "dried thyme"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/2 tsp salt and a pinch of dried herbs per cube.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "garlic",
+      "aliases": [
+        "garlic clove"
+      ],
+      "swaps": [
+        {
+          "name": "garlic powder",
+          "pantryNames": [
+            "garlic powder"
+          ],
+          "ratio": {
+            "amount": 0.125,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/8 tsp powder per clove.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "minced jarred garlic",
+          "pantryNames": [
+            "jarred garlic"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/2 tsp per clove.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "shallot",
+          "pantryNames": [
+            "shallot"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1 tbsp minced shallot per clove for milder flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "garlic powder",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "garlic",
+          "pantryNames": [
+            "garlic"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "pieces",
+            "per": 0.125,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1 fresh clove per 1/8 tsp powder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "onion powder",
+          "pantryNames": [
+            "onion powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; milder, different flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "onion",
+      "aliases": [
+        "yellow onion",
+        "white onion"
+      ],
+      "swaps": [
+        {
+          "name": "shallot",
+          "pantryNames": [
+            "shallot"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Swap 1 to 1; milder and sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "leek",
+          "pantryNames": [
+            "leek"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Use white and light green parts, swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "onion powder",
+          "pantryNames": [
+            "onion powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Use 1 tbsp powder per medium onion; loses texture.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "onion powder",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "onion",
+          "pantryNames": [
+            "onion"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 cup minced onion per tsp powder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "garlic powder",
+          "pantryNames": [
+            "garlic powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; different flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "shallot",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "onion",
+          "pantryNames": [
+            "onion"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Swap 1 to 1; sharper. Use a little less.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "green onion",
+          "pantryNames": [
+            "green onions"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Use white parts of 2 per shallot.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "green onion",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "chive",
+          "pantryNames": [
+            "chives"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "shallot",
+          "pantryNames": [
+            "shallot"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Use minced shallot for cooked dishes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "onion",
+          "pantryNames": [
+            "onion"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Use minced onion; sharper. Rinse for raw use.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "leek",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "onion",
+          "pantryNames": [
+            "onion"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Swap 1 to 1; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "shallot",
+          "pantryNames": [
+            "shallot"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Use 2 shallots per leek.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "ginger",
+      "aliases": [
+        "fresh ginger",
+        "ginger root"
+      ],
+      "swaps": [
+        {
+          "name": "ground ginger",
+          "pantryNames": [
+            "ground ginger"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp ground per 1 tsp fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "galangal",
+          "pantryNames": [
+            "galangal"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; more citrusy.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "ground ginger",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "fresh ginger",
+          "pantryNames": [
+            "ginger"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1 tbsp grated fresh per tsp ground.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "allspice",
+          "pantryNames": [
+            "allspice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1 in baking.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cinnamon",
+          "pantryNames": [
+            "cinnamon"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1 in baking in a pinch.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "fresh basil",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "dried basil",
+          "pantryNames": [
+            "dried basil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh; add earlier in cooking.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "fresh oregano",
+          "pantryNames": [
+            "oregano"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "fresh spinach pesto",
+          "pantryNames": [
+            "spinach"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use chopped fresh spinach with a pinch of dried herbs.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "dried basil",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "fresh basil",
+          "pantryNames": [
+            "fresh basil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1 tbsp fresh per tsp dried.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "italian seasoning",
+          "pantryNames": [
+            "italian seasoning"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried oregano",
+          "pantryNames": [
+            "dried oregano"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "fresh parsley",
+      "aliases": [
+        "parsley"
+      ],
+      "swaps": [
+        {
+          "name": "dried parsley",
+          "pantryNames": [
+            "dried parsley"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh; flavor is weak.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cilantro",
+          "pantryNames": [
+            "cilantro"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; very different flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "chervil",
+          "pantryNames": [
+            "chervil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "cilantro",
+      "aliases": [
+        "fresh cilantro"
+      ],
+      "swaps": [
+        {
+          "name": "fresh parsley",
+          "pantryNames": [
+            "parsley"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 with a squeeze of lime for brightness.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "fresh basil",
+          "pantryNames": [
+            "fresh basil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 in Southeast Asian dishes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "mint",
+          "pantryNames": [
+            "mint"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; cooler flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "fresh thyme",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "dried thyme",
+          "pantryNames": [
+            "dried thyme"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "italian seasoning",
+          "pantryNames": [
+            "italian seasoning"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp per tbsp fresh thyme.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried oregano",
+          "pantryNames": [
+            "dried oregano"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh thyme.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "dried oregano",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "dried marjoram",
+          "pantryNames": [
+            "marjoram"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "italian seasoning",
+          "pantryNames": [
+            "italian seasoning"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried thyme",
+          "pantryNames": [
+            "dried thyme"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "rosemary",
+      "aliases": [
+        "fresh rosemary"
+      ],
+      "swaps": [
+        {
+          "name": "dried thyme",
+          "pantryNames": [
+            "dried thyme"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp thyme per tbsp fresh rosemary.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "dried sage",
+          "pantryNames": [
+            "dried sage"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp per tbsp fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried rosemary",
+          "pantryNames": [
+            "dried rosemary"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "dill",
+      "aliases": [
+        "fresh dill",
+        "dill weed"
+      ],
+      "swaps": [
+        {
+          "name": "fennel fronds",
+          "pantryNames": [
+            "fennel"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; anise note.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tarragon",
+          "pantryNames": [
+            "tarragon"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; stronger, use a little less.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried dill",
+          "pantryNames": [
+            "dried dill"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "mint",
+      "aliases": [
+        "fresh mint"
+      ],
+      "swaps": [
+        {
+          "name": "fresh basil",
+          "pantryNames": [
+            "fresh basil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "fresh parsley",
+          "pantryNames": [
+            "parsley"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; less sweet.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried mint",
+          "pantryNames": [
+            "dried mint"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp dried per tbsp fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "bay leaf",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "dried thyme",
+          "pantryNames": [
+            "dried thyme"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/4 tsp dried thyme per leaf.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "dried oregano",
+          "pantryNames": [
+            "dried oregano"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/4 tsp per leaf.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "cumin",
+      "aliases": [
+        "ground cumin"
+      ],
+      "swaps": [
+        {
+          "name": "chili powder",
+          "pantryNames": [
+            "chili powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; spicier, includes other spices.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "ground coriander",
+          "pantryNames": [
+            "ground coriander"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; citrusier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "caraway seed",
+          "pantryNames": [
+            "caraway seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "ground coriander",
+      "aliases": [
+        "coriander",
+        "coriander seed"
+      ],
+      "swaps": [
+        {
+          "name": "cumin",
+          "pantryNames": [
+            "cumin"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; earthier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "garam masala",
+          "pantryNames": [
+            "garam masala"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "caraway seed",
+          "pantryNames": [
+            "caraway seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "chili powder",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "paprika + cumin + cayenne",
+          "pantryNames": [
+            "paprika",
+            "cumin",
+            "cayenne"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Mix 2 tsp paprika, 1/2 tsp cumin, 1/4 tsp cayenne and a pinch of garlic powder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "taco seasoning",
+          "pantryNames": [
+            "taco seasoning"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; saltier. Check label for gluten.",
+          "tags": [
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cayenne",
+          "pantryNames": [
+            "cayenne"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp cayenne plus extra paprika; much hotter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "cayenne",
+      "aliases": [
+        "cayenne pepper"
+      ],
+      "swaps": [
+        {
+          "name": "red pepper flake",
+          "pantryNames": [
+            "red pepper flakes"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; blend fine for a smoother heat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "hot sauce",
+          "pantryNames": [
+            "hot sauce"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 0.25,
+            "perUnit": "tsp"
+          },
+          "note": "Add a few dashes; adds liquid.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "chili powder",
+          "pantryNames": [
+            "chili powder"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 2 tsp per tsp cayenne; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "paprika",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "chili powder",
+          "pantryNames": [
+            "chili powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; hotter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cayenne + sweet pepper",
+          "pantryNames": [
+            "cayenne",
+            "bell pepper"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use a pinch of cayenne with finely chopped red pepper.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "smoked paprika",
+          "pantryNames": [
+            "smoked paprika"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; smokier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "smoked paprika",
+      "aliases": [
+        "spanish paprika",
+        "pimenton"
+      ],
+      "swaps": [
+        {
+          "name": "paprika + chipotle",
+          "pantryNames": [
+            "paprika",
+            "chipotle"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix paprika with a pinch of chipotle powder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "paprika",
+          "pantryNames": [
+            "paprika"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; no smoke.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cumin",
+          "pantryNames": [
+            "cumin"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; earthier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "cinnamon",
+      "aliases": [
+        "ground cinnamon"
+      ],
+      "swaps": [
+        {
+          "name": "allspice",
+          "pantryNames": [
+            "allspice"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp per tsp cinnamon; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "nutmeg",
+          "pantryNames": [
+            "nutmeg"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp per tsp cinnamon; stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "pumpkin pie spice",
+          "pantryNames": [
+            "pumpkin pie spice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; blend.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "nutmeg",
+      "aliases": [
+        "ground nutmeg"
+      ],
+      "swaps": [
+        {
+          "name": "mace",
+          "pantryNames": [
+            "mace"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cinnamon",
+          "pantryNames": [
+            "cinnamon"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "allspice",
+          "pantryNames": [
+            "allspice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "allspice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "cinnamon + clove + nutmeg",
+          "pantryNames": [
+            "cinnamon",
+            "cloves",
+            "nutmeg"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix equal parts cinnamon, clove and nutmeg.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "pumpkin pie spice",
+          "pantryNames": [
+            "pumpkin pie spice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "pumpkin pie spice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "cinnamon + ginger + nutmeg + clove",
+          "pantryNames": [
+            "cinnamon",
+            "ground ginger",
+            "nutmeg",
+            "cloves"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix 1/2 tsp cinnamon, 1/4 tsp ginger, 1/8 tsp nutmeg, 1/8 tsp cloves.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "allspice",
+          "pantryNames": [
+            "allspice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "italian seasoning",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "oregano + basil + thyme",
+          "pantryNames": [
+            "dried oregano",
+            "dried basil",
+            "dried thyme"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix equal parts dried oregano, basil and thyme.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "dried oregano",
+          "pantryNames": [
+            "dried oregano"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "black pepper",
+      "aliases": [
+        "ground black pepper"
+      ],
+      "swaps": [
+        {
+          "name": "white pepper",
+          "pantryNames": [
+            "white pepper"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; different heat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cayenne",
+          "pantryNames": [
+            "cayenne"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp cayenne per tsp pepper for heat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "allspice",
+          "pantryNames": [
+            "allspice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; warmer.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "red pepper flake",
+      "aliases": [
+        "crushed red pepper",
+        "chili flakes"
+      ],
+      "swaps": [
+        {
+          "name": "cayenne",
+          "pantryNames": [
+            "cayenne"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp cayenne per tsp flakes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "hot sauce",
+          "pantryNames": [
+            "hot sauce"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Add a few dashes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "fresh chili",
+          "pantryNames": [
+            "chili pepper"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use minced fresh chili.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "chicken breast",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "chicken thigh",
+          "pantryNames": [
+            "chicken thighs"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; juicier, cook a bit longer.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "turkey breast",
+          "pantryNames": [
+            "turkey breast"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "firm tofu",
+          "pantryNames": [
+            "tofu"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Press and cube; good in stir fries.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "chickpea",
+          "pantryNames": [
+            "chickpeas"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Use about 2 cups cooked chickpeas for a vegan option.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "ground beef",
+      "aliases": [
+        "minced beef",
+        "beef mince"
+      ],
+      "swaps": [
+        {
+          "name": "ground turkey",
+          "pantryNames": [
+            "ground turkey"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; leaner, add a little oil.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "lentil",
+          "pantryNames": [
+            "lentils"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Use 2 cups cooked lentils for tacos and sauces.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "mushroom",
+          "pantryNames": [
+            "mushrooms"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Finely chop and brown until dry; swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "ground chicken",
+          "pantryNames": [
+            "ground chicken"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "bacon",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "turkey bacon",
+          "pantryNames": [
+            "turkey bacon"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; leaner, cook with a little oil.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "smoked mushroom",
+          "pantryNames": [
+            "mushrooms",
+            "smoked paprika"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Roast sliced mushrooms with smoked paprika and soy sauce.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "pancetta",
+          "pantryNames": [
+            "pancetta"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; less smoky.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "ham",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "bacon",
+          "pantryNames": [
+            "bacon"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; smokier and fattier.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "smoked turkey",
+          "pantryNames": [
+            "turkey breast"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "smoked tofu",
+          "pantryNames": [
+            "tofu"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1 for a vegan option.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "shrimp",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "scallop",
+          "pantryNames": [
+            "scallops"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; cook briefly.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "firm white fish",
+          "pantryNames": [
+            "white fish"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Cut into chunks; swap 1 to 1.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "hearts of palm",
+          "pantryNames": [
+            "hearts of palm"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Slice thick for a vegan seafood stand-in.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "tofu",
+      "aliases": [
+        "firm tofu"
+      ],
+      "swaps": [
+        {
+          "name": "chickpea",
+          "pantryNames": [
+            "chickpeas"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in curries and scrambles.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "paneer",
+          "pantryNames": [
+            "paneer"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in curries.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "tempeh",
+          "pantryNames": [
+            "tempeh"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; check label for gluten.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "pancetta",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "bacon",
+          "pantryNames": [
+            "bacon"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "oz",
+            "per": 1,
+            "perUnit": "oz"
+          },
+          "note": "Swap 1 to 1; smokier.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "ham",
+          "pantryNames": [
+            "ham"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "oz",
+            "per": 1,
+            "perUnit": "oz"
+          },
+          "note": "Swap 1 to 1; less fat.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "anchovy",
+      "aliases": [
+        "anchovy fillet"
+      ],
+      "swaps": [
+        {
+          "name": "capers + soy sauce",
+          "pantryNames": [
+            "capers",
+            "soy sauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Mash 1 tsp capers with a dash of soy sauce per fillet.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "fish sauce",
+          "pantryNames": [
+            "fish sauce"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/2 tsp per fillet.",
+          "tags": [
+            "gluten_free",
+            "nut_free",
+            "dairy_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "miso",
+          "pantryNames": [
+            "miso"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1 tsp white miso per fillet.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "white rice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "brown rice",
+          "pantryNames": [
+            "brown rice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; add 1/4 cup water and 20 more minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "quinoa",
+          "pantryNames": [
+            "quinoa"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook 15 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "couscous",
+          "pantryNames": [
+            "couscous"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cooks in 5 minutes with 1 cup hot water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "brown rice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "white rice",
+          "pantryNames": [
+            "white rice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook 15 minutes less.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "quinoa",
+          "pantryNames": [
+            "quinoa"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "barley",
+          "pantryNames": [
+            "barley"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; chewier. Contains gluten.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "rice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "quinoa",
+          "pantryNames": [
+            "quinoa"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook 15 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "couscous",
+          "pantryNames": [
+            "couscous"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cooks in 5 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cauliflower rice",
+          "pantryNames": [
+            "cauliflower"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; sauteed 5 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "pasta",
+      "aliases": [
+        "spaghetti",
+        "noodle"
+      ],
+      "swaps": [
+        {
+          "name": "rice noodle",
+          "pantryNames": [
+            "rice noodles"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "oz",
+            "per": 1,
+            "perUnit": "oz"
+          },
+          "note": "Swap 1 to 1; soak or cook per package.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "zucchini noodle",
+          "pantryNames": [
+            "zucchini"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Spiralize; saute 2 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "gluten free pasta",
+          "pantryNames": [
+            "gluten free pasta"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "oz",
+            "per": 1,
+            "perUnit": "oz"
+          },
+          "note": "Swap 1 to 1 and cook per package.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "quinoa",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "couscous",
+          "pantryNames": [
+            "couscous"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; contains gluten.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "brown rice",
+          "pantryNames": [
+            "brown rice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook longer.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "millet",
+          "pantryNames": [
+            "millet"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "couscous",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "quinoa",
+          "pantryNames": [
+            "quinoa"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook 15 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "orzo",
+          "pantryNames": [
+            "orzo"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook per package.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "bulgur",
+          "pantryNames": [
+            "bulgur"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; soak in hot water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "bell pepper",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "poblano pepper",
+          "pantryNames": [
+            "poblano"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "items",
+            "per": 1,
+            "perUnit": "items"
+          },
+          "note": "Swap 1 to 1; slightly spicier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "zucchini",
+          "pantryNames": [
+            "zucchini"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in cooked dishes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "celery",
+          "pantryNames": [
+            "celery"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for crunch.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "spinach",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "kale",
+          "pantryNames": [
+            "kale"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook 3 minutes longer.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "swiss chard",
+          "pantryNames": [
+            "chard"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "frozen spinach",
+          "pantryNames": [
+            "frozen spinach"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Thaw and squeeze dry; use about 1/2 cup per 1 cup fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "kale",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "spinach",
+          "pantryNames": [
+            "spinach"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cooks faster.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "swiss chard",
+          "pantryNames": [
+            "chard"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "collard green",
+          "pantryNames": [
+            "collard greens"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cook longer.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "zucchini",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "yellow squash",
+          "pantryNames": [
+            "yellow squash"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "eggplant",
+          "pantryNames": [
+            "eggplant"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cucumber",
+          "pantryNames": [
+            "cucumber"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in raw dishes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "potato",
+      "aliases": [
+        "russet potato"
+      ],
+      "swaps": [
+        {
+          "name": "sweet potato",
+          "pantryNames": [
+            "sweet potato"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; sweeter and softer.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cauliflower",
+          "pantryNames": [
+            "cauliflower"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1 for mash.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "parsnip",
+          "pantryNames": [
+            "parsnip"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "sweet potato",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "potato",
+          "pantryNames": [
+            "potato"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; starchier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "butternut squash",
+          "pantryNames": [
+            "butternut squash"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "carrot",
+          "pantryNames": [
+            "carrot"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "lbs",
+            "per": 1,
+            "perUnit": "lbs"
+          },
+          "note": "Swap 1 to 1; cook slightly less.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "mushroom",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "zucchini",
+          "pantryNames": [
+            "zucchini"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "eggplant",
+          "pantryNames": [
+            "eggplant"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for meaty texture.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried mushroom",
+          "pantryNames": [
+            "dried mushrooms"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Soak in hot water 20 minutes; use about 1/4 cup per cup fresh.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "celery",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "fennel",
+          "pantryNames": [
+            "fennel"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; anise note.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "bell pepper",
+          "pantryNames": [
+            "bell pepper"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for crunch.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "celery seed",
+          "pantryNames": [
+            "celery seed"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1/4 tsp seed per cup for flavor only.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "carrot",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "parsnip",
+          "pantryNames": [
+            "parsnip"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sweet potato",
+          "pantryNames": [
+            "sweet potato"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "butternut squash",
+          "pantryNames": [
+            "butternut squash"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "cabbage",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "brussels sprout",
+          "pantryNames": [
+            "brussels sprouts"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Shred and swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "bok choy",
+          "pantryNames": [
+            "bok choy"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; cooks faster.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "kale",
+          "pantryNames": [
+            "kale"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "lemon zest",
+      "aliases": [
+        "lemon peel"
+      ],
+      "swaps": [
+        {
+          "name": "lime zest",
+          "pantryNames": [
+            "lime zest"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "orange zest",
+          "pantryNames": [
+            "orange zest"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 2 tsp juice per tsp zest.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "orange juice",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "lemon juice + sugar",
+          "pantryNames": [
+            "lemon juice",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1/4 cup lemon juice, 3/4 cup water and 1 tbsp sugar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "apple juice",
+          "pantryNames": [
+            "apple juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "pineapple juice",
+          "pantryNames": [
+            "pineapple juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "raisin",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "dried cranberry",
+          "pantryNames": [
+            "dried cranberries"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; tarter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "chopped date",
+          "pantryNames": [
+            "dates"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "dried currant",
+          "pantryNames": [
+            "currants"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "dried cranberry",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "raisin",
+          "pantryNames": [
+            "raisins"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; sweeter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "dried cherry",
+          "pantryNames": [
+            "dried cherries"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "chopped apricot",
+          "pantryNames": [
+            "dried apricots"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "walnut",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "pecan",
+          "pantryNames": [
+            "pecans"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sunflower seed",
+          "pantryNames": [
+            "sunflower seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "almond",
+          "pantryNames": [
+            "almonds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "pecan",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "walnut",
+          "pantryNames": [
+            "walnuts"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; slightly bitter.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "almond",
+          "pantryNames": [
+            "almonds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "pumpkin seed",
+          "pantryNames": [
+            "pumpkin seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "almond",
+      "aliases": [
+        "sliced almonds"
+      ],
+      "swaps": [
+        {
+          "name": "sunflower seed",
+          "pantryNames": [
+            "sunflower seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "pecan",
+          "pantryNames": [
+            "pecans"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "pumpkin seed",
+          "pantryNames": [
+            "pumpkin seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "pine nut",
+      "aliases": [
+        "pignoli"
+      ],
+      "swaps": [
+        {
+          "name": "sunflower seed",
+          "pantryNames": [
+            "sunflower seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; toast lightly. Nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "walnut",
+          "pantryNames": [
+            "walnuts"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "almond",
+          "pantryNames": [
+            "almonds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
         }
       ]
     }
