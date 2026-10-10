@@ -14,6 +14,9 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service';
 import { SignupRequest, LoginRequest } from '@/types/auth.types';
+import { AppError } from '@/middleware/errorHandler';
+import { refreshBodySchema, logoutBodySchema } from './refresh-token.validation';
+import { revokeFamilyByToken } from './refresh-token.service';
 
 export class AuthController {
   /**
@@ -69,18 +72,34 @@ export class AuthController {
   }
 
   /**
-   * POST /api/v1/auth/logout
-   * Logout user
-   *
-   * NOTE: JWT is stateless, so logout is client-side!
-   * Client should:
-   * 1. Delete token from localStorage/cookies
-   * 2. Redirect to login page
-   *
-   * This endpoint is optional - just for consistency
+   * POST /api/v1/auth/refresh
+   * Body: { "refreshToken": "<43 chars>" }
+   * Response (200): { token, expiresIn, refreshToken, refreshExpiresAt }
+   * Errors: 400 VALIDATION_ERROR, 401 REFRESH_TOKEN_INVALID | REFRESH_TOKEN_REUSED
    */
-  async logout(_req: Request, res: Response): Promise<void> {
-    // Nothing to do on server side for JWT logout
+  async refresh(req: Request, res: Response): Promise<void> {
+    const parsed = refreshBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new AppError('Invalid refresh request', 400, true, { code: 'VALIDATION_ERROR' });
+    }
+    const result = await authService.refresh(parsed.data.refreshToken);
+    res.status(200).json(result);
+  }
+
+  /**
+   * POST /api/v1/auth/logout
+   * Revokes the refresh token family when a refreshToken is supplied.
+   * Unauthenticated on purpose so an expired access token can still log out;
+   * always 200 for a well-formed body (no token-validity oracle).
+   */
+  async logout(req: Request, res: Response): Promise<void> {
+    const parsed = logoutBodySchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      throw new AppError('Invalid logout request', 400, true, { code: 'VALIDATION_ERROR' });
+    }
+    if (parsed.data.refreshToken) {
+      await revokeFamilyByToken(parsed.data.refreshToken, 'logout');
+    }
     res.status(200).json({
       message: 'Logout successful',
     });

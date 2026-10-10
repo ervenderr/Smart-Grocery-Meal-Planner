@@ -21,6 +21,7 @@ import {
   UserPreferencesResponse,
 } from '@/types/user.types';
 import { logger } from '@/config/logger.config';
+import { revokeAllForUser } from '@/modules/auth/refresh-token.service';
 import { DEFAULT_STAPLE_NAMES } from '@/modules/intelligence/staples';
 
 export class UsersService {
@@ -265,6 +266,8 @@ export class UsersService {
       where: { id: userId },
       data: { passwordHash: newPasswordHash },
     });
+
+    await revokeAllForUser(userId, 'password_change');
 
     logger.info('User password changed', { userId });
   }

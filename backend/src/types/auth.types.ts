@@ -48,7 +48,19 @@ export interface AuthResponse {
     createdAt: Date;
   };
   token: string;
-  expiresIn: string; // "7d"
+  expiresIn: string; // config.jwt.expiresIn (e.g. "1h")
+  refreshToken: string;
+  refreshExpiresAt: string; // ISO timestamp
+}
+
+/**
+ * POST /auth/refresh response
+ */
+export interface RefreshResponse {
+  token: string;
+  expiresIn: string;
+  refreshToken: string;
+  refreshExpiresAt: string; // ISO timestamp
 }
 
 /**

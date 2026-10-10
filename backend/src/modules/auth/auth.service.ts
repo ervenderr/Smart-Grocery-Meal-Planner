@@ -20,7 +20,9 @@ import { prisma } from '@/config/database.config';
 import { AppError } from '@/middleware/errorHandler';
 import { hashPassword, comparePassword, validatePasswordStrength } from '@/utils/password.util';
 import { generateToken } from '@/utils/jwt.util';
-import { SignupRequest, LoginRequest, AuthResponse } from '@/types/auth.types';
+import { config } from '@/config/env.config';
+import { issueRefreshToken, rotateRefreshToken } from './refresh-token.service';
+import { SignupRequest, LoginRequest, AuthResponse, RefreshResponse } from '@/types/auth.types';
 import { logger } from '@/config/logger.config';
 
 export class AuthService {
@@ -98,6 +100,8 @@ export class AuthService {
       email: user.email,
     });
 
+    const refresh = await issueRefreshToken(user.id);
+
     logger.info('User registered successfully', {
       userId: user.id,
       email: user.email,
@@ -107,7 +111,9 @@ export class AuthService {
     return {
       user,
       token,
-      expiresIn: '7d',
+      expiresIn: config.jwt.expiresIn,
+      refreshToken: refresh.refreshToken,
+      refreshExpiresAt: refresh.refreshExpiresAt.toISOString(),
     };
   }
 
@@ -245,6 +251,8 @@ export class AuthService {
       email: user.email,
     });
 
+    const refresh = await issueRefreshToken(user.id);
+
     logger.info('User logged in successfully', {
       userId: user.id,
       email: user.email,
@@ -260,7 +268,24 @@ export class AuthService {
         createdAt: user.createdAt,
       },
       token,
-      expiresIn: '7d',
+      expiresIn: config.jwt.expiresIn,
+      refreshToken: refresh.refreshToken,
+      refreshExpiresAt: refresh.refreshExpiresAt.toISOString(),
+    };
+  }
+
+  /**
+   * Exchange a refresh token for a new access token and a rotated refresh token.
+   * @throws AppError 401 (REFRESH_TOKEN_INVALID | REFRESH_TOKEN_REUSED)
+   */
+  async refresh(rawToken: string): Promise<RefreshResponse> {
+    const rotated = await rotateRefreshToken(rawToken);
+    const token = generateToken({ userId: rotated.userId, email: rotated.email });
+    return {
+      token,
+      expiresIn: config.jwt.expiresIn,
+      refreshToken: rotated.refreshToken,
+      refreshExpiresAt: rotated.refreshExpiresAt.toISOString(),
     };
   }
 

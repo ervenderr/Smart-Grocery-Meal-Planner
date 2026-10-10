@@ -16,6 +16,7 @@
 import request from "supertest";
 import { createApp } from "../src/app";
 import { prisma } from "../src/config/database.config";
+import { config } from "../src/config/env.config";
 
 const app = createApp();
 
@@ -46,7 +47,8 @@ describe("Authentication Endpoints", () => {
 
       expect(response.body).toHaveProperty("user");
       expect(response.body).toHaveProperty("token");
-      expect(response.body).toHaveProperty("expiresIn", "7d");
+      expect(response.body).toHaveProperty("expiresIn", config.jwt.expiresIn);
+      expect(typeof response.body.refreshToken).toBe("string");
 
       expect(response.body.user).toMatchObject({
         email: testUser.email,

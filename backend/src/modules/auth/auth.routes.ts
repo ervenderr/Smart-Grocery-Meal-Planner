@@ -19,7 +19,7 @@ import { authController } from './auth.controller';
 import { signupValidation, loginValidation, validate } from './auth.validation';
 import { authenticate } from '@/middleware/auth.middleware';
 import { asyncHandler } from '@/middleware/errorHandler';
-import { authLimiter } from '@/middleware/rateLimiter';
+import { authLimiter, refreshLimiter } from '@/middleware/rateLimiter';
 
 const router = Router();
 
@@ -82,6 +82,19 @@ router.post(
 );
 
 /**
+ * POST /api/v1/auth/refresh
+ * Rotate refresh token, get a new access token. PUBLIC, RATE LIMITED (30 failures / 15 min / IP)
+ *
+ * Body: { "refreshToken": "..." }
+ * Response (200): { token, expiresIn, refreshToken, refreshExpiresAt }
+ */
+router.post(
+  '/refresh',
+  refreshLimiter,
+  asyncHandler(authController.refresh.bind(authController))
+);
+
+/**
  * POST /api/v1/auth/logout
  * Logout user (client-side action)
  *
@@ -94,6 +107,7 @@ router.post(
  */
 router.post(
   '/logout',
+  refreshLimiter,
   asyncHandler(authController.logout.bind(authController))
 );
 
