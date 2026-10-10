@@ -4,6 +4,7 @@ import { createElement, useCallback, useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { pantryApi } from '@/lib/api/pantry';
+import { fetchAllPantryItems } from '@/lib/pantry/fetch-all-pantry';
 import { queryKeys } from '@/lib/react-query';
 import type { PantryItem } from '@/types/pantry.types';
 
@@ -27,11 +28,15 @@ export function usePantryList(filters: PantryFilters) {
   return useQuery({
     queryKey: queryKeys.pantry.list(filters),
     queryFn: async () => {
-      const response = await pantryApi.getAll({
-        category: filters.category || undefined,
-        search: filters.search || undefined,
-      });
-      return (response.items ?? []).map(normalizeItem);
+      const items = await fetchAllPantryItems((page, limit) =>
+        pantryApi.getAll({
+          page,
+          limit,
+          category: filters.category || undefined,
+          search: filters.search || undefined,
+        }),
+      );
+      return items.map(normalizeItem);
     },
     select: (items) => items.filter((item) => !pendingRemovalIds.has(item.id)),
   });

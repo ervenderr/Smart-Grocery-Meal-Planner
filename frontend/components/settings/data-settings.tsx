@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { recipeApi } from '@/lib/api/recipes';
 import { mealPlanApi } from '@/lib/api/mealplans';
 import { pantryApi } from '@/lib/api/pantry';
+import { fetchAllPantryItems } from '@/lib/pantry/fetch-all-pantry';
 import toast from 'react-hot-toast';
 import { DangerZoneCard } from './danger-zone-card';
 
@@ -27,16 +28,16 @@ export function DataSettings() {
 
   const fetchDataStats = async () => {
     try {
-      const [recipesResponse, mealPlansResponse, pantryResponse] = await Promise.all([
+      const [recipesResponse, mealPlansResponse, pantryItems] = await Promise.all([
         recipeApi.getAll(),
         mealPlanApi.getAll(),
-        pantryApi.getAll(),
+        fetchAllPantryItems((page, limit) => pantryApi.getAll({ page, limit })),
       ]);
 
       setStats({
         recipesCount: recipesResponse.items.length,
         mealPlansCount: mealPlansResponse.items.length,
-        pantryItemsCount: pantryResponse.items.length,
+        pantryItemsCount: pantryItems.length,
         shoppingListsCount: 0, // Shopping lists are session-based
       });
     } catch (error) {
@@ -47,16 +48,16 @@ export function DataSettings() {
   const exportData = async (format: 'json' | 'csv') => {
     setLoading(true);
     try {
-      const [recipesResponse, mealPlansResponse, pantryResponse] = await Promise.all([
+      const [recipesResponse, mealPlansResponse, pantryItems] = await Promise.all([
         recipeApi.getAll(),
         mealPlanApi.getAll(),
-        pantryApi.getAll(),
+        fetchAllPantryItems((page, limit) => pantryApi.getAll({ page, limit })),
       ]);
 
       const data = {
         recipes: recipesResponse.items,
         mealPlans: mealPlansResponse.items,
-        pantryItems: pantryResponse.items,
+        pantryItems: pantryItems,
         exportedAt: new Date().toISOString(),
       };
 

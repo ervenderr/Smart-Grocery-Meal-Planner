@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Package, AlertTriangle, TrendingUp, Archive } from 'lucide-react';
 import type { PantryItem } from '@/types/pantry.types';
 import { pantryApi } from '@/lib/api/pantry';
+import { fetchAllPantryItems } from '@/lib/pantry/fetch-all-pantry';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 
 export function PantryAnalytics() {
@@ -24,12 +25,10 @@ export function PantryAnalytics() {
   const fetchPantryAnalytics = async () => {
     setLoading(true);
     try {
-      const [pantryResponse, expiringItems] = await Promise.all([
-        pantryApi.getAll(),
+      const [items, expiringItems] = await Promise.all([
+        fetchAllPantryItems((page, limit) => pantryApi.getAll({ page, limit })),
         pantryApi.getExpiringSoon(7),
       ]);
-
-      const items = pantryResponse.items;
 
       // Calculate category counts
       const categoryCounts: Record<string, number> = {};
