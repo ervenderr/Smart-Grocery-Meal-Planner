@@ -65,3 +65,35 @@ A replay whose name/unit/quantity (only supplied fields) differ from the stored 
 ---
 
 _Fixer: Claude (gsd-code-fixer)_
+
+## Iteration 2
+
+**Fixed at:** 2026-10-10
+**Scope:** WR-08, WR-09, IN-05 (re-review iteration 1). 3 in scope, 3 fixed, 0 skipped.
+
+### WR-08: Family absolute-lifetime cap defeated by token pruning
+
+**Commit:** 171b079
+**Files:** `backend/prisma/schema.prisma`, `backend/prisma/migrations/20261016000000_refresh_token_family_started_at/migration.sql`, `backend/src/modules/auth/refresh-token.service.ts`, `backend/tests/refresh-token-limits.test.ts`
+**Fix:** Additive migration adds nullable `refresh_tokens.family_started_at` (applied to the local DB; no drops). `issueRefreshToken` persists `familyStartedAt` (now for a new family, copied forward on rotation). The 180-day cap reads `row.familyStartedAt ?? row.createdAt`; the MIN(createdAt) aggregate is gone. Tests: pruned-predecessor regression (cap still triggers after rotated rows are deleted) and a legacy-null fallback test; existing WR-04 tests now age `familyStartedAt`. Account-deletion suite passes. Status: fixed, requires human verification (logic change; legacy rows only get a precise origin once rotated, until then createdAt is used).
+
+### WR-09: Client-id replay false 409s / timestamp heuristic
+
+**Commit:** 48198f1
+**Files:** `backend/src/modules/sync/client-id-replay.ts` (deleted), `backend/src/modules/pantry/pantry.service.ts`, `backend/src/modules/shopping/shopping.service.ts`, `backend/tests/pantry-client-ids.test.ts`, `backend/tests/shopping-client-ids.test.ts`
+**Fix:** Removed the 1-second heuristic and payload comparison. A same-owner create replay returns the existing row unchanged (200, `created: false`); other-owner (409) and soft-deleted (410) handling is unchanged. Tests restored to "replay with different payload returns the original row" and a new test that a stale create replay after a later edit returns the edited row instead of 409. Comments updated.
+**Note:** Payload-mismatch detection for client-id creates is deliberately deferred to the Idempotency-Key middleware (request-hash mismatch); a different-content replay under a new/no Idempotency-Key is silently treated as a replay. This supersedes the WR-07 fix behaviour.
+
+### IN-05: Non-json responses leave key in_progress
+
+**Commit:** a9733ec
+**Files:** `backend/src/middleware/idempotency.middleware.ts`, `backend/tests/idempotency-non-json.test.ts` (new)
+**Fix:** Added a `res.once('finish')` fallback that releases the claim when `res.json` never ran (res.send/res.end/204). `finish` is used rather than `close` so a client disconnect mid-handler still keeps the reservation (CR-01). Such responses are not cached, so retries re-execute. Test covers a 204 handler.
+
+### Verification
+
+- `tsc --noEmit`: clean; lint: 0 errors (warnings only, pre-existing)
+- Full backend jest: 88/88 suites, 1462/1462 tests pass (no account-deletion flake this run)
+- Work was done directly on `main` (no separate worktree) because the local DB, node_modules and migration application are needed; only explicitly staged paths were committed.
+
+_Iteration: 2_
