@@ -9,6 +9,7 @@
 #   Check (12) covers the persistent shopping list (add, check with price, finish, history).
 #   Check (13) covers pantry-aware intelligence (staples, cook-first, pantry-subtracted generate).
 #   Check (14) covers capture loops (barcode, quick edit, bought it, cooked it)
+#   Check (15) covers offline sync groundwork (idempotency, adjust, client ids, CORS, refresh, bootstrap)
 #   FE=https://kitcha-ai.vercel.app (optional, default shown)
 #
 # Requires curl and jq. Exits non-zero on the first failing check.
@@ -458,6 +459,68 @@ code="$(req POST "$API/api/v1/cook/preview" -H "$AUTH" -H "$JSON_H" -d '{"recipe
 [ "$code" = "404" ] || fail "14g unknown recipe: expected 404, got $code"
 [ "$(jq -r '.code // empty' "$BODY_FILE")" = "RECIPE_NOT_FOUND" ] || fail "14g unknown recipe: code is not RECIPE_NOT_FOUND"
 pass "14g unknown recipe preview returns 404 RECIPE_NOT_FOUND"
+
+# (15) offline sync groundwork (Phase 8): idempotency, delta adjust, client ids,
+# Capacitor CORS, refresh round trip, bootstrap paging. Smoke rows are removed in 15g.
+# Tokens are never printed.
+NOW15="$(date +%s)"
+code="$(req OPTIONS "$API/api/v1/pantry" -H "Origin: capacitor://localhost" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: authorization,content-type,idempotency-key")" || fail "15a preflight: request failed"
+case "$code" in 2*) ;; *) fail "15a preflight: expected 2xx, got $code" ;; esac
+header access-control-allow-headers | grep -qi "idempotency-key" || fail "15a preflight: idempotency-key not allowed"
+pass "15a capacitor origin preflight allows idempotency-key"
+
+IDEM_KEY="smoke-${NOW15}-${RANDOM}"
+idem_payload="$(jq -nc --arg n "Smoke Idem $NOW15" '{ingredientName:$n,quantity:5,unit:"pieces",category:"other"}')"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -H "Idempotency-Key: $IDEM_KEY" -d "$idem_payload")" || fail "15b create 1: request failed"
+[ "$code" = "201" ] || fail "15b create 1: expected 201, got $code"
+IDEM_ID="$(jq -r '.id // empty' "$BODY_FILE")"
+[ -n "$IDEM_ID" ] || fail "15b create 1: no id"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -H "Idempotency-Key: $IDEM_KEY" -d "$idem_payload")" || fail "15b create 2: request failed"
+[ "$code" = "201" ] || fail "15b create 2: expected 201, got $code"
+[ "$(jq -r '.id // empty' "$BODY_FILE")" = "$IDEM_ID" ] || fail "15b replay: id differs"
+[ "$(header idempotency-replayed)" = "true" ] || fail "15b replay: Idempotency-Replayed header missing"
+pass "15b idempotent replay returns the same item with Idempotency-Replayed"
+
+code="$(req POST "$API/api/v1/pantry/$IDEM_ID/adjust" -H "$AUTH" -H "$JSON_H" -d '{"delta":-100}')" || fail "15c adjust: request failed"
+[ "$code" = "200" ] || fail "15c adjust: expected 200, got $code"
+jq -e '(.quantity | tostring | tonumber) == 0 and .clamped == true' "$BODY_FILE" >/dev/null || fail "15c adjust: expected quantity 0 and clamped true"
+pass "15c adjust clamps at zero"
+
+CLIENT_ID="$(uuidgen | tr 'A-Z' 'a-z')"
+cid_payload="$(jq -nc --arg i "$CLIENT_ID" --arg n "Smoke ClientId $NOW15" '{id:$i,ingredientName:$n,quantity:1,unit:"pieces",category:"other"}')"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d "$cid_payload")" || fail "15d client id 1: request failed"
+[ "$code" = "201" ] || fail "15d client id 1: expected 201, got $code"
+code="$(req POST "$API/api/v1/pantry" -H "$AUTH" -H "$JSON_H" -d "$cid_payload")" || fail "15d client id 2: request failed"
+[ "$code" = "200" ] || fail "15d client id retry: expected 200, got $code"
+[ "$(jq -r '.id // empty' "$BODY_FILE")" = "$CLIENT_ID" ] || fail "15d client id retry: id differs"
+pass "15d client-supplied id retry returns 200 with the same id"
+
+code="$(req POST "$API/api/v1/auth/login" -H "$JSON_H" -d "$login_payload")" || fail "15e login: request failed"
+[ "$code" = "200" ] || fail "15e login: expected 200, got $code"
+RT_OLD="$(jq -r '.refreshToken // empty' "$BODY_FILE")"
+[ -n "$RT_OLD" ] || fail "15e login: no refreshToken"
+code="$(req POST "$API/api/v1/auth/refresh" -H "$JSON_H" -d "$(jq -nc --arg r "$RT_OLD" '{refreshToken:$r}')")" || fail "15e refresh: request failed"
+[ "$code" = "200" ] || fail "15e refresh: expected 200, got $code"
+RT_NEW="$(jq -r '.refreshToken // empty' "$BODY_FILE")"
+[ -n "$(jq -r '.token // empty' "$BODY_FILE")" ] || fail "15e refresh: no new token"
+{ [ -n "$RT_NEW" ] && [ "$RT_NEW" != "$RT_OLD" ]; } || fail "15e refresh: refresh token was not rotated"
+pass "15e refresh rotates the refresh token and issues a new access token"
+
+code="$(req GET "$API/api/v1/sync/bootstrap?limit=1" -H "$AUTH")" || fail "15f bootstrap: request failed"
+[ "$code" = "200" ] || fail "15f bootstrap: expected 200, got $code"
+jq -e '.serverTime != null and .shoppingList != null and .section == "pantry"' "$BODY_FILE" >/dev/null || fail "15f bootstrap: unexpected first page shape"
+NEXT_CURSOR="$(jq -r '.nextCursor // empty' "$BODY_FILE")"
+if [ -n "$NEXT_CURSOR" ]; then
+  code="$(req GET "$API/api/v1/sync/bootstrap" -G --data-urlencode "limit=1" --data-urlencode "cursor=$NEXT_CURSOR" -H "$AUTH")" || fail "15f bootstrap page 2: request failed"
+  [ "$code" = "200" ] || fail "15f bootstrap page 2: expected 200, got $code"
+fi
+pass "15f bootstrap first page and next cursor"
+
+for rid in "$IDEM_ID" "$CLIENT_ID"; do
+  code="$(req DELETE "$API/api/v1/pantry/$rid" -H "$AUTH")" || fail "15g cleanup: request failed"
+  [ "$code" = "200" ] || fail "15g cleanup: expected 200, got $code"
+done
+pass "15g smoke pantry rows cleaned up"
 
 # (8) frontend bundle check
 if [ "$API_ONLY" = "false" ]; then
