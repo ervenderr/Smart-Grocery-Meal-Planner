@@ -37,13 +37,28 @@ Someone standing in a kitchen or grocery aisle with a phone can quickly see what
 
 ### Out of Scope
 
-- Native iOS/Android app (Expo/React Native) — PWA covers the "mobile first" goal at a fraction of the cost
+- Native Android app and Expo/React Native rewrite — iPhone ships via Capacitor in v2.0; originally: PWA covers the "mobile first" goal at a fraction of the cost
 - Gemini, OpenRouter, Mistral, Cerebras, Spoonacular, Edamam — free-tier limits, training-data terms or ToS conflicts; Gemini SDK removed in v1.0
 - Receipt OCR, grocery delivery integrations, calorie diary, social features — high cost or off core value
 - Provider failover for AI — single provider with graceful degradation is enough at this traffic
 - Paid LLM or data APIs — side project; free tiers only
 - Moving the frontend host as part of this milestone — only the backend + DB move to Railway (frontend host stays as-is, e.g. Vercel)
 - Multi-tenant scale work (queues, horizontal scaling) — traffic is tiny
+
+## Current Milestone: v2.0 Kitcha for iPhone
+
+**Goal:** Ship an offline-first iPhone app (Capacitor, in `mobile/`) that reuses the web app, works with no internet, and is monetized via subscription on the App Store.
+
+**Target features:**
+- Store blockers: real account deletion, AI consent and AI-generated labels, privacy/terms/support pages, name check
+- Backend offline groundwork: idempotency keys, pantry adjust, CORS for Capacitor, finish-trip date window, refresh tokens
+- `mobile/` Capacitor shell on a static export, native barcode scan, local expiry notifications
+- Offline: SQLite read cache + write outbox (pantry, shopping, scans); recipes and meal plans readable offline; rules-based recipe ranking and substitutions
+- Subscription (RevenueCat) with entitlement gating
+- On-device AI (Apple Foundation Models) with server fallback
+- TestFlight and App Store submission
+
+Research: `.planning/research-v2/` (native path, on-device AI, offline sync, monetization, tooling).
 
 ## Context
 
@@ -93,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-10 after v1.0 milestone*
+*Last updated: 2026-10-10 after starting v2.0 milestone*
