@@ -58,9 +58,19 @@ const TOKEN_KEYS: readonly TokenKey[] = Object.freeze(
     )
 );
 
+/**
+ * Token-subset fallback. The key must also end on the name's head noun (last token), so
+ * "buttermilk powder" or "butter chicken" never resolve to "buttermilk" or "butter".
+ */
 function tokenSubsetKey(canonical: string): string | null {
-  const present = new Set(canonical.split(' '));
-  const hit = TOKEN_KEYS.find((candidate) => candidate.tokens.every((t) => present.has(t)));
+  const tokens = canonical.split(' ');
+  const present = new Set(tokens);
+  const head = tokens[tokens.length - 1];
+  const hit = TOKEN_KEYS.find(
+    (candidate) =>
+      candidate.tokens[candidate.tokens.length - 1] === head &&
+      candidate.tokens.every((t) => present.has(t))
+  );
   return hit ? hit.key : null;
 }
 

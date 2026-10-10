@@ -26,7 +26,7 @@ describe('matchSubstitutionKey', () => {
 
   it('falls back to whole-token subset, longest key first', () => {
     expect(matchSubstitutionKey('salted butter')).toBe('butter');
-    expect(matchSubstitutionKey('organic brown sugar cubes')).toBe('brown sugar');
+    expect(matchSubstitutionKey('organic brown sugar')).toBe('brown sugar');
   });
 
   it('never matches substrings, unknown or empty names', () => {
@@ -34,6 +34,28 @@ describe('matchSubstitutionKey', () => {
     expect(matchSubstitutionKey('subutter')).toBeNull();
     expect(matchSubstitutionKey('xyzzy')).toBeNull();
     expect(matchSubstitutionKey('')).toBeNull();
+  });
+});
+
+describe('matchSubstitutionKey head-noun rule', () => {
+  it.each([
+    'buttermilk powder',
+    'butter chicken',
+    'milk chocolate',
+    'peanut oil',
+    'brown sugar cubes',
+    'honey mustard',
+  ])('does not resolve %s to a different ingredient', (name) => {
+    expect(matchSubstitutionKey(name)).toBeNull();
+  });
+  it.each([
+    ['peanut butter', 'peanut butter'],
+    ['coconut milk', 'coconut milk'],
+    ['almond milk', 'almond milk'],
+    ['melted butter', 'butter'],
+    ['whole milk', 'milk'],
+  ])('keeps %s -> %s', (name, key) => {
+    expect(matchSubstitutionKey(name)).toBe(key);
   });
 });
 
