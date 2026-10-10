@@ -44,7 +44,27 @@ export interface AIStatus {
   };
 }
 
+export interface ReportSuggestionInput {
+  kind: 'recipe' | 'meal_plan' | 'substitution';
+  reason: 'inaccurate_or_unsafe' | 'offensive' | 'diet_or_allergy_mismatch' | 'other';
+  note?: string;
+  refId?: string;
+  snapshot: Record<string, unknown>;
+}
+
+export interface ReportSuggestionResult {
+  id: string;
+  createdAt: string;
+}
+
 export const aiApi = {
+  /**
+   * Report an AI suggestion (Apple 1.2 / AI content reporting)
+   */
+  async reportSuggestion(input: ReportSuggestionInput): Promise<ReportSuggestionResult> {
+    return await apiClient.post<ReportSuggestionResult>('/api/v1/ai/reports', input);
+  },
+
   /**
    * Check if AI service is available
    */
@@ -84,12 +104,16 @@ export const aiApi = {
     filteredOut?: number;
     cached?: boolean;
   }> {
-    return await apiClient.post('/api/v1/ai/suggest-substitutions', {
-      ingredients,
-      budgetCents,
-    }, {
-      timeout: 90000, // 90 seconds for AI generation
-    });
+    return await apiClient.post(
+      '/api/v1/ai/suggest-substitutions',
+      {
+        ingredients,
+        budgetCents,
+      },
+      {
+        timeout: 90000, // 90 seconds for AI generation
+      }
+    );
   },
 
   /**
