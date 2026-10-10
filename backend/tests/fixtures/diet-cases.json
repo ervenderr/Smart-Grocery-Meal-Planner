@@ -1,0 +1,513 @@
+[
+  {
+    "restrictions": [
+      "vegan"
+    ],
+    "texts": [
+      "2 cups milk"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "vegan"
+    ],
+    "texts": [
+      "honey"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "vegan"
+    ],
+    "texts": [
+      "Grilled chicken breast"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "vegan"
+    ],
+    "texts": [
+      "tofu",
+      "spinach",
+      "olive oil"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "vegetarian"
+    ],
+    "texts": [
+      "crispy bacon"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "vegetarian"
+    ],
+    "texts": [
+      "cheese",
+      "eggs"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "vegetarian"
+    ],
+    "texts": [
+      "anchovies"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "pescatarian"
+    ],
+    "texts": [
+      "salmon fillet"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "pescatarian"
+    ],
+    "texts": [
+      "pork chops"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "gluten-free"
+    ],
+    "texts": [
+      "all-purpose flour"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "gluten_free"
+    ],
+    "texts": [
+      "soy sauce"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "Gluten Free"
+    ],
+    "texts": [
+      "spaghetti pasta"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "Gluten Free"
+    ],
+    "texts": [
+      "rice",
+      "chicken"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "gluten-free"
+    ],
+    "texts": [
+      "soy   sauce"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "Peanut butter cookies"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "buttermilk"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "butter"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "coconut oil"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "nut-free"
+    ],
+    "texts": [
+      "chopped walnuts"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "nut-free"
+    ],
+    "texts": [
+      "almond"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "nut-free"
+    ],
+    "texts": [
+      "coconut"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "peanut-allergy"
+    ],
+    "texts": [
+      "peanuts"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "peanut-allergy"
+    ],
+    "texts": [
+      "almonds"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "shellfish-allergy"
+    ],
+    "texts": [
+      "shrimp"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "shellfish-allergy"
+    ],
+    "texts": [
+      "2 lobsters"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "shellfish-allergy"
+    ],
+    "texts": [
+      "salmon"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "egg-free"
+    ],
+    "texts": [
+      "eggs"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "egg-free"
+    ],
+    "texts": [
+      "mayonnaise"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "egg-free"
+    ],
+    "texts": [
+      "eggplant"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "halal"
+    ],
+    "texts": [
+      "pork sausage"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "halal"
+    ],
+    "texts": [
+      "red wine"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "halal"
+    ],
+    "texts": [
+      "beef"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "kosher"
+    ],
+    "texts": [
+      "shrimp scampi"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "kosher"
+    ],
+    "texts": [
+      "lamb"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "no mushrooms"
+    ],
+    "texts": [
+      "sliced mushrooms"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "no mushrooms"
+    ],
+    "texts": [
+      "onion"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "allergic to sesame"
+    ],
+    "texts": [
+      "sesame oil"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "allergic to sesame"
+    ],
+    "texts": [
+      "olive oil"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "cilantro"
+    ],
+    "texts": [
+      "fresh cilantro"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "cilantro"
+    ],
+    "texts": [
+      "parsley"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "tomato"
+    ],
+    "texts": [
+      "tomatoes"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "tomatoes"
+    ],
+    "texts": [
+      "tomato paste"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "anchovy"
+    ],
+    "texts": [
+      "anchovies"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "egg"
+    ],
+    "texts": [
+      "eggs"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "vegan",
+      "nut-free"
+    ],
+    "texts": [
+      "cashew cream"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "vegan",
+      "nut-free"
+    ],
+    "texts": [
+      "rice"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "no peanuts"
+    ],
+    "texts": [
+      "peanut sauce"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [],
+    "texts": [
+      "chicken"
+    ],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "vegan"
+    ],
+    "texts": [],
+    "expected": false
+  },
+  {
+    "restrictions": [],
+    "texts": [],
+    "expected": false
+  },
+  {
+    "restrictions": [
+      "VEGAN"
+    ],
+    "texts": [
+      "MILK"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "  vegan  "
+    ],
+    "texts": [
+      "Honey"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "(milk)"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "ice-cream"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "dairy-free"
+    ],
+    "texts": [
+      "cream, heavy"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "celiac"
+    ],
+    "texts": [
+      "barley"
+    ],
+    "expected": true
+  },
+  {
+    "restrictions": [
+      "lactose-free"
+    ],
+    "texts": [
+      "ghee"
+    ],
+    "expected": true
+  }
+]
