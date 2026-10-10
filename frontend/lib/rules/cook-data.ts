@@ -143,3 +143,17 @@ export function deriveCookStatus(input: CookStatusInput): CookStatus {
   if (input.itemCount === 0 && input.filtersActive) return 'filteredOut';
   return 'ready';
 }
+
+export type PrefsState = 'loading' | 'ready' | 'unavailable';
+
+/**
+ * Dietary preferences gate the allergen filter. Without them the filter cannot run,
+ * so callers must wait while they load and warn when they cannot be loaded.
+ */
+export function derivePrefsState(input: {
+  readonly hasPrefs: boolean;
+  readonly fetchStatus: 'fetching' | 'paused' | 'idle';
+}): PrefsState {
+  if (input.hasPrefs) return 'ready';
+  return input.fetchStatus === 'fetching' ? 'loading' : 'unavailable';
+}

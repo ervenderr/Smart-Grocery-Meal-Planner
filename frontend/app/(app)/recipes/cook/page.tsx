@@ -53,6 +53,7 @@ export default function CookFromPantryPage() {
 
       <FilterCard
         dietRestrictions={cook.dietRestrictions}
+        prefsUnavailable={cook.prefsUnavailable}
         applyDiet={applyDiet}
         onlyReady={onlyReady}
         onToggleDiet={() => setApplyDiet((v) => !v)}

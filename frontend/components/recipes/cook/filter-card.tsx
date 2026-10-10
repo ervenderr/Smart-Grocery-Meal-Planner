@@ -4,6 +4,7 @@ import { dietSummary } from '@/lib/rules/view-model';
 
 interface FilterCardProps {
   readonly dietRestrictions: readonly string[];
+  readonly prefsUnavailable?: boolean;
   readonly applyDiet: boolean;
   readonly onlyReady: boolean;
   readonly onToggleDiet: () => void;
@@ -20,6 +21,7 @@ function chipClass(active: boolean): string {
 
 export function FilterCard({
   dietRestrictions,
+  prefsUnavailable = false,
   applyDiet,
   onlyReady,
   onToggleDiet,
@@ -49,6 +51,12 @@ export function FilterCard({
           Only recipes I can make now
         </button>
       </div>
+      {prefsUnavailable && (
+        <p role="alert" className="text-sm font-medium text-amber-800">
+          We could not load your dietary preferences, so diet filtering is off. Recipes shown may
+          contain ingredients you avoid. Connect to the internet and reopen this page to apply them.
+        </p>
+      )}
       {summary !== null && (
         <p className="flex flex-wrap items-center gap-x-2 text-sm text-gray-600">
           <span>{summary}</span>

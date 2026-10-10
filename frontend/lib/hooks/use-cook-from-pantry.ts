@@ -11,6 +11,7 @@ import {
   PANTRY_CAP,
   RECIPE_CAP,
   deriveCookStatus,
+  derivePrefsState,
   fetchAllPages,
   normalizePantry,
   normalizeRecipes,
@@ -54,6 +55,8 @@ export interface UseCookFromPantry {
   result: RankResult | null;
   recipesById: ReadonlyMap<string, Recipe>;
   dietRestrictions: readonly string[];
+  /** True when saved preferences could not be loaded, so diet filtering is NOT applied. */
+  prefsUnavailable: boolean;
   dataUpdatedAt: number | null;
   getSubstitutes: (match: IngredientMatch) => SubstituteResult | null;
   refetch: () => void;
@@ -102,6 +105,11 @@ export function useCookFromPantry({ applyDiet, onlyReady }: Options): UseCookFro
   );
 
   const restrictions = prefs?.dietaryRestrictions ?? EMPTY_LIST;
+  const prefsState = derivePrefsState({
+    hasPrefs: Boolean(prefs),
+    fetchStatus: prefsQuery.fetchStatus,
+  });
+  const prefsUnavailable = prefsState === 'unavailable';
   const stapleNames = prefs?.stapleNames;
   const defaultStapleNames = prefs?.defaultStapleNames;
   const staples = useMemo(
@@ -136,10 +144,11 @@ export function useCookFromPantry({ applyDiet, onlyReady }: Options): UseCookFro
   );
 
   const hasData = Boolean(pantryQuery.data && recipesQuery.data);
+  // Wait for preferences before ranking so allergens are never briefly unfiltered.
   const paused = pantryQuery.fetchStatus === 'paused' || recipesQuery.fetchStatus === 'paused';
   const fetching =
     pantryQuery.fetchStatus === 'fetching' || recipesQuery.fetchStatus === 'fetching';
-  const status = deriveCookStatus({
+  const derived = deriveCookStatus({
     hasData,
     fetchStatus: paused ? 'paused' : fetching ? 'fetching' : 'idle',
     isError: pantryQuery.isError || recipesQuery.isError,
@@ -149,6 +158,8 @@ export function useCookFromPantry({ applyDiet, onlyReady }: Options): UseCookFro
     filtersActive: applyDiet || onlyReady,
     engineFailed: ranking.failed,
   });
+
+  const status: CookStatus = hasData && prefsState === 'loading' ? 'loading' : derived;
 
   const refetchPantry = pantryQuery.refetch;
   const refetchRecipes = recipesQuery.refetch;
@@ -167,6 +178,7 @@ export function useCookFromPantry({ applyDiet, onlyReady }: Options): UseCookFro
     result: ranking.result,
     recipesById,
     dietRestrictions: restrictions,
+    prefsUnavailable,
     dataUpdatedAt: hasData && Number.isFinite(updatedAt) ? updatedAt : null,
     getSubstitutes,
     refetch,

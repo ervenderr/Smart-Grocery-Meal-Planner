@@ -53,7 +53,6 @@ const TAG_TERMS: Readonly<Record<string, readonly string[]>> = Object.freeze({
   kosher: ['pork', 'bacon', 'ham', 'lard', 'shrimp', 'crab', 'lobster'],
 });
 
-export const MAX_RESTRICTIONS = 20;
 export const MAX_RESTRICTION_LENGTH = 60;
 
 /** Canonical lookup key: lowercase, with underscores, spaces and hyphens unified. */
@@ -125,12 +124,13 @@ export function violates(texts: readonly string[], terms: readonly string[]): bo
   return violatesCompiled(texts, terms.map(termPattern));
 }
 
-/** Build patterns once per run from capped user restrictions. */
+/**
+ * Build patterns once per run. Every restriction is compiled (no count cap):
+ * silently dropping one could surface an allergen. Only per-item length is bounded.
+ */
 export function compileRestrictions(restrictions: readonly string[]): readonly RegExp[] {
-  const capped = restrictions
-    .slice(0, MAX_RESTRICTIONS)
-    .map((r) => String(r).slice(0, MAX_RESTRICTION_LENGTH));
-  return Object.freeze(buildForbiddenTerms(capped).map(termPattern));
+  const bounded = restrictions.map((r) => String(r).slice(0, MAX_RESTRICTION_LENGTH));
+  return Object.freeze(buildForbiddenTerms(bounded).map(termPattern));
 }
 
 export function violatesCompiled(texts: readonly string[], patterns: readonly RegExp[]): boolean {

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  derivePrefsState,
   PAGE_SIZE,
   deriveCookStatus,
   fetchAllPages,
@@ -123,5 +124,21 @@ describe('deriveCookStatus', () => {
     expect(deriveCookStatus({ ...base, recipeCount: 0 })).toBe('noRecipes');
     expect(deriveCookStatus({ ...base, itemCount: 0, filtersActive: true })).toBe('filteredOut');
     expect(deriveCookStatus({ ...base, engineFailed: true })).toBe('error');
+  });
+});
+
+describe('derivePrefsState', () => {
+  it('is ready whenever preferences exist, even while refetching or paused', () => {
+    expect(derivePrefsState({ hasPrefs: true, fetchStatus: 'fetching' })).toBe('ready');
+    expect(derivePrefsState({ hasPrefs: true, fetchStatus: 'paused' })).toBe('ready');
+  });
+
+  it('waits while the first load is in flight', () => {
+    expect(derivePrefsState({ hasPrefs: false, fetchStatus: 'fetching' })).toBe('loading');
+  });
+
+  it('flags unavailable when offline or errored with no cached preferences', () => {
+    expect(derivePrefsState({ hasPrefs: false, fetchStatus: 'paused' })).toBe('unavailable');
+    expect(derivePrefsState({ hasPrefs: false, fetchStatus: 'idle' })).toBe('unavailable');
   });
 });

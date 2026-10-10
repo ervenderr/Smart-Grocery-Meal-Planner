@@ -5,7 +5,6 @@ import {
   buildForbiddenTerms,
   compileRestrictions,
   MAX_RESTRICTION_LENGTH,
-  MAX_RESTRICTIONS,
   violates,
   violatesCompiled,
 } from './diet';
@@ -64,14 +63,15 @@ describe('diet behavior', () => {
     expect(violates(['milk'], [])).toBe(false);
   });
 
-  it('caps restriction count and length', () => {
+  it('compiles every restriction (never drops one past a count) and caps length', () => {
     const many = Array.from({ length: 50 }, (_, i) => `zzitem${i}`);
     const patterns = compileRestrictions(many);
-    expect(MAX_RESTRICTIONS).toBe(20);
     expect(MAX_RESTRICTION_LENGTH).toBe(60);
     expect(Object.isFrozen(patterns)).toBe(true);
     expect(violatesCompiled(['zzitem19'], patterns)).toBe(true);
-    expect(violatesCompiled(['zzitem25'], patterns)).toBe(false);
+    expect(violatesCompiled(['zzitem49'], patterns)).toBe(true);
+    const late = [...Array.from({ length: 30 }, (_, i) => `aaitem${i}`), 'peanut allergy'];
+    expect(violatesCompiled(['peanut butter'], compileRestrictions(late))).toBe(true);
     const long = compileRestrictions(['a'.repeat(200)]);
     expect(long.every((p) => p.source.length < 200)).toBe(true);
   });
