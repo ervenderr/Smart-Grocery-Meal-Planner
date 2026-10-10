@@ -73,7 +73,16 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   1. With the network disabled, user sees their recipes ranked by how much of each is covered by the pantry, with expiring items boosted
   2. For a missing ingredient, user sees rules-based substitution suggestions (honoring diet/allergens) with no network call
   3. Ranking and substitutions give identical results online and offline for the same data
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+- [ ] 09-01-PLAN.md — Engine types, unit registry port and diet filter port with shared parity fixtures
+- [ ] 09-02-PLAN.md — Curated 150+ entry substitution table with zod schema and integrity test
+- [ ] 09-03-PLAN.md — Staples mirror, pantry index and rankRecipes (quantity-aware coverage, expiry boost, missing penalty, filters)
+- [ ] 09-04-PLAN.md — Substitution lookup (alias/token matching, ratio scaling, diet filter, in-pantry first)
+- [ ] 09-05-PLAN.md — Server parity on rankCookFirst, 100 ms performance gate, determinism/no-network tests
+- [ ] 09-06-PLAN.md — Barrel, boundary normalizers, view-model helpers and offline-first useCookFromPantry hook
+- [ ] 09-07-PLAN.md — Recipe row, filter card, states and Substitute sheet components
+- [ ] 09-08-PLAN.md — /recipes/cook page, nav title, entry points, human offline verification
 **UI hint**: yes
 
 ### Phase 10: Capacitor iOS Shell
@@ -155,7 +164,7 @@ Phases execute in numeric order. Phases 7, 8 and 9 are independent and need no X
 | 6. Capture Loops | v1.0 | 12/13 | Complete | 2026-10-09 |
 | 7. Store Readiness | v2.0 | 0/0 | Not started | - |
 | 8. Offline Sync Backend | v2.0 | 0/0 | Not started | - |
-| 9. Offline Rules Engine | v2.0 | 0/0 | Not started | - |
+| 9. Offline Rules Engine | v2.0 | 0/8 | Planned | - |
 | 10. Capacitor iOS Shell | v2.0 | 0/0 | Not started | - |
 | 11. Offline Core | v2.0 | 0/0 | Not started | - |
 | 12. Subscription | v2.0 | 0/0 | Not started | - |
