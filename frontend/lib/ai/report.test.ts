@@ -7,7 +7,7 @@ import {
   mapReportError,
 } from './report';
 
-const size = (value: unknown) => JSON.stringify(value).length;
+const size = (value: unknown) => new TextEncoder().encode(JSON.stringify(value)).length;
 
 describe('REPORT_REASONS', () => {
   it('has the four UI-SPEC reasons', () => {
@@ -59,6 +59,13 @@ describe('buildReportSnapshot', () => {
     const wide = Object.fromEntries(Array.from({ length: 2000 }, (_, i) => [`key${i}`, 'v'.repeat(50)]));
     const out = buildReportSnapshot(wide);
     expect(size(out)).toBeLessThanOrEqual(MAX_SNAPSHOT_BYTES);
+  });
+
+  it('measures bytes, not characters, so multi-byte text stays under the server cap', () => {
+    const multibyte = { notes: Array.from({ length: 20 }, () => '\u{1F35C}\u00E9\u4E2D'.repeat(80)) };
+    expect(JSON.stringify(multibyte).length).toBeLessThanOrEqual(MAX_SNAPSHOT_BYTES);
+    expect(size(multibyte)).toBeGreaterThan(MAX_SNAPSHOT_BYTES);
+    expect(size(buildReportSnapshot(multibyte))).toBeLessThanOrEqual(MAX_SNAPSHOT_BYTES);
   });
 
   it('handles non-object input', () => {

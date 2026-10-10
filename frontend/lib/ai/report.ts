@@ -35,6 +35,12 @@ function sanitize(value: unknown, stringCap: number, arrayCap: number, depth: nu
   return Object.fromEntries(entries);
 }
 
+const encoder = new TextEncoder();
+
+function utf8ByteLength(text: string): number {
+  return encoder.encode(text).length;
+}
+
 function toRecord(input: unknown): unknown {
   if (input === null || input === undefined) return {};
   if (typeof input === 'object' && !Array.isArray(input)) return input;
@@ -52,7 +58,8 @@ export function buildReportSnapshot(input: unknown): Record<string, unknown> {
 
   while (stringCap >= 1 && arrayCap >= 1) {
     const candidate = sanitize(source, stringCap, arrayCap, 0) as Record<string, unknown>;
-    if (JSON.stringify(candidate).length <= MAX_SNAPSHOT_BYTES) return candidate;
+    // Server enforces UTF-8 bytes, so measure bytes (not UTF-16 code units).
+    if (utf8ByteLength(JSON.stringify(candidate)) <= MAX_SNAPSHOT_BYTES) return candidate;
     stringCap = Math.floor(stringCap / 2);
     arrayCap = Math.floor(arrayCap / 2);
   }
