@@ -110,3 +110,20 @@ describe('dietSummary / substituteContextLine / truncationNote', () => {
     expect(truncationNote(50, 50)).toBeNull();
   });
 });
+
+describe('unspecified amounts (needed 0)', () => {
+  it('never prints "need 0"', () => {
+    expect(formatMatchLine(match({ needed: 0, status: 'have' }))).toBe(
+      'amount not specified, have 350 g',
+    );
+    expect(formatMatchLine(match({ needed: 0, have: 0, status: 'missing' }))).toBe(
+      'amount not specified',
+    );
+    expect(formatMatchLine(match({ needed: 0, status: 'staple' }))).toBe('pantry staple');
+  });
+  it('substitute context omits the zero quantity', () => {
+    expect(substituteContextLine(match({ needed: 0, name: 'Butter' }))).toBe(
+      'Recipe uses Butter (amount not specified).',
+    );
+  });
+});
