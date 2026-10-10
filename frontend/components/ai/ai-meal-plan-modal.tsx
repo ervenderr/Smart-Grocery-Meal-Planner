@@ -17,6 +17,10 @@ import { useCurrency } from '@/lib/currency/currency-provider';
 import { centsToMajorString } from '@/lib/currency/format';
 import { parseBudgetInput } from '@/lib/currency/budget';
 import { DietFilterNotice } from './diet-filter-notice';
+import { AiBadge } from './ai-badge';
+import { AiDisclaimer } from './ai-disclaimer';
+import { ReportSuggestionButton } from './report-suggestion';
+import { useAiConsent } from '@/lib/hooks/use-ai-consent';
 import toast from 'react-hot-toast';
 import { todayCalendarDate } from '@/lib/utils/calendar-date';
 
@@ -71,6 +75,7 @@ export function AIMealPlanModal({
   const [filteredOut, setFilteredOut] = useState(0);
   const [showSaveForm, setShowSaveForm] = useState(false);
   const { format, currency } = useCurrency();
+  const { runWithAiConsent } = useAiConsent();
   const [budgetInput, setBudgetInput] = useState(centsToMajorString(DEFAULT_BUDGET_CENTS));
   const [budgetTextError, setBudgetTextError] = useState<string | undefined>(undefined);
 
@@ -181,7 +186,7 @@ export function AIMealPlanModal({
           Intelligent meal planning for your week
         </p>
         {!suggestion ? (
-          <form onSubmit={handleSubmit(handleGenerate)} className="space-y-6">
+          <form onSubmit={handleSubmit((data) => runWithAiConsent(() => { void handleGenerate(data); }))} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Duration (Days)
@@ -253,6 +258,7 @@ export function AIMealPlanModal({
         ) : showSaveForm ? (
           <form onSubmit={handleSubmitSave(handleSave)} className="space-y-6">
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <AiBadge className="mb-2" />
               <h3 className="font-semibold text-purple-900 mb-1">{suggestion.name}</h3>
               <p className="text-sm text-purple-700">
                 {suggestion.meals.length} meals • {format(suggestion.estimatedCostCents)}
@@ -324,6 +330,7 @@ export function AIMealPlanModal({
         ) : (
           <div className="space-y-6">
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <AiBadge className="mb-2" />
               <h3 className="font-semibold text-purple-900 mb-2">{suggestion.name}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                 <div className="flex items-center gap-2">
@@ -347,6 +354,7 @@ export function AIMealPlanModal({
             </div>
 
             <DietFilterNotice filteredOut={filteredOut} />
+            <AiDisclaimer />
 
             <div className="space-y-4">
               {dayNames.map((dayName, dayIndex) => {
@@ -375,6 +383,8 @@ export function AIMealPlanModal({
                 );
               })}
             </div>
+
+            <ReportSuggestionButton kind="meal_plan" item={suggestion} />
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setSuggestion(null)} className="flex-1">

@@ -1,5 +1,8 @@
 'use client';
 
+import { AiBadge } from '@/components/ai/ai-badge';
+import { AiDisclaimer } from '@/components/ai/ai-disclaimer';
+import { isAiGeneratedRecipe } from '@/lib/ai/ai-origin';
 import { useState } from 'react';
 import { Clock, Users, ChefHat, Calendar, Sparkles } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
@@ -70,6 +73,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
 
         {/* Badges */}
         <div className="flex flex-wrap gap-2">
+          {isAiGeneratedRecipe(recipe.tags) && <AiBadge />}
           <span className={`rounded-full px-3 py-1 text-sm font-medium ${getCategoryColor(recipe.category)}`}>
             {recipe.category}
           </span>
@@ -183,6 +187,7 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
         </div>
 
         {/* Instructions */}
+        {isAiGeneratedRecipe(recipe.tags) && <AiDisclaimer />}
         <div>
           <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">
             Instructions
