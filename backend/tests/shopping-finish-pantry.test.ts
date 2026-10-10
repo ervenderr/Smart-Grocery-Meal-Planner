@@ -107,15 +107,23 @@ describe('shopping finish addToPantry', () => {
     expect(res.body.code).toBe('VALIDATION_ERROR');
   });
 
-  it('keeps the finished trip when the pantry step fails', async () => {
+  it('rolls back the whole finish when the pantry merge fails', async () => {
     const u = await newUser('fail');
     await addChecked(u, { itemName: 'Rice', quantity: 1, unit: 'kg' });
-    jest.spyOn(pantryService, 'applyPantryMerge').mockRejectedValue(new Error('db down'));
+    const spy = jest
+      .spyOn(pantryService, 'applyPantryMergeInTx')
+      .mockRejectedValue(new Error('db down'));
 
-    const res = await finish(u, { addToPantry: true }).expect(200);
-    expect(res.body.pantry).toEqual({ added: 0, merged: 0, failed: true });
-    expect(await prisma.shoppingHistory.count({ where: { userId: u.id } })).toBe(1);
-    expect(await prisma.shoppingList.count({ where: { userId: u.id, isCompleted: true } })).toBe(1);
+    await finish(u, { addToPantry: true }).expect(500);
+    spy.mockRestore();
+    expect(await prisma.shoppingHistory.count({ where: { userId: u.id } })).toBe(0);
+    const active = await prisma.shoppingList.findMany({
+      where: { userId: u.id, isCompleted: false },
+      include: { shoppingListItems: true },
+    });
+    expect(active).toHaveLength(1);
+    expect(active[0].shoppingListItems).toHaveLength(1);
+    expect(await pantryOf(u.id)).toHaveLength(0);
   });
 
   it('never merges into another user pantry', async () => {

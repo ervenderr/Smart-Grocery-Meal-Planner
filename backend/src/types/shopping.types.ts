@@ -85,11 +85,25 @@ export interface FinishedCheckedItem {
   readonly costEstimateCents: number | null;
 }
 
-/** Internal finish outcome: the HTTP result plus data for the after-commit pantry step. */
+export interface FinishShoppingOptions {
+  readonly carryOver?: CarryOverMode;
+  readonly receiptDate?: string;
+  readonly occurredAt?: string;
+  readonly addToPantry?: boolean;
+}
+
+export interface FinishPantrySummary {
+  readonly added: number;
+  readonly merged: number;
+  readonly failed: false;
+}
+
+/** Internal finish outcome: the HTTP result plus the in-transaction pantry merge summary. */
 export interface FinishShoppingOutcome {
   readonly result: FinishShoppingResult;
   readonly checkedItems: readonly FinishedCheckedItem[];
   readonly receiptDate: Date;
+  readonly pantry?: FinishPantrySummary;
 }
 
 export interface ShoppingHistoryPage {

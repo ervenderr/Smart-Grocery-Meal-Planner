@@ -5,12 +5,14 @@
 import { prisma } from '../../config/database.config';
 import { AppError } from '../../middleware/errorHandler';
 import type {
-  CarryOverMode,
+  FinishShoppingOptions,
   FinishShoppingOutcome,
   ShoppingHistoryPage,
 } from '../../types/shopping.types';
 import { SHOPPING_ERROR_CODES } from './shopping.constants';
 import { toHistoryDto } from './shopping.dto';
+import { applyPantryMergeInTx } from './shopping-pantry.service';
+import { clampOccurredAt, utcDateOf } from './shopping.receipt-window';
 import {
   ensureActiveListId,
   findActiveListIdForUpdate,
@@ -18,28 +20,22 @@ import {
 } from './shopping.repository';
 import { computeHistoryTotals } from './shopping.totals';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const utcMidnight = (d: Date): number =>
-  Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-
-/** True when a YYYY-MM-DD date lies within UTC today -1 day .. +1 day (covers every timezone). */
-export const withinOneDayOfUtcToday = (value: string, now: Date = new Date()): boolean => {
-  const ms = Date.parse(`${value}T00:00:00.000Z`);
-  if (Number.isNaN(ms)) return false;
-  return Math.abs(ms - utcMidnight(now)) <= DAY_MS;
-};
-
 const emptyError = (): AppError =>
   new AppError('Add items to your list before finishing a trip.', 400, true, {
     code: SHOPPING_ERROR_CODES.SHOPPING_LIST_EMPTY,
   });
 
+const FINISH_TX_TIMEOUT_MS = 15000;
+
 export async function finishShopping(
   userId: string,
-  carryOver: CarryOverMode = 'carry',
-  receiptDate?: string,
+  options: FinishShoppingOptions = {},
 ): Promise<FinishShoppingOutcome> {
+  const { carryOver = 'carry', receiptDate, occurredAt, addToPantry } = options;
+  const occurred = clampOccurredAt(occurredAt);
+  // Lock order: shopping list row lock (findActiveListIdForUpdate) first, then
+  // lockUserPantry inside the merge. Cook and adjust only take the pantry lock,
+  // so this order cannot deadlock.
   return prisma.$transaction(async (tx) => {
     const listId = await findActiveListIdForUpdate(tx, userId);
     if (!listId) throw emptyError();
@@ -56,11 +52,11 @@ export async function finishShopping(
 
     const list = await tx.shoppingList.update({
       where: { id: listId },
-      data: { isCompleted: true, completedAt: new Date(), totalCostCents: totals.totalCents },
+      data: { isCompleted: true, completedAt: occurred, totalCostCents: totals.totalCents },
     });
     const date = receiptDate
       ? new Date(`${receiptDate}T00:00:00.000Z`)
-      : new Date(utcMidnight(new Date()));
+      : utcDateOf(occurred);
     const history = await tx.shoppingHistory.create({
       data: {
         userId,
@@ -91,24 +87,32 @@ export async function finishShopping(
       }
     }
 
+    const checkedItems = items
+      .filter((i) => i.isChecked)
+      .map((i) => ({
+        itemName: i.itemName,
+        quantity: i.quantity,
+        unit: i.unit,
+        category: i.category,
+        actualCostCents: i.actualCostCents,
+        costEstimateCents: i.costEstimateCents,
+      }));
+
+    const merge =
+      addToPantry === true
+        ? await applyPantryMergeInTx(tx, userId, checkedItems, date)
+        : undefined;
+
     return {
       result: {
         history: toHistoryDto(history, totals, list.name),
         list: await loadListDto(tx, newListId),
       },
-      checkedItems: items
-        .filter((i) => i.isChecked)
-        .map((i) => ({
-          itemName: i.itemName,
-          quantity: i.quantity,
-          unit: i.unit,
-          category: i.category,
-          actualCostCents: i.actualCostCents,
-          costEstimateCents: i.costEstimateCents,
-        })),
+      checkedItems,
       receiptDate: date,
+      ...(merge && { pantry: { ...merge, failed: false as const } }),
     };
-  });
+  }, { timeout: FINISH_TX_TIMEOUT_MS });
 }
 
 export async function getHistory(

@@ -180,8 +180,8 @@ describe('shopping finish and history', () => {
   });
 
   describe('receiptDate', () => {
-    it.each([1, -1])('accepts UTC today offset %i', async (offset) => {
-      const user = offset === 1 ? u4 : u5;
+    it.each([1, -1, -10, -14])('accepts UTC today offset %i', async (offset) => {
+      const user = offset === 1 ? u4 : offset === -1 ? u5 : await signup(`rd${-offset}`);
       const item = await addItem(user, { itemName: 'Tea' });
       await patchItem(user, item.id, { isChecked: true }).expect(200);
       const date = dayOffset(offset);
@@ -189,13 +189,47 @@ describe('shopping finish and history', () => {
       expect(res.body.history.receiptDate).toBe(date);
     });
 
-    it.each([dayOffset(2), dayOffset(-2), '2026-13-01', '10/09/2026', 20261009])(
+    it.each([dayOffset(2), dayOffset(-15), '2026-13-01', '10/09/2026', 20261009])(
       'rejects %s',
       async (value) => {
         const res = await finish(u6, { receiptDate: value }).expect(400);
         expect(JSON.stringify(res.body)).toContain('VALIDATION_ERROR');
       },
     );
+  });
+
+  describe('occurredAt', () => {
+    const daysAgo = (n: number): Date => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
+
+    it('records completedAt = occurredAt for a 10 day old offline trip', async () => {
+      const user = await signup('occ10');
+      const item = await addItem(user, { itemName: 'Oats' });
+      await patchItem(user, item.id, { isChecked: true }).expect(200);
+      const occurredAt = daysAgo(10);
+      const res = await finish(user, {
+        occurredAt: occurredAt.toISOString(),
+        receiptDate: occurredAt.toISOString().slice(0, 10),
+      }).expect(200);
+      expect(res.body.history.receiptDate).toBe(occurredAt.toISOString().slice(0, 10));
+      const done = await prisma.shoppingList.findFirstOrThrow({
+        where: { userId: user.id, isCompleted: true },
+      });
+      expect(done.completedAt?.getTime()).toBe(occurredAt.getTime());
+    });
+
+    it('derives receiptDate from the clamped occurredAt when omitted', async () => {
+      const user = await signup('occ-only');
+      const item = await addItem(user, { itemName: 'Salt' });
+      await patchItem(user, item.id, { isChecked: true }).expect(200);
+      const occurredAt = daysAgo(30);
+      const res = await finish(user, { occurredAt: occurredAt.toISOString() }).expect(200);
+      expect(res.body.history.receiptDate).toBe(dayOffset(-14));
+    });
+
+    it('rejects a non ISO-8601 occurredAt', async () => {
+      const res = await finish(u6, { occurredAt: 'yesterday' }).expect(400);
+      expect(JSON.stringify(res.body)).toContain('VALIDATION_ERROR');
+    });
   });
 
   describe('GET /history', () => {

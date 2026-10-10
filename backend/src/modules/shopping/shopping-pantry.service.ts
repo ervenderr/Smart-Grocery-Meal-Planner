@@ -1,9 +1,10 @@
 /**
- * Applies the bought-it merge plan to the user's pantry in one transaction.
- * Runs after the finish transaction has committed (see shopping.controller).
+ * Applies the bought-it merge plan to the user's pantry inside the caller's
+ * transaction (the finish transaction, see shopping-finish.service), so a
+ * merge failure rolls the whole finish back.
  */
 
-import { prisma } from '../../config/database.config';
+import type { Prisma } from '@prisma/client';
 import { lockUserPantry } from '../pantry/pantry.lock';
 import { planPantryMerge } from './shopping-pantry';
 import type { CheckedItem } from './shopping-pantry';
@@ -13,14 +14,15 @@ export const PANTRY_MERGE_READ_CAP = 2000;
 const utcMidnight = (d: Date): Date =>
   new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
-export async function applyPantryMerge(
+export async function applyPantryMergeInTx(
+  tx: Prisma.TransactionClient,
   userId: string,
   checked: readonly CheckedItem[],
   purchaseDate: Date,
 ): Promise<{ added: number; merged: number }> {
-  // Read, plan and write in one locked transaction so a concurrent edit or
+  // Read, plan and write under the pantry lock so a concurrent edit or
   // cook between the read and the write cannot be overwritten.
-  return prisma.$transaction(async (tx) => {
+  {
     await lockUserPantry(tx, userId);
     const lots = await tx.pantryItem.findMany({
       where: { userId, deletedAt: null },
@@ -55,5 +57,5 @@ export async function applyPantryMerge(
     }
     await tx.pantryItem.createMany({ data: plan.creates.map((c) => ({ ...c, userId })) });
     return { added: plan.added, merged: plan.merged };
-  });
+  }
 }
