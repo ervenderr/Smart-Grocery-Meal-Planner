@@ -199,4 +199,19 @@ router.delete(
   asyncHandler(usersController.deleteAccountPermanently.bind(usersController))
 );
 
+/**
+ * AI consent record (STORE-02). All responses (200):
+ * { consented: boolean, consentedAt: string | null, version: number | null, currentVersion: number }
+ *
+ * GET    /api/v1/users/me/ai-consent  read status
+ * POST   /api/v1/users/me/ai-consent  grant (server-stamped, idempotent, body ignored)
+ * DELETE /api/v1/users/me/ai-consent  withdraw (nulls both fields)
+ */
+router.get('/me/ai-consent', asyncHandler(usersController.getAiConsent.bind(usersController)));
+router.post('/me/ai-consent', asyncHandler(usersController.grantAiConsent.bind(usersController)));
+router.delete(
+  '/me/ai-consent',
+  asyncHandler(usersController.withdrawAiConsent.bind(usersController))
+);
+
 export default router;

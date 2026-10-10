@@ -7,6 +7,7 @@
 import { Request, Response } from 'express';
 import { deleteAccountPermanently } from './account-deletion.service';
 import { usersService } from './users.service';
+import * as aiConsent from './ai-consent.service';
 import {
   UpdateProfileRequest,
   UpdatePasswordRequest,
@@ -144,6 +145,27 @@ export class UsersController {
     const preferences = await usersService.completeOnboarding(userId);
 
     res.status(200).json(preferences);
+  }
+
+  /**
+   * GET /api/v1/users/me/ai-consent - consent status (body-free)
+   */
+  async getAiConsent(req: Request, res: Response): Promise<void> {
+    res.status(200).json(await aiConsent.getAiConsent((req as any).user.id));
+  }
+
+  /**
+   * POST /api/v1/users/me/ai-consent - grant consent (server-stamped, body ignored)
+   */
+  async grantAiConsent(req: Request, res: Response): Promise<void> {
+    res.status(200).json(await aiConsent.grantAiConsent((req as any).user.id));
+  }
+
+  /**
+   * DELETE /api/v1/users/me/ai-consent - withdraw consent
+   */
+  async withdrawAiConsent(req: Request, res: Response): Promise<void> {
+    res.status(200).json(await aiConsent.withdrawAiConsent((req as any).user.id));
   }
 
   /**
