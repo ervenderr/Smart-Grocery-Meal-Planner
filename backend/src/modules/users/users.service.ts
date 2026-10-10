@@ -262,12 +262,14 @@ export class UsersService {
     const newPasswordHash = await hashPassword(newPassword);
 
     // Update password
-    await prisma.user.update({
-      where: { id: userId },
-      data: { passwordHash: newPasswordHash },
+    // Atomic: a new password never coexists with still-valid refresh tokens (WR-05).
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { passwordHash: newPasswordHash },
+      });
+      await revokeAllForUser(userId, 'password_change', tx);
     });
-
-    await revokeAllForUser(userId, 'password_change');
 
     logger.info('User password changed', { userId });
   }
