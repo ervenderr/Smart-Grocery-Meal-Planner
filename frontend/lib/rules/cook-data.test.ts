@@ -4,6 +4,7 @@ import {
   PAGE_SIZE,
   deriveCookStatus,
   fetchAllPages,
+  indexById,
   normalizePantry,
   normalizeRecipes,
 } from './cook-data';
@@ -140,5 +141,16 @@ describe('derivePrefsState', () => {
   it('flags unavailable when offline or errored with no cached preferences', () => {
     expect(derivePrefsState({ hasPrefs: false, fetchStatus: 'paused' })).toBe('unavailable');
     expect(derivePrefsState({ hasPrefs: false, fetchStatus: 'idle' })).toBe('unavailable');
+  });
+});
+
+describe('indexById', () => {
+  it('skips null, primitive, array and id-less rows without throwing', () => {
+    const map = indexById<{ id: string }>([null, 5, 'x', [], {}, { id: 3 }, { id: 'a' }]);
+    expect([...map.keys()]).toEqual(['a']);
+  });
+
+  it('returns an empty map for undefined', () => {
+    expect(indexById(undefined).size).toBe(0);
   });
 });

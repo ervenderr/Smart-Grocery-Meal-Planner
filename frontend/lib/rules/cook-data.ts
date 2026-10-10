@@ -157,3 +157,15 @@ export function derivePrefsState(input: {
   if (input.hasPrefs) return 'ready';
   return input.fetchStatus === 'fetching' ? 'loading' : 'unavailable';
 }
+
+/** Index raw rows by id, skipping corrupted entries (null, non-object, missing id). */
+export function indexById<T extends { readonly id: string }>(
+  raw: readonly unknown[] | undefined
+): ReadonlyMap<string, T> {
+  const entries: Array<readonly [string, T]> = [];
+  for (const row of raw ?? []) {
+    if (!isRecord(row) || typeof row.id !== 'string') continue;
+    entries.push([row.id, row as unknown as T] as const);
+  }
+  return new Map(entries);
+}

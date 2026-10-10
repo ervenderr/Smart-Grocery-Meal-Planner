@@ -13,6 +13,7 @@ import {
   deriveCookStatus,
   derivePrefsState,
   fetchAllPages,
+  indexById,
   normalizePantry,
   normalizeRecipes,
   type CookStatus,
@@ -37,7 +38,6 @@ export const COOK_RECIPES_KEY = [...queryKeys.recipes.all, 'all-pages'] as const
 const OFFLINE_GC_MS = 24 * 60 * 60 * 1000;
 const STALE_MS = 5 * 60 * 1000;
 const EMPTY_LIST: readonly string[] = Object.freeze([]);
-const EMPTY_MAP: ReadonlyMap<string, Recipe> = new Map();
 
 const queryOptions = {
   gcTime: OFFLINE_GC_MS,
@@ -98,11 +98,7 @@ export function useCookFromPantry({ applyDiet, onlyReady }: Options): UseCookFro
   const recipesRaw = recipesQuery.data?.items;
   const pantry = useMemo(() => normalizePantry(pantryRaw), [pantryRaw]);
   const recipes = useMemo(() => normalizeRecipes(recipesRaw), [recipesRaw]);
-  const recipesById = useMemo(
-    () =>
-      recipesRaw ? new Map((recipesRaw as Recipe[]).map((r) => [r.id, r] as const)) : EMPTY_MAP,
-    [recipesRaw]
-  );
+  const recipesById = useMemo(() => indexById<Recipe>(recipesRaw), [recipesRaw]);
 
   const restrictions = prefs?.dietaryRestrictions ?? EMPTY_LIST;
   const prefsState = derivePrefsState({
