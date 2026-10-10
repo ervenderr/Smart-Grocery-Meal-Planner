@@ -39,8 +39,17 @@ function buildPreviewRegExp(project: string, scope: string): RegExp {
   return new RegExp(`^https://${p}(-git-[a-z0-9]+|-[a-z0-9]{9})?-${s}\\.vercel\\.app$`);
 }
 
+/**
+ * Origins of the native app WebView. Capacitor's default iosScheme is
+ * `capacitor` with hostname `localhost`; `ionic://localhost` is kept for legacy
+ * Ionic WebViews. Android's `https://localhost` is deliberately excluded
+ * (iOS-only milestone). These are a code constant, not CORS_ORIGIN, because
+ * env.schema parseOrigin accepts only http(s). Matching is exact.
+ */
+export const NATIVE_APP_ORIGINS = ["capacitor://localhost", "ionic://localhost"] as const;
+
 export function buildOriginPredicate(opts: OriginPredicateOptions): OriginPredicate {
-  const exact = new Set(opts.origins.map(normalizeOrigin));
+  const exact = new Set([...opts.origins, ...NATIVE_APP_ORIGINS].map(normalizeOrigin));
   const preview = opts.previewScope
     ? buildPreviewRegExp(opts.previewProject, opts.previewScope)
     : undefined;
@@ -74,7 +83,8 @@ export function buildCorsOptions(isAllowed: OriginPredicate): CorsOptions {
     credentials: true,
     optionsSuccessStatus: 200,
     maxAge: 86400,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key"],
+    exposedHeaders: ["Idempotency-Replayed", "Retry-After", "RateLimit-Reset"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   };
 }

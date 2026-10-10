@@ -113,4 +113,46 @@ describe("originGuard + cors integration", () => {
     const res = await request(app).get("/ping");
     expect(res.status).toBe(200);
   });
+
+  it.each(["capacitor://localhost", "ionic://localhost"])(
+    "allows native app origin %s and echoes it",
+    async (origin) => {
+      const res = await request(app).get("/ping").set("Origin", origin);
+      expect(res.status).toBe(200);
+      expect(res.headers["access-control-allow-origin"]).toBe(origin);
+    }
+  );
+
+  it.each([
+    "capacitor://evil",
+    "capacitor://localhost.evil.com",
+    "https://localhost",
+  ])("rejects look-alike origin %s with 403", async (origin) => {
+    const res = await request(app).get("/ping").set("Origin", origin);
+    expect(res.status).toBe(403);
+  });
+
+  it("allows the Idempotency-Key header in preflight from capacitor://localhost", async () => {
+    const res = await request(app)
+      .options("/act")
+      .set("Origin", "capacitor://localhost")
+      .set("Access-Control-Request-Method", "POST")
+      .set(
+        "Access-Control-Request-Headers",
+        "content-type,authorization,idempotency-key"
+      );
+    expect(res.status).toBe(200);
+    expect(res.headers["access-control-allow-headers"].toLowerCase()).toContain(
+      "idempotency-key"
+    );
+  });
+
+  it("exposes replay and retry headers to clients", async () => {
+    const res = await request(app)
+      .get("/ping")
+      .set("Origin", "capacitor://localhost");
+    const exposed = (res.headers["access-control-expose-headers"] ?? "").toLowerCase();
+    expect(exposed).toContain("idempotency-replayed");
+    expect(exposed).toContain("retry-after");
+  });
 });
