@@ -1,0 +1,338 @@
+[
+  {
+    "qty": 1,
+    "unit": "g",
+    "family": "mass",
+    "unitKey": "grams",
+    "base": 1
+  },
+  {
+    "qty": 250,
+    "unit": "gram",
+    "family": "mass",
+    "unitKey": "grams",
+    "base": 250
+  },
+  {
+    "qty": 3,
+    "unit": "grams",
+    "family": "mass",
+    "unitKey": "grams",
+    "base": 3
+  },
+  {
+    "qty": 5,
+    "unit": "gr",
+    "family": "mass",
+    "unitKey": "grams",
+    "base": 5
+  },
+  {
+    "qty": 2,
+    "unit": "kg",
+    "family": "mass",
+    "unitKey": "kg",
+    "base": 2000
+  },
+  {
+    "qty": 1.5,
+    "unit": "kilo",
+    "family": "mass",
+    "unitKey": "kg",
+    "base": 1500
+  },
+  {
+    "qty": 2,
+    "unit": "kilos",
+    "family": "mass",
+    "unitKey": "kg",
+    "base": 2000
+  },
+  {
+    "qty": 1,
+    "unit": "kilogram",
+    "family": "mass",
+    "unitKey": "kg",
+    "base": 1000
+  },
+  {
+    "qty": 3,
+    "unit": "kgs",
+    "family": "mass",
+    "unitKey": "kg",
+    "base": 3000
+  },
+  {
+    "qty": 4,
+    "unit": "oz",
+    "family": "mass",
+    "unitKey": "oz",
+    "base": 113.3980925
+  },
+  {
+    "qty": 8,
+    "unit": "ounces",
+    "family": "mass",
+    "unitKey": "oz",
+    "base": 226.796185
+  },
+  {
+    "qty": 1,
+    "unit": "ounce",
+    "family": "mass",
+    "unitKey": "oz",
+    "base": 28.349523125
+  },
+  {
+    "qty": 2,
+    "unit": "lb",
+    "family": "mass",
+    "unitKey": "lbs",
+    "base": 907.18474
+  },
+  {
+    "qty": 0.5,
+    "unit": "lbs",
+    "family": "mass",
+    "unitKey": "lbs",
+    "base": 226.796185
+  },
+  {
+    "qty": 3,
+    "unit": "pounds",
+    "family": "mass",
+    "unitKey": "lbs",
+    "base": 1360.77711
+  },
+  {
+    "qty": 1,
+    "unit": "pound",
+    "family": "mass",
+    "unitKey": "lbs",
+    "base": 453.59237
+  },
+  {
+    "qty": 100,
+    "unit": "ml",
+    "family": "volume",
+    "unitKey": "ml",
+    "base": 100
+  },
+  {
+    "qty": 250,
+    "unit": "milliliters",
+    "family": "volume",
+    "unitKey": "ml",
+    "base": 250
+  },
+  {
+    "qty": 10,
+    "unit": "millilitre",
+    "family": "volume",
+    "unitKey": "ml",
+    "base": 10
+  },
+  {
+    "qty": 1,
+    "unit": "l",
+    "family": "volume",
+    "unitKey": "liters",
+    "base": 1000
+  },
+  {
+    "qty": 2,
+    "unit": "litre",
+    "family": "volume",
+    "unitKey": "liters",
+    "base": 2000
+  },
+  {
+    "qty": 1.5,
+    "unit": "liters",
+    "family": "volume",
+    "unitKey": "liters",
+    "base": 1500
+  },
+  {
+    "qty": 3,
+    "unit": "litres",
+    "family": "volume",
+    "unitKey": "liters",
+    "base": 3000
+  },
+  {
+    "qty": 3,
+    "unit": "tsp",
+    "family": "volume",
+    "unitKey": "tsp",
+    "base": 14.78676478125
+  },
+  {
+    "qty": 2,
+    "unit": "teaspoons",
+    "family": "volume",
+    "unitKey": "tsp",
+    "base": 9.8578431875
+  },
+  {
+    "qty": 1,
+    "unit": "teaspoon",
+    "family": "volume",
+    "unitKey": "tsp",
+    "base": 4.92892159375
+  },
+  {
+    "qty": 1,
+    "unit": "tbsp",
+    "family": "volume",
+    "unitKey": "tbsp",
+    "base": 14.78676478125
+  },
+  {
+    "qty": 16,
+    "unit": "tbsp",
+    "family": "volume",
+    "unitKey": "tbsp",
+    "base": 236.5882365
+  },
+  {
+    "qty": 2,
+    "unit": "tbs",
+    "family": "volume",
+    "unitKey": "tbsp",
+    "base": 29.5735295625
+  },
+  {
+    "qty": 1,
+    "unit": "Tbsp",
+    "family": "volume",
+    "unitKey": "tbsp",
+    "base": 14.78676478125
+  },
+  {
+    "qty": 3,
+    "unit": "tablespoons",
+    "family": "volume",
+    "unitKey": "tbsp",
+    "base": 44.36029434375
+  },
+  {
+    "qty": 2,
+    "unit": "fl oz",
+    "family": "volume",
+    "unitKey": "fl_oz",
+    "base": 59.147059125
+  },
+  {
+    "qty": 4,
+    "unit": "fl_oz",
+    "family": "volume",
+    "unitKey": "fl_oz",
+    "base": 118.29411825
+  },
+  {
+    "qty": 1,
+    "unit": "fluid ounces",
+    "family": "volume",
+    "unitKey": "fl_oz",
+    "base": 29.5735295625
+  },
+  {
+    "qty": 1,
+    "unit": "cup",
+    "family": "volume",
+    "unitKey": "cups",
+    "base": 236.5882365
+  },
+  {
+    "qty": 1,
+    "unit": "cups",
+    "family": "volume",
+    "unitKey": "cups",
+    "base": 236.5882365
+  },
+  {
+    "qty": 2.5,
+    "unit": "Cups",
+    "family": "volume",
+    "unitKey": "cups",
+    "base": 591.47059125
+  },
+  {
+    "qty": 3,
+    "unit": "pieces",
+    "family": "count",
+    "unitKey": "pieces",
+    "base": 3
+  },
+  {
+    "qty": 2,
+    "unit": "items",
+    "family": "count",
+    "unitKey": "pieces",
+    "base": 2
+  },
+  {
+    "qty": 4,
+    "unit": "pc",
+    "family": "count",
+    "unitKey": "pieces",
+    "base": 4
+  },
+  {
+    "qty": 1,
+    "unit": "",
+    "family": "count",
+    "unitKey": "pieces",
+    "base": 1
+  },
+  {
+    "qty": 6,
+    "unit": "pcs",
+    "family": "count",
+    "unitKey": "pieces",
+    "base": 6
+  },
+  {
+    "qty": 2,
+    "unit": "piece",
+    "family": "count",
+    "unitKey": "pieces",
+    "base": 2
+  },
+  {
+    "qty": 3,
+    "unit": "cloves",
+    "family": "count",
+    "unitKey": "clove",
+    "base": 3
+  },
+  {
+    "qty": 2,
+    "unit": "bunches",
+    "family": "count",
+    "unitKey": "bunch",
+    "base": 2
+  },
+  {
+    "qty": 4,
+    "unit": "cans",
+    "family": "count",
+    "unitKey": "can",
+    "base": 4
+  },
+  {
+    "qty": 1,
+    "unit": "pinches",
+    "family": "count",
+    "unitKey": "pinch",
+    "base": 1
+  },
+  {
+    "qty": 1,
+    "unit": "clove",
+    "family": "count",
+    "unitKey": "clove",
+    "base": 1
+  }
+]
