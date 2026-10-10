@@ -13,7 +13,9 @@ import {
   updatePreferencesValidation,
   changePasswordValidation,
   deactivateAccountValidation,
+  deleteAccountValidation,
 } from './users.validation';
+import { accountDeletionLimiter } from './account-deletion.limiter';
 import { validate } from '@/modules/auth/auth.validation';
 import { authenticate } from '@/middleware/auth.middleware';
 import { asyncHandler } from '@/middleware/errorHandler';
@@ -173,6 +175,28 @@ router.delete(
   deactivateAccountValidation,
   validate,
   asyncHandler(usersController.deactivateAccount.bind(usersController))
+);
+
+/**
+ * DELETE /api/v1/users/me
+ * Permanently delete the account and all owned data (password re-auth)
+ *
+ * PROTECTED (requires JWT token)
+ *
+ * Body: { "password": "UserPass123" }
+ *
+ * Responses:
+ * 204 deleted
+ * 400 validation error
+ * 403 { code: 'INVALID_PASSWORD' } wrong password (not 401, so the client keeps its session)
+ * 429 { code: 'ACCOUNT_DELETE_RATE_LIMITED' } too many failed attempts
+ */
+router.delete(
+  '/me',
+  accountDeletionLimiter,
+  deleteAccountValidation,
+  validate,
+  asyncHandler(usersController.deleteAccountPermanently.bind(usersController))
 );
 
 export default router;

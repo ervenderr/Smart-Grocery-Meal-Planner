@@ -130,3 +130,17 @@ export const deactivateAccountValidation = [
     .notEmpty()
     .withMessage('Password is required to deactivate account'),
 ];
+
+/**
+ * Validation rules for permanent account deletion (password re-auth)
+ */
+export const deleteAccountValidation = [
+  body('password')
+    .isString()
+    .withMessage('Password is required')
+    .bail()
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ max: 128 })
+    .withMessage('Password is too long'),
+];

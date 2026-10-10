@@ -314,41 +314,6 @@ export class UsersService {
 
     logger.warn('User account deactivated', { userId });
   }
-
-  /**
-   * Delete user account (hard delete)
-   *
-   * WARNING: This permanently deletes all user data!
-   * Use only if required by law (GDPR right to be forgotten)
-   *
-   * @param userId - User ID
-   * @param password - User's password (for confirmation)
-   * @returns Promise<void>
-   */
-  async deleteAccount(userId: string, password: string): Promise<void> {
-    // Verify password
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { passwordHash: true },
-    });
-
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
-
-    const isPasswordValid = await comparePassword(password, user.passwordHash);
-
-    if (!isPasswordValid) {
-      throw new AppError('Incorrect password', 401);
-    }
-
-    // Delete user (CASCADE will delete related data)
-    await prisma.user.delete({
-      where: { id: userId },
-    });
-
-    logger.warn('User account permanently deleted', { userId });
-  }
 }
 
 // Export singleton instance

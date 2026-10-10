@@ -5,6 +5,7 @@
  */
 
 import { Request, Response } from 'express';
+import { deleteAccountPermanently } from './account-deletion.service';
 import { usersService } from './users.service';
 import {
   UpdateProfileRequest,
@@ -200,6 +201,16 @@ export class UsersController {
     res.status(200).json({
       message: 'Account deactivated successfully',
     });
+  }
+
+  /**
+   * DELETE /api/v1/users/me - permanently delete the authenticated account.
+   * userId comes from the verified JWT only. Responds 204.
+   */
+  async deleteAccountPermanently(req: Request, res: Response): Promise<void> {
+    const userId = (req as any).user.id;
+    await deleteAccountPermanently(userId, req.body.password);
+    res.status(204).send();
   }
 }
 
