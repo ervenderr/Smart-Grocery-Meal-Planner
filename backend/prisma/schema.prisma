@@ -51,6 +51,10 @@ model User {
   lastFailedLogin     DateTime? @map("last_failed_login")
   lockedUntil         DateTime? @map("locked_until")
 
+  // AI data-sharing consent (null = not consented)
+  aiConsentAt      DateTime? @map("ai_consent_at")
+  aiConsentVersion Int?      @map("ai_consent_version")
+
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   lastLogin     DateTime? @map("last_login")
@@ -65,6 +69,7 @@ model User {
   notifications     Notification[] @relation("UserNotifications")
   alerts            Alert[] @relation("UserAlerts")
   zapierWebhooks    ZapierWebhook[]
+  aiReports         AiReport[]
 
   @@index([email])
   @@map("users")
@@ -571,4 +576,23 @@ model AiCache {
   @@index([expiresAt])
   @@index([feature])
   @@map("ai_cache")
+}
+
+// ============================================
+// AI REPORTS (user-flagged AI output)
+// ============================================
+model AiReport {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  kind      String // 'recipe' | 'meal_plan' | 'substitution' (validated by zod)
+  refId     String?  @map("ref_id")
+  snapshot  Json?
+  reason    String
+  note      String?  @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_reports")
 }
