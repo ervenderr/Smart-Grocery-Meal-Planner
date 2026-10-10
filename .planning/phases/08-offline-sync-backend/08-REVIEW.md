@@ -136,3 +136,30 @@ res.json = ((body?: unknown): Response => {
 _Reviewed: 2026-10-10_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
+
+---
+
+## Re-review (iteration 1)
+
+**Scope:** `fix(08)` commits 0cf0f42..df061c2 (idempotency middleware/store/hash, refresh-token service, users.service, pantry/shopping replay guard, client-id-replay).
+**New findings:** critical 0, warning 2, info 1.
+
+CR-01 (no release on disconnect), WR-01/02/03 (claim-guarded complete, UTC insert, completion retry), WR-05 and WR-06 were checked and hold. The claim token (`created_at`) is written with the same millisecond value by `reserve` and `takeOver`, and `complete`/`release` match on it.
+
+### WR-08: Family absolute-lifetime cap is defeated by token pruning
+
+**File:** `backend/src/modules/auth/refresh-token.service.ts:103-110, 162-163`; `backend/src/modules/idempotency/idempotency.cleanup.ts:8, 26-27`
+**Issue:** `familyStart` uses `MIN(createdAt)` over the family's surviving rows. The daily prune deletes rotated rows 7 days after `revokedAt`, so the family origin row disappears and the computed start drifts forward. The 180-day cap (`MAX_FAMILY_DAYS`) therefore never triggers for an actively rotated family, and WR-04's main goal (a kept-alive stolen family eventually dies) is not met.
+**Fix:** Persist the start on the row. Add a `familyStartedAt` column, copied from the predecessor on rotation and set to `now` for a new family. Compute the cap from it instead of the aggregate. As a stopgap, exclude the newest row of each family from pruning and carry the start forward.
+
+### WR-09: Client-id replay compare gives false 409s and is bypassable by a time heuristic
+
+**File:** `backend/src/modules/sync/client-id-replay.ts:34-38`
+**Issue:** The compare is skipped when `updatedAt - createdAt > 1000 ms`, and enforced otherwise. A legitimate create replay that arrives after the offline client's own update within 1 s (outbox flushing create then update back to back) sees a differing name and gets 409 CLIENT_ID_CONFLICT, which an outbox will likely treat as a permanent failure. Conversely, any different-content replay after 1 s of row age is silently accepted as `created: false`, so WR-07's "edited create believed applied" case remains for edits that follow the original row by more than 1 s.
+**Fix:** Do not infer from timestamps. Store a hash of the create payload (or `createdFromHash`) on the row, and compare that hash on replay.
+
+### IN-05: Responses not sent through `res.json` leave the key in_progress
+
+**File:** `backend/src/middleware/idempotency.middleware.ts:156-172`
+**Issue:** Only `res.json` is instrumented. A handler that replies via `res.send`/`res.end`/`res.status(204).end()` never completes or releases, so retries get 409 IN_FLIGHT until the 120 s stale takeover, then re-execute.
+**Fix:** Wrap `res.send`/`res.end` too, or ensure idempotent routes only use `res.json`, and add a `res.on('finish')` fallback that releases the claim if `handled` is still false.
