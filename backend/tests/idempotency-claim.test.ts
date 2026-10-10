@@ -2,7 +2,10 @@
  * WR-02 / WR-03 regression: claim-conditional completion, real DB.
  */
 
+import express from 'express';
 import request from 'supertest';
+import * as store from '../src/modules/idempotency/idempotency.store';
+import { idempotency } from '../src/middleware/idempotency.middleware';
 import { createApp } from '../src/app';
 import { prisma } from '../src/config/database.config';
 import { complete, release, reserve, takeOver } from '../src/modules/idempotency/idempotency.store';
@@ -48,5 +51,25 @@ describe('idempotency claim token (WR-02)', () => {
     const done = await prisma.idempotencyKey.findUnique({ where: { id: id as string } });
     expect(done?.status).toBe('completed');
     expect(done?.responseBody).toEqual({ fresh: true });
+  });
+
+  it('retries a transient completion failure so the key completes (WR-03)', async () => {
+    const app = express();
+    app.use(express.json());
+    app.use((req, _res, next) => {
+      (req as unknown as { user: { id: string } }).user = { id: userId };
+      next();
+    });
+    app.use(idempotency);
+    app.post('/ok', (_req, res) => res.status(201).json({ ok: true }));
+
+    const spy = jest.spyOn(store, 'complete').mockRejectedValueOnce(new Error('db blip'));
+    const key = `${PREFIX}-key-2`;
+    const res = await request(app).post('/ok').set('Idempotency-Key', key).send({});
+    spy.mockRestore();
+
+    expect(res.status).toBe(201);
+    const row = await prisma.idempotencyKey.findUnique({ where: { userId_key: { userId, key } } });
+    expect(row?.status).toBe('completed');
   });
 });

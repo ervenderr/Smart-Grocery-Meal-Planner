@@ -12,7 +12,10 @@
  * its completion is persisted so a retry replays instead of double-applying.
  * A truly crashed request is recovered by the stale-takeover timeout.
  *
- * Accepted residual risk (research A3): if the process dies after the business
+ * Completion writes are retried briefly on transient DB errors (WR-03).
+ *
+ * Accepted residual risk (research A3): if the process dies, or the completion
+ * write keeps failing past the retries, after the business
  * commit but before the completion write, a retry can double-apply. Railway
  * runs a single replica and the window is one UPDATE.
  */
@@ -97,6 +100,26 @@ async function claimExisting(claim: Claim, res: Response): Promise<Outcome> {
   return { kind: 'responded' };
 }
 
+const COMPLETE_RETRY_DELAYS_MS: readonly number[] = [50, 200];
+
+/** Retries a transient completion-write failure so the key does not stay in_progress (WR-03). */
+async function completeWithRetry(
+  id: string,
+  claimedAt: Date,
+  statusCode: number,
+  body: Prisma.InputJsonValue
+): Promise<boolean> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await complete(id, claimedAt, statusCode, body);
+    } catch (error) {
+      const delay = COMPLETE_RETRY_DELAYS_MS[attempt];
+      if (delay === undefined) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 async function persistOrRelease(
   id: string,
   claimedAt: Date,
@@ -113,7 +136,7 @@ async function persistOrRelease(
       serialised !== undefined &&
       Buffer.byteLength(serialised) <= IDEMPOTENCY_MAX_STORED_BODY_BYTES;
     if (storable) {
-      const kept = await complete(
+      const kept = await completeWithRetry(
         id,
         claimedAt,
         statusCode,
