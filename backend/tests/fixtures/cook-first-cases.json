@@ -1,0 +1,965 @@
+[
+  {
+    "name": "expiry windows today/1/3/7/8 days",
+    "today": "2026-10-10",
+    "staples": [],
+    "pantry": [
+      {
+        "ingredientName": "milk",
+        "quantity": 1,
+        "unit": "liters",
+        "expiryDate": "2026-10-10"
+      },
+      {
+        "ingredientName": "eggs",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-11"
+      },
+      {
+        "ingredientName": "spinach",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-13"
+      },
+      {
+        "ingredientName": "yogurt",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-17"
+      },
+      {
+        "ingredientName": "cheddar",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-18"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "r1",
+        "title": "Everything",
+        "totalTimeMinutes": 30,
+        "ingredients": [
+          {
+            "ingredientName": "milk",
+            "quantity": 1,
+            "unit": "cups"
+          },
+          {
+            "ingredientName": "eggs",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "spinach",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "yogurt",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "cheddar",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "r2",
+        "title": "Only late",
+        "totalTimeMinutes": 20,
+        "ingredients": [
+          {
+            "ingredientName": "cheddar",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "rice",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "r3",
+        "title": "Milk only",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "milk",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "r1",
+        "score": 14,
+        "usesExpiring": [
+          {
+            "name": "milk",
+            "daysLeft": 0
+          },
+          {
+            "name": "egg",
+            "daysLeft": 1
+          },
+          {
+            "name": "spinach",
+            "daysLeft": 3
+          },
+          {
+            "name": "yogurt",
+            "daysLeft": 7
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "r2",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 50
+      },
+      {
+        "id": "r3",
+        "score": 5,
+        "usesExpiring": [
+          {
+            "name": "milk",
+            "daysLeft": 0
+          }
+        ],
+        "coveragePercent": 100
+      }
+    ]
+  },
+  {
+    "name": "expired lot is neither stock nor expiring",
+    "today": "2026-10-10",
+    "staples": [],
+    "pantry": [
+      {
+        "ingredientName": "chicken",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-09"
+      },
+      {
+        "ingredientName": "rice",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": null
+      },
+      {
+        "ingredientName": "carrot",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-08"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "a",
+        "title": "Chicken rice",
+        "totalTimeMinutes": 25,
+        "ingredients": [
+          {
+            "ingredientName": "chicken",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "rice",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "title": "Carrot rice",
+        "totalTimeMinutes": 25,
+        "ingredients": [
+          {
+            "ingredientName": "carrot",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "rice",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "a",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 50
+      },
+      {
+        "id": "b",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 50
+      }
+    ]
+  },
+  {
+    "name": "duplicate lots take the minimum daysLeft",
+    "today": "2026-10-10",
+    "staples": [],
+    "pantry": [
+      {
+        "ingredientName": "tomato",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-16"
+      },
+      {
+        "ingredientName": "tomato",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-12"
+      },
+      {
+        "ingredientName": "tomato",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": null
+      },
+      {
+        "ingredientName": "tomato",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-09"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "t1",
+        "title": "Tomato salad",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "tomato",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "onion",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "t1",
+        "score": 3,
+        "usesExpiring": [
+          {
+            "name": "tomato",
+            "daysLeft": 2
+          }
+        ],
+        "coveragePercent": 50
+      }
+    ]
+  },
+  {
+    "name": "staples cover ingredients",
+    "today": "2026-10-10",
+    "staples": [
+      "salt",
+      "olive oil",
+      "water"
+    ],
+    "pantry": [
+      {
+        "ingredientName": "pasta",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": null
+      }
+    ],
+    "recipes": [
+      {
+        "id": "s1",
+        "title": "Pasta",
+        "totalTimeMinutes": 15,
+        "ingredients": [
+          {
+            "ingredientName": "pasta",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "salt",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "olive oil",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "water",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "s2",
+        "title": "Pasta sauce",
+        "totalTimeMinutes": 20,
+        "ingredients": [
+          {
+            "ingredientName": "pasta",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "salt",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "basil",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "garlic",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "s3",
+        "title": "Soup",
+        "totalTimeMinutes": 40,
+        "ingredients": [
+          {
+            "ingredientName": "stock",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "water",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "s1",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 100
+      },
+      {
+        "id": "s2",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 50
+      },
+      {
+        "id": "s3",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 50
+      }
+    ]
+  },
+  {
+    "name": "plural and qualifier names",
+    "today": "2026-10-10",
+    "staples": [],
+    "pantry": [
+      {
+        "ingredientName": "Tomatoes",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-12"
+      },
+      {
+        "ingredientName": "fresh basil",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-11"
+      },
+      {
+        "ingredientName": "Garlic cloves",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": null
+      },
+      {
+        "ingredientName": "Green Onions",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-15"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "p1",
+        "title": "Caprese",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "tomato",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "basil",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "garlic",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "scallion",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "p2",
+        "title": "Salsa",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "tomatoes",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "cilantro",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "Spring Onion",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "p1",
+        "score": 4,
+        "usesExpiring": [
+          {
+            "name": "tomato",
+            "daysLeft": 2
+          },
+          {
+            "name": "green onion",
+            "daysLeft": 5
+          }
+        ],
+        "coveragePercent": 50
+      },
+      {
+        "id": "p2",
+        "score": 4,
+        "usesExpiring": [
+          {
+            "name": "tomato",
+            "daysLeft": 2
+          },
+          {
+            "name": "green onion",
+            "daysLeft": 5
+          }
+        ],
+        "coveragePercent": 67
+      }
+    ]
+  },
+  {
+    "name": "recipe with zero ingredients",
+    "today": "2026-10-10",
+    "staples": [
+      "salt"
+    ],
+    "pantry": [
+      {
+        "ingredientName": "apple",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-11"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "z0",
+        "title": "Empty",
+        "totalTimeMinutes": 5,
+        "ingredients": []
+      },
+      {
+        "id": "z1",
+        "title": "Apple",
+        "totalTimeMinutes": 5,
+        "ingredients": [
+          {
+            "ingredientName": "apple",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "z0",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 0
+      },
+      {
+        "id": "z1",
+        "score": 5,
+        "usesExpiring": [
+          {
+            "name": "apple",
+            "daysLeft": 1
+          }
+        ],
+        "coveragePercent": 100
+      }
+    ]
+  },
+  {
+    "name": "oil vs sesame oil exact-match separation",
+    "today": "2026-10-10",
+    "staples": [
+      "olive oil"
+    ],
+    "pantry": [
+      {
+        "ingredientName": "oil",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-12"
+      },
+      {
+        "ingredientName": "sesame oil",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": null
+      }
+    ],
+    "recipes": [
+      {
+        "id": "o1",
+        "title": "Fry",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "oil",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "o2",
+        "title": "Sesame",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "sesame oil",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "o3",
+        "title": "Both",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "oil",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "sesame oil",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "olive oil",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "o4",
+        "title": "Olive",
+        "totalTimeMinutes": 10,
+        "ingredients": [
+          {
+            "ingredientName": "olive oil",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "oil",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "o1",
+        "score": 3,
+        "usesExpiring": [
+          {
+            "name": "oil",
+            "daysLeft": 2
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "o2",
+        "score": 0,
+        "usesExpiring": [],
+        "coveragePercent": 100
+      },
+      {
+        "id": "o3",
+        "score": 3,
+        "usesExpiring": [
+          {
+            "name": "oil",
+            "daysLeft": 2
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "o4",
+        "score": 3,
+        "usesExpiring": [
+          {
+            "name": "oil",
+            "daysLeft": 2
+          }
+        ],
+        "coveragePercent": 100
+      }
+    ]
+  },
+  {
+    "name": "three-recipe tie broken by time then name then id",
+    "today": "2026-10-10",
+    "staples": [],
+    "pantry": [
+      {
+        "ingredientName": "egg",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-11"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "c3",
+        "title": "Same",
+        "totalTimeMinutes": 20,
+        "ingredients": [
+          {
+            "ingredientName": "egg",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "c1",
+        "title": "Same",
+        "totalTimeMinutes": 20,
+        "ingredients": [
+          {
+            "ingredientName": "egg",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "c2",
+        "title": "Alpha",
+        "totalTimeMinutes": 20,
+        "ingredients": [
+          {
+            "ingredientName": "egg",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "c4",
+        "title": "Quick",
+        "totalTimeMinutes": 5,
+        "ingredients": [
+          {
+            "ingredientName": "egg",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "c1",
+        "score": 5,
+        "usesExpiring": [
+          {
+            "name": "egg",
+            "daysLeft": 1
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "c2",
+        "score": 5,
+        "usesExpiring": [
+          {
+            "name": "egg",
+            "daysLeft": 1
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "c3",
+        "score": 5,
+        "usesExpiring": [
+          {
+            "name": "egg",
+            "daysLeft": 1
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "c4",
+        "score": 5,
+        "usesExpiring": [
+          {
+            "name": "egg",
+            "daysLeft": 1
+          }
+        ],
+        "coveragePercent": 100
+      }
+    ]
+  },
+  {
+    "name": "mixed realistic pantry",
+    "today": "2026-10-10",
+    "staples": [
+      "salt",
+      "pepper",
+      "flour"
+    ],
+    "pantry": [
+      {
+        "ingredientName": "chicken breast",
+        "quantity": 500,
+        "unit": "grams",
+        "expiryDate": "2026-10-11"
+      },
+      {
+        "ingredientName": "rice",
+        "quantity": 2,
+        "unit": "kg",
+        "expiryDate": null
+      },
+      {
+        "ingredientName": "broccoli",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-14"
+      },
+      {
+        "ingredientName": "soy sauce",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": null
+      },
+      {
+        "ingredientName": "ginger",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-30"
+      },
+      {
+        "ingredientName": "butter",
+        "quantity": 1,
+        "unit": "pieces",
+        "expiryDate": "2026-10-17"
+      }
+    ],
+    "recipes": [
+      {
+        "id": "m1",
+        "title": "Stir fry",
+        "totalTimeMinutes": 25,
+        "ingredients": [
+          {
+            "ingredientName": "chicken breast",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "broccoli",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "soy sauce",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "ginger",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "rice",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "m2",
+        "title": "Buttered rice",
+        "totalTimeMinutes": 15,
+        "ingredients": [
+          {
+            "ingredientName": "rice",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "butter",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "salt",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      },
+      {
+        "id": "m3",
+        "title": "Pie",
+        "totalTimeMinutes": 90,
+        "ingredients": [
+          {
+            "ingredientName": "flour",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "butter",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "apple",
+            "quantity": 1,
+            "unit": "pieces"
+          },
+          {
+            "ingredientName": "sugar",
+            "quantity": 1,
+            "unit": "pieces"
+          }
+        ]
+      }
+    ],
+    "expected": [
+      {
+        "id": "m1",
+        "score": 6,
+        "usesExpiring": [
+          {
+            "name": "chicken breast",
+            "daysLeft": 1
+          },
+          {
+            "name": "broccoli",
+            "daysLeft": 4
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "m2",
+        "score": 1,
+        "usesExpiring": [
+          {
+            "name": "butter",
+            "daysLeft": 7
+          }
+        ],
+        "coveragePercent": 100
+      },
+      {
+        "id": "m3",
+        "score": 1,
+        "usesExpiring": [
+          {
+            "name": "butter",
+            "daysLeft": 7
+          }
+        ],
+        "coveragePercent": 50
+      }
+    ]
+  }
+]
