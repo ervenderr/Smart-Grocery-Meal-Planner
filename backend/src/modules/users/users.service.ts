@@ -7,7 +7,7 @@
  * - Get/update user profile
  * - Get/update user preferences
  * - Change password
- * - Deactivate account
+ * - Deactivate account (hard delete lives in account-deletion.service.ts)
  */
 
 import { prisma } from '@/config/database.config';
@@ -42,6 +42,8 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         lastLogin: true,
+        aiConsentAt: true,
+        aiConsentVersion: true,
       },
     });
 
@@ -108,6 +110,8 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         lastLogin: true,
+        aiConsentAt: true,
+        aiConsentVersion: true,
       },
     });
 

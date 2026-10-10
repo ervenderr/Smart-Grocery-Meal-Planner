@@ -47,6 +47,8 @@ export interface UserProfileResponse {
   isActive: boolean;
   createdAt: Date;
   lastLogin: Date | null;
+  aiConsentAt: Date | null;
+  aiConsentVersion: number | null;
 }
 
 /**
