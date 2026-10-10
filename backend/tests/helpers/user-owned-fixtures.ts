@@ -3,11 +3,13 @@
  * Used by account-deletion tests (including the DMMF completeness check).
  */
 
+import { createHash, randomUUID } from 'crypto';
 import { prisma } from '../../src/config/database.config';
 
 type Factory = (userId: string) => Promise<void>;
 type Counter = (userId: string) => Promise<number>;
 
+const DAY_MS = 24 * 60 * 60 * 1000;
 const TODAY = new Date(new Date().toISOString().slice(0, 10));
 
 async function createRecipe(userId: string) {
@@ -88,6 +90,31 @@ export const OWNED_MODEL_FACTORIES: Readonly<Record<string, Factory>> = {
       data: { userId, kind: 'recipe', reason: 'inaccurate' },
     });
   },
+  RefreshToken: async (userId) => {
+    await prisma.refreshToken.create({
+      data: {
+        userId,
+        tokenHash: createHash('sha256').update(randomUUID()).digest('hex'),
+        familyId: randomUUID(),
+        expiresAt: new Date(Date.now() + DAY_MS),
+      },
+    });
+  },
+  IdempotencyKey: async (userId) => {
+    await prisma.idempotencyKey.create({
+      data: {
+        userId,
+        key: `fixture-${randomUUID()}`,
+        method: 'POST',
+        route: '/api/v1/pantry',
+        requestHash: createHash('sha256').update(randomUUID()).digest('hex'),
+        status: 'completed',
+        responseStatus: 201,
+        responseBody: { ok: true },
+        expiresAt: new Date(Date.now() + DAY_MS),
+      },
+    });
+  },
 };
 
 export const OWNED_MODEL_COUNTERS: Readonly<Record<string, Counter>> = {
@@ -104,6 +131,8 @@ export const OWNED_MODEL_COUNTERS: Readonly<Record<string, Counter>> = {
   Alert: (userId) => prisma.alert.count({ where: { userId } }),
   ZapierWebhook: (userId) => prisma.zapierWebhook.count({ where: { userId } }),
   AiReport: (userId) => prisma.aiReport.count({ where: { userId } }),
+  RefreshToken: (userId) => prisma.refreshToken.count({ where: { userId } }),
+  IdempotencyKey: (userId) => prisma.idempotencyKey.count({ where: { userId } }),
 };
 
 /** Insert the user's ai_usage row and make sure today's global row exists. */

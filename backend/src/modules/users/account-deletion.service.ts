@@ -3,7 +3,8 @@
  *
  * meal_plan_items.recipe_id is ON DELETE RESTRICT, so plan items must be removed
  * before the user's recipes are cascaded. ai_usage has no FK to users, so the
- * user's quota rows are deleted explicitly.
+ * user's quota rows are deleted explicitly. refresh_tokens and
+ * idempotency_keys cascade via FK and are also deleted explicitly for clarity.
  */
 
 import { prisma } from '@/config/database.config';
@@ -42,6 +43,8 @@ export async function deleteAccountPermanently(
     await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`;
     await tx.mealPlanItem.deleteMany({ where: { mealPlan: { userId } } });
     await tx.aiUsage.deleteMany({ where: { scope: `user:${userId}` } });
+    await tx.refreshToken.deleteMany({ where: { userId } });
+    await tx.idempotencyKey.deleteMany({ where: { userId } });
     // deleteMany: a concurrent duplicate request that lost the race deletes 0
     // rows and is treated as already deleted rather than throwing P2025.
     await tx.user.deleteMany({ where: { id: userId } });
