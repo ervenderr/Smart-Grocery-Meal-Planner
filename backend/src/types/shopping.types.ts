@@ -30,6 +30,8 @@ export interface ShoppingListDto {
 }
 
 export interface CreateShoppingItemInput {
+  /** Optional client-generated UUID (create-only, makes retries idempotent). */
+  readonly id?: string;
   readonly itemName: string;
   readonly quantity?: number;
   readonly unit?: string;
@@ -40,7 +42,12 @@ export interface CreateShoppingItemInput {
   readonly notes?: string | null;
 }
 
-export type UpdateShoppingItemInput = Partial<CreateShoppingItemInput>;
+export type UpdateShoppingItemInput = Partial<Omit<CreateShoppingItemInput, 'id'>>;
+
+export interface AddItemResult {
+  readonly item: ShoppingItemDto;
+  readonly created: boolean;
+}
 
 export type CarryOverMode = 'carry' | 'discard';
 

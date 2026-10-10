@@ -44,11 +44,14 @@ export class ShoppingController {
   }
 
   async addItem(req: Request, res: Response): Promise<void> {
-    const item = await shoppingService.addItem(
-      userIdOf(req),
-      itemInput(req) as CreateShoppingItemInput,
-    );
-    res.status(201).json(item);
+    const { id } = matchedData(req, { locations: ['body'], includeOptionals: false }) as {
+      id?: string;
+    };
+    const result = await shoppingService.addItem(userIdOf(req), {
+      ...(itemInput(req) as CreateShoppingItemInput),
+      ...(id !== undefined && { id }),
+    });
+    res.status(result.created ? 201 : 200).json(result.item);
   }
 
   async updateItem(req: Request, res: Response): Promise<void> {

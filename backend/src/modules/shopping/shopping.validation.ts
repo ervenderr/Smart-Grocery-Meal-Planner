@@ -99,7 +99,10 @@ const itemFieldChains = (required: boolean): ValidationChain[] => {
   ];
 };
 
-export const validateCreateItem: ValidationChain[] = itemFieldChains(true);
+export const validateCreateItem: ValidationChain[] = [
+  body('id').optional().isUUID().withMessage('id must be a UUID'),
+  ...itemFieldChains(true),
+];
 
 export const validateUpdateItem: ValidationChain[] = [
   ...itemFieldChains(false),

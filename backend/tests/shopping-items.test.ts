@@ -125,11 +125,9 @@ describe('shopping items', () => {
       const res = await post(a, {
         itemName: 'Mass',
         shoppingListId: (await getList(b)).body.id,
-        id: UNKNOWN_ID,
         userId: b.id,
       }).expect(201);
       expect(res.body.shoppingListId).toBe(mine.body.id);
-      expect(res.body.id).not.toBe(UNKNOWN_ID);
       const otherItems = await prisma.shoppingListItem.count({
         where: { shoppingListId: (await getList(b)).body.id },
       });

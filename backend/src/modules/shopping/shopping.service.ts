@@ -7,6 +7,7 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '../../config/database.config';
 import { AppError } from '../../middleware/errorHandler';
 import type {
+  AddItemResult,
   CreateShoppingItemInput,
   ShoppingItemDto,
   ShoppingListDto,
@@ -88,9 +89,28 @@ export class ShoppingService {
     );
   }
 
-  async addItem(userId: string, input: CreateShoppingItemInput): Promise<ShoppingItemDto> {
+  async addItem(userId: string, input: CreateShoppingItemInput): Promise<AddItemResult> {
     return prisma.$transaction(async (tx) => {
       const listId = await ensureActiveListId(tx, userId);
+      if (input.id) {
+        // Pre-check under the list row lock (serialises same-user retries).
+        // Do NOT catch P2002 here: in Postgres a unique violation aborts the
+        // whole interactive transaction, so the fallback read would fail too.
+        // Note: a replay whose original row was carried to a new list after
+        // finish returns the old row (Phase 11 outbox concern).
+        const existing = await tx.shoppingListItem.findUnique({
+          where: { id: input.id },
+          include: { shoppingList: { select: { userId: true } } },
+        });
+        if (existing) {
+          if (existing.shoppingList.userId !== userId) {
+            throw new AppError('That item id is already in use.', 409, true, {
+              code: SHOPPING_ERROR_CODES.CLIENT_ID_CONFLICT,
+            });
+          }
+          return { item: toItemDto(existing), created: false };
+        }
+      }
       const count = await tx.shoppingListItem.count({ where: { shoppingListId: listId } });
       if (count >= MAX_ITEMS_PER_LIST) {
         throw new AppError(
@@ -109,11 +129,12 @@ export class ShoppingService {
       const created = await tx.shoppingListItem.create({
         data: {
           ...(data as Prisma.ShoppingListItemUncheckedCreateInput),
+          ...(input.id && { id: input.id }),
           itemName: input.itemName,
           shoppingListId: listId,
         },
       });
-      return toItemDto(created);
+      return { item: toItemDto(created), created: true };
     });
   }
 
