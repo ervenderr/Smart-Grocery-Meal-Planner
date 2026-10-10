@@ -9,6 +9,8 @@ import request from 'supertest';
 import type { Application } from 'express';
 import { OpenAiCompatibleProvider } from '../../src/modules/ai/providers/openai-compatible.provider';
 import { setAiDepsForTests } from '../../src/modules/ai/ai.deps';
+import { AI_CONSENT_VERSION } from '../../src/modules/ai/ai-consent.constants';
+import { prisma } from '../../src/config/database.config';
 
 export const TEST_BASE_URL = 'https://llm.test/v1';
 export const TEST_API_KEY = 'test-key';
@@ -66,9 +68,24 @@ export function uniqueName(base: string): string {
   return `${base}-${crypto.randomBytes(4).toString('hex')}`;
 }
 
+export async function grantAiConsent(userId: string): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { aiConsentAt: new Date(), aiConsentVersion: AI_CONSENT_VERSION },
+  });
+}
+
+export async function revokeAiConsent(userId: string): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { aiConsentAt: null, aiConsentVersion: null },
+  });
+}
+
 export async function createUserWithPantry(
   app: Application,
-  names: string[]
+  names: string[],
+  options: { consent?: boolean } = {}
 ): Promise<{ token: string; userId: string; email: string }> {
   const email = `ai-${crypto.randomBytes(6).toString('hex')}@example.com`;
   const signup = await request(app)
@@ -76,6 +93,9 @@ export async function createUserWithPantry(
     .send({ email, password: 'TestPass123', firstName: 'Aiko', lastName: 'Tester' });
   const token: string = signup.body.token;
   const userId: string = signup.body.user.id;
+  if (options.consent ?? true) {
+    await grantAiConsent(userId);
+  }
   for (const ingredientName of names) {
     await request(app)
       .post('/api/v1/pantry')
