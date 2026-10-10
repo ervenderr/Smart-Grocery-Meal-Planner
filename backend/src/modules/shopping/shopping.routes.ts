@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
+import { idempotency } from '../../middleware/idempotency.middleware';
 import { shoppingLimiter } from '../../middleware/rateLimiter';
 import { asyncHandler } from '../../middleware/errorHandler';
 import { ShoppingController } from './shopping.controller';
@@ -24,6 +25,7 @@ const controller = new ShoppingController();
 
 router.use(authenticate);
 router.use(shoppingLimiter);
+router.use(idempotency);
 
 /**
  * @route   GET /api/v1/shopping/list

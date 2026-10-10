@@ -4,6 +4,7 @@
 
 import { Router } from 'express';
 import { authenticate } from '../../middleware/auth.middleware';
+import { idempotency } from '../../middleware/idempotency.middleware';
 import { asyncHandler } from '../../middleware/errorHandler';
 import { CookController } from './cook.controller';
 import { validate, validateApply, validatePreview } from './cook.validation';
@@ -12,6 +13,7 @@ const router = Router();
 const controller = new CookController();
 
 router.use(authenticate);
+router.use(idempotency);
 
 /**
  * @route   POST /api/v1/cook/preview

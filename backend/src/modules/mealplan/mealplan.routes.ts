@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import { MealPlanController } from './mealplan.controller';
 import { authenticate } from '../../middleware/auth.middleware';
+import { idempotency } from '../../middleware/idempotency.middleware';
 import {
   validateCreateMealPlan,
   validateUpdateMealPlan,
@@ -20,6 +21,7 @@ const mealPlanController = new MealPlanController();
 
 // All meal plan routes require authentication
 router.use(authenticate);
+router.use(idempotency);
 
 // Statistics endpoint (must come before /:id)
 router.get('/stats', mealPlanController.getStats);

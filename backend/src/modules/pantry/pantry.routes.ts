@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import { PantryController } from './pantry.controller';
 import { authenticate } from '../../middleware/auth.middleware';
+import { idempotency } from '../../middleware/idempotency.middleware';
 import { pantryLimiter } from '../../middleware/rateLimiter';
 import {
   validateCreateItem,
@@ -24,6 +25,7 @@ const pantryController = new PantryController();
  */
 router.use(authenticate);
 router.use(pantryLimiter);
+router.use(idempotency);
 
 /**
  * @route   GET /api/v1/pantry/stats
