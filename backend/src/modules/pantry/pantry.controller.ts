@@ -6,6 +6,7 @@
 
 import { Request, Response } from 'express';
 import { PantryService } from './pantry.service';
+import { adjustPantryItem } from './pantry.adjust';
 import { asyncHandler } from '../../middleware/errorHandler';
 import {
   CreatePantryItemRequest,
@@ -31,6 +32,20 @@ export class PantryController {
     const item = await this.pantryService.createItem(userId, data);
 
     res.status(201).json(item);
+  });
+
+  /**
+   * Apply a quantity delta (clamped to [0, max])
+   * POST /api/v1/pantry/:id/adjust
+   */
+  adjustItem = asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const result = await adjustPantryItem(userId, req.params.id, {
+      delta: req.body.delta,
+      unit: req.body.unit,
+    });
+
+    res.status(200).json(result);
   });
 
   /**

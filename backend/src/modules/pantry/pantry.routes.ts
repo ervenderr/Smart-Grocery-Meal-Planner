@@ -12,6 +12,7 @@ import { pantryLimiter } from '../../middleware/rateLimiter';
 import {
   validateCreateItem,
   validateUpdateItem,
+  validateAdjustItem,
   validateGetItems,
   validateItemId,
   validate,
@@ -54,6 +55,18 @@ router.post('/', validateCreateItem, validate, pantryController.createItem);
  * @access  Private
  */
 router.get('/', validateGetItems, validate, pantryController.getItems);
+
+/**
+ * @route   POST /api/v1/pantry/:id/adjust
+ * @desc    Apply a quantity delta (clamped at 0)
+ * @access  Private
+ */
+router.post(
+  '/:id/adjust',
+  validateAdjustItem,
+  validate,
+  pantryController.adjustItem
+);
 
 /**
  * @route   GET /api/v1/pantry/:id

@@ -8,6 +8,7 @@ import { body, query, param, ValidationChain } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { AppError } from '../../middleware/errorHandler';
+import { PANTRY_QUANTITY_MAX } from './pantry.adjust';
 import { PantryCategory, PantryUnit, PantryLocation } from '../../types/pantry.types';
 
 const BARCODE_PATTERN = /^\d{8,14}$/;
@@ -236,4 +237,31 @@ export const validateGetItems: ValidationChain[] = [
  */
 export const validateItemId: ValidationChain[] = [
   param('id').isUUID().withMessage('Invalid item ID'),
+];
+
+/**
+ * Adjust (delta) validation: finite, non-zero, max 2 decimals, |delta| <= max
+ */
+const DELTA_PATTERN = /^-?\d+(\.\d{1,2})?$/;
+
+export const validateAdjustItem: ValidationChain[] = [
+  param('id').isUUID().withMessage('Invalid item ID'),
+  body('delta').custom((value) => {
+    if (typeof value !== 'number' && typeof value !== 'string') {
+      throw new Error('delta must be a number');
+    }
+    const text = typeof value === 'number' ? String(value) : value.trim();
+    if (!DELTA_PATTERN.test(text)) {
+      throw new Error('delta must be a number with at most 2 decimal places');
+    }
+    const num = Number(text);
+    if (!Number.isFinite(num) || num === 0) {
+      throw new Error('delta must be non-zero');
+    }
+    if (Math.abs(num) > PANTRY_QUANTITY_MAX) {
+      throw new Error(`delta must be within +/-${PANTRY_QUANTITY_MAX}`);
+    }
+    return true;
+  }),
+  body('unit').optional().isString().trim().isLength({ min: 1, max: 20 }),
 ];

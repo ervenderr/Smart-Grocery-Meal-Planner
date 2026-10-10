@@ -16,11 +16,8 @@ import {
   PantryStats,
 } from "../../types/pantry.types";
 import { Decimal } from "@prisma/client/runtime/library";
-import { zapierService } from "../zapier";
 import { formatPantryItem } from "./pantry.format";
-
-// Low stock threshold - items below this quantity trigger alerts
-const LOW_STOCK_THRESHOLD = 2;
+import { notifyLowStock } from "./pantry.low-stock";
 
 export class PantryService {
   /**
@@ -276,27 +273,7 @@ export class PantryService {
       itemId,
     });
 
-    // Check for low stock and dispatch Zapier event
-    // Quantity 0 (used up) intentionally does not fire stock_low
-    const currentQuantity = Number(item.quantity);
-    if (currentQuantity <= LOW_STOCK_THRESHOLD && currentQuantity > 0) {
-      zapierService
-        .dispatchEvent(userId, "stock_low", {
-          itemId: item.id,
-          itemName: item.ingredientName,
-          currentQuantity,
-          unit: item.unit,
-          threshold: LOW_STOCK_THRESHOLD,
-          message: `${item.ingredientName} is running low (${currentQuantity} ${item.unit} remaining)`,
-        })
-        .catch((error) => {
-          logger.warn("Failed to dispatch Zapier event for low stock", {
-            service: "kitcha-api",
-            error: error instanceof Error ? error.message : "Unknown error",
-            itemId: item.id,
-          });
-        });
-    }
+    notifyLowStock(userId, item);
 
     return this.formatItem(item);
   }
