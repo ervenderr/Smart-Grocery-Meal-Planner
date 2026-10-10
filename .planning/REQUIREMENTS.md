@@ -75,4 +75,38 @@ Research: `.planning/research-v2/` (01 native path, 02 on-device AI, 03 offline 
 ## Traceability
 | Requirement | Phase | Status |
 |---|---|---|
-| (filled by roadmapper) | | |
+| STORE-01 | Phase 7 | Pending |
+| STORE-02 | Phase 7 | Pending |
+| STORE-03 | Phase 7 | Pending |
+| STORE-04 | Phase 7 | Pending |
+| STORE-05 | Phase 7 | Pending |
+| SYNC-01 | Phase 8 | Pending |
+| SYNC-02 | Phase 8 | Pending |
+| SYNC-03 | Phase 8 | Pending |
+| SYNC-04 | Phase 8 | Pending |
+| SYNC-05 | Phase 8 | Pending |
+| SYNC-06 | Phase 8 | Pending |
+| SYNC-07 | Phase 8 | Pending |
+| OFF-08 | Phase 9 | Pending |
+| SHELL-01 | Phase 10 | Pending |
+| SHELL-02 | Phase 10 | Pending |
+| SHELL-03 | Phase 10 | Pending |
+| SHELL-04 | Phase 10 | Pending |
+| SHELL-05 | Phase 10 | Pending |
+| SHELL-06 | Phase 10 | Pending |
+| OFF-01 | Phase 11 | Pending |
+| OFF-02 | Phase 11 | Pending |
+| OFF-03 | Phase 11 | Pending |
+| OFF-04 | Phase 11 | Pending |
+| OFF-05 | Phase 11 | Pending |
+| OFF-06 | Phase 11 | Pending |
+| OFF-07 | Phase 11 | Pending |
+| OFF-09 | Phase 11 | Pending |
+| SUB-01 | Phase 12 | Pending |
+| SUB-02 | Phase 12 | Pending |
+| SUB-03 | Phase 12 | Pending |
+| AI-01 | Phase 13 | Pending |
+| AI-02 | Phase 13 | Pending |
+| AI-03 | Phase 13 | Pending |
+| REL-01 | Phase 14 | Pending |
+| REL-02 | Phase 14 | Pending |
