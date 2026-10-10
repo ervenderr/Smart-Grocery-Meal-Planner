@@ -15,7 +15,7 @@ import {
   MIN_QUANTITY,
   SHOPPING_ERROR_CODES,
 } from './shopping.constants';
-import { withinOneDayOfUtcToday } from './shopping-finish.service';
+import { withinReceiptWindow } from './shopping.receipt-window';
 import { normalizeUnit } from './shopping.units';
 
 // eslint-disable-next-line no-control-regex -- intentionally strips control characters
@@ -140,8 +140,12 @@ export const validateFinish: ValidationChain[] = [
     .isISO8601({ strict: true })
     .withMessage('receiptDate must be a valid date')
     .bail()
-    .custom((v: string) => withinOneDayOfUtcToday(v))
-    .withMessage('receiptDate must be within one day of today'),
+    .custom((v: string) => withinReceiptWindow(v))
+    .withMessage('receiptDate must be within the last 14 days and not more than 1 day ahead'),
+  body('occurredAt')
+    .optional()
+    .isISO8601({ strict: true, strictSeparator: true })
+    .withMessage('occurredAt must be an ISO-8601 timestamp'),
 ];
 
 export const validateHistory: ValidationChain[] = [
