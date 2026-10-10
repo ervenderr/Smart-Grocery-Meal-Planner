@@ -10,6 +10,10 @@
  *   limiter skips /api/<version>/shopping ONLY for requests carrying a valid
  *   JWT, so aisle check-offs are not throttled while unauthenticated or
  *   bad-token floods still hit the per-IP general limit)
+ * - Pantry: 600 per 15 minutes per user; Sync: 300 per 15 minutes per user.
+ *   Same JWT-gated skip, so offline queue drains and bootstrap page loops are
+ *   not throttled by the per-IP limiter.
+ * - Refresh/logout: 30 per 15 minutes per IP (failures only)
  * - Notification stats (GET /api/<version>/notifications/stats): 300 requests
  *   per 15 minutes per user. Same JWT-gated skip as shopping, because the
  *   frontend polls this read-only unread count from every open tab.
@@ -37,6 +41,14 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 const SHOPPING_PATH_PATTERN = new RegExp(
   `^/api/${escapeRegExp(config.apiVersion)}/shopping(/|\\?|$)`,
 );
+
+const USER_SCOPED_PATH_PATTERN = new RegExp(
+  `^/api/${escapeRegExp(config.apiVersion)}/(shopping|pantry|sync)(/|\\?|$)`,
+);
+
+/** True for shopping, pantry and sync paths (per-user limited; matches originalUrl). */
+export const isUserScopedApiRequest = (originalUrl: string): boolean =>
+  USER_SCOPED_PATH_PATTERN.test(originalUrl);
 
 /** True for /api/<version>/shopping and anything beneath it (matches originalUrl). */
 export const isShoppingRequest = (originalUrl: string): boolean =>
@@ -81,7 +93,7 @@ export const apiLimiter = rateLimit({
   // Shopping has its own per-user limiter, but only for requests with a valid
   // token; unauthenticated traffic stays under this per-IP limit.
   skip: (req: Request) =>
-    (isShoppingRequest(req.originalUrl) ||
+    (isUserScopedApiRequest(req.originalUrl) ||
       isNotificationStatsRequest(req.method, req.originalUrl)) &&
     hasValidBearerToken(req),
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
@@ -152,11 +164,20 @@ export const aiBurstLimiter = rateLimit({
 
 const SHOPPING_RATE_LIMIT_MESSAGE = 'Too many shopping list requests. Please wait a moment and try again.';
 
-/** Per-user shopping limiter (keyed by user id; IPv6-safe IP fallback). */
-export const createShoppingLimiter = (limit: number = SHOPPING_RATE_LIMIT_MAX) =>
+export const PANTRY_RATE_LIMIT_MAX = 600;
+export const SYNC_RATE_LIMIT_MAX = 300;
+const USER_SCOPED_WINDOW_MS = 15 * 60 * 1000;
+
+/** Per-user limiter (keyed by user id; IPv6-safe IP fallback). */
+export const createUserScopedLimiter = (opts: {
+  limit: number;
+  windowMs?: number;
+  code: string;
+  message: string;
+}) =>
   rateLimit({
-    windowMs: SHOPPING_RATE_LIMIT_WINDOW_MS,
-    limit,
+    windowMs: opts.windowMs ?? USER_SCOPED_WINDOW_MS,
+    limit: opts.limit,
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req: Request) => {
@@ -167,14 +188,61 @@ export const createShoppingLimiter = (limit: number = SHOPPING_RATE_LIMIT_MAX) =
       res.status(429).json({
         status: 'error',
         statusCode: 429,
-        code: 'SHOPPING_RATE_LIMITED',
-        message: SHOPPING_RATE_LIMIT_MESSAGE,
-        error: SHOPPING_RATE_LIMIT_MESSAGE,
+        code: opts.code,
+        message: opts.message,
+        error: opts.message,
       });
     },
   });
 
+/** Per-user shopping limiter. */
+export const createShoppingLimiter = (limit: number = SHOPPING_RATE_LIMIT_MAX) =>
+  createUserScopedLimiter({
+    limit,
+    windowMs: SHOPPING_RATE_LIMIT_WINDOW_MS,
+    code: 'SHOPPING_RATE_LIMITED',
+    message: SHOPPING_RATE_LIMIT_MESSAGE,
+  });
+
 export const shoppingLimiter = createShoppingLimiter();
+
+export const createPantryLimiter = (limit: number = PANTRY_RATE_LIMIT_MAX) =>
+  createUserScopedLimiter({
+    limit,
+    code: 'PANTRY_RATE_LIMITED',
+    message: 'Too many pantry requests. Please wait a moment and try again.',
+  });
+
+export const pantryLimiter = createPantryLimiter();
+
+export const createSyncLimiter = (limit: number = SYNC_RATE_LIMIT_MAX) =>
+  createUserScopedLimiter({
+    limit,
+    code: 'SYNC_RATE_LIMITED',
+    message: 'Too many sync requests. Please wait a moment and try again.',
+  });
+
+export const syncLimiter = createSyncLimiter();
+
+const REFRESH_RATE_LIMIT_MESSAGE = 'Too many token refresh attempts. Please try again later.';
+
+/** IP-keyed limiter for /auth/refresh and /auth/logout (failed requests only count). */
+export const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      status: 'error',
+      statusCode: 429,
+      code: 'AUTH_REFRESH_RATE_LIMITED',
+      message: REFRESH_RATE_LIMIT_MESSAGE,
+      error: REFRESH_RATE_LIMIT_MESSAGE,
+    });
+  },
+});
 
 const NOTIFICATION_STATS_RATE_LIMIT_MESSAGE =
   'Too many notification checks. Please wait a moment and try again.';

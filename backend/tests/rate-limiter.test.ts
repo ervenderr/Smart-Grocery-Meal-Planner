@@ -183,3 +183,92 @@ describe("Shopping limiter", () => {
     expect(hasValidBearerToken(req(`Bearer ${token}x`))).toBe(false);
   });
 });
+
+describe("per-user pantry/sync limiters", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const limiter = require("../src/middleware/rateLimiter") as typeof import("../src/middleware/rateLimiter");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const express = require("express") as typeof import("express");
+
+  it.each([
+    "/api/v1/pantry/abc",
+    "/api/v1/pantry",
+    "/api/v1/sync/bootstrap?cursor=x",
+    "/api/v1/shopping/list",
+  ])("isUserScopedApiRequest matches %s", (url) => {
+    expect(limiter.isUserScopedApiRequest(url)).toBe(true);
+  });
+
+  it.each(["/api/v1/pantryx", "/api/v1/recipes", "/api/v1/auth/login"])(
+    "isUserScopedApiRequest rejects %s",
+    (url) => {
+      expect(limiter.isUserScopedApiRequest(url)).toBe(false);
+    }
+  );
+
+  const buildApp = (mount: import("express").RequestHandler) => {
+    const app = express();
+    app.use((req, _res, next) => {
+      const id = req.header("x-test-user");
+      if (id) (req as unknown as { user: { id: string } }).user = { id };
+      next();
+    });
+    app.use(mount);
+    app.get("/x", (_req, res) => {
+      res.json({ ok: true });
+    });
+    return app;
+  };
+
+  it("429s the third request per user with the configured code, other users unaffected", async () => {
+    const app = buildApp(
+      limiter.createUserScopedLimiter({ limit: 2, code: "TEST_LIMITED", message: "slow down" })
+    );
+    const hit = (u: string) => request(app).get("/x").set("x-test-user", u);
+    expect((await hit("u1")).status).toBe(200);
+    expect((await hit("u1")).status).toBe(200);
+    const blocked = await hit("u1");
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.code).toBe("TEST_LIMITED");
+    expect((await hit("u2")).status).toBe(200);
+  });
+
+  it("pantry limiter answers 429 PANTRY_RATE_LIMITED", async () => {
+    const app = buildApp(limiter.createPantryLimiter(1));
+    await request(app).get("/x").set("x-test-user", "p1");
+    const res = await request(app).get("/x").set("x-test-user", "p1");
+    expect(res.status).toBe(429);
+    expect(res.body.code).toBe("PANTRY_RATE_LIMITED");
+  });
+
+  it("sync limiter answers 429 SYNC_RATE_LIMITED", async () => {
+    const app = buildApp(limiter.createSyncLimiter(1));
+    await request(app).get("/x").set("x-test-user", "s1");
+    const res = await request(app).get("/x").set("x-test-user", "s1");
+    expect(res.status).toBe(429);
+    expect(res.body.code).toBe("SYNC_RATE_LIMITED");
+  });
+
+  it("refreshLimiter and default limiters are exported", () => {
+    expect(limiter.refreshLimiter).toBeDefined();
+    expect(limiter.pantryLimiter).toBeDefined();
+    expect(limiter.syncLimiter).toBeDefined();
+  });
+
+  it("refreshLimiter 429s with AUTH_REFRESH_RATE_LIMITED only after 30 failures", async () => {
+    const app = express();
+    app.use(limiter.refreshLimiter);
+    app.get("/x", (_req, res) => {
+      res.status(401).json({});
+    });
+    let last = 0;
+    let body: { code?: string } = {};
+    for (let i = 0; i < 31; i += 1) {
+      const res = await request(app).get("/x");
+      last = res.status;
+      body = res.body;
+    }
+    expect(last).toBe(429);
+    expect(body.code).toBe("AUTH_REFRESH_RATE_LIMITED");
+  });
+});

@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import { PantryController } from './pantry.controller';
 import { authenticate } from '../../middleware/auth.middleware';
+import { pantryLimiter } from '../../middleware/rateLimiter';
 import {
   validateCreateItem,
   validateUpdateItem,
@@ -22,6 +23,7 @@ const pantryController = new PantryController();
  * All pantry routes require authentication
  */
 router.use(authenticate);
+router.use(pantryLimiter);
 
 /**
  * @route   GET /api/v1/pantry/stats
