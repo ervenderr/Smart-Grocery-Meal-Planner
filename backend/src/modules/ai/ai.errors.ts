@@ -12,7 +12,16 @@ export const AI_ERROR_CODES = {
   LOOKUP_UNAVAILABLE: 'LOOKUP_UNAVAILABLE',
   LOOKUP_THROTTLED: 'LOOKUP_THROTTLED',
   LOOKUP_NOT_FOUND: 'LOOKUP_NOT_FOUND',
+  CONSENT_REQUIRED: 'AI_CONSENT_REQUIRED',
 } as const;
+
+export const AI_CONSENT_REQUIRED_MESSAGE = 'AI features are turned off. Accept to continue.';
+
+export function aiConsentRequiredError(): AppError {
+  return new AppError(AI_CONSENT_REQUIRED_MESSAGE, 403, true, {
+    code: AI_ERROR_CODES.CONSENT_REQUIRED,
+  });
+}
 
 export const AI_UNAVAILABLE_MESSAGE = 'AI suggestions are unavailable right now, try again later.';
 
