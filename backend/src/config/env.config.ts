@@ -51,6 +51,15 @@ export const config = Object.freeze({
     expiresIn: parsed.JWT_EXPIRES_IN,
   }),
 
+  // Refresh tokens (SYNC-04)
+  refreshToken: Object.freeze({
+    ttlDays: parsed.REFRESH_TOKEN_TTL_DAYS,
+    reuseGraceSeconds: parsed.REFRESH_REUSE_GRACE_SECONDS,
+  }),
+
+  // Idempotency keys (SYNC-01)
+  idempotency: Object.freeze({ ttlHours: parsed.IDEMPOTENCY_TTL_HOURS }),
+
   // CORS
   cors: Object.freeze({
     origin: Object.freeze([...parsed.CORS_ORIGIN]) as readonly string[] as string[],
@@ -94,6 +103,8 @@ export const config = Object.freeze({
   readonly publicHost?: string;
   readonly database: { readonly url: string };
   readonly jwt: { readonly secret: string; readonly expiresIn: string };
+  readonly refreshToken: { readonly ttlDays: number; readonly reuseGraceSeconds: number };
+  readonly idempotency: { readonly ttlHours: number };
   readonly cors: {
     readonly origin: string[];
     readonly previewProject: string;

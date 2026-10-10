@@ -66,7 +66,10 @@ export const envSchema = z
           !WEAK_SECRET_FRAGMENTS.some((weak) => value.toLowerCase().includes(weak)),
         "looks like a default/weak value"
       ),
-    JWT_EXPIRES_IN: z.string().min(1).default("7d"),
+    JWT_EXPIRES_IN: z.string().min(1).default("1h"),
+    REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(365).default(90),
+    REFRESH_REUSE_GRACE_SECONDS: z.coerce.number().int().min(0).max(300).default(60),
+    IDEMPOTENCY_TTL_HOURS: z.coerce.number().int().min(1).max(168).default(48),
     API_VERSION: z.string().min(1).default("v1"),
     LOG_LEVEL: z.string().min(1).default("info"),
     CORS_ORIGIN: z.string().default("http://localhost:3000").transform(parseOriginList),
