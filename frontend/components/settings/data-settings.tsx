@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Trash2, AlertTriangle, Loader2, Database, FileJson, FileText } from 'lucide-react';
+import { Download, Loader2, Database, FileJson, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { apiClient } from '@/lib/api/client';
 import { recipeApi } from '@/lib/api/recipes';
 import { mealPlanApi } from '@/lib/api/mealplans';
 import { pantryApi } from '@/lib/api/pantry';
 import toast from 'react-hot-toast';
+import { DangerZoneCard } from './danger-zone-card';
 
 type DataStats = {
   recipesCount: number;
@@ -20,8 +20,6 @@ type DataStats = {
 export function DataSettings() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<DataStats | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   useEffect(() => {
     fetchDataStats();
@@ -134,26 +132,6 @@ export function DataSettings() {
     return [header, ...rows].join('\n');
   };
 
-  const deleteAccount = async () => {
-    if (deleteConfirmText !== 'DELETE MY ACCOUNT') {
-      toast.error('Please type the confirmation text exactly');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await apiClient.delete('/api/v1/users/account');
-      toast.success('Account deleted successfully');
-      // Redirect to login page
-      window.location.href = '/login';
-    } catch (error: any) {
-      console.error('Delete account error:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete account');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-w-0 space-y-6">
       {/* Data Statistics */}
@@ -235,77 +213,7 @@ export function DataSettings() {
         </div>
       </Card>
 
-      {/* Delete Account */}
-      <Card className="p-6 border-2 border-red-200">
-        <div className="flex items-center gap-2 mb-4">
-          <AlertTriangle className="h-5 w-5 text-red-600" />
-          <h2 className="text-lg font-semibold text-red-900">Danger Zone</h2>
-        </div>
-        <p className="text-sm text-gray-600 mb-6">
-          Once you delete your account, there is no going back. Please be certain.
-        </p>
-
-        {!showDeleteConfirm ? (
-          <Button
-            onClick={() => setShowDeleteConfirm(true)}
-            variant="outline"
-            className="min-h-11 w-full border-red-300 text-red-700 hover:bg-red-50 sm:w-auto"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete Account
-          </Button>
-        ) : (
-          <div className="space-y-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-800 font-medium mb-2">
-                This action cannot be undone. This will permanently delete your account and remove all your data.
-              </p>
-              <p className="text-sm text-red-700">
-                Please type <strong>DELETE MY ACCOUNT</strong> to confirm.
-              </p>
-            </div>
-
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="DELETE MY ACCOUNT"
-              className="block min-h-11 w-full px-3 py-2 text-base lg:text-sm border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500"
-            />
-
-            <div className="flex flex-col-reverse gap-2 sm:flex-row">
-              <Button
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setDeleteConfirmText('');
-                }}
-                variant="outline"
-                className="min-h-11 w-full sm:w-auto"
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={deleteAccount}
-                disabled={loading || deleteConfirmText !== 'DELETE MY ACCOUNT'}
-                className="min-h-11 w-full bg-red-600 hover:bg-red-700 text-white sm:w-auto"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4" />
-                    Delete My Account
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
-      </Card>
+      <DangerZoneCard />
     </div>
   );
 }

@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart } from 'lucide-react';
 import { LoginForm } from '@/components/auth/login-form';
+import { DeletedAccountNotice } from '@/components/auth/deleted-account-notice';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import Image from 'next/image'; 
 
@@ -47,10 +48,25 @@ export default function LoginPage() {
             Log in to continue managing your meals and groceries
           </p>
 
+          <div className="mt-6">
+            <Suspense fallback={null}>
+              <DeletedAccountNotice />
+            </Suspense>
+          </div>
+
           {/* Login Form */}
           <div className="mt-8">
             <LoginForm />
           </div>
+
+          <nav
+            aria-label="Legal and support"
+            className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600"
+          >
+            <Link href="/privacy" className="underline hover:text-gray-900">Privacy Policy</Link>
+            <Link href="/terms" className="underline hover:text-gray-900">Terms of Use</Link>
+            <Link href="/support" className="underline hover:text-gray-900">Support</Link>
+          </nav>
         </div>
       </div>
 
