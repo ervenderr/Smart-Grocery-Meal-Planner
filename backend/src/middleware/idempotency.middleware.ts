@@ -171,7 +171,7 @@ export const idempotency: RequestHandler = async (
       key: parsed.data,
       method: req.method,
       route,
-      requestHash: computeRequestHash(req.method, route, req.body),
+      requestHash: computeRequestHash(req.method, route, req.body, req.query),
     };
 
     const id = await reserve({ ...claim, now: new Date() });

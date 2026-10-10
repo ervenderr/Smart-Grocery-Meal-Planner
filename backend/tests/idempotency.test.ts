@@ -103,6 +103,13 @@ describe('Idempotency-Key middleware', () => {
     expect(res.status).toBe(422);
   });
 
+  it('returns 422 when only the query string differs (WR-01)', async () => {
+    const key = newKey();
+    await request(app).post('/api/v1/pantry?a=1').set(auth(u1)).set('Idempotency-Key', key).send(pantryBody()).expect(201);
+    const res = await request(app).post('/api/v1/pantry?a=2').set(auth(u1)).set('Idempotency-Key', key).send(pantryBody());
+    expect(res.status).toBe(422);
+  });
+
   it('scopes keys per user', async () => {
     const key = newKey();
     const a = await postPantry(u1, key);

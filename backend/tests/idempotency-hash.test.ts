@@ -51,3 +51,20 @@ describe('idempotencyKeySchema', () => {
     (k) => expect(idempotencyKeySchema.safeParse(k).success).toBe(false)
   );
 });
+
+describe('computeRequestHash query (WR-01)', () => {
+  const { computeRequestHash } = jest.requireActual('../src/modules/idempotency/idempotency.hash');
+  it('differs when the query differs', () => {
+    expect(computeRequestHash('POST', '/x', {}, { a: '1' })).not.toBe(
+      computeRequestHash('POST', '/x', {}, { a: '2' })
+    );
+  });
+  it('is order-insensitive and unchanged for an empty query', () => {
+    expect(computeRequestHash('POST', '/x', {}, { a: '1', b: '2' })).toBe(
+      computeRequestHash('POST', '/x', {}, { b: '2', a: '1' })
+    );
+    expect(computeRequestHash('POST', '/x', { k: 1 }, {})).toBe(
+      computeRequestHash('POST', '/x', { k: 1 })
+    );
+  });
+});

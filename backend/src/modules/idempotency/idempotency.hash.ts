@@ -26,8 +26,22 @@ export function canonicalJson(value: unknown): string {
   return result === undefined ? 'undefined' : result;
 }
 
-export function computeRequestHash(method: string, route: string, body: unknown): string {
+/**
+ * Hash of method + route + body (+ query when present, WR-01). An empty query
+ * hashes exactly as before so existing stored keys stay valid.
+ */
+export function computeRequestHash(
+  method: string,
+  route: string,
+  body: unknown,
+  query?: unknown
+): string {
+  const hasQuery =
+    query !== null &&
+    typeof query === 'object' &&
+    Object.keys(query as Record<string, unknown>).length > 0;
+  const suffix = hasQuery ? ` ?${canonicalJson(query)}` : '';
   return createHash('sha256')
-    .update(`${method.toUpperCase()} ${route} ${canonicalJson(body)}`)
+    .update(`${method.toUpperCase()} ${route} ${canonicalJson(body)}${suffix}`)
     .digest('hex');
 }
