@@ -15,7 +15,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" \"prisma/**/*.ts\"",
+    "seed:reviewer": "ts-node scripts/seed-reviewer.ts",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" \"prisma/**/*.ts\" \"scripts/**/*.ts\"",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\""
   },
