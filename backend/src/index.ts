@@ -15,6 +15,7 @@ import { config } from "./config/env.config";
 import { logger } from "./config/logger.config";
 import { connectDatabase, disconnectDatabase } from "./config/database.config";
 import { initializeScheduler } from "./modules/zapier";
+import { initializeSyncCleanup } from "./modules/idempotency/idempotency.cleanup";
 
 /**
  * Start the server
@@ -35,6 +36,8 @@ async function startServer(): Promise<void> {
     // 3. Initialize scheduled tasks
     initializeScheduler();
     console.log("✅ Zapier scheduler initialized");
+    initializeSyncCleanup();
+    console.log("✅ Sync cleanup scheduled");
 
     console.log("📊 Step 4: Starting server on port", config.port);
     // 4. Start listening
