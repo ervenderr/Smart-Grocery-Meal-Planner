@@ -133,10 +133,11 @@ function resolveWithStock(group: NeedGroup, entry: PantryEntry, quantityAware: b
 }
 
 function resolveWithoutStock(group: NeedGroup, ctx: RulesContext): Draft {
+  const quantityAware = ctx.quantityAware !== false;
   const first = [...group.families.values()][0];
   const needed = first ? fromBase(first.base, first.unit.unitKey) : 0;
   const unit = first ? first.unit.label : group.firstUnit.label;
-  const isStaple = ctx.staples.has(group.canonical) && !group.discreteCount;
+  const isStaple = ctx.staples.has(group.canonical) && !(quantityAware && group.discreteCount);
   return {
     status: isStaple ? 'staple' : 'missing',
     needed,
