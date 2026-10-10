@@ -197,6 +197,9 @@ export function createApp(): Application {
   console.log("  - Loading cook routes...");
   const cookRoutes = require("./modules/cook/cook.routes").default;
 
+  console.log("  - Loading sync routes...");
+  const syncRoutes = require("./modules/sync/sync.routes").default;
+
   console.log("✅ All route modules loaded successfully");
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
@@ -213,6 +216,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/zapier`, zapierRoutes);
   app.use(`/api/${config.apiVersion}/shopping`, shoppingRoutes);
   app.use(`/api/${config.apiVersion}/cook`, cookRoutes);
+  app.use(`/api/${config.apiVersion}/sync`, syncRoutes);
 
   console.log("✅ All routes registered successfully");
 
