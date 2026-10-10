@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import {
   DRAFT_BANNER_ENABLED,
@@ -15,9 +16,9 @@ export function LegalShell({ title, children }: LegalShellProps) {
   return (
     <main className="mx-auto min-h-dvh max-w-prose bg-white px-4 py-12 text-gray-900 sm:px-6">
       <header className="mb-6">
-        <a href="/" className="text-primary-700 text-xl font-semibold">
+        <Link href="/" className="text-primary-700 text-xl font-semibold">
           Kitcha
-        </a>
+        </Link>
       </header>
 
       {DRAFT_BANNER_ENABLED && (

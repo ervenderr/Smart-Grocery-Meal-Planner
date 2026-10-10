@@ -51,6 +51,17 @@ export default function SignupPage() {
           <div className="mt-8">
             <SignupForm />
           </div>
+          <p className="mt-4 text-center text-sm text-gray-600">
+            By creating an account you agree to our{' '}
+            <Link href="/terms" className="underline">
+              Terms of Use
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
       </div>
 
