@@ -91,7 +91,7 @@ describe('findSubstitutes filtering', () => {
   it('removes swaps lacking the vegan tag and counts them', () => {
     const result = findSubstitutes(
       { ingredientName: 'sugar', quantity: 1, unit: 'cups' },
-      { ...none, restrictions: ['vegan'] },
+      { ...none, restrictions: ['vegan'] }
     );
     expect(result?.swaps.map((s) => s.name)).not.toContain('honey');
     expect(result?.hiddenCount).toBe(1);
@@ -101,7 +101,7 @@ describe('findSubstitutes filtering', () => {
   it('filters free-text restrictions by keyword', () => {
     const result = findSubstitutes(
       { ingredientName: 'almond butter', quantity: 1, unit: 'cups' },
-      { ...none, restrictions: ['no peanuts'] },
+      { ...none, restrictions: ['no peanuts'] }
     );
     expect(result?.swaps.map((s) => s.name)).toEqual(['sunflower seed butter']);
     expect(result?.hiddenCount).toBe(1);
@@ -111,7 +111,7 @@ describe('findSubstitutes filtering', () => {
     const entry = table.entries.find((e) => e.ingredient === 'almond butter');
     const result = findSubstitutes(
       { ingredientName: 'almond butter', quantity: 1, unit: 'cups' },
-      { ...none, restrictions: ['peanut free', 'sunflower'] },
+      { ...none, restrictions: ['peanut free', 'sunflower'] }
     );
     expect(result?.swaps).toEqual([]);
     expect(result?.hiddenCount).toBe(entry?.swaps.length);
@@ -125,13 +125,9 @@ describe('findSubstitutes filtering', () => {
     expect(RESTRICTION_TAG_MAP.halal).toBe('halal');
     const result = findSubstitutes(
       { ingredientName: 'butter', quantity: 1, unit: 'cups' },
-      { ...none, restrictions: ['Gluten-Free', 'dairy_free'] },
+      { ...none, restrictions: ['Gluten-Free', 'dairy_free'] }
     );
-    expect(result?.swaps.map((s) => s.name)).toEqual([
-      'vegetable oil',
-      'coconut oil',
-      'olive oil',
-    ]);
+    expect(result?.swaps.map((s) => s.name)).toEqual(['vegetable oil', 'coconut oil', 'olive oil']);
   });
 });
 
@@ -139,7 +135,7 @@ describe('findSubstitutes ordering and purity', () => {
   it('lists in-pantry swaps first', () => {
     const result = findSubstitutes(
       { ingredientName: 'sugar', quantity: 1, unit: 'cups' },
-      { pantryHas: (c) => c === 'honey', restrictions: [] },
+      { pantryHas: (c) => c === 'honey', restrictions: [] }
     );
     expect(result?.swaps[0].name).toBe('honey');
     expect(result?.swaps[0].inPantry).toBe(true);
@@ -150,13 +146,15 @@ describe('findSubstitutes ordering and purity', () => {
   it('requires every pantry name for inPantry', () => {
     const result = findSubstitutes(
       { ingredientName: 'buttermilk', quantity: 1, unit: 'cups' },
-      { pantryHas: (c) => c === 'milk', restrictions: [] },
+      { pantryHas: (c) => c === 'milk', restrictions: [] }
     );
     expect(result?.swaps.every((s) => !s.inPantry)).toBe(true);
   });
 
   it('returns null for unknown ingredients', () => {
-    expect(findSubstitutes({ ingredientName: 'xyzzy', quantity: 1, unit: 'cups' }, none)).toBeNull();
+    expect(
+      findSubstitutes({ ingredientName: 'xyzzy', quantity: 1, unit: 'cups' }, none)
+    ).toBeNull();
   });
 
   it('makes no network call, is deterministic and does not mutate the table', () => {

@@ -38,13 +38,13 @@ interface TokenKey {
 }
 
 const KEY_INDEX: ReadonlyMap<string, SubstitutionEntry> = new Map(
-  TABLE.entries.map((entry) => [entry.ingredient, entry]),
+  TABLE.entries.map((entry) => [entry.ingredient, entry])
 );
 
 const ALIAS_INDEX: ReadonlyMap<string, string> = new Map(
   TABLE.entries.flatMap((entry) =>
-    entry.aliases.map((alias): [string, string] => [canonicalName(alias), entry.ingredient]),
-  ),
+    entry.aliases.map((alias): [string, string] => [canonicalName(alias), entry.ingredient])
+  )
 );
 
 const TOKEN_KEYS: readonly TokenKey[] = Object.freeze(
@@ -54,8 +54,8 @@ const TOKEN_KEYS: readonly TokenKey[] = Object.freeze(
       (a, b) =>
         b.tokens.length - a.tokens.length ||
         b.key.length - a.key.length ||
-        (a.key < b.key ? -1 : a.key > b.key ? 1 : 0),
-    ),
+        (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
+    )
 );
 
 function tokenSubsetKey(canonical: string): string | null {
@@ -111,21 +111,17 @@ function scaledLine(swap: SubstitutionSwap, query: SubstituteQuery): string | nu
   if (familyKey(queryUnit) !== familyKey(perUnit)) return null;
   const factor = toBase(query.quantity, queryUnit) / toBase(ratio.per, perUnit);
   let amount = ratio.amount * factor;
-  let unit = ratio.unit;
+  let unit: string = ratio.unit;
   const swapUnit = resolveUnit(ratio.unit);
   if (swapUnit.family !== 'count' && familyKey(swapUnit) === familyKey(queryUnit)) {
     amount = fromBase(toBase(amount, swapUnit), queryUnit.unitKey);
     unit = queryUnit.unitKey;
   }
-  const given = joinWords(
-    formatAmount(amount, unit),
-    label(unit, amount),
-    swap.name,
-  );
+  const given = joinWords(formatAmount(amount, unit), label(unit, amount), swap.name);
   const need = joinWords(
     formatAmount(query.quantity, queryUnit.unitKey),
     label(queryUnit.unitKey, query.quantity),
-    query.ingredientName.trim(),
+    query.ingredientName.trim()
   );
   return `Use ${given} for ${need}`;
 }
@@ -133,7 +129,7 @@ function scaledLine(swap: SubstitutionSwap, query: SubstituteQuery): string | nu
 function toSuggested(
   swap: SubstitutionSwap,
   query: SubstituteQuery,
-  options: SubstituteOptions,
+  options: SubstituteOptions
 ): SuggestedSwap {
   const ingredient = query.ingredientName.trim();
   return Object.freeze({
@@ -154,7 +150,7 @@ function compareSwaps(a: SuggestedSwap, b: SuggestedSwap): number {
 
 export function findSubstitutes(
   query: SubstituteQuery,
-  options: SubstituteOptions,
+  options: SubstituteOptions
 ): SubstituteResult | null {
   const key = matchSubstitutionKey(query.ingredientName);
   const entry = key ? KEY_INDEX.get(key) : undefined;
@@ -165,7 +161,7 @@ export function findSubstitutes(
   const allowed = entry.swaps.filter(
     (swap) =>
       tags.every((tag) => (swap.tags as readonly string[]).includes(tag)) &&
-      !violatesCompiled([swap.name, ...swap.pantryNames], patterns),
+      !violatesCompiled([swap.name, ...swap.pantryNames], patterns)
   );
   const swaps = allowed.map((swap) => toSuggested(swap, query, options)).sort(compareSwaps);
   return Object.freeze({
