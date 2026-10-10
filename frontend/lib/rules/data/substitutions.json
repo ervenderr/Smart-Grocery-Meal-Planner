@@ -1,0 +1,4702 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "ingredient": "buttermilk",
+      "aliases": [
+        "cultured buttermilk"
+      ],
+      "swaps": [
+        {
+          "name": "milk + lemon juice",
+          "pantryNames": [
+            "milk",
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Stir 1 tbsp lemon juice into 1 cup milk and rest 5 minutes.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "plain yogurt + milk",
+          "pantryNames": [
+            "plain yogurt",
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Whisk 3/4 cup yogurt with 1/4 cup milk until pourable.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "soy milk + vinegar",
+          "pantryNames": [
+            "soy milk",
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Stir 1 tbsp vinegar into 1 cup soy milk and rest 5 minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "egg",
+      "aliases": [
+        "large egg"
+      ],
+      "swaps": [
+        {
+          "name": "flax egg",
+          "pantryNames": [
+            "ground flaxseed",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "pieces",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Mix 1 tbsp ground flax with 3 tbsp water, rest 5 minutes. Best in baking.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "applesauce",
+          "pantryNames": [
+            "applesauce"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/4 cup unsweetened applesauce per egg. Gives a denser, moister result.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "mashed banana",
+          "pantryNames": [
+            "banana"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1/4 cup mashed ripe banana per egg. Adds banana flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "silken tofu",
+          "pantryNames": [
+            "tofu"
+          ],
+          "ratio": {
+            "amount": 0.25,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Blend 1/4 cup silken tofu until smooth per egg.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "egg white",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "aquafaba",
+          "pantryNames": [
+            "chickpea liquid"
+          ],
+          "ratio": {
+            "amount": 3,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Use 3 tbsp liquid from canned chickpeas per egg white. Whips like meringue.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "whole egg",
+          "pantryNames": [
+            "egg"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "pieces",
+            "per": 2,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1 whole egg for 2 whites when richness is fine.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "egg yolk",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "whole egg",
+          "pantryNames": [
+            "egg"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "pieces",
+            "per": 2,
+            "perUnit": "pieces"
+          },
+          "note": "Use 1 whole egg for 2 yolks in custards and sauces. Result is a bit lighter.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cornstarch + milk",
+          "pantryNames": [
+            "cornstarch",
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "pieces"
+          },
+          "note": "Whisk 1 tbsp cornstarch into milk already in the recipe to thicken instead.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "butter",
+      "aliases": [
+        "stick of butter"
+      ],
+      "swaps": [
+        {
+          "name": "margarine",
+          "pantryNames": [
+            "margarine"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Check the label if you avoid dairy.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "vegetable oil",
+          "pantryNames": [
+            "vegetable oil"
+          ],
+          "ratio": {
+            "amount": 0.75,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 3/4 cup oil per cup butter in baking. Texture will be softer.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "coconut oil",
+          "pantryNames": [
+            "coconut oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 using solid refined or virgin coconut oil.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "olive oil",
+          "pantryNames": [
+            "olive oil"
+          ],
+          "ratio": {
+            "amount": 0.75,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 3/4 cup per cup butter in savory dishes and rustic cakes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "unsalted butter",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "salted butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 and reduce added salt by 1/4 tsp per stick.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut oil",
+          "pantryNames": [
+            "coconut oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; add a pinch of salt only if needed.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "margarine",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Adds richer flavor.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut oil",
+          "pantryNames": [
+            "coconut oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for a dairy-free option.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "shortening",
+      "aliases": [
+        "vegetable shortening"
+      ],
+      "swaps": [
+        {
+          "name": "butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Baked goods spread slightly more and taste richer.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut oil",
+          "pantryNames": [
+            "coconut oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use solid coconut oil 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "margarine",
+          "pantryNames": [
+            "margarine"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use stick margarine 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "gluten_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "lard",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Pastry will be less flaky but tasty.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "shortening",
+          "pantryNames": [
+            "shortening"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for similar flakiness.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "coconut oil",
+          "pantryNames": [
+            "coconut oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 using solid coconut oil.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "vegetable oil",
+      "aliases": [
+        "canola oil",
+        "cooking oil"
+      ],
+      "swaps": [
+        {
+          "name": "olive oil",
+          "pantryNames": [
+            "olive oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Flavor is stronger.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "melted butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in baking; cool slightly first.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "applesauce",
+          "pantryNames": [
+            "applesauce"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in cakes and muffins for a lower-fat, moister crumb.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "olive oil",
+      "aliases": [
+        "extra virgin olive oil"
+      ],
+      "swaps": [
+        {
+          "name": "vegetable oil",
+          "pantryNames": [
+            "vegetable oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Less flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "melted butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for sauteing or baking.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "avocado oil",
+          "pantryNames": [
+            "avocado oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; good for high heat.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "coconut oil",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "vegetable oil",
+          "pantryNames": [
+            "vegetable oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 when the oil is melted in the recipe.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "ghee",
+      "aliases": [
+        "clarified butter"
+      ],
+      "swaps": [
+        {
+          "name": "butter",
+          "pantryNames": [
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Smokes at a lower temperature.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut oil",
+          "pantryNames": [
+            "coconut oil"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for dairy-free frying.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "milk",
+      "aliases": [
+        "whole milk",
+        "2 percent milk",
+        "skim milk"
+      ],
+      "swaps": [
+        {
+          "name": "soy milk",
+          "pantryNames": [
+            "soy milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Choose unsweetened.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "oat milk",
+          "pantryNames": [
+            "oat milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Check label if you need gluten-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "almond milk",
+          "pantryNames": [
+            "almond milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Not nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "evaporated milk + water",
+          "pantryNames": [
+            "evaporated milk",
+            "water"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1/2 cup evaporated milk with 1/2 cup water.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "heavy cream",
+      "aliases": [
+        "heavy whipping cream",
+        "double cream"
+      ],
+      "swaps": [
+        {
+          "name": "milk + butter",
+          "pantryNames": [
+            "milk",
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Whisk 3/4 cup milk with 1/4 cup melted butter. Works in cooking, will not whip.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut cream",
+          "pantryNames": [
+            "coconut cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; chilled coconut cream whips.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "evaporated milk",
+          "pantryNames": [
+            "evaporated milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in soups and sauces. Lower fat.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "whipping cream",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "heavy cream",
+          "pantryNames": [
+            "heavy cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut cream",
+          "pantryNames": [
+            "coconut cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Chill the can overnight and whip the solid part.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "half and half",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "milk + heavy cream",
+          "pantryNames": [
+            "milk",
+            "heavy cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1/2 cup milk with 1/2 cup heavy cream.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "evaporated milk",
+          "pantryNames": [
+            "evaporated milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "milk + butter",
+          "pantryNames": [
+            "milk",
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 7/8 cup milk plus 1 1/2 tbsp melted butter.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "sour cream",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "plain yogurt",
+          "pantryNames": [
+            "plain yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Add a splash of lemon juice if you want more tang.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "greek yogurt",
+          "pantryNames": [
+            "greek yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; thicker and tangier.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cottage cheese + lemon juice",
+          "pantryNames": [
+            "cottage cheese",
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Blend until smooth with 1 tbsp lemon juice.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "cashew cream",
+          "pantryNames": [
+            "cashews",
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Blend soaked cashews with water and lemon juice.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "plain yogurt",
+      "aliases": [
+        "yogurt",
+        "natural yogurt"
+      ],
+      "swaps": [
+        {
+          "name": "sour cream",
+          "pantryNames": [
+            "sour cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; richer.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "greek yogurt + water",
+          "pantryNames": [
+            "greek yogurt",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Thin 3/4 cup Greek yogurt with 1/4 cup water.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "coconut yogurt",
+          "pantryNames": [
+            "coconut yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 unsweetened.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "greek yogurt",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "sour cream",
+          "pantryNames": [
+            "sour cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "plain yogurt",
+          "pantryNames": [
+            "plain yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Strain through a cloth 30 minutes for thickness, or use as is.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "cream cheese",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "mascarpone",
+          "pantryNames": [
+            "mascarpone"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; milder and richer.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "ricotta",
+          "pantryNames": [
+            "ricotta"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Blend or drain well first; less tang.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "strained greek yogurt",
+          "pantryNames": [
+            "greek yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Strain overnight in a cloth for a spreadable substitute.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "ricotta",
+      "aliases": [
+        "ricotta cheese"
+      ],
+      "swaps": [
+        {
+          "name": "cottage cheese",
+          "pantryNames": [
+            "cottage cheese"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Drain and mash or blend smooth.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tofu",
+          "pantryNames": [
+            "tofu"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crumble firm tofu with lemon juice and salt for a vegan option.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "mascarpone",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "cream cheese + heavy cream",
+          "pantryNames": [
+            "cream cheese",
+            "heavy cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Beat 8 oz cream cheese with 1/4 cup cream until smooth.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "cottage cheese",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "ricotta",
+          "pantryNames": [
+            "ricotta"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; smoother.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "greek yogurt",
+          "pantryNames": [
+            "greek yogurt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in dips and bakes.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "evaporated milk",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "milk simmered down",
+          "pantryNames": [
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Simmer 2 1/4 cups milk until reduced to 1 cup.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "heavy cream + water",
+          "pantryNames": [
+            "heavy cream",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1/2 cup cream with 1/2 cup water.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "coconut milk",
+          "pantryNames": [
+            "coconut milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for a dairy-free option.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "condensed milk",
+      "aliases": [
+        "sweetened condensed milk"
+      ],
+      "swaps": [
+        {
+          "name": "milk + sugar",
+          "pantryNames": [
+            "milk",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Simmer 1 cup milk with 1/2 cup sugar until thick, about 30 minutes.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "coconut condensed milk",
+          "pantryNames": [
+            "coconut milk",
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Simmer coconut milk with sugar until thick.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "powdered milk",
+      "aliases": [
+        "dry milk",
+        "milk powder"
+      ],
+      "swaps": [
+        {
+          "name": "fresh milk",
+          "pantryNames": [
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 0.25,
+            "perUnit": "cups"
+          },
+          "note": "Use 1 cup liquid milk per 1/4 cup powder; reduce other liquid slightly.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "parmesan",
+      "aliases": [
+        "parmesan cheese",
+        "parmigiano reggiano"
+      ],
+      "swaps": [
+        {
+          "name": "pecorino romano",
+          "pantryNames": [
+            "pecorino"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; saltier, so cut added salt.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "asiago",
+          "pantryNames": [
+            "asiago"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for a milder flavor.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "nutritional yeast",
+          "pantryNames": [
+            "nutritional yeast"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use 1/2 cup per cup grated for a vegan topping.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "mozzarella",
+      "aliases": [
+        "mozzarella cheese"
+      ],
+      "swaps": [
+        {
+          "name": "provolone",
+          "pantryNames": [
+            "provolone"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; sharper.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "monterey jack",
+          "pantryNames": [
+            "monterey jack"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; melts well.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "cheddar",
+      "aliases": [
+        "cheddar cheese"
+      ],
+      "swaps": [
+        {
+          "name": "colby jack",
+          "pantryNames": [
+            "colby jack"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "gruyere",
+          "pantryNames": [
+            "gruyere"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nuttier flavor.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "monterey jack",
+          "pantryNames": [
+            "monterey jack"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; milder.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "feta",
+      "aliases": [
+        "feta cheese"
+      ],
+      "swaps": [
+        {
+          "name": "goat cheese",
+          "pantryNames": [
+            "goat cheese"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; creamier and less salty.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "ricotta salata",
+          "pantryNames": [
+            "ricotta salata"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "firm tofu + lemon + salt",
+          "pantryNames": [
+            "tofu",
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crumble tofu, marinate with lemon juice and salt.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "white sugar",
+      "aliases": [
+        "granulated sugar",
+        "sugar",
+        "caster sugar"
+      ],
+      "swaps": [
+        {
+          "name": "brown sugar",
+          "pantryNames": [
+            "brown sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 packed. Slightly moister and darker.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "honey",
+          "pantryNames": [
+            "honey"
+          ],
+          "ratio": {
+            "amount": 0.75,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Reduce other liquid by 1/4 cup per cup of honey; lower oven 25 F.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "maple syrup",
+          "pantryNames": [
+            "maple syrup"
+          ],
+          "ratio": {
+            "amount": 0.75,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Reduce other liquid by 3 tbsp per cup; lower oven 25 F.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        },
+        {
+          "name": "powdered sugar",
+          "pantryNames": [
+            "powdered sugar"
+          ],
+          "ratio": {
+            "amount": 1.75,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use about 1 3/4 cups powdered sugar per cup; works for frostings, not for creaming.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "ingredient": "brown sugar",
+      "aliases": [
+        "light brown sugar",
+        "dark brown sugar"
+      ],
+      "swaps": [
+        {
+          "name": "white sugar + molasses",
+          "pantryNames": [
+            "white sugar",
+            "molasses"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Mix 1 cup white sugar with 1 tbsp molasses (2 tbsp for dark).",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white sugar",
+          "pantryNames": [
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; slightly less moisture and flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "coconut sugar",
+          "pantryNames": [
+            "coconut sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "powdered sugar",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "white sugar + cornstarch",
+          "pantryNames": [
+            "white sugar",
+            "cornstarch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Blitz 1 cup sugar with 1 tbsp cornstarch in a blender until fine.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "honey",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "maple syrup",
+          "pantryNames": [
+            "maple syrup"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Vegan-friendly.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "agave",
+          "pantryNames": [
+            "agave"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "white sugar + water",
+          "pantryNames": [
+            "white sugar",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Dissolve 1 1/4 cups sugar in 1/4 cup water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "maple syrup",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "honey",
+          "pantryNames": [
+            "honey"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; thicker.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "brown sugar + water",
+          "pantryNames": [
+            "brown sugar",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Dissolve 1 cup brown sugar in 1/4 cup hot water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "agave",
+          "pantryNames": [
+            "agave"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "corn syrup",
+      "aliases": [
+        "light corn syrup"
+      ],
+      "swaps": [
+        {
+          "name": "honey",
+          "pantryNames": [
+            "honey"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; stronger flavor.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sugar syrup",
+          "pantryNames": [
+            "white sugar",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Simmer 1 cup sugar with 1/4 cup water and a squeeze of lemon juice.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "molasses",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "dark brown sugar",
+          "pantryNames": [
+            "brown sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for baking.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "maple syrup",
+          "pantryNames": [
+            "maple syrup"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; milder flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "honey",
+          "pantryNames": [
+            "honey"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; lighter flavor.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "agave",
+      "aliases": [
+        "agave nectar",
+        "agave syrup"
+      ],
+      "swaps": [
+        {
+          "name": "honey",
+          "pantryNames": [
+            "honey"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free",
+            "halal",
+            "kosher"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "maple syrup",
+          "pantryNames": [
+            "maple syrup"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "baking powder",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "baking soda + cream of tartar",
+          "pantryNames": [
+            "baking soda",
+            "cream of tartar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Mix 1/4 tsp baking soda with 1/2 tsp cream of tartar per 1 tsp baking powder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "baking soda + lemon juice",
+          "pantryNames": [
+            "baking soda",
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 1/4 tsp baking soda plus 1/2 tsp lemon juice or vinegar per tsp.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "baking soda",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "baking powder",
+          "pantryNames": [
+            "baking powder"
+          ],
+          "ratio": {
+            "amount": 3,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 3 tsp baking powder per tsp baking soda; reduce added salt and acid.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "cream of tartar",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "lemon juice",
+          "pantryNames": [
+            "lemon juice"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 2 tsp lemon juice or white vinegar per tsp. For whipping egg whites.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white vinegar",
+          "pantryNames": [
+            "white vinegar"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use 2 tsp per tsp cream of tartar.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "yeast",
+      "aliases": [
+        "active dry yeast",
+        "instant yeast"
+      ],
+      "swaps": [
+        {
+          "name": "baking powder (quick bread)",
+          "pantryNames": [
+            "baking powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Not a true swap: use for quick flatbreads only, no rise time. About 1 tbsp per tsp yeast.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "all purpose flour",
+      "aliases": [
+        "ap flour"
+      ],
+      "swaps": [
+        {
+          "name": "whole wheat flour",
+          "pantryNames": [
+            "whole wheat flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; use 3/4 cup plus 1 tbsp more liquid if dry. Denser result.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "bread flour",
+          "pantryNames": [
+            "bread flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; chewier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "gluten free flour blend",
+          "pantryNames": [
+            "gluten free flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 with a blend that has xanthan gum.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "cake flour",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "all purpose flour + cornstarch",
+          "pantryNames": [
+            "all purpose flour",
+            "cornstarch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Remove 2 tbsp from each cup of flour and add 2 tbsp cornstarch; sift twice.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "bread flour",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "all purpose flour",
+          "pantryNames": [
+            "all purpose flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; slightly softer chew.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "all purpose flour + vital wheat gluten",
+          "pantryNames": [
+            "all purpose flour",
+            "vital wheat gluten"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Add 1 tsp vital wheat gluten per cup of all purpose flour.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "self rising flour",
+      "aliases": [
+        "self raising flour"
+      ],
+      "swaps": [
+        {
+          "name": "all purpose flour + baking powder + salt",
+          "pantryNames": [
+            "all purpose flour",
+            "baking powder",
+            "salt"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Whisk 1 1/2 tsp baking powder and 1/4 tsp salt into 1 cup all purpose flour.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "whole wheat flour",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "all purpose flour",
+          "pantryNames": [
+            "all purpose flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; lighter result.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "half all purpose + oat flour",
+          "pantryNames": [
+            "all purpose flour",
+            "oat flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use half each for a lighter whole grain feel.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "cornstarch",
+      "aliases": [
+        "corn starch",
+        "cornflour"
+      ],
+      "swaps": [
+        {
+          "name": "all purpose flour",
+          "pantryNames": [
+            "all purpose flour"
+          ],
+          "ratio": {
+            "amount": 2,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 2 tbsp flour per tbsp cornstarch for thickening; cook 2 more minutes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "arrowroot",
+          "pantryNames": [
+            "arrowroot"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; do not boil long.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "potato starch",
+          "pantryNames": [
+            "potato starch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; add near the end.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "arrowroot",
+      "aliases": [
+        "arrowroot powder"
+      ],
+      "swaps": [
+        {
+          "name": "cornstarch",
+          "pantryNames": [
+            "cornstarch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tapioca starch",
+          "pantryNames": [
+            "tapioca starch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "tapioca starch",
+      "aliases": [
+        "tapioca flour"
+      ],
+      "swaps": [
+        {
+          "name": "cornstarch",
+          "pantryNames": [
+            "cornstarch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "arrowroot",
+          "pantryNames": [
+            "arrowroot"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "potato starch",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "cornstarch",
+          "pantryNames": [
+            "cornstarch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "breadcrumb",
+      "aliases": [
+        "bread crumbs"
+      ],
+      "swaps": [
+        {
+          "name": "panko",
+          "pantryNames": [
+            "panko"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; crunchier.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "crushed crackers",
+          "pantryNames": [
+            "crackers"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crush plain crackers finely.",
+          "tags": [
+            "vegetarian",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "rolled oats",
+          "pantryNames": [
+            "rolled oats"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Pulse oats briefly; use in meatballs and meatloaf.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "panko",
+      "aliases": [
+        "panko breadcrumbs"
+      ],
+      "swaps": [
+        {
+          "name": "breadcrumb",
+          "pantryNames": [
+            "breadcrumbs"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; finer, less crisp.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "crushed cornflakes",
+          "pantryNames": [
+            "cornflakes"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crush lightly for a crunchy coating.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "rolled oat",
+      "aliases": [
+        "old fashioned oat",
+        "oats"
+      ],
+      "swaps": [
+        {
+          "name": "quick oats",
+          "pantryNames": [
+            "quick oats"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; softer texture.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "breadcrumb",
+          "pantryNames": [
+            "breadcrumbs"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use in meatloaf or crisp toppings.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "cocoa powder",
+      "aliases": [
+        "unsweetened cocoa",
+        "cocoa"
+      ],
+      "swaps": [
+        {
+          "name": "unsweetened chocolate",
+          "pantryNames": [
+            "unsweetened chocolate"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "oz",
+            "per": 3,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 oz melted chocolate per 3 tbsp cocoa; reduce fat by 1 tbsp.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "carob powder",
+          "pantryNames": [
+            "carob powder"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1; sweeter and milder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "unsweetened chocolate",
+      "aliases": [
+        "baking chocolate"
+      ],
+      "swaps": [
+        {
+          "name": "cocoa powder + oil",
+          "pantryNames": [
+            "cocoa powder",
+            "vegetable oil"
+          ],
+          "ratio": {
+            "amount": 3,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "oz"
+          },
+          "note": "Use 3 tbsp cocoa plus 1 tbsp oil or melted butter per ounce.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "semisweet chocolate",
+      "aliases": [
+        "semi sweet chocolate",
+        "dark chocolate"
+      ],
+      "swaps": [
+        {
+          "name": "chocolate chip",
+          "pantryNames": [
+            "chocolate chips"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 by weight; chips hold shape more.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "cocoa powder + sugar + butter",
+          "pantryNames": [
+            "cocoa powder",
+            "white sugar",
+            "butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "oz",
+            "per": 1,
+            "perUnit": "oz"
+          },
+          "note": "Use 3 tbsp cocoa, 1 tbsp sugar and 1 tbsp butter per ounce.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "chocolate chip",
+      "aliases": [
+        "semisweet chocolate chips"
+      ],
+      "swaps": [
+        {
+          "name": "chopped chocolate bar",
+          "pantryNames": [
+            "semisweet chocolate"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Chop a chocolate bar into chunks.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "raisins",
+          "pantryNames": [
+            "raisins"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Use for a chocolate-free cookie mix-in.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "vanilla extract",
+      "aliases": [
+        "vanilla"
+      ],
+      "swaps": [
+        {
+          "name": "maple syrup",
+          "pantryNames": [
+            "maple syrup"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; adds mild sweetness.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "almond extract",
+          "pantryNames": [
+            "almond extract"
+          ],
+          "ratio": {
+            "amount": 0.5,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Use half as much; stronger. Not nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "vanilla bean paste",
+          "pantryNames": [
+            "vanilla bean paste"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "almond extract",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "vanilla extract",
+          "pantryNames": [
+            "vanilla extract"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tsp"
+          },
+          "note": "Swap 1 to 1; no almond flavor, nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "gelatin",
+      "aliases": [
+        "unflavored gelatin"
+      ],
+      "swaps": [
+        {
+          "name": "agar agar",
+          "pantryNames": [
+            "agar agar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Use 1 tsp agar powder per tbsp gelatin; boil 2 minutes to activate.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "coconut milk",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "heavy cream + water",
+          "pantryNames": [
+            "heavy cream",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Thin 1/2 cup cream with 1/2 cup water; flavor differs.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "whole milk",
+          "pantryNames": [
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in curries; thinner.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "cashew cream",
+          "pantryNames": [
+            "cashews",
+            "water"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Blend soaked cashews with water.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "coconut cream",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "heavy cream",
+          "pantryNames": [
+            "heavy cream"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "full fat coconut milk",
+          "pantryNames": [
+            "coconut milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Chill and use the thick solid part.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "almond milk",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "soy milk",
+          "pantryNames": [
+            "soy milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "oat milk",
+          "pantryNames": [
+            "oat milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "milk",
+          "pantryNames": [
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 if dairy is fine.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "soy milk",
+      "aliases": [
+        "soymilk"
+      ],
+      "swaps": [
+        {
+          "name": "oat milk",
+          "pantryNames": [
+            "oat milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "milk",
+          "pantryNames": [
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "almond milk",
+          "pantryNames": [
+            "almond milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "peanut butter",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "almond butter",
+          "pantryNames": [
+            "almond butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Contains tree nuts.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sunflower seed butter",
+          "pantryNames": [
+            "sunflower seed butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free. May turn baked goods green.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "tahini",
+          "pantryNames": [
+            "tahini"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; savory flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "almond butter",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "peanut butter",
+          "pantryNames": [
+            "peanut butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Peanut allergy: avoid.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sunflower seed butter",
+          "pantryNames": [
+            "sunflower seed butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "tahini",
+      "aliases": [
+        "sesame paste"
+      ],
+      "swaps": [
+        {
+          "name": "peanut butter",
+          "pantryNames": [
+            "peanut butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; different flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sunflower seed butter",
+          "pantryNames": [
+            "sunflower seed butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "almond flour",
+      "aliases": [
+        "almond meal",
+        "ground almond"
+      ],
+      "swaps": [
+        {
+          "name": "oat flour",
+          "pantryNames": [
+            "oat flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; absorbs more liquid. Use certified gluten-free oats if needed.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "sunflower seed flour",
+          "pantryNames": [
+            "sunflower seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Grind seeds fine; swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "cornmeal",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "polenta",
+          "pantryNames": [
+            "polenta"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "semolina",
+          "pantryNames": [
+            "semolina"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; less crunch.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "graham cracker",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "digestive biscuits",
+          "pantryNames": [
+            "digestive biscuits"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crush and swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "vanilla wafers",
+          "pantryNames": [
+            "vanilla wafers"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Crush and swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "rice flour",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "cornstarch",
+          "pantryNames": [
+            "cornstarch"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 for thickening or coating, not for bread.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "all purpose flour",
+          "pantryNames": [
+            "all purpose flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 where gluten is fine.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "oat flour",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "rolled oat",
+          "pantryNames": [
+            "rolled oats"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Blend rolled oats to a fine powder.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "all purpose flour",
+          "pantryNames": [
+            "all purpose flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "oat milk",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "soy milk",
+          "pantryNames": [
+            "soy milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "almond milk",
+          "pantryNames": [
+            "almond milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Not nut-free.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 2
+        },
+        {
+          "name": "milk",
+          "pantryNames": [
+            "milk"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 if dairy is fine.",
+          "tags": [
+            "vegetarian",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "ingredient": "applesauce",
+      "aliases": [
+        "unsweetened applesauce"
+      ],
+      "swaps": [
+        {
+          "name": "mashed banana",
+          "pantryNames": [
+            "banana"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in muffins and quick breads.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "pumpkin puree",
+          "pantryNames": [
+            "pumpkin puree"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1 in dense bakes.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "coconut sugar",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "brown sugar",
+          "pantryNames": [
+            "brown sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "white sugar",
+          "pantryNames": [
+            "white sugar"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; less caramel flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "ground flaxseed",
+      "aliases": [
+        "flax meal",
+        "flaxseed meal"
+      ],
+      "swaps": [
+        {
+          "name": "chia seeds",
+          "pantryNames": [
+            "chia seeds"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 as an egg replacer (grind first, mix with water).",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "oat flour",
+          "pantryNames": [
+            "oat flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 as a binder in cookies.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "ingredient": "nutritional yeast",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "parmesan",
+          "pantryNames": [
+            "parmesan"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Swap 1 to 1 for a cheesy flavor if dairy is fine.",
+          "tags": [
+            "vegetarian",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "vital wheat gluten",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "bread flour",
+          "pantryNames": [
+            "bread flour"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "tbsp",
+            "per": 1,
+            "perUnit": "tbsp"
+          },
+          "note": "Not the same: bread flour adds some extra chew but far less protein than gluten.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "quick oat",
+      "aliases": [
+        "instant oats",
+        "quick cooking oats"
+      ],
+      "swaps": [
+        {
+          "name": "rolled oat",
+          "pantryNames": [
+            "rolled oats"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; chewier. Pulse once or twice to shorten.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "nut_free"
+          ],
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "ingredient": "sunflower seed butter",
+      "aliases": [],
+      "swaps": [
+        {
+          "name": "peanut butter",
+          "pantryNames": [
+            "peanut butter"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1. Peanut allergy: avoid.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free"
+          ],
+          "rank": 1
+        },
+        {
+          "name": "tahini",
+          "pantryNames": [
+            "tahini"
+          ],
+          "ratio": {
+            "amount": 1,
+            "unit": "cups",
+            "per": 1,
+            "perUnit": "cups"
+          },
+          "note": "Swap 1 to 1; savory flavor.",
+          "tags": [
+            "vegetarian",
+            "vegan",
+            "dairy_free",
+            "halal",
+            "kosher",
+            "gluten_free",
+            "nut_free"
+          ],
+          "rank": 2
+        }
+      ]
+    }
+  ]
+}
