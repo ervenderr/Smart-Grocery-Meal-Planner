@@ -7,6 +7,7 @@ import express from 'express';
 import { Prisma } from '@prisma/client';
 import { createApp } from '../src/app';
 import { prisma } from '../src/config/database.config';
+import { deleteAccountPermanently } from '../src/modules/users/account-deletion.service';
 import { createAccountDeletionLimiter } from '../src/modules/users/account-deletion.limiter';
 import {
   OWNED_MODEL_FACTORIES,
@@ -85,6 +86,30 @@ describe('DELETE /api/v1/users/me', () => {
     const afterB = await countsFor(b.id);
     Object.entries(afterB).forEach(([name, n]) => expect([name, n]).toEqual([name, before[name]]));
     expect(await countGlobalAiUsage()).toBeGreaterThan(0);
+  });
+
+  it('handles concurrent duplicate deletes without a 500', async () => {
+    const results = await Promise.all([
+      del(a.token, { password: PASSWORD }),
+      del(a.token, { password: PASSWORD }),
+    ]);
+    const statuses = results.map((r) => r.status);
+    statuses.forEach((s) => expect([204, 401, 404]).toContain(s));
+    expect(statuses).toContain(204);
+    expect(await prisma.user.count({ where: { id: a.id } })).toBe(0);
+  });
+
+  it('is idempotent when two deletions race past the user lookup', async () => {
+    const settled = await Promise.allSettled([
+      deleteAccountPermanently(a.id, PASSWORD),
+      deleteAccountPermanently(a.id, PASSWORD),
+      deleteAccountPermanently(a.id, PASSWORD),
+    ]);
+    settled.forEach((r) => {
+      if (r.status === 'rejected') expect((r.reason as { statusCode?: number }).statusCode).toBe(404);
+    });
+    expect(settled.some((r) => r.status === 'fulfilled')).toBe(true);
+    expect(await prisma.user.count({ where: { id: a.id } })).toBe(0);
   });
 
   it('returns 403 INVALID_PASSWORD on wrong password and deletes nothing', async () => {

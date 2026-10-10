@@ -35,9 +35,16 @@ export async function deleteAccountPermanently(
   }
 
   await prisma.$transaction(async (tx) => {
+    // Lock the user row first. Concurrent inserts of user-owned rows take a
+    // FOR KEY SHARE lock on it via their FK, so they wait until we commit
+    // (and then fail the FK) instead of sneaking a RESTRICT-bound row in
+    // between the plan-item delete and the user delete.
+    await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`;
     await tx.mealPlanItem.deleteMany({ where: { mealPlan: { userId } } });
     await tx.aiUsage.deleteMany({ where: { scope: `user:${userId}` } });
-    await tx.user.delete({ where: { id: userId } });
+    // deleteMany: a concurrent duplicate request that lost the race deletes 0
+    // rows and is treated as already deleted rather than throwing P2025.
+    await tx.user.deleteMany({ where: { id: userId } });
   });
 
   logger.warn('User account permanently deleted', { userId });
