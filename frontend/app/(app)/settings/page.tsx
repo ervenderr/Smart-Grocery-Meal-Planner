@@ -2,15 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Lock, Bell, Database, HelpCircle } from 'lucide-react';
+import { User, Lock, Bell, Database, HelpCircle, Shield } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ProfileSettings } from '@/components/settings/profile-settings';
 import { PasswordSettings } from '@/components/settings/password-settings';
 import { PreferencesSettings } from '@/components/settings/preferences-settings';
 import { StaplesSettings } from '@/components/settings/staples-settings';
 import { DataSettings } from '@/components/settings/data-settings';
+import { AiPrivacySettings } from '@/components/settings/ai-privacy-settings';
+import { LegalLinks } from '@/components/settings/legal-links';
 
-type SettingsTab = 'profile' | 'password' | 'preferences' | 'data';
+type SettingsTab = 'profile' | 'password' | 'preferences' | 'data' | 'privacy';
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
@@ -18,7 +20,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['profile', 'password', 'preferences', 'data'].includes(tab)) {
+    if (tab && ['profile', 'password', 'preferences', 'data', 'privacy'].includes(tab)) {
       setActiveTab(tab as SettingsTab);
     }
   }, [searchParams]);
@@ -28,6 +30,7 @@ export default function SettingsPage() {
     { id: 'password' as SettingsTab, name: 'Password', icon: Lock, description: 'Change your password' },
     { id: 'preferences' as SettingsTab, name: 'Preferences', icon: Bell, description: 'Customize your experience' },
     { id: 'data' as SettingsTab, name: 'Data', icon: Database, description: 'Export or manage your data' },
+    { id: 'privacy' as SettingsTab, name: 'Privacy', icon: Shield, description: 'AI features, legal and support' },
   ];
 
   const renderTabContent = () => {
@@ -45,6 +48,13 @@ export default function SettingsPage() {
         );
       case 'data':
         return <DataSettings />;
+      case 'privacy':
+        return (
+          <div className="space-y-6">
+            <AiPrivacySettings />
+            <LegalLinks />
+          </div>
+        );
       default:
         return null;
     }
