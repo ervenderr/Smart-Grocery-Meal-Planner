@@ -82,7 +82,7 @@ Sorting is fixed (engine score desc). No user-facing sort control this phase.
 
 ## Substitute Affordance Contract
 
-- **Trigger:** `Button variant="outline" size="sm"` (44px height on mobile via `size sm`), label "Find substitute", leading icon `ArrowRightLeft` 16px. Placed right-aligned on each missing-ingredient row. `aria-label="Substitute for {ingredient}"`.
+- **Trigger:** `Button variant="outline" size="sm"` (44px height on mobile via `size sm`), label "Find substitute", leading icon `ArrowRightLeft` 16px. Placed right-aligned on each missing-ingredient row. `aria-label="Find substitute for {ingredient}"` (must start with the visible label text, WCAG 2.5.3 Label in Name).
 - **Container:** existing `Modal` component (bottom sheet on mobile, centered `size="md"` on sm+). Title: "Substitute for {ingredient}". Not the AI modal: this is a distinct, network-free surface and must not import `AISubstitutionModal`.
 - **Sheet content:**
   - Context line (14px gray-600): "Recipe needs {qty} {unit} {ingredient}."

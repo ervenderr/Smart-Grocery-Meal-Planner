@@ -63,7 +63,7 @@ export function IngredientGroups({ ranked, onFindSubstitute }: IngredientGroupsP
                     variant="outline"
                     size="sm"
                     className="shrink-0"
-                    aria-label={`Substitute for ${m.name}`}
+                    aria-label={`Find substitute for ${m.name}`}
                     onClick={() => onFindSubstitute(m)}
                   >
                     <ArrowRightLeft className="h-4 w-4" aria-hidden="true" />
