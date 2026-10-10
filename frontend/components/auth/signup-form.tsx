@@ -84,7 +84,7 @@ export function SignupForm() {
       const response = await authApi.signup(signupData);
 
       // Store auth data
-      setAuth(response.token, response.user);
+      setAuth(response.token, response.user, response.refreshToken);
 
       // Show success message
       toast.success('Account created successfully! Welcome aboard!');

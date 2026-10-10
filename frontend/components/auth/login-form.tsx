@@ -41,7 +41,7 @@ export function LoginForm() {
       const response = await authApi.login(data);
 
       // Store auth data
-      setAuth(response.token, response.user);
+      setAuth(response.token, response.user, response.refreshToken);
 
       // Show success message
       toast.success('Welcome back!');

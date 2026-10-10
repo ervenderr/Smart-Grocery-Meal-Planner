@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { authApi } from '@/lib/api/auth';
+import { getRefreshToken } from '@/lib/api/token-storage';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 /** Shared logout flow: server logout, clear local auth, redirect to login. */
@@ -13,7 +14,7 @@ export function useLogout(): () => Promise<void> {
 
   return useCallback(async () => {
     try {
-      await authApi.logout();
+      await authApi.logout(getRefreshToken() ?? undefined);
       clearAuth();
       toast.success('Logged out successfully');
       router.push('/login');

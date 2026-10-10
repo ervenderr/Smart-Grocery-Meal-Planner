@@ -14,6 +14,7 @@ export const API_ROUTES = {
     SIGNUP: `/api/${API_VERSION}/auth/signup`,
     LOGIN: `/api/${API_VERSION}/auth/login`,
     LOGOUT: `/api/${API_VERSION}/auth/logout`,
+    REFRESH: `/api/${API_VERSION}/auth/refresh`,
   },
 
   // User

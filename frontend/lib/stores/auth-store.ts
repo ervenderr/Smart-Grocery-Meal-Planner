@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { User, AuthState } from '@/types/auth.types';
 import { queryClient } from '@/lib/react-query';
 import { clearUserSessionState } from '@/lib/auth/session-cleanup';
+import { clearTokens, setTokens } from '@/lib/api/token-storage';
 
 function resetUserSessionState(): void {
   clearUserSessionState(
@@ -13,7 +14,7 @@ function resetUserSessionState(): void {
 }
 
 interface AuthStore extends AuthState {
-  setAuth: (token: string, user: User) => void;
+  setAuth: (token: string, user: User, refreshToken?: string) => void;
   updateUser: (user: Partial<User>) => void;
   clearAuth: () => void;
 }
@@ -32,13 +33,11 @@ export const useAuthStore = create<AuthStore>()(
       /**
        * Set authentication data after login/signup
        */
-      setAuth: (token: string, user: User) => {
+      setAuth: (token: string, user: User, refreshToken?: string) => {
         // A new session must never inherit cached data from a previous user
         resetUserSessionState();
-        // Store token in localStorage for API client
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth-token', token);
-        }
+        // Store tokens in localStorage for API client (refresh token is not in zustand state)
+        setTokens({ token, refreshToken });
 
         set({
           token,
@@ -63,10 +62,8 @@ export const useAuthStore = create<AuthStore>()(
       clearAuth: () => {
         // Drop every cached query and per-user browser state
         resetUserSessionState();
-        // Remove token from localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth-token');
-        }
+        // Remove access and refresh tokens from localStorage
+        clearTokens();
 
         set({
           token: null,

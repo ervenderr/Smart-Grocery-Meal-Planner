@@ -39,7 +39,9 @@ export interface SignupData {
 export interface AuthResponse {
   user: User;
   token: string;
-  expiresIn: number;
+  expiresIn: string | number;
+  refreshToken?: string;
+  refreshExpiresAt?: string;
 }
 
 export interface AuthState {

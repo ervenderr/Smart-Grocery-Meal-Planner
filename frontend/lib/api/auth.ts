@@ -23,8 +23,11 @@ export const authApi = {
   /**
    * Logout user
    */
-  logout: async (): Promise<void> => {
-    return apiClient.post<void>(API_ROUTES.AUTH.LOGOUT);
+  logout: async (refreshToken?: string): Promise<void> => {
+    return apiClient.post<void>(
+      API_ROUTES.AUTH.LOGOUT,
+      refreshToken ? { refreshToken } : undefined
+    );
   },
 
   /**

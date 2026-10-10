@@ -1,15 +1,18 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { API_BASE_URL } from '@/lib/constants/api-routes';
+import { API_BASE_URL, API_ROUTES } from '@/lib/constants/api-routes';
 import { queryClient } from '@/lib/react-query';
 import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 import { isAiConsentRequiredError } from '@/lib/ai/consent-flow';
 import { useAiConsentStore } from '@/lib/ai/consent-store';
+import { clearTokens, getAccessToken, setTokens, getRefreshToken } from '@/lib/api/token-storage';
+import { createAuthErrorHandler, createRefreshCoordinator } from '@/lib/api/session-refresh';
 
 /**
  * API Client Configuration
  */
 class ApiClient {
   private client: AxiosInstance;
+  private handleUnauthorized: (error: AxiosError) => Promise<unknown>;
 
   constructor() {
     this.client = axios.create({
@@ -17,6 +20,31 @@ class ApiClient {
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
+      },
+    });
+
+    // Refresh uses a BARE axios call (never this.client) to avoid interceptor recursion.
+    const coordinator = createRefreshCoordinator({
+      readRefreshToken: getRefreshToken,
+      refreshRequest: async (refreshToken) => {
+        const response = await axios.post(
+          `${API_BASE_URL}${API_ROUTES.AUTH.REFRESH}`,
+          { refreshToken },
+          { timeout: 15000 }
+        );
+        return response.data?.data ?? response.data;
+      },
+      writeTokens: setTokens,
+    });
+    this.handleUnauthorized = createAuthErrorHandler({
+      coordinator,
+      retry: (config) => this.client.request(config),
+      onSessionExpired: () => {
+        clearTokens();
+        if (typeof window !== 'undefined') {
+          clearUserSessionState(queryClient, window.sessionStorage, window.localStorage);
+          window.location.href = '/login';
+        }
       },
     });
 
@@ -30,7 +58,7 @@ class ApiClient {
     // Request interceptor - Add auth token
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        const token = this.getToken();
+        const token = getAccessToken();
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -51,22 +79,10 @@ class ApiClient {
           // Handle specific error codes
           switch (error.response.status) {
             case 401:
-              // Only redirect if not on login/signup pages (token expired scenario)
-              // Don't redirect on login/signup endpoints (wrong credentials)
-              const url = error.config?.url || '';
-              const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/signup');
-
-              if (!isAuthEndpoint) {
-                // Unauthorized - clear token and redirect to login
-                this.clearToken();
-                if (typeof window !== 'undefined') {
-                  clearUserSessionState(queryClient, window.sessionStorage, window.localStorage);
-                }
-                if (typeof window !== 'undefined') {
-                  window.location.href = '/login';
-                }
-              }
-              break;
+              // Try a single-flight silent refresh first. Only a definitive 401/403 from
+              // /auth/refresh clears the session; transient failures (offline, timeout,
+              // 5xx) must keep local state so unsynced offline work is not lost (SYNC-07).
+              return this.handleUnauthorized(error);
             case 403:
               // Forbidden
               if (isAiConsentRequiredError(error)) {
@@ -97,22 +113,6 @@ class ApiClient {
         return Promise.reject(error);
       }
     );
-  }
-
-  /**
-   * Get authentication token from storage
-   */
-  private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth-token');
-  }
-
-  /**
-   * Clear authentication token
-   */
-  private clearToken(): void {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem('auth-token');
   }
 
   /**
