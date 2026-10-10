@@ -81,6 +81,8 @@ describe('getPageTitle', () => {
     expect(getPageTitle('/shopping')).toBe('Shopping');
     expect(getPageTitle('/alerts')).toBe('Alerts');
     expect(getPageTitle('/pantry/12')).toBe('Pantry');
+    expect(getPageTitle('/recipes/cook')).toBe('Cook from what you have');
+    expect(getPageTitle('/recipes')).toBe('Recipes');
   });
   it('falls back to Kitcha', () => {
     expect(getPageTitle('/unknown')).toBe('Kitcha');

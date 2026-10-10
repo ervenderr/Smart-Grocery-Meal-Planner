@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, Search, UtensilsCrossed, AlertCircle, Sparkles } from 'lucide-react';
+import { Plus, Search, UtensilsCrossed, AlertCircle, Sparkles, ChefHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
@@ -197,6 +197,10 @@ function RecipesPageContent() {
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button variant="outline" onClick={() => router.push('/recipes/cook')}>
+            <ChefHat className="h-4 w-4" />
+            Cook from what you have
+          </Button>
           <Button variant="outline" onClick={() => setShowAISuggestionsModal(true)}>
             <Sparkles className="h-4 w-4" />
             AI Suggestions

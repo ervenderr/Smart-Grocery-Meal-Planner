@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ChefHat } from 'lucide-react';
@@ -63,6 +64,12 @@ export function CookFirstCard() {
           ))}
         </ul>
       )}
+      <Link
+        href="/recipes/cook"
+        className="text-primary-700 mt-4 flex min-h-11 items-center text-sm font-semibold"
+      >
+        See all you can cook
+      </Link>
     </Card>
   );
 }

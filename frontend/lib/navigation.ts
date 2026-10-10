@@ -60,6 +60,7 @@ export const NAV_SIDEBAR: ReadonlyArray<NavItem> = [
 const PAGE_TITLES: Readonly<Record<string, string>> = {
   '/dashboard': 'Dashboard',
   '/pantry': 'Pantry',
+  '/recipes/cook': 'Cook from what you have',
   '/recipes': 'Recipes',
   '/mealplans': 'Meal Plans',
   '/shopping': 'Shopping',
