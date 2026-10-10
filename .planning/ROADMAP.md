@@ -76,7 +76,19 @@ Plans:
   4. A request from the Capacitor origin passes CORS, and an expired access token is silently renewed with a refresh token so the session survives time offline
   5. A single paged bootstrap call returns pantry (more than 50 rows), shopping list, recipes and meal plans, and a 401 no longer discards unsynced local work
   6. Finishing a shopping trip with an `occurredAt` and an older receipt date merges purchased items into the pantry in the same transaction
-**Plans**: TBD
+**Plans**: 11 plans
+Plans:
+- [ ] 08-01-PLAN.md — Wave 1: additive migration (idempotency_keys, refresh_tokens), account-deletion coverage + DMMF fixtures, refresh/idempotency config, 1h access default
+- [ ] 08-02-PLAN.md — Wave 1: Capacitor origins + Idempotency-Key header in CORS; per-user pantry/sync limiters, refresh limiter
+- [ ] 08-03-PLAN.md — Wave 1: finish trip occurredAt, 14-day receipt window, pantry merge in the same transaction
+- [ ] 08-04-PLAN.md — Wave 1: frontend pantry pager (no 50-row cap) for list, export, analytics
+- [ ] 08-05-PLAN.md — Wave 2: generic Idempotency-Key middleware on pantry/shopping/mealplan/cook + daily cleanup cron
+- [ ] 08-06-PLAN.md — Wave 2: rotating hashed refresh tokens with 60 s grace, /auth/refresh, revoking logout, password-change revocation
+- [ ] 08-07-PLAN.md — Wave 2: client-generated ids for shopping items (pre-check under list lock)
+- [ ] 08-08-PLAN.md — Wave 2: GET /sync/bootstrap keyset-paged snapshot (pantry, recipes, meal plans, shopping list, serverTime)
+- [ ] 08-09-PLAN.md — Wave 3: POST /pantry/:id/adjust delta (Decimal, clamp, lock) + pantry client ids
+- [ ] 08-10-PLAN.md — Wave 3: frontend single-flight refresh; 401 clears only on definitive refresh failure
+- [ ] 08-11-PLAN.md — Wave 4: smoke check 15 + full quality gate and deploy-ordering note
 
 ### Phase 9: Offline Rules Engine
 **Goal**: Users get useful "what can I cook" and substitution answers computed locally, with no network and no model
@@ -176,7 +188,7 @@ Phases execute in numeric order. Phases 7, 8 and 9 are independent and need no X
 | 5. Pantry-Aware Intelligence | v1.0 | 12/13 | Complete | 2026-10-09 |
 | 6. Capture Loops | v1.0 | 12/13 | Complete | 2026-10-09 |
 | 7. Store Readiness | v2.0 | 0/0 | Not started | - |
-| 8. Offline Sync Backend | v2.0 | 0/0 | Not started | - |
+| 8. Offline Sync Backend | v2.0 | 0/11 | Planned | - |
 | 9. Offline Rules Engine | v2.0 | 0/8 | Planned | - |
 | 10. Capacitor iOS Shell | v2.0 | 0/0 | Not started | - |
 | 11. Offline Core | v2.0 | 0/0 | Not started | - |
