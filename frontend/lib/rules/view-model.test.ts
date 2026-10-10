@@ -47,6 +47,13 @@ describe('buildRowViewModel', () => {
     expect(vm.progressLabel).toBe('75% of ingredients in pantry');
     expect(vm.pills).toEqual([{ kind: 'missing', label: 'Missing 2' }]);
   });
+  it('never shows Ready to cook for a recipe with no ingredients', () => {
+    const vm = buildRowViewModel(
+      ranked({ totalCount: 0, haveCount: 0, missingCount: 0, coveragePercent: 0 }),
+    );
+    expect(vm.coverageText).toBe('No ingredients to compare');
+    expect(vm.pills).toEqual([{ kind: 'missing', label: 'No ingredients listed' }]);
+  });
   it('shows ready and expiring pills', () => {
     const vm = buildRowViewModel(
       ranked({

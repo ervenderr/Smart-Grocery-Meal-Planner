@@ -17,15 +17,20 @@ export interface RowViewModel {
 
 export function buildRowViewModel(r: RankedRecipe): RowViewModel {
   const status: RowPill =
-    r.missingCount === 0
-      ? { kind: 'ready', label: 'Ready to cook' }
-      : { kind: 'missing', label: `Missing ${r.missingCount}` };
+    r.totalCount === 0
+      ? { kind: 'missing', label: 'No ingredients listed' }
+      : r.readyToCook
+        ? { kind: 'ready', label: 'Ready to cook' }
+        : { kind: 'missing', label: `Missing ${r.missingCount}` };
   const expiring: RowPill[] = r.expiringUsed.map((e) => ({
     kind: 'expiring',
     label: `Uses expiring: ${e.name} (${formatExpiryLabel(e.daysLeft)})`,
   }));
   return {
-    coverageText: `You have ${r.haveCount} of ${r.totalCount} ingredients`,
+    coverageText:
+      r.totalCount === 0
+        ? 'No ingredients to compare'
+        : `You have ${r.haveCount} of ${r.totalCount} ingredients`,
     pills: [status, ...expiring],
     progressLabel: `${Math.round(r.coveragePercent)}% of ingredients in pantry`,
   };
