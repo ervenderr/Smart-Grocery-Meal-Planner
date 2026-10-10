@@ -15,6 +15,7 @@ import {
   PaginatedPantryResponse,
   PantryStats,
 } from "../../types/pantry.types";
+import { Prisma } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import { formatPantryItem } from "./pantry.format";
 import { notifyLowStock } from "./pantry.low-stock";
@@ -26,8 +27,9 @@ export class PantryService {
   async createItem(
     userId: string,
     data: CreatePantryItemRequest
-  ): Promise<PantryItemResponse> {
+  ): Promise<{ item: PantryItemResponse; created: boolean }> {
     const {
+      id,
       ingredientName,
       quantity,
       unit,
@@ -46,21 +48,30 @@ export class PantryService {
     }
 
     // Create the pantry item
-    const item = await prisma.pantryItem.create({
-      data: {
-        userId,
-        ingredientName: ingredientName.trim(),
-        quantity: new Decimal(quantity),
-        unit,
-        category,
-        expiryDate: expiryDate ? new Date(expiryDate) : null,
-        purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
-        purchasePriceCents,
-        location,
-        notes,
-        barcode: barcode ?? null,
-      },
-    });
+    let item;
+    try {
+      item = await prisma.pantryItem.create({
+        data: {
+          ...(id ? { id } : {}),
+          userId,
+          ingredientName: ingredientName.trim(),
+          quantity: new Decimal(quantity),
+          unit,
+          category,
+          expiryDate: expiryDate ? new Date(expiryDate) : null,
+          purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
+          purchasePriceCents,
+          location,
+          notes,
+          barcode: barcode ?? null,
+        },
+      });
+    } catch (error) {
+      if (id && this.isPrimaryKeyConflict(error)) {
+        return this.resolveClientIdReplay(userId, id);
+      }
+      throw error;
+    }
 
     logger.info("Pantry item created", {
       service: "kitcha-api",
@@ -69,7 +80,37 @@ export class PantryService {
       ingredientName: item.ingredientName,
     });
 
-    return this.formatItem(item);
+    return { item: this.formatItem(item), created: true };
+  }
+
+  private isPrimaryKeyConflict(error: unknown): boolean {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
+    if (error.code !== "P2002") return false;
+    const target = error.meta?.target;
+    const fields = Array.isArray(target) ? target.map(String) : [String(target ?? "")];
+    return fields.some((f) => f === "id" || f.includes("pkey"));
+  }
+
+  /**
+   * A create with an existing client id: replay for the owner, never leak or
+   * resurrect anything otherwise.
+   */
+  private async resolveClientIdReplay(
+    userId: string,
+    id: string
+  ): Promise<{ item: PantryItemResponse; created: boolean }> {
+    const existing = await prisma.pantryItem.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userId) {
+      throw new AppError("Client id already in use", 409, true, {
+        code: "CLIENT_ID_CONFLICT",
+      });
+    }
+    if (existing.deletedAt) {
+      throw new AppError("Item was deleted", 410, true, {
+        code: "CLIENT_ID_DELETED",
+      });
+    }
+    return { item: this.formatItem(existing), created: false };
   }
 
   /**

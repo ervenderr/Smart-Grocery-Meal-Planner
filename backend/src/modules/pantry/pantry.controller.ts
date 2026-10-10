@@ -29,9 +29,9 @@ export class PantryController {
     const userId = (req as any).user.id;
     const data: CreatePantryItemRequest = req.body;
 
-    const item = await this.pantryService.createItem(userId, data);
+    const result = await this.pantryService.createItem(userId, data);
 
-    res.status(201).json(item);
+    res.status(result.created ? 201 : 200).json(result.item);
   });
 
   /**

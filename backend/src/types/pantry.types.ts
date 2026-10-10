@@ -59,6 +59,7 @@ export enum PantryLocation {
  * Request to create a new pantry item
  */
 export interface CreatePantryItemRequest {
+  readonly id?: string; // optional client-generated UUID (offline create)
   ingredientName: string;
   quantity: number;
   unit: string;

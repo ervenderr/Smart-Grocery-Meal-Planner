@@ -32,6 +32,8 @@ export const validate = (req: Request, _res: Response, next: NextFunction) => {
  * Create pantry item validation
  */
 export const validateCreateItem: ValidationChain[] = [
+  body('id').optional().isUUID().withMessage('id must be a UUID'),
+
   body('ingredientName')
     .trim()
     .notEmpty()
