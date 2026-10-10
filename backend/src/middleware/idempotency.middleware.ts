@@ -178,6 +178,18 @@ function instrumentResponse(
     });
     return res;
   }) as Response['json'];
+
+  // Fallback for replies not sent via res.json (res.send/res.end/204): once the
+  // response is fully flushed without json having run, release the claim so the
+  // key never stays in_progress (IN-05). 'finish' (not 'close') is used so a
+  // client disconnect mid-handler still keeps the reservation (CR-01).
+  res.once('finish', () => {
+    if (handled) return;
+    handled = true;
+    void release(id, claimedAt).catch((error: Error) => {
+      logger.error('Idempotency release failed', { userId, route, error: error.message });
+    });
+  });
 }
 
 export const idempotency: RequestHandler = async (
