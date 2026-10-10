@@ -4,6 +4,7 @@
  * Business logic for pantry item management.
  */
 
+import { ReplayFields, replayMatchesOriginal } from "@/modules/sync/client-id-replay";
 import { prisma } from "../../config/database.config";
 import { logger } from "../../config/logger.config";
 import { AppError } from "../../middleware/errorHandler";
@@ -68,7 +69,11 @@ export class PantryService {
       });
     } catch (error) {
       if (id && this.isPrimaryKeyConflict(error)) {
-        return this.resolveClientIdReplay(userId, id);
+        return this.resolveClientIdReplay(userId, id, {
+          name: ingredientName,
+          quantity,
+          unit,
+        });
       }
       throw error;
     }
@@ -97,7 +102,8 @@ export class PantryService {
    */
   private async resolveClientIdReplay(
     userId: string,
-    id: string
+    id: string,
+    incoming: ReplayFields
   ): Promise<{ item: PantryItemResponse; created: boolean }> {
     const existing = await prisma.pantryItem.findUnique({ where: { id } });
     if (!existing || existing.userId !== userId) {
@@ -108,6 +114,21 @@ export class PantryService {
     if (existing.deletedAt) {
       throw new AppError("Item was deleted", 410, true, {
         code: "CLIENT_ID_DELETED",
+      });
+    }
+    const matches = replayMatchesOriginal(
+      {
+        name: existing.ingredientName,
+        quantity: existing.quantity,
+        unit: existing.unit,
+        createdAt: existing.createdAt,
+        updatedAt: existing.updatedAt,
+      },
+      incoming
+    );
+    if (!matches) {
+      throw new AppError("Client id was already used with different content", 409, true, {
+        code: "CLIENT_ID_CONFLICT",
       });
     }
     return { item: this.formatItem(existing), created: false };

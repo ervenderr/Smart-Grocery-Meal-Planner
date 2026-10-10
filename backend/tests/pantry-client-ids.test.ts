@@ -54,14 +54,33 @@ describe('POST /pantry with client id', () => {
     expect(res.body.id).toBe(id);
   });
 
-  it('retry returns the original row with 200, unchanged', async () => {
+  it('retry with identical content returns the original row with 200', async () => {
     const id = randomUUID();
     await post(body({ id })).expect(201);
-    const res = await post(body({ id, quantity: 9, ingredientName: 'Changed' })).expect(200);
+    const res = await post(body({ id })).expect(200);
     expect(res.body.id).toBe(id);
     expect(res.body.ingredientName).toBe('Flour');
     expect(res.body.quantity).toBe('2');
     expect(await prisma.pantryItem.count({ where: { id } })).toBe(1);
+  });
+
+  it('409 CLIENT_ID_CONFLICT when a replayed create has different content (WR-07)', async () => {
+    const id = randomUUID();
+    await post(body({ id })).expect(201);
+    const res = await post(body({ id, quantity: 9, ingredientName: 'Changed' })).expect(409);
+    expect(res.body.code ?? res.body.error?.code).toBe('CLIENT_ID_CONFLICT');
+    const row = await prisma.pantryItem.findUniqueOrThrow({ where: { id } });
+    expect(row.ingredientName).toBe('Flour');
+  });
+
+  it('a stale create replay is accepted once the row was modified since (WR-07)', async () => {
+    const id = randomUUID();
+    await post(body({ id })).expect(201);
+    await prisma.pantryItem.update({
+      where: { id },
+      data: { quantity: 5, updatedAt: new Date(Date.now() + 60_000) },
+    });
+    await post(body({ id })).expect(200);
   });
 
   it('409 CLIENT_ID_CONFLICT for another user id, without leaking data', async () => {

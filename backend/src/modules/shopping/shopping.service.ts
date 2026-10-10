@@ -2,6 +2,7 @@
  * Shopping service.
  */
 
+import { replayMatchesOriginal } from '@/modules/sync/client-id-replay';
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '../../config/database.config';
@@ -105,6 +106,21 @@ export class ShoppingService {
         if (existing) {
           if (existing.shoppingList.userId !== userId) {
             throw new AppError('That item id is already in use.', 409, true, {
+              code: SHOPPING_ERROR_CODES.CLIENT_ID_CONFLICT,
+            });
+          }
+          const matches = replayMatchesOriginal(
+            {
+              name: existing.itemName,
+              quantity: existing.quantity,
+              unit: existing.unit,
+              createdAt: existing.createdAt,
+              updatedAt: existing.updatedAt,
+            },
+            { name: input.itemName, quantity: input.quantity, unit: input.unit },
+          );
+          if (!matches) {
+            throw new AppError('That item id was already used with different content.', 409, true, {
               code: SHOPPING_ERROR_CODES.CLIENT_ID_CONFLICT,
             });
           }
