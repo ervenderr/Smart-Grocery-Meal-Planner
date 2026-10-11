@@ -61,6 +61,13 @@ describe('classify', () => {
   it('401 -> pause-auth', () => {
     expect(c({ status: 401 })).toEqual({ kind: 'pause-auth' });
   });
+  it('401 while the session is still active -> counted retry, parks at max attempts (CR-03)', () => {
+    expect(classify(f({ status: 401 }), { kind: 'pantry.adjust', attempts: 0, sessionActive: true })).toEqual({ kind: 'retry', countsAttempt: true });
+    expect(classify(f({ status: 401 }), { kind: 'pantry.adjust', attempts: 7, sessionActive: true })).toEqual({
+      kind: 'park',
+      error: { reason: 'max-attempts', status: 401 },
+    });
+  });
   it('unknown 4xx -> park invalid; unknown no status -> retry counted', () => {
     expect(c({ status: 403 })).toMatchObject({ kind: 'park', error: { reason: 'invalid' } });
     expect(c({})).toEqual({ kind: 'retry', countsAttempt: true });

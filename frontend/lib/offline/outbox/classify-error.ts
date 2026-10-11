@@ -35,10 +35,19 @@ function transient(f: TransportFailure, attempts: number): Outcome {
   return out;
 }
 
-export function classify(f: TransportFailure, ctx: { kind: OpKind; attempts: number }): Outcome {
+export interface ClassifyContext {
+  kind: OpKind;
+  attempts: number;
+  /** True when the user who owns the op is still signed in after the request failed. */
+  sessionActive?: boolean;
+}
+
+export function classify(f: TransportFailure, ctx: ClassifyContext): Outcome {
   if (f.network || f.timeout) return { kind: 'retry', countsAttempt: false };
   const s = f.status;
-  if (s === 401) return { kind: 'pause-auth' };
+  // A 401 that survived the refresh attempt while still signed in means the refresh failed
+  // transiently (SYNC-07 keeps the session): retry with backoff. Pause only once the session ended.
+  if (s === 401) return ctx.sessionActive ? transient(f, ctx.attempts) : { kind: 'pause-auth' };
   if (s === 409 && f.code === IN_FLIGHT) {
     return { kind: 'retry', countsAttempt: false, ...(f.retryAfterMs !== undefined ? { retryAfterMs: f.retryAfterMs } : {}) };
   }

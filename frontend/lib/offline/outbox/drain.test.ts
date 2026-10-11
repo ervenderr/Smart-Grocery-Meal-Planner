@@ -146,16 +146,42 @@ describe('drain worker', () => {
     expect(await store.list(U)).toHaveLength(0);
   });
 
-  it('401 pauses all rows without deleting any', async () => {
+  it('401 after the session ended pauses all rows without deleting any', async () => {
     await store.enqueue(U, adj(ID_A, 1));
     await store.enqueue(U, adj(ID_B, 2));
-    responder = () => fail({ status: 401 });
+    responder = () => {
+      user = null; // definitive refresh failure clears the session before the 401 surfaces
+      return fail({ status: 401 });
+    };
     await drain();
     const rows = await store.list(U);
     expect(rows).toHaveLength(2);
     expect(rows.every((r) => r.state === 'paused_auth')).toBe(true);
     expect(types()).toContain('auth-paused');
     expect(sent).toHaveLength(1);
+  });
+
+  it('401 while still signed in (transient refresh failure) retries instead of pausing (CR-03)', async () => {
+    await store.enqueue(U, adj(ID_A, 1));
+    await store.enqueue(U, adj(ID_B, 2));
+    responder = () => fail({ status: 401 });
+    await drain();
+    const rows = await store.list(U);
+    expect(rows.map((r) => r.state)).toEqual(['queued', 'queued']);
+    expect(rows.every((r) => r.attempts === 1 && r.lastError?.status === 401)).toBe(true);
+    expect(types()).not.toContain('auth-paused');
+    responder = () => ({ ok: true });
+    clock += 60_000;
+    await drain();
+    expect(await store.list(U)).toHaveLength(0);
+  });
+
+  it('resumes paused_auth ops of the signed-in user on the next pass (CR-03)', async () => {
+    await store.enqueue(U, adj(ID_A, 1));
+    await store.pauseAuth(U);
+    await drain();
+    expect(sent).toHaveLength(1);
+    expect(await store.list(U)).toHaveLength(0);
   });
 
   it('404 on delete completes the op', async () => {

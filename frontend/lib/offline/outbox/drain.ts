@@ -70,7 +70,7 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
 
   async function onFailure(op: OutboxOp, userId: string, raw: unknown, tally: Tally): Promise<boolean> {
     const failure = asFailure(raw);
-    const outcome = classify(failure, { kind: op.kind, attempts: op.attempts });
+    const outcome = classify(failure, { kind: op.kind, attempts: op.attempts, sessionActive: deps.getUserId() === userId });
     switch (outcome.kind) {
       case 'ok':
         await deps.store.complete(op.seq);
@@ -128,6 +128,8 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
     const userId = deps.getUserId();
     if (!userId) return;
     emit({ type: 'started' });
+    // paused_auth means "waiting for this user to sign in": they are signed in now, so release them.
+    if ((await deps.store.counts(userId)).pausedAuth > 0) await deps.store.resumeAuth(userId);
     const tally: Tally = { applied: 0, parked: 0 };
     if (await deps.connectivity.isReachable()) {
       for (let op = await deps.store.nextReady(userId, now()); op && !disposed; op = await deps.store.nextReady(userId, now())) {
