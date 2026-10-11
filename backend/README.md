@@ -1,6 +1,6 @@
-# Kitcha - Backend API
+# Kumaun - Backend API
 
-Express 4 + TypeScript + Prisma 5.22 + PostgreSQL. Serves the Kitcha PWA under `/api/v1`. See the [root README](../README.md) for the product overview, deployment overview and the full environment variable table.
+Express 4 + TypeScript + Prisma 5.22 + PostgreSQL. Serves the Kumaun PWA under `/api/v1`. See the [root README](../README.md) for the product overview, deployment overview and the full environment variable table.
 
 ## Setup
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Kitcha - Smart Grocery and Meal Planner
+# Kumaun - Smart Grocery and Meal Planner
 
 **A mobile-first PWA that helps you see what is in your kitchen, decide what to cook, and shop without overspending.**
 
