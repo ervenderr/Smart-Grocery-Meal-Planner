@@ -13,6 +13,7 @@ import { EditRecipeModal } from '@/components/recipes/edit-recipe-modal';
 import { RecipeDetailModal } from '@/components/recipes/recipe-detail-modal';
 import { AIRecipeSuggestionsModal } from '@/components/ai/ai-recipe-suggestions-modal';
 import { RecipeCard } from '@/components/recipes/recipe-card';
+import { NeedsConnection } from '@/components/offline/needs-connection';
 import { recipeApi } from '@/lib/api/recipes';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRecipesList } from '@/lib/hooks/use-recipes';
@@ -208,14 +209,31 @@ function RecipesPageContent() {
             <ChefHat className="h-4 w-4" />
             Cook from what you have
           </Button>
-          <Button variant="outline" onClick={() => setShowAISuggestionsModal(true)}>
-            <Sparkles className="h-4 w-4" />
-            AI Suggestions
-          </Button>
-          <Button onClick={() => setShowAddModal(true)}>
-            <Plus className="h-4 w-4" />
-            Add Recipe
-          </Button>
+          <NeedsConnection>
+            {(disabled, describedById) => (
+              <Button
+                variant="outline"
+                onClick={() => setShowAISuggestionsModal(true)}
+                disabled={disabled}
+                aria-describedby={describedById}
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Suggestions
+              </Button>
+            )}
+          </NeedsConnection>
+          <NeedsConnection>
+            {(disabled, describedById) => (
+              <Button
+                onClick={() => setShowAddModal(true)}
+                disabled={disabled}
+                aria-describedby={describedById}
+              >
+                <Plus className="h-4 w-4" />
+                Add Recipe
+              </Button>
+            )}
+          </NeedsConnection>
         </div>
       </div>
 

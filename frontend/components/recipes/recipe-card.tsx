@@ -1,6 +1,7 @@
 'use client';
 
 import { Edit2, Trash2, Clock, Users, ChefHat } from 'lucide-react';
+import { NeedsConnection } from '@/components/offline/needs-connection';
 import { Card } from '@/components/ui/card';
 import type { Recipe } from '@/types/recipe.types';
 
@@ -104,31 +105,39 @@ export function RecipeCard({ recipe, onEdit, onDelete, onView, badge }: RecipeCa
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex justify-end gap-2 border-t border-gray-100 pt-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(recipe);
-            }}
-            aria-label={`Edit ${recipe.name}`}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100"
-          >
-            <Edit2 className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(recipe);
-            }}
-            aria-label={`Delete ${recipe.name}`}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
+        {/* Actions: edit and delete are online-only (D-04) */}
+        <NeedsConnection>
+          {(disabled, describedById) => (
+            <div className="flex justify-end gap-2 border-t border-gray-100 pt-2">
+              <button
+                type="button"
+                disabled={disabled}
+                aria-describedby={describedById}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(recipe);
+                }}
+                aria-label={`Edit ${recipe.name}`}
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                disabled={disabled}
+                aria-describedby={describedById}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(recipe);
+                }}
+                aria-label={`Delete ${recipe.name}`}
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </NeedsConnection>
       </div>
     </Card>
   );
