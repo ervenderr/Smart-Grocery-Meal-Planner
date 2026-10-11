@@ -39,7 +39,7 @@ Native cold start now opens SQLite, migrates, resets in_flight ops, hydrates Rea
 
 ## Commits
 - 6161332 feat: offline runtime singleton (enabled.ts, runtime.ts)
-- ddc2d39 (see git log, "boot sequence") feat: boot sequence and drain triggers
+- ddc2d39 feat: boot sequence and drain triggers
 - 3e35f60 feat: boot gate, first-launch screen, Providers wiring, web plugin-chunk elimination
 
 ## Verification
