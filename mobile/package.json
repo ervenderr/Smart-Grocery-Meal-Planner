@@ -8,7 +8,10 @@
   },
   "scripts": {
     "verify:deps": "node scripts/verify-deps.mjs",
-    "cap:sync": "cap sync ios"
+    "cap:sync": "cap sync ios",
+    "build:ios": "bash scripts/build-ios.sh",
+    "sim:run": "bash scripts/sim-run.sh",
+    "verify:bundle": "bash scripts/verify-bundle.sh"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "8.0.1",
