@@ -10,6 +10,9 @@ import { scanNative, type DeviceLike, type NativeScannerLike } from '@/lib/scan/
 import { haptic } from '@/lib/native/native-haptics';
 import { getNativeReminderScheduler } from '@/lib/reminders/native-scheduler';
 import { isReminderId } from '@/lib/reminders/plan';
+import { newId } from '@/lib/offline/ids';
+import { getDb } from '@/lib/offline/sql/get-db';
+import { migrate } from '@/lib/offline/sql/migrations';
 import { E2E_PHASE_KEY, findTokenLeaks, formatE2eLine, nextPhase } from '@/lib/e2e/self-check';
 
 interface StepResult {
@@ -17,6 +20,8 @@ interface StepResult {
   readonly ok: boolean;
 }
 
+const SPIKE_STORAGE_KEY = 'kitcha:e2e-spike';
+const SPIKE_ROW_KEY = 'e2e_spike';
 const INJECTED_RAW = ' 4800016644801 ';
 const INJECTED_CODE = '4800016644801';
 const DASHBOARD_DELAY_MS = 1500;
@@ -58,6 +63,42 @@ export function E2eRunner() {
       setStatus(`${step} ${ok ? 'PASS' : 'FAIL'}`);
     };
 
+    // Durability spike (D-07): write a row on launch 1, read it back after terminate + relaunch.
+    const writeSqliteSpike = async () => {
+      try {
+        const db = await getDb();
+        if (!db) return;
+        await migrate(db);
+        const value = `spike-${newId()}`;
+        await db.run('INSERT OR REPLACE INTO cache_meta (key, value) VALUES (?, ?)', [SPIKE_ROW_KEY, value]);
+        window.localStorage.setItem(SPIKE_STORAGE_KEY, value);
+      } catch (error) {
+        console.error('E2E sqlite write failed:', error instanceof Error ? error.name : 'unknown');
+      }
+    };
+
+    const runSqlite = async () => {
+      try {
+        const db = await getDb();
+        const expected = window.localStorage.getItem(SPIKE_STORAGE_KEY);
+        if (!db || !expected) {
+          emit('sqlite', false, { available: Boolean(db), expected: Boolean(expected) });
+          return;
+        }
+        const rows = await db.query<{ value: string }>('SELECT value FROM cache_meta WHERE key = ?', [
+          SPIKE_ROW_KEY,
+        ]);
+        const tables = await db.query<{ n: number }>(
+          "SELECT COUNT(*) AS n FROM sqlite_master WHERE type = 'table'"
+        );
+        emit('sqlite', rows[0]?.value === expected, { tables: tables[0]?.n ?? 0 });
+        window.localStorage.removeItem(SPIKE_STORAGE_KEY);
+      } catch (error) {
+        console.error('E2E sqlite read failed:', error instanceof Error ? error.name : 'unknown');
+        emit('sqlite', false);
+      }
+    };
+
     const runLogin = async () => {
       emit('render', window.location.protocol === 'capacitor:', {
         origin: window.location.origin,
@@ -78,6 +119,7 @@ export function E2eRunner() {
         console.error('E2E login failed:', error instanceof Error ? error.message : 'unknown');
         emit('login', false, { leaks: -1 });
       }
+      await writeSqliteSpike();
       window.localStorage.setItem(E2E_PHASE_KEY, nextPhase('login'));
       await sleep(DASHBOARD_DELAY_MS);
       router.replace('/dashboard/');
@@ -160,6 +202,7 @@ export function E2eRunner() {
 
     const runPostLogin = async () => {
       await runRelaunch();
+      await runSqlite();
       await runScan();
       runHaptics();
       await runNotifications();

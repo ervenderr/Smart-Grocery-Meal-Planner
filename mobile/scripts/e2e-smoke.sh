@@ -7,7 +7,7 @@
 # Env:   E2E_EMAIL + E2E_PASSWORD (optional; otherwise a throwaway account is
 #        generated), API_URL (https only), SIM_DEVICE, STEP_TIMEOUT (default 90).
 # Flow: build E2E variant, fresh install, launch 1 (render + login), terminate,
-# launch 2 (relaunch/Keychain, scan, haptics, notifications, done), screenshots,
+# launch 2 (relaunch/Keychain, sqlite durability, scan, haptics, notifications, done), screenshots,
 # report.json. EXIT trap always deletes the account and wipes E2E build output.
 set -euo pipefail
 
@@ -153,7 +153,7 @@ sleep 2
 log "launch 2: relaunch, scan, haptics, notifications"
 launch_and_capture launch2
 if [ "$NOTIF_GRANT" = "0" ]; then auto_allow & CAPTURE_PIDS+=("$!"); fi
-for s in relaunch scan haptics notifications done; do wait_for_step "$s"; done
+for s in relaunch sqlite scan haptics notifications done; do wait_for_step "$s"; done
 sleep 2
 screenshot 02-e2e-pantry.png
 stop_capture
