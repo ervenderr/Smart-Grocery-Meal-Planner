@@ -44,7 +44,7 @@ public class KumaunStorePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     /// Does NOT finish the transaction: JS calls finish() after the server accepted the JWS.
-    /// No appAccountToken is set on purpose so restore works after delete + re-signup.
+    /// No account token is attached to the purchase on purpose so restore works after delete + re-signup.
     @objc func purchase(_ call: CAPPluginCall) {
         guard let id = productId(from: call) else { return }
         Task {
