@@ -36,6 +36,8 @@ export const ENTITLEMENT_COPY = {
   restoreFailed: "Couldn't restore purchases. Check your connection and try again.",
   restoreSuccess: 'Purchase restored. Kumaun Full is unlocked.',
   restoreNone: 'No previous purchase found for this Apple Account.',
+  purchaseRevoked:
+    'This purchase was refunded or revoked, so Kumaun Full is not active. Contact support if you were charged.',
   claimedElsewhere:
     'This purchase is already linked to another Kumaun account. Sign in to that account to use it.',
   webNote:

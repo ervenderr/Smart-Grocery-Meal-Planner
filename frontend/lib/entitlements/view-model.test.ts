@@ -140,4 +140,14 @@ describe('outcomeMessage', () => {
     expect(outcomeMessage({ kind: 'verify-pending' })?.text).toBe(C.verifyPending);
     expect(outcomeMessage({ kind: 'claimed-elsewhere' })?.text).toBe(C.claimedElsewhere);
   });
+  it('shows an error for a revoked purchase or restore (WR-06)', () => {
+    expect(outcomeMessage({ kind: 'revoked' })).toEqual({ tone: 'error', text: C.purchaseRevoked });
+    expect(outcomeMessage({ kind: 'revoked' }, 'restore')).toEqual({ tone: 'error', text: C.purchaseRevoked });
+    expect(C.purchaseRevoked).toMatch(/Contact support if you were charged/);
+  });
+  it('the sheet keeps showing the revoked message after the flow returns to idle', () => {
+    const m = buildUpgradeSheetModel(sheet({ flow: 'idle', message: outcomeMessage({ kind: 'revoked' }) }));
+    expect(m.message?.text).toBe(C.purchaseRevoked);
+    expect(m.state).toBe('offer');
+  });
 });

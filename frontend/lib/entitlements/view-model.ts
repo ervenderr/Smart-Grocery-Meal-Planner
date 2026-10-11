@@ -116,6 +116,8 @@ const OUTCOME_TEXT: Record<string, Message> = {
   'verify-failed': { tone: 'error', text: C.verifyFailed },
   'verify-pending': PENDING_MESSAGE,
   'claimed-elsewhere': { tone: 'error', text: C.claimedElsewhere },
+  // A just-charged user must never see the sheet silently reset (WR-06).
+  revoked: { tone: 'error', text: C.purchaseRevoked },
 };
 
 /** Maps a purchase/restore outcome to inline message copy; cancelled and unlocked show none. */
