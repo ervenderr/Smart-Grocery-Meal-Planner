@@ -1,11 +1,21 @@
 'use client';
 
+import { useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { queryClient } from '@/lib/react-query';
 import { CurrencyProvider } from '@/lib/currency/currency-provider';
 import { ErrorBoundary } from '@/components/common/error-boundary';
+import { whenTokenStorageReady } from '@/lib/api/token-storage';
+
+/** Starts Keychain hydration at app start (no-op on web). */
+function TokenHydration() {
+  useEffect(() => {
+    void whenTokenStorageReady();
+  }, []);
+  return null;
+}
 
 /**
  * Application Providers
@@ -15,6 +25,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <TokenHydration />
         <CurrencyProvider>{children}</CurrencyProvider>
         <Toaster
           position="top-right"

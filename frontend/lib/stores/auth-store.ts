@@ -4,6 +4,8 @@ import type { User, AuthState } from '@/types/auth.types';
 import { queryClient } from '@/lib/react-query';
 import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 import { clearTokens, setTokens } from '@/lib/api/token-storage';
+import { selectPersisted } from '@/lib/stores/auth-persist';
+import { isNative } from '@/lib/platform/native';
 
 function resetUserSessionState(): void {
   clearUserSessionState(
@@ -17,6 +19,7 @@ interface AuthStore extends AuthState {
   setAuth: (token: string, user: User, refreshToken?: string) => void;
   updateUser: (user: Partial<User>) => void;
   clearAuth: () => void;
+  syncFromTokenStore: (accessToken: string | null) => void;
 }
 
 /**
@@ -57,6 +60,17 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       /**
+       * Native: apply the Keychain access token after hydration
+       */
+      syncFromTokenStore: (accessToken: string | null) => {
+        set((state) =>
+          accessToken && state.user
+            ? { token: accessToken, isAuthenticated: true }
+            : { token: null, isAuthenticated: false }
+        );
+      },
+
+      /**
        * Clear authentication data on logout
        */
       clearAuth: () => {
@@ -74,12 +88,8 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage', // localStorage key
-      partialize: (state) => ({
-        // Only persist these fields
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      // On native the token lives only in Keychain, never in localStorage
+      partialize: (state) => selectPersisted(state, isNative()),
     }
   )
 );
