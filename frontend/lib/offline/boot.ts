@@ -1,14 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { isOfflineError, registerOfflineGate } from '@/lib/api/offline-error';
-import { COOK_PANTRY_KEY, COOK_RECIPES_KEY } from '@/lib/hooks/use-cook-from-pantry';
-import {
-  MEAL_PLANS_ALL_KEY,
-  PANTRY_ALL_KEY,
-  RECIPES_ALL_KEY,
-  SHOPPING_ACTIVE_KEY,
-} from './cache/cache-keys';
+import { readCacheMeta } from './cache/cache-meta';
 import { isOfflineEnabled } from './enabled';
-import { reapplyForKey } from './reconcile/reapply';
+import { applyUserTransition } from './session/apply-transition';
+import { planUserTransition, type TransitionAction } from './session/user-scope';
 import { setOfflineRuntime, type OfflineRuntime } from './runtime';
 import { migrate } from './sql/migrations';
 import type { SqlDb } from './sql/types';
@@ -32,23 +27,17 @@ export interface BootArgs {
   enabled?: () => boolean;
 }
 
-const CANONICAL_KEYS: ReadonlyArray<readonly unknown[]> = [
-  PANTRY_ALL_KEY,
-  COOK_PANTRY_KEY,
-  RECIPES_ALL_KEY,
-  COOK_RECIPES_KEY,
-  MEAL_PLANS_ALL_KEY,
-  SHOPPING_ACTIVE_KEY,
-];
-
-async function foldPendingOps(runtime: OfflineRuntime, qc: QueryClient, userId: string): Promise<void> {
-  const ops = await runtime.store.list(userId);
-  if (ops.length === 0) return;
-  for (const key of CANONICAL_KEYS) {
-    const data = qc.getQueryData(key as unknown[]);
-    if (data === undefined) continue;
-    qc.setQueryData(key as unknown[], reapplyForKey(key, data, ops));
-  }
+/** Boot applies the sign-in plan minus refresh (the gate refreshes) and always hydrates unless wiping. */
+async function applyBootPlan(
+  runtime: OfflineRuntime,
+  qc: QueryClient,
+  db: SqlDb,
+  plan: TransitionAction[],
+): Promise<number> {
+  const wiped = plan.some((a) => a.type === 'wipe-cache');
+  const actions = plan.filter((a) => a.type !== 'refresh');
+  if (!wiped && !actions.some((a) => a.type === 'hydrate')) actions.unshift({ type: 'hydrate' });
+  return applyUserTransition(runtime, qc, db, actions);
 }
 
 async function runBoot(args: BootArgs): Promise<BootResult> {
@@ -68,11 +57,13 @@ async function runBoot(args: BootArgs): Promise<BootResult> {
       retry: (n: number, e: unknown) => !isOfflineError(e) && n < 1,
     },
   });
+  // Started even without a user so a later sign-in is persisted (writes are skipped until then)
+  runtime.persister.start();
   const userId = args.getUserId();
   if (!userId) return { status: 'no-user' };
-  const { restored } = await runtime.persister.hydrateAll();
-  await foldPendingOps(runtime, args.queryClient, userId);
-  runtime.persister.start();
+  const meta = await readCacheMeta(db);
+  const plan = planUserTransition({ prevUserId: null, nextUserId: userId, metaUserId: meta.userId, intent: 'expired' });
+  const restored = await applyBootPlan(runtime, args.queryClient, db, plan);
   if (restored === 0 && !(await runtime.connectivity.isReachable())) {
     return { status: 'empty-offline' };
   }

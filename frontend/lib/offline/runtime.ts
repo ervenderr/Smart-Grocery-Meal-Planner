@@ -1,4 +1,5 @@
 import { notifyManager, type QueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import type { apiClient } from '@/lib/api/client';
 import { foodApi } from '@/lib/api/food';
 import { syncApi } from '@/lib/api/sync';
@@ -18,6 +19,10 @@ import type { NewOp, OpKind, OutboxOp } from './outbox/op-types';
 import { createOutboxStore, type EnqueueOpts, type OutboxStore } from './outbox/store';
 import { applyResult, type CacheWrites } from './reconcile/apply-result';
 import { reapplyForKey } from './reconcile/reapply';
+import { applyUserTransition } from './session/apply-transition';
+import { consumeSessionEndIntent, registerSessionHandlers } from './session/session-hooks';
+import { planUserTransition } from './session/user-scope';
+import { readCacheMeta } from './cache/cache-meta';
 import type { SqlDb } from './sql/types';
 import { createTransport } from './transport';
 
@@ -214,7 +219,61 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
       listeners.clear();
     },
   };
+  const detachSession = attachSessionTransitions(runtime, args);
+  const baseDispose = runtime.dispose;
+  runtime.dispose = () => {
+    detachSession();
+    baseDispose();
+  };
   return runtime;
+}
+
+/**
+ * Keeps the persister suspended around session clears, then applies the planned transition
+ * (park/wipe/hydrate/resume) whenever the signed-in user id changes.
+ */
+function attachSessionTransitions(runtime: OfflineRuntime, args: CreateRuntimeArgs): () => void {
+  const { db, queryClient, getUserId, persister } = { ...args, persister: runtime.persister };
+  let lastUserId = getUserId();
+  let active = 0;
+  let chain: Promise<void> = Promise.resolve();
+
+  registerSessionHandlers({
+    beforeClear: () => persister.suspend(),
+    afterClear: () => {
+      // A user id change follows synchronously; if none does, nothing else will resume us.
+      queueMicrotask(() => {
+        if (active === 0) persister.resume();
+      });
+    },
+  });
+
+  const onUserChange = (next: string | null): void => {
+    if (next === lastUserId) return;
+    const prev = lastUserId;
+    lastUserId = next;
+    const intent = consumeSessionEndIntent();
+    active += 1;
+    chain = chain
+      .then(async () => {
+        const meta = await readCacheMeta(db);
+        const plan = planUserTransition({ prevUserId: prev, nextUserId: next, metaUserId: meta.userId, intent });
+        await applyUserTransition(runtime, queryClient, db, plan);
+      })
+      .catch((error: unknown) => {
+        console.error('Session transition failed:', error instanceof Error ? error.name : 'unknown');
+      })
+      .finally(() => {
+        active -= 1;
+        if (active === 0) persister.resume();
+      });
+  };
+
+  const unsubscribe = useAuthStore.subscribe((state) => onUserChange(state.user?.id ?? null));
+  return () => {
+    unsubscribe();
+    registerSessionHandlers(null);
+  };
 }
 
 let current: OfflineRuntime | null = null;

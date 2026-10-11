@@ -237,3 +237,13 @@ describe('durability', () => {
     }
   });
 });
+
+describe('deleteForUser', () => {
+  it('removes only that user ops', async () => {
+    await store.enqueue(U, adj(ID_A, 1));
+    await store.enqueue('user-2', adj(ID_B, 1));
+    expect(await store.deleteForUser(U)).toBe(1);
+    expect(await store.list(U)).toHaveLength(0);
+    expect(await store.list('user-2')).toHaveLength(1);
+  });
+});

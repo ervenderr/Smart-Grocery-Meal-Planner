@@ -37,6 +37,8 @@ export interface OutboxStore {
   discard(seq: number): Promise<OutboxOp[]>;
   discardAllFailed(userId: string): Promise<OutboxOp[]>;
   resetInFlight(): Promise<number>;
+  /** Removes every op of one user (account deletion only). */
+  deleteForUser(userId: string): Promise<number>;
   counts(userId: string): Promise<OutboxCounts>;
   subscribe(listener: () => void): () => void;
 }
@@ -192,6 +194,8 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
         for (const { seq } of failed) out.push(...(await discardOne(tx, seq)));
         return out;
       }),
+    deleteForUser: (userId) =>
+      mutate(async (tx) => (await tx.run('DELETE FROM outbox WHERE user_id = ?', [userId])).changes),
     resetInFlight: () =>
       mutate(async (tx) => {
         const res = await tx.run(

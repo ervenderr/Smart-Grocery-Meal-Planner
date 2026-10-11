@@ -6,13 +6,17 @@ import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 import { clearTokens, setTokens } from '@/lib/api/token-storage';
 import { selectPersisted } from '@/lib/stores/auth-persist';
 import { isNative } from '@/lib/platform/native';
+import { notifySessionCleared, notifySessionClearing } from '@/lib/offline/session/session-hooks';
 
 function resetUserSessionState(): void {
+  // Persister is suspended around the clear so it never mirrors the wipe onto disk
+  notifySessionClearing();
   clearUserSessionState(
     queryClient,
     typeof window !== 'undefined' ? window.sessionStorage : undefined,
     typeof window !== 'undefined' ? window.localStorage : undefined
   );
+  notifySessionCleared();
 }
 
 interface AuthStore extends AuthState {
