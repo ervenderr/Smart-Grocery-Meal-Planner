@@ -4,6 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import toast from 'react-hot-toast';
 import { shoppingApi } from '@/lib/api/shopping';
 import { getApiErrorMessage } from '@/lib/api/errors';
+import { haptic } from '@/lib/native/native-haptics';
 import { queryKeys } from '@/lib/react-query';
 import { SHOPPING_MUTATION_SCOPE } from '@/lib/hooks/use-shopping-list';
 import { localIsoDate } from '@/lib/shopping/trip';
@@ -25,6 +26,7 @@ export function useFinishShopping() {
     mutationFn: ({ carryOver, addToPantry }: FinishShoppingVariables) =>
       shoppingApi.finish({ carryOver, receiptDate: localIsoDate(new Date()), addToPantry }),
     onSuccess: async (result) => {
+      haptic('success');
       await queryClient.cancelQueries({ queryKey: queryKeys.shopping.active() });
       queryClient.setQueryData(queryKeys.shopping.active(), result.list);
       void queryClient.invalidateQueries({ queryKey: [...queryKeys.shopping.all, 'history'] });

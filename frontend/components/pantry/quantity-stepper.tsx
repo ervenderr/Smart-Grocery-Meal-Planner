@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
+import { haptic } from '@/lib/native/native-haptics';
 import {
   MAX_QUANTITY,
   clampQuantity,
@@ -95,7 +96,11 @@ export function QuantityStepper({
           aria-label={`Decrease ${label} quantity`}
           aria-disabled={atMin || disabled}
           disabled={disabled}
-          onClick={() => !atMin && onChange(bounded(value - step))}
+          onClick={() => {
+            if (atMin) return haptic('warning');
+            haptic('light');
+            onChange(bounded(value - step));
+          }}
         >
           <Minus className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -137,7 +142,11 @@ export function QuantityStepper({
           aria-label={`Increase ${label} quantity`}
           aria-disabled={atMax || disabled}
           disabled={disabled}
-          onClick={() => !atMax && onChange(bounded(value + step))}
+          onClick={() => {
+            if (atMax) return haptic('warning');
+            haptic('light');
+            onChange(bounded(value + step));
+          }}
         >
           <Plus className="h-5 w-5" aria-hidden="true" />
         </button>

@@ -11,6 +11,7 @@ import { CookPreviewRows } from '@/components/cook/cook-preview-rows';
 import { CookNotes } from '@/components/cook/cook-notes';
 import { cookApi } from '@/lib/api/cook';
 import { getApiErrorCode } from '@/lib/api/errors';
+import { haptic } from '@/lib/native/native-haptics';
 import { queryKeys } from '@/lib/react-query';
 import { cookSuccessToast, deductionCount, isPreviewStale, toDeductions } from '@/lib/cook/preview';
 import type { CookPreview, CookRow, CookTarget } from '@/types/cook.types';
@@ -122,6 +123,7 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
   const apply = useMutation({
     mutationFn: () => cookApi.apply(target, toDeductions(editableRows, uses)),
     onSuccess: (result) => {
+      haptic('success');
       toast.success(cookSuccessToast(result));
       void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
       onCooked?.();

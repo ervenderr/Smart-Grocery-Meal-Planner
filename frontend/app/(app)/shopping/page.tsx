@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBasket, AlertCircle } from 'lucide-react';
+import { ShoppingBasket, AlertCircle, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { EmptyState } from '@/components/common/empty-state';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
@@ -16,6 +16,8 @@ import { ShoppingHistory } from '@/components/shopping/shopping-history';
 import { ShoppingModeToggle } from '@/components/shopping/shopping-mode-toggle';
 import { ShoppingItemRow } from '@/components/shopping/shopping-item-row';
 import { SummaryBar } from '@/components/shopping/summary-bar';
+import { shareShoppingList } from '@/lib/native/native-share';
+import { SHARE_COPIED_COPY, SHARE_ERROR_COPY } from '@/lib/native/share';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import { useWakeLock } from '@/lib/hooks/use-wake-lock';
@@ -129,6 +131,12 @@ export default function ShoppingPage() {
 
   const loadState = getShoppingLoadState({ isLoading, isError, hasData: list !== undefined });
 
+  const handleShare = async () => {
+    const outcome = await shareShoppingList(items);
+    if (outcome === 'copied') toast.success(SHARE_COPIED_COPY);
+    else if (outcome === 'error') toast.error(SHARE_ERROR_COPY);
+  };
+
   if (loadState === 'loading') {
     return (
       <div className="flex justify-center py-12">
@@ -151,11 +159,23 @@ export default function ShoppingPage() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <h1 className="text-2xl font-semibold text-gray-900">Shopping list</h1>
-        <p className="text-sm text-gray-600">
-          {items.length} {items.length === 1 ? 'item' : 'items'}
-        </p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Shopping list</h1>
+          <p className="text-sm text-gray-600">
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Share shopping list"
+          data-testid="share-list"
+          disabled={!items.some((item) => !item.isChecked)}
+          onClick={() => void handleShare()}
+          className="flex h-11 min-h-11 w-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-50"
+        >
+          <Share2 className="h-5 w-5" aria-hidden="true" />
+        </button>
       </header>
 
       {loadState === 'refresh-failed' && (

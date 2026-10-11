@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { AislePriceInput } from '@/components/shopping/aisle-price-input';
+import { haptic } from '@/lib/native/native-haptics';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import { itemCheckboxLabel, priceChipLabel } from '@/lib/shopping/a11y';
 import { unitLabel } from '@/lib/shopping/vocab';
@@ -25,6 +26,10 @@ export function ShoppingItemRow({
 }: ShoppingItemRowProps) {
   const { format } = useCurrency();
   const [pricing, setPricing] = useState(false);
+  const handleToggle = () => {
+    haptic('light');
+    onToggle(item);
+  };
 
   let priceText = '';
   if (item.actualCostCents !== null) {
@@ -57,7 +62,7 @@ export function ShoppingItemRow({
             role="checkbox"
             aria-checked={item.isChecked}
             // Name comes from the visible text (item, quantity, estimate); aria-checked carries state.
-            onClick={() => onToggle(item)}
+            onClick={handleToggle}
             className="flex min-h-14 flex-1 items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
             <span className="flex h-14 w-14 shrink-0 items-center justify-center">
@@ -116,7 +121,7 @@ export function ShoppingItemRow({
         role="checkbox"
         aria-checked={item.isChecked}
         aria-label={itemCheckboxLabel(item.itemName)}
-        onClick={() => onToggle(item)}
+        onClick={handleToggle}
         className="flex min-h-11 min-w-11 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
       >
         <span

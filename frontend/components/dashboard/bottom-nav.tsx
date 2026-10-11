@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { haptic } from '@/lib/native/native-haptics';
 import { NAV_MORE_ICON, NAV_PRIMARY, isActive, isMoreActive } from '@/lib/navigation';
 import { useKeyboardOpen } from '@/lib/hooks/use-keyboard-open';
 import { useNotificationStats } from '@/lib/notifications/use-notification-stats';
@@ -63,6 +64,7 @@ export function BottomNav() {
     <>
       <nav
         aria-label="Primary"
+        data-bottom-nav
         className={`fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white pb-safe lg:hidden ${
           keyboardOpen ? 'hidden' : ''
         }`}
@@ -75,6 +77,10 @@ export function BottomNav() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
+                data-testid={`tab-${item.href.replace(/\W+/g, '') || 'home'}`}
+                onClick={() => {
+                  if (!active) haptic('selection');
+                }}
                 className={SLOT_CLASS}
               >
                 <SlotContent icon={item.icon} label={item.label} active={active} />
@@ -85,7 +91,11 @@ export function BottomNav() {
             type="button"
             aria-haspopup="dialog"
             aria-expanded={moreOpen}
-            onClick={() => setMoreOpen(true)}
+            data-testid="tab-more"
+            onClick={() => {
+              haptic('selection');
+              setMoreOpen(true);
+            }}
             className={SLOT_CLASS}
           >
             <SlotContent icon={NAV_MORE_ICON} label="More" active={moreActive} dot={unread > 0} />

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { haptic } from '@/lib/native/native-haptics';
 import { accountApi } from '@/lib/api/account';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import {
@@ -32,6 +33,11 @@ function DeleteAccountForm({ onClose, onBusyChange }: DeleteAccountFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
+
+  // The form mounts only when the sheet opens: one warning tap per open.
+  useEffect(() => {
+    haptic('warning');
+  }, []);
 
   // Initial focus goes to the password field, never the danger button.
   useEffect(() => {
