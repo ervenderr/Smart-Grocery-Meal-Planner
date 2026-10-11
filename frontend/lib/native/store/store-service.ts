@@ -174,10 +174,12 @@ export async function restorePurchases(deps: StoreDeps): Promise<RestoreOutcome>
  * unfinished (e.g. claimed from another device) are finished so StoreKit stops
  * re-delivering them (WR-04).
  */
+export type RecheckResult = 'verified' | 'skipped' | 'pending' | 'claimed-elsewhere' | 'failed';
+
 export async function recheckEntitlements(
   deps: StoreDeps,
   serverStatus: EntitlementStatus
-): Promise<'verified' | 'skipped' | 'pending' | 'failed'> {
+): Promise<RecheckResult> {
   if (serverStatus === 'active') {
     try {
       await deps.plugin.finishUnfinished(PRODUCT);
@@ -195,7 +197,8 @@ export async function recheckEntitlements(
   if (txs.length === 0) return 'skipped';
   const results = await verifyAll(deps, txs);
   if (results.some((r) => r === 'active' || r === 'revoked')) return 'verified';
-  return results.includes('transient') ? 'pending' : 'failed';
+  if (results.includes('transient')) return 'pending';
+  return results.includes('claimed') ? 'claimed-elsewhere' : 'failed';
 }
 
 export type UpdateResult = 'verified' | 'pending' | 'claimed-elsewhere' | 'failed' | 'ignored';

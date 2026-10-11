@@ -254,6 +254,10 @@ describe('recheckEntitlements', () => {
     const f = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(400); } });
     expect(await recheckEntitlements(f.deps, 'none')).toBe('failed');
   });
+  it('reports claimed-elsewhere so the caller can stop rechecking (WR-07)', async () => {
+    const c = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); } });
+    expect(await recheckEntitlements(c.deps, 'none')).toBe('claimed-elsewhere');
+  });
 });
 
 const update = (n: number, productId = 'app.kitcha.mobile.full'): StoreTransactionUpdate => ({
