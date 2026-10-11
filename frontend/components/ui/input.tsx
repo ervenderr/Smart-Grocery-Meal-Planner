@@ -9,6 +9,8 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   suffix?: React.ReactNode;
 }
 
+const DATE_LIKE_TYPES = new Set(['date', 'time', 'datetime-local', 'month', 'week']);
+
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, label, error, icon, suffix, id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
@@ -38,6 +40,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'disabled:cursor-not-allowed disabled:opacity-50',
               error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
               icon && 'pl-10',
+              // iOS WebKit date fields ignore width:100% and overflow their column.
+              DATE_LIKE_TYPES.has(type ?? '') &&
+                'min-w-0 max-w-full appearance-none text-left [&::-webkit-date-and-time-value]:min-h-[1.5em] [&::-webkit-date-and-time-value]:text-left',
               className
             )}
             ref={ref}

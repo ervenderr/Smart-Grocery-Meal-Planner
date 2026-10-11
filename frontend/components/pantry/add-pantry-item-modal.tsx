@@ -372,7 +372,7 @@ export function AddPantryItemModal({
           </h3>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
+            <div className="min-w-0">
               <Input
                 label="Purchase Date"
                 type="date"
@@ -383,7 +383,7 @@ export function AddPantryItemModal({
               <p className="mt-1 text-sm text-gray-500">When did you buy this?</p>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <Input
                 label="Expiry Date"
                 type="date"

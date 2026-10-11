@@ -7,7 +7,14 @@ export const MEAL_PLANS_ALL_KEY = ['mealPlans', 'list', 'all'] as const;
 export const SHOPPING_ACTIVE_KEY = queryKeys.shopping.active();
 export const PREFERENCES_KEY = PREFERENCES_QUERY_KEY;
 
-const PERSISTED_ROOTS = new Set(['pantry', 'recipes', 'mealPlans', 'preferences', 'notifications']);
+const PERSISTED_ROOTS = new Set([
+  'pantry',
+  'recipes',
+  'mealPlans',
+  'preferences',
+  'notifications',
+  'analytics',
+]);
 const DENIED_SEGMENTS = new Set(['ai', 'preview', 'history', 'last-generate']);
 
 export function isPersistedKey(key: readonly unknown[]): boolean {

@@ -299,7 +299,7 @@ export function EditPantryItemModal({
               <p className="mt-1 text-sm text-gray-500">When did you buy this?</p>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <Input
                 label="Expiry Date"
                 type="date"

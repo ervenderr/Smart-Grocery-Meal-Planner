@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { Card } from '@/components/ui/card';
@@ -8,12 +9,11 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { ShoppingCart, Package, Calendar, TrendingUp, ChefHat, Plus, AlertCircle, CheckCircle } from 'lucide-react';
 import { analyticsApi } from '@/lib/api/analytics';
 import { pantryApi } from '@/lib/api/pantry';
+import { usePantryList } from '@/lib/hooks/use-pantry';
 import { useRecipesList } from '@/lib/hooks/use-recipes';
 import { useMealPlansList } from '@/lib/hooks/use-meal-plans';
 import { EmptyState } from '@/components/common/empty-state';
 import { useCurrency } from '@/lib/currency/currency-provider';
-import type { ExpiringItem } from '@/types/pantry.types';
-import type { AnalyticsDashboard } from '@/types/budget.types';
 import { formatExpiryLabel, toExpiringItems } from '@/lib/pantry/expiry';
 import { CookFirstCard } from '@/components/dashboard/cook-first-card';
 import { ReminderPromptCard } from '@/components/reminders/reminder-prompt-card';
@@ -25,37 +25,24 @@ export default function DashboardPage() {
   const router = useRouter();
   const { native } = usePlatform();
   const { format: formatCurrency } = useCurrency();
-  const [expiring, setExpiring] = useState<ExpiringItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [analytics, setAnalytics] = useState<AnalyticsDashboard | null>(null);
-  const [pantryCount, setPantryCount] = useState(0);
+  // Cached (persisted) queries so the dashboard keeps its numbers with no connection.
+  const pantry = usePantryList({});
+  const expiringQuery = useQuery({
+    queryKey: ['pantry', 'expiring', 7],
+    queryFn: () => pantryApi.getExpiringSoon(7),
+  });
+  const analyticsQuery = useQuery({
+    queryKey: ['analytics', 'dashboard', 30],
+    queryFn: () => analyticsApi.getDashboard(30),
+  });
   const recipes = useRecipesList({});
   const mealPlans = useMealPlansList();
+  const pantryCount = pantry.data?.length ?? 0;
+  const analytics = analyticsQuery.data ?? null;
+  const expiring = useMemo(() => toExpiringItems(expiringQuery.data ?? []), [expiringQuery.data]);
   const recipeCount = recipes.data?.length ?? 0;
   const mealPlanCount = mealPlans.data?.length ?? 0;
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      const [analyticsData, pantryData, expiringData] = await Promise.all([
-        analyticsApi.getDashboard(30).catch(() => null),
-        pantryApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
-        pantryApi.getExpiringSoon(7).catch(() => []),
-      ]);
-
-      setAnalytics(analyticsData);
-      setExpiring(toExpiringItems(expiringData));
-      setPantryCount(pantryData.pagination?.total || 0);
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  const loading = pantry.isPending && !pantry.data;
 
   const getBudgetStatusColor = (status?: string) => {
     switch (status) {
