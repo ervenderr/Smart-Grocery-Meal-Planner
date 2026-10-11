@@ -16,10 +16,15 @@ import {
 import { getAppleVerifier } from './entitlements.deps';
 import { ENTITLEMENT_ERROR_CODES } from './entitlements.constants';
 import { applyVerifiedTransaction } from './entitlements.service';
+import {
+  REVERSING_TYPE,
+  REVOKING_TYPES,
+  recordRevocationState,
+  tracksRevocation,
+} from './revocation-tombstone';
 
 export type NotificationOutcome = 'applied' | 'duplicate' | 'ignored' | 'no_entitlement';
 
-const REVOKING_TYPES: ReadonlySet<string> = new Set(['REFUND', 'REVOKE']);
 const HANDLED_TYPES: ReadonlySet<string> = new Set([
   'REFUND',
   'REVOKE',
@@ -53,7 +58,7 @@ async function verify(signedPayload: string): Promise<VerifiedNotification> {
  */
 function effectiveTransaction(n: VerifiedNotification, base: VerifiedTransaction): VerifiedTransaction {
   const revoked = REVOKING_TYPES.has(n.notificationType);
-  const restored = n.notificationType === 'REFUND_REVERSED';
+  const restored = n.notificationType === REVERSING_TYPE;
   let revocationDate = base.revocationDate;
   if (revoked) revocationDate = base.revocationDate ?? n.signedDate;
   if (restored) revocationDate = null;
@@ -70,6 +75,17 @@ async function applyNotification(
   n: VerifiedNotification,
 ): Promise<NotificationOutcome> {
   if (!HANDLED_TYPES.has(n.notificationType) || n.transaction === null) return 'ignored';
+  const effective = effectiveTransaction(n, n.transaction);
+  if (tracksRevocation(n.notificationType)) {
+    // Remember the refund/reversal even when nobody has claimed the purchase yet.
+    await recordRevocationState(tx, {
+      environment: effective.environment,
+      originalTransactionId: effective.originalTransactionId,
+      revokedAt: effective.revocationDate,
+      revocationReason: effective.revocationReason,
+      signedAt: effective.signedDate,
+    });
+  }
   const row = await tx.entitlement.findUnique({
     where: {
       environment_originalTransactionId: {
@@ -80,7 +96,7 @@ async function applyNotification(
   });
   if (!row) return 'no_entitlement';
   if (n.signedDate.getTime() < row.lastSignedAt.getTime()) return 'ignored';
-  await applyVerifiedTransaction(tx, row.userId, effectiveTransaction(n, n.transaction));
+  await applyVerifiedTransaction(tx, row.userId, effective);
   return 'applied';
 }
 

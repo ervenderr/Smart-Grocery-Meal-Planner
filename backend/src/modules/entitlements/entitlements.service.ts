@@ -13,6 +13,7 @@ import { AppleVerificationError, type VerifiedTransaction } from './apple-verifi
 import { getAppleVerifier } from './entitlements.deps';
 import { ENTITLEMENT_ERROR_CODES, ENTITLEMENT_STATUS } from './entitlements.constants';
 import { getEntitlementSummary } from './entitlement-status';
+import { withRevocationState } from './revocation-tombstone';
 
 export interface EntitlementView {
   status: 'active' | 'revoked';
@@ -89,8 +90,10 @@ function sameIdentity(row: Entitlement, tx: VerifiedTransaction): boolean {
 export async function applyVerifiedTransaction(
   tx: Prisma.TransactionClient,
   userId: string,
-  verified: VerifiedTransaction,
+  signed: VerifiedTransaction,
 ): Promise<EntitlementView> {
+  // A refund/revoke recorded before this purchase was claimed overrides an older JWS.
+  const verified = await withRevocationState(tx, signed);
   const owner = await tx.entitlement.findUnique({
     where: {
       environment_originalTransactionId: {

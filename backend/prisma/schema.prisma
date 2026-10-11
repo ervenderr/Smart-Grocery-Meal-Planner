@@ -671,3 +671,17 @@ model AppStoreNotification {
 
   @@map("app_store_notifications")
 }
+
+/// Latest refund/revoke state Apple reported for a purchase, kept even when no
+/// account has claimed it yet, so a later claim cannot resurrect a refunded
+/// purchase. revokedAt null means the revocation was reversed.
+model AppStoreRevocation {
+  environment           String    @db.VarChar(16)
+  originalTransactionId String    @map("original_transaction_id") @db.VarChar(40)
+  revokedAt             DateTime? @map("revoked_at")
+  revocationReason      Int?      @map("revocation_reason")
+  lastSignedAt          DateTime  @map("last_signed_at")
+
+  @@id([environment, originalTransactionId])
+  @@map("app_store_revocations")
+}

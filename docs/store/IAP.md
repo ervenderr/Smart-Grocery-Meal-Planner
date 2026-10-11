@@ -47,6 +47,7 @@ Error and status codes: verify returns 400 `INVALID_TRANSACTION` (bad JWS, wrong
 
 Rules the server enforces (the client is only a hint):
 - Database uniqueness on (environment, originalTransactionId) globally, and (userId, productId): one purchase cannot unlock many accounts. A different purchase never replaces an existing ACTIVE entitlement of the same user (prevents a Sandbox JWS from displacing a Production unlock).
+- Refund/revoke state is stored per purchase in `app_store_revocations` even when no account has claimed it yet (and it survives account deletion). A later verify of an older JWS for that purchase is applied as revoked; a newer `REFUND_REVERSED` clears it. Ordering is by notification `signedDate`. Residual gap: if Apple's webhook retries are exhausted (endpoint down for days), a refund is never recorded. After any long outage, check App Store Connect refunds by hand or call the App Store Server API `GET /inApps/v1/transactions/{transactionId}` for recent claims.
 - Sandbox transactions are accepted in production, because App Review purchases in Sandbox. Xcode/LocalTesting JWS are not Apple-signed and are accepted only when `IAP_ALLOW_XCODE_ENV=true`, which config validation rejects in production.
 - `IAP_ONLINE_CHECKS` defaults to true in production, false otherwise. Leave it at the default.
 - Free: 25 active pantry items (`FREE_PANTRY_LIMIT`); existing items are never deleted, only creating is blocked. Paid: unlimited.
