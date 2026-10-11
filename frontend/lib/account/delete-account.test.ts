@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { consumeSessionEndIntent } from '@/lib/offline/session/session-hooks';
 import {
   canSubmitDelete,
   classifyDeleteError,
   DELETE_ACCOUNT_MESSAGES,
   DELETED_LOGIN_PATH,
+  markAccountDeleted,
 } from './delete-account';
 
 const httpError = (status: number, code?: string) => ({
@@ -59,5 +61,12 @@ describe('canSubmitDelete', () => {
 describe('DELETED_LOGIN_PATH', () => {
   it('points at the login page with the deleted flag', () => {
     expect(DELETED_LOGIN_PATH).toBe('/login?deleted=1');
+  });
+});
+
+describe('markAccountDeleted', () => {
+  it('sets the deleted session end intent', () => {
+    markAccountDeleted();
+    expect(consumeSessionEndIntent()).toBe('deleted');
   });
 });

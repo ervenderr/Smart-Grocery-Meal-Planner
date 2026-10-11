@@ -1,4 +1,5 @@
 import { getApiErrorCode } from '@/lib/api/errors';
+import { setSessionEndIntent } from '@/lib/offline/session/session-hooks';
 
 export type DeleteErrorKind = 'wrong_password' | 'rate_limited' | 'failed';
 
@@ -25,4 +26,9 @@ export function classifyDeleteError(error: unknown): DeleteErrorKind {
 
 export function canSubmitDelete(password: string): boolean {
   return password.trim().length > 0;
+}
+
+/** Marks the coming session end as a deletion so local cache and queued changes are removed. Call right before clearing auth. */
+export function markAccountDeleted(): void {
+  setSessionEndIntent('deleted');
 }

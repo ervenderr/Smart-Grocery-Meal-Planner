@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button';
 import { haptic } from '@/lib/native/native-haptics';
 import { accountApi } from '@/lib/api/account';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { setSessionEndIntent } from '@/lib/offline/session/session-hooks';
 import {
   canSubmitDelete,
   classifyDeleteError,
   DELETE_ACCOUNT_MESSAGES,
   DELETED_LOGIN_PATH,
+  markAccountDeleted,
 } from '@/lib/account/delete-account';
 
 interface DeleteAccountSheetProps {
@@ -71,7 +71,7 @@ function DeleteAccountForm({ onClose, onBusyChange }: DeleteAccountFormProps) {
     }
 
     setPassword('');
-    setSessionEndIntent('deleted');
+    markAccountDeleted();
     useAuthStore.getState().clearAuth();
     router.replace(DELETED_LOGIN_PATH);
   };
