@@ -3,13 +3,20 @@
 import { AiBadge } from '@/components/ai/ai-badge';
 import { AiDisclaimer } from '@/components/ai/ai-disclaimer';
 import { isAiGeneratedRecipe } from '@/lib/ai/ai-origin';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Clock, Users, ChefHat, Calendar, Sparkles } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { CookedItSheet } from '@/components/cook/cooked-it-sheet';
 import { AISubstitutionModal } from '@/components/ai/ai-substitution-modal';
+import { QuantityStepper } from '@/components/pantry/quantity-stepper';
+import { formatAmount, unitLabel } from '@/lib/rules/format-amount';
+import { scaleIngredients } from '@/lib/recipes/scale';
+import { useIsOnline } from '@/lib/offline/status/use-offline-status';
 import type { Recipe } from '@/types/recipe.types';
+
+const MIN_SERVINGS = 1;
+const MAX_SERVINGS = 99;
 
 interface RecipeDetailModalProps {
   isOpen: boolean;
@@ -20,6 +27,19 @@ interface RecipeDetailModalProps {
 export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModalProps) {
   const [showSubstitutionModal, setShowSubstitutionModal] = useState(false);
   const [showCookedIt, setShowCookedIt] = useState(false);
+  const [servings, setServings] = useState(recipe?.servings ?? 1);
+  const isOnline = useIsOnline();
+
+  const recipeId = recipe?.id;
+  const baseServings = recipe?.servings;
+  useEffect(() => {
+    if (baseServings !== undefined) setServings(baseServings);
+  }, [recipeId, baseServings]);
+
+  const scaled = useMemo(
+    () => (recipe ? scaleIngredients(recipe.ingredients, recipe.servings, servings) : []),
+    [recipe, servings],
+  );
 
   if (!recipe) return null;
 
@@ -162,19 +182,33 @@ export function RecipeDetailModal({ isOpen, onClose, recipe }: RecipeDetailModal
               variant="outline"
               size="sm"
               onClick={() => setShowSubstitutionModal(true)}
+              disabled={!isOnline}
               className="gap-2"
             >
               <Sparkles className="h-4 w-4" />
               Find Substitutes
             </Button>
+            {!isOnline && <span className="text-xs text-gray-600">Needs a connection</span>}
+          </div>
+          <div className="mb-3 flex items-center gap-3">
+            <span className="text-sm text-gray-700">Servings</span>
+            <QuantityStepper
+              value={servings}
+              unitLabel={servings === 1 ? 'serving' : 'servings'}
+              step={1}
+              min={MIN_SERVINGS}
+              max={MAX_SERVINGS}
+              label="Servings"
+              onChange={setServings}
+            />
           </div>
           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-            {recipe.ingredients.map((ingredient, index) => (
+            {scaled.map((ingredient, index) => (
               <div key={index} className="flex items-start gap-2">
                 <span className="text-primary-600 mt-1">•</span>
                 <div className="min-w-0 flex-1 break-words">
                   <span className="font-medium text-gray-900">
-                    {ingredient.quantity} {ingredient.unit}
+                    {formatAmount(ingredient.quantity, ingredient.unit)} {unitLabel(ingredient.unit, ingredient.quantity)}
                   </span>
                   <span className="text-gray-700"> {ingredient.ingredientName}</span>
                   {ingredient.notes && (
