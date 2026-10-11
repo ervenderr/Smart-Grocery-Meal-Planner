@@ -98,13 +98,31 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     });
   };
 
+  // Bumped on every signed-in user change so an in-flight refresh can tell its session ended.
+  let sessionEpoch = 0;
+  const MAX_REFRESH_FETCHES = 3;
+
+  /** Fetches a snapshot no op completed during (else it may predate an applied change). */
+  const fetchStableSnapshot = async (userId: string) => {
+    for (let attempt = 1; ; attempt += 1) {
+      const before = await store.list(userId);
+      const snapshot = await fetchBootstrapSnapshot(fetchPage);
+      const ops = await store.list(userId);
+      const after = new Set(ops.map((o) => o.seq));
+      const completedDuringFetch = before.some((o) => !after.has(o.seq));
+      if (!completedDuringFetch || attempt >= MAX_REFRESH_FETCHES) return { snapshot, ops };
+    }
+  };
+
   const doRefresh = async (): Promise<RefreshResult> => {
     const userId = getUserId();
     if (!userId) return 'skipped';
+    const epoch = sessionEpoch;
     if (!(await connectivity.isReachable())) return 'offline';
     try {
-      const snapshot = await fetchBootstrapSnapshot(fetchPage);
-      const ops = await store.list(userId);
+      const { snapshot, ops } = await fetchStableSnapshot(userId);
+      // The user signed out or switched while fetching: never write their data into the new session.
+      if (disposed || getUserId() !== userId || sessionEpoch !== epoch) return 'skipped';
       await applySnapshot({
         queryClient,
         snapshot,
@@ -219,7 +237,9 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
       listeners.clear();
     },
   };
-  const detachSession = attachSessionTransitions(runtime, args);
+  const detachSession = attachSessionTransitions(runtime, args, () => {
+    sessionEpoch += 1;
+  });
   const baseDispose = runtime.dispose;
   runtime.dispose = () => {
     detachSession();
@@ -232,7 +252,7 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
  * Keeps the persister suspended around session clears, then applies the planned transition
  * (park/wipe/hydrate/resume) whenever the signed-in user id changes.
  */
-function attachSessionTransitions(runtime: OfflineRuntime, args: CreateRuntimeArgs): () => void {
+function attachSessionTransitions(runtime: OfflineRuntime, args: CreateRuntimeArgs, onUserChanged: () => void): () => void {
   const { db, queryClient, getUserId, persister } = { ...args, persister: runtime.persister };
   let lastUserId = getUserId();
   let active = 0;
@@ -252,6 +272,7 @@ function attachSessionTransitions(runtime: OfflineRuntime, args: CreateRuntimeAr
     if (next === lastUserId) return;
     const prev = lastUserId;
     lastUserId = next;
+    onUserChanged();
     const intent = consumeSessionEndIntent();
     active += 1;
     chain = chain
