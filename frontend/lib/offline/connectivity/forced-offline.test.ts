@@ -24,13 +24,19 @@ describe('forced-offline', () => {
     expect(isForcedOffline(fakeStorage({ [KEY]: '1' }), '0')).toBe(false);
   });
   it('honored when e2e flag 1 and stored 1', () => {
-    expect(isForcedOffline(fakeStorage({ [KEY]: '1' }), '1')).toBe(true);
+    expect(isForcedOffline(fakeStorage({ [KEY]: '1' }), '1', KEY)).toBe(true);
   });
   it('false when e2e on but nothing stored', () => {
-    expect(isForcedOffline(fakeStorage(), '1')).toBe(false);
+    expect(isForcedOffline(fakeStorage(), '1', KEY)).toBe(false);
+  });
+  it('inert without a key (release builds)', () => {
+    expect(isForcedOffline(fakeStorage({ [KEY]: '1' }), '1', null)).toBe(false);
+    const s = fakeStorage();
+    setForcedOffline(true, s, '1', null);
+    expect(s.data[KEY]).toBeUndefined();
   });
   it('false when storage missing', () => {
-    expect(isForcedOffline(undefined, '1')).toBe(false);
+    expect(isForcedOffline(undefined, '1', KEY)).toBe(false);
   });
   it('false when storage throws', () => {
     const s = {
@@ -38,15 +44,15 @@ describe('forced-offline', () => {
         throw new Error('x');
       },
     };
-    expect(isForcedOffline(s, '1')).toBe(false);
+    expect(isForcedOffline(s, '1', KEY)).toBe(false);
   });
   it('setForcedOffline writes only when e2e', () => {
     const s = fakeStorage();
     setForcedOffline(true, s, undefined);
     expect(s.data[KEY]).toBeUndefined();
-    setForcedOffline(true, s, '1');
+    setForcedOffline(true, s, '1', KEY);
     expect(s.data[KEY]).toBe('1');
-    setForcedOffline(false, s, '1');
+    setForcedOffline(false, s, '1', KEY);
     expect(s.data[KEY]).toBeUndefined();
   });
 });

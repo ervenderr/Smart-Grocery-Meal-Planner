@@ -5,7 +5,8 @@
 export const FORCE_OFFLINE_KEY: string | null =
   process.env.NEXT_PUBLIC_E2E === '1' ? 'kitcha:e2e-force-offline' : null;
 
-const E2E_KEY = 'kitcha:e2e-force-offline';
+/** Folded to null in non-E2E builds so the literal never reaches a release bundle. */
+const defaultKey = (): string | null => FORCE_OFFLINE_KEY;
 
 type ReadStorage = Pick<Storage, 'getItem'>;
 type WriteStorage = Pick<Storage, 'setItem' | 'removeItem'>;
@@ -16,11 +17,12 @@ function defaultStorage(): Storage | undefined {
 
 export function isForcedOffline(
   storage: ReadStorage | undefined = defaultStorage(),
-  e2eFlag: string | undefined = process.env.NEXT_PUBLIC_E2E
+  e2eFlag: string | undefined = process.env.NEXT_PUBLIC_E2E,
+  key: string | null = defaultKey()
 ): boolean {
-  if (e2eFlag !== '1' || !storage) return false;
+  if (e2eFlag !== '1' || !storage || !key) return false;
   try {
-    return storage.getItem(E2E_KEY) === '1';
+    return storage.getItem(key) === '1';
   } catch {
     return false;
   }
@@ -29,12 +31,13 @@ export function isForcedOffline(
 export function setForcedOffline(
   on: boolean,
   storage: WriteStorage | undefined = defaultStorage(),
-  e2eFlag: string | undefined = process.env.NEXT_PUBLIC_E2E
+  e2eFlag: string | undefined = process.env.NEXT_PUBLIC_E2E,
+  key: string | null = defaultKey()
 ): void {
-  if (e2eFlag !== '1' || !storage) return;
+  if (e2eFlag !== '1' || !storage || !key) return;
   try {
-    if (on) storage.setItem(E2E_KEY, '1');
-    else storage.removeItem(E2E_KEY);
+    if (on) storage.setItem(key, '1');
+    else storage.removeItem(key);
   } catch {
     // storage unavailable: nothing to force
   }
