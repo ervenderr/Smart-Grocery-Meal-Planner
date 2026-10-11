@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { queryClient, queryKeys } from '@/lib/react-query';
 import {
   entitlementsApi,
   ENTITLEMENT_QUERY_KEY,
@@ -27,6 +26,7 @@ import {
   readCachedEntitlement,
   writeCachedEntitlement,
 } from '@/lib/entitlements/entitlement-cache';
+import { refreshEntitlementQueries } from '@/lib/entitlements/refresh';
 import { outcomeMessage, type FlowState, type Message } from '@/lib/entitlements/view-model';
 import { useStoreProduct } from './use-store-product';
 
@@ -51,11 +51,6 @@ interface AppLike {
 }
 
 const UNLOCKED_KINDS = ['unlocked', 'restored'];
-
-function refreshEntitlementQueries(): void {
-  void queryClient.invalidateQueries({ queryKey: ENTITLEMENT_QUERY_KEY });
-  void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
-}
 
 function flowAfter(kind: string): FlowState {
   if (kind === 'unlocked') return 'success';

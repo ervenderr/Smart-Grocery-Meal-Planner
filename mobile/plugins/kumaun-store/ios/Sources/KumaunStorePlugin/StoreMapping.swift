@@ -42,6 +42,14 @@ enum StoreMapping {
         ]
     }
 
+    /// Transaction.updates event: adds productId and revoked so JS can filter.
+    static func updateDictionary(jws: String, transaction: Transaction) -> [String: Any] {
+        var result = transactionDictionary(jws: jws, transaction: transaction)
+        result["productId"] = transaction.productID
+        result["revoked"] = transaction.revocationDate != nil
+        return result
+    }
+
     static func successDictionary(jws: String, transaction: Transaction) -> [String: Any] {
         var result = transactionDictionary(jws: jws, transaction: transaction)
         result["status"] = "success"

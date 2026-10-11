@@ -1,13 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import type { VerifyResult } from '../../api/entitlements';
 import { OfflineError } from '../../api/offline-error';
-import type { KumaunStorePlugin, PurchaseResult, StoreTransaction } from './store-plugin';
+import type {
+  KumaunStorePlugin,
+  PurchaseResult,
+  StoreTransaction,
+  StoreTransactionUpdate,
+} from './store-plugin';
 import {
+  handleTransactionUpdate,
   loadProduct,
   purchaseFull,
   recheckEntitlements,
   restorePurchases,
+  subscribeTransactionUpdates,
   type StoreDeps,
+  type UpdateResult,
 } from './store-service';
 
 const tx = (n: number): StoreTransaction => ({
@@ -23,6 +31,8 @@ interface Setup {
   deps: StoreDeps;
   calls: string[];
   verifyCalls: Array<{ jws: string; key: string }>;
+  emit(update: StoreTransactionUpdate): void;
+  listenerCount(): number;
 }
 
 function setup(opts: {
@@ -36,6 +46,7 @@ function setup(opts: {
   const calls: string[] = [];
   const verifyCalls: Array<{ jws: string; key: string }> = [];
   let ownedIdx = 0;
+  let listeners: Array<(u: StoreTransactionUpdate) => void> = [];
   const owned = opts.owned ?? [[]];
   const plugin: KumaunStorePlugin = {
     async getProduct(o) {
@@ -61,6 +72,18 @@ function setup(opts: {
     async finish(o) {
       calls.push(`finish:${o.transactionId}`);
     },
+    async finishUnfinished() {
+      calls.push('finishUnfinished');
+      return { finished: 1 };
+    },
+    async addListener(_event, listener) {
+      listeners = [...listeners, listener];
+      return {
+        remove: async () => {
+          listeners = listeners.filter((l) => l !== listener);
+        },
+      };
+    },
   };
   let keys = 0;
   const deps: StoreDeps = {
@@ -72,7 +95,13 @@ function setup(opts: {
     newKey: () => `key-${++keys}`,
     isOnline: () => opts.online ?? true,
   };
-  return { deps, calls, verifyCalls };
+  return {
+    deps,
+    calls,
+    verifyCalls,
+    emit: (u) => listeners.forEach((l) => l(u)),
+    listenerCount: () => listeners.length,
+  };
 }
 
 describe('loadProduct', () => {
@@ -199,10 +228,16 @@ describe('restorePurchases', () => {
 });
 
 describe('recheckEntitlements', () => {
-  it('skips with no plugin calls when server says active', async () => {
+  it('when server says active: no verify, only finishes unfinished device transactions', async () => {
     const s = setup({ owned: [[tx(1)]] });
     expect(await recheckEntitlements(s.deps, 'active')).toBe('skipped');
-    expect(s.calls).toEqual([]);
+    expect(s.calls).toEqual(['finishUnfinished']);
+    expect(s.verifyCalls).toHaveLength(0);
+  });
+  it('a finishUnfinished rejection is swallowed', async () => {
+    const s = setup();
+    s.deps.plugin.finishUnfinished = async () => { throw new Error('x'); };
+    expect(await recheckEntitlements(s.deps, 'active')).toBe('skipped');
   });
   it.each(['none', 'revoked'] as const)('verifies device transactions when server says %s', async (status) => {
     const s = setup({ owned: [[tx(1)]] });
@@ -218,5 +253,74 @@ describe('recheckEntitlements', () => {
     expect(await recheckEntitlements(setup({ owned: [[tx(1)]], online: false }).deps, 'none')).toBe('pending');
     const f = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(400); } });
     expect(await recheckEntitlements(f.deps, 'none')).toBe('failed');
+  });
+});
+
+const update = (n: number, productId = 'app.kitcha.mobile.full'): StoreTransactionUpdate => ({
+  ...tx(n),
+  productId,
+  revoked: false,
+});
+
+describe('handleTransactionUpdate (WR-04)', () => {
+  it('verifies then finishes an update for the product', async () => {
+    const s = setup();
+    expect(await handleTransactionUpdate(s.deps, update(7))).toBe('verified');
+    expect(s.verifyCalls.map((c) => c.jws)).toEqual(['jws-7']);
+    expect(s.calls).toContain('finish:7');
+  });
+  it('ignores other products', async () => {
+    const s = setup();
+    expect(await handleTransactionUpdate(s.deps, update(7, 'other.product'))).toBe('ignored');
+    expect(s.verifyCalls).toHaveLength(0);
+  });
+  it('transient verify leaves it unfinished (pending)', async () => {
+    const s = setup({ verify: async () => { throw httpError(429); } });
+    expect(await handleTransactionUpdate(s.deps, update(7))).toBe('pending');
+    expect(s.calls.some((c) => c.startsWith('finish'))).toBe(false);
+  });
+  it('maps claimed and hard failures', async () => {
+    const c = setup({ verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); } });
+    expect(await handleTransactionUpdate(c.deps, update(1))).toBe('claimed-elsewhere');
+    const f = setup({ verify: async () => { throw httpError(400); } });
+    expect(await handleTransactionUpdate(f.deps, update(1))).toBe('failed');
+  });
+  it('a revoked delivery is still verified so the server learns the refund', async () => {
+    const s = setup({ verify: async () => ({ ...active, status: 'revoked' }) });
+    expect(await handleTransactionUpdate(s.deps, { ...update(3), revoked: true })).toBe('verified');
+  });
+});
+
+describe('subscribeTransactionUpdates (WR-04)', () => {
+  const flush = () => new Promise((r) => setTimeout(r, 0));
+
+  it('handles deliveries one at a time and reports results', async () => {
+    const order: string[] = [];
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    const s = setup({
+      verify: async (jws) => {
+        order.push(`start:${jws}`);
+        if (jws === 'jws-1') await gate;
+        order.push(`end:${jws}`);
+        return active;
+      },
+    });
+    const results: UpdateResult[] = [];
+    const unsubscribe = await subscribeTransactionUpdates(s.deps, (r) => results.push(r));
+    s.emit(update(1));
+    s.emit(update(2));
+    await flush();
+    expect(order).toEqual(['start:jws-1']);
+    release();
+    await flush();
+    await flush();
+    expect(order).toEqual(['start:jws-1', 'end:jws-1', 'start:jws-2', 'end:jws-2']);
+    expect(results).toEqual(['verified', 'verified']);
+    unsubscribe();
+    await flush();
+    expect(s.listenerCount()).toBe(0);
   });
 });

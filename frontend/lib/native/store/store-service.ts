@@ -3,9 +3,11 @@ import { getApiErrorCode } from '../../api/errors';
 import { isOfflineError } from '../../api/offline-error';
 import {
   IAP_PRODUCT_ID,
+  TRANSACTION_UPDATED_EVENT,
   type KumaunStorePlugin,
   type StoreProduct,
   type StoreTransaction,
+  type StoreTransactionUpdate,
 } from './store-plugin';
 
 export interface StoreDeps {
@@ -166,12 +168,24 @@ export async function restorePurchases(deps: StoreDeps): Promise<RestoreOutcome>
   }
 }
 
-/** Launch/resume re-check. Never prompts for Apple ID (no AppStore sync), and skipped when the server already says active. */
+/**
+ * Launch/resume re-check. Never prompts for Apple ID (no AppStore sync). When the
+ * server already says active, no verify is sent; device transactions left
+ * unfinished (e.g. claimed from another device) are finished so StoreKit stops
+ * re-delivering them (WR-04).
+ */
 export async function recheckEntitlements(
   deps: StoreDeps,
   serverStatus: EntitlementStatus
 ): Promise<'verified' | 'skipped' | 'pending' | 'failed'> {
-  if (serverStatus === 'active') return 'skipped';
+  if (serverStatus === 'active') {
+    try {
+      await deps.plugin.finishUnfinished(PRODUCT);
+    } catch {
+      // Best effort; retried on the next recheck.
+    }
+    return 'skipped';
+  }
   let txs: StoreTransaction[];
   try {
     txs = await readEntitlements(deps);
@@ -182,4 +196,55 @@ export async function recheckEntitlements(
   const results = await verifyAll(deps, txs);
   if (results.some((r) => r === 'active' || r === 'revoked')) return 'verified';
   return results.includes('transient') ? 'pending' : 'failed';
+}
+
+export type UpdateResult = 'verified' | 'pending' | 'claimed-elsewhere' | 'failed' | 'ignored';
+
+const UPDATE_BY_VERIFY: Record<VerifyKind, UpdateResult> = {
+  active: 'verified',
+  revoked: 'verified',
+  transient: 'pending',
+  claimed: 'claimed-elsewhere',
+  failed: 'failed',
+};
+
+/**
+ * Handles one Transaction.updates delivery: verify with the server, then finish
+ * (verifyAndFinish only finishes after a 2xx). Other products are ignored.
+ */
+export async function handleTransactionUpdate(
+  deps: StoreDeps,
+  update: StoreTransactionUpdate
+): Promise<UpdateResult> {
+  if (update.productId !== IAP_PRODUCT_ID) return 'ignored';
+  const tx: StoreTransaction = {
+    jws: update.jws,
+    originalTransactionId: update.originalTransactionId,
+    transactionId: update.transactionId,
+  };
+  const [kind] = await verifyAll(deps, [tx]);
+  return UPDATE_BY_VERIFY[kind];
+}
+
+/**
+ * Subscribes to native transaction updates. Deliveries are handled one at a time
+ * so a burst cannot race the verify limiter. Returns an unsubscribe function.
+ */
+export async function subscribeTransactionUpdates(
+  deps: StoreDeps,
+  onResult: (result: UpdateResult) => void
+): Promise<() => void> {
+  let chain: Promise<void> = Promise.resolve();
+  const handle = await deps.plugin.addListener(TRANSACTION_UPDATED_EVENT, (update) => {
+    chain = chain.then(async () => {
+      try {
+        onResult(await handleTransactionUpdate(deps, update));
+      } catch {
+        onResult('failed');
+      }
+    });
+  });
+  return () => {
+    void handle.remove();
+  };
 }

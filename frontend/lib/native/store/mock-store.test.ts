@@ -33,4 +33,16 @@ describe('createMockStore', () => {
   it('carries the verify-bundle marker', () => {
     expect(MOCK_STORE_MARKER).toContain('KITCHA_E2E');
   });
+
+  it('emits transaction updates to listeners until removed', async () => {
+    const store = createMockStore();
+    const seen: string[] = [];
+    const handle = await store.addListener('transactionUpdated', (u) => seen.push(u.transactionId));
+    const u = { jws: 'j', originalTransactionId: 'o', transactionId: 't1', productId: 'p', revoked: false };
+    store.emitUpdate(u);
+    await handle.remove();
+    store.emitUpdate({ ...u, transactionId: 't2' });
+    expect(seen).toEqual(['t1']);
+    expect(await store.finishUnfinished({ productId: 'p' })).toEqual({ finished: 0 });
+  });
 });

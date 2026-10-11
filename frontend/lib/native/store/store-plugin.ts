@@ -1,4 +1,4 @@
-import { registerPlugin } from '@capacitor/core';
+import { registerPlugin, type PluginListenerHandle } from '@capacitor/core';
 import { isNative, type CapacitorLike } from '../../platform/native';
 
 export const IAP_PRODUCT_ID = 'app.kitcha.mobile.full';
@@ -22,12 +22,26 @@ export type PurchaseResult =
   | { status: 'cancelled' }
   | { status: 'pending' };
 
+/** A Transaction.updates delivery (Ask-to-Buy approval, other device, refund...). */
+export interface StoreTransactionUpdate extends StoreTransaction {
+  productId: string;
+  revoked: boolean;
+}
+
+export const TRANSACTION_UPDATED_EVENT = 'transactionUpdated';
+
 export interface KumaunStorePlugin {
   getProduct(options: { productId: string }): Promise<StoreProduct>;
   purchase(options: { productId: string }): Promise<PurchaseResult>;
   currentEntitlements(options: { productId: string }): Promise<{ transactions: StoreTransaction[] }>;
   sync(): Promise<void>;
   finish(options: { transactionId: string }): Promise<void>;
+  /** Finishes unfinished transactions for the product without verifying (server already active). */
+  finishUnfinished(options: { productId: string }): Promise<{ finished: number }>;
+  addListener(
+    event: typeof TRANSACTION_UPDATED_EVENT,
+    listener: (update: StoreTransactionUpdate) => void
+  ): Promise<PluginListenerHandle>;
 }
 
 let cached: KumaunStorePlugin | null = null;

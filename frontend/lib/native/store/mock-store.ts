@@ -3,6 +3,7 @@ import type {
   PurchaseResult,
   StoreProduct,
   StoreTransaction,
+  StoreTransactionUpdate,
 } from './store-plugin';
 
 /** Contains the KITCHA_E2E marker so mobile/scripts/verify-bundle.sh fails a release export on leak. */
@@ -27,11 +28,17 @@ function fakeTx(n: number): StoreTransaction {
   return { jws: `mock.jws.${n}`, originalTransactionId: `orig-${n}`, transactionId: `tx-${n}` };
 }
 
-export function createMockStore(options: MockStoreOptions = {}): KumaunStorePlugin {
+export interface MockStore extends KumaunStorePlugin {
+  /** Simulates a Transaction.updates delivery to current listeners. */
+  emitUpdate(update: StoreTransactionUpdate): void;
+}
+
+export function createMockStore(options: MockStoreOptions = {}): MockStore {
   const price = options.price ?? '$9.99';
   const outcomes = options.purchaseOutcomes ?? ['success'];
   let purchaseCount = 0;
   let owned: ReadonlyArray<StoreTransaction> = options.owned ?? [];
+  let listeners: ReadonlyArray<(u: StoreTransactionUpdate) => void> = [];
 
   return {
     async getProduct({ productId }): Promise<StoreProduct> {
@@ -63,6 +70,20 @@ export function createMockStore(options: MockStoreOptions = {}): KumaunStorePlug
     },
     async finish() {
       /* no-op */
+    },
+    async finishUnfinished() {
+      return { finished: 0 };
+    },
+    async addListener(_event, listener) {
+      listeners = [...listeners, listener];
+      return {
+        remove: async () => {
+          listeners = listeners.filter((l) => l !== listener);
+        },
+      };
+    },
+    emitUpdate(update) {
+      for (const l of listeners) l(update);
     },
   };
 }

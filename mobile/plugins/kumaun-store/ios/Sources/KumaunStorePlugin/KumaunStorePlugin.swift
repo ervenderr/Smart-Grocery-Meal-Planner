@@ -13,8 +13,41 @@ public class KumaunStorePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "purchase", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "currentEntitlements", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "sync", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "finish", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "finish", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "finishUnfinished", returnType: CAPPluginReturnPromise)
     ]
+
+    /// JS event name for transactions delivered outside purchase() (WR-04).
+    static let transactionUpdatedEvent = "transactionUpdated"
+
+    private var updatesTask: Task<Void, Never>?
+
+    /// Apple requires listening to Transaction.updates from launch: Ask-to-Buy
+    /// approvals, interrupted/SCA purchases, refunds and purchases made on another
+    /// device arrive only here. Each verified transaction is forwarded to JS, which
+    /// verifies it with the server and finishes it. Events are retained until a JS
+    /// listener attaches, so launch-time deliveries are not lost.
+    override public func load() {
+        updatesTask = Task.detached(priority: .background) { [weak self] in
+            for await result in Transaction.updates {
+                guard case .verified(let transaction) = result else { continue }
+                guard let plugin = self else { return }
+                await plugin.emitUpdate(jws: result.jwsRepresentation, transaction: transaction)
+            }
+        }
+    }
+
+    @MainActor
+    private func emitUpdate(jws: String, transaction: Transaction) {
+        notifyListeners(
+            KumaunStorePlugin.transactionUpdatedEvent,
+            data: StoreMapping.updateDictionary(jws: jws, transaction: transaction),
+            retainUntilConsumed: true)
+    }
+
+    deinit {
+        updatesTask?.cancel()
+    }
 
     private func productId(from call: CAPPluginCall) -> String? {
         let id = StoreMapping.validatedId(call.getString("productId"))
@@ -125,6 +158,24 @@ public class KumaunStorePlugin: CAPPlugin, CAPBridgedPlugin {
                 }
             }
             call.resolve()
+        }
+    }
+
+    /// Finishes every unfinished verified transaction for the product without a
+    /// server round trip. JS calls this only when the server already reports the
+    /// account as active, so StoreKit stops re-delivering those transactions.
+    /// Non-consumables stay in currentEntitlements after finish, so Restore still works.
+    @objc func finishUnfinished(_ call: CAPPluginCall) {
+        guard let id = productId(from: call) else { return }
+        Task {
+            var finished = 0
+            for await result in Transaction.unfinished {
+                if case .verified(let transaction) = result, transaction.productID == id {
+                    await transaction.finish()
+                    finished += 1
+                }
+            }
+            call.resolve(["finished": finished])
         }
     }
 }
