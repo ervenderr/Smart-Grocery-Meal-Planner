@@ -34,8 +34,9 @@ export async function finishShopping(
   const { carryOver = 'carry', receiptDate, occurredAt, addToPantry } = options;
   const occurred = clampOccurredAt(occurredAt);
   // Lock order: shopping list row lock (findActiveListIdForUpdate) first, then
-  // lockUserPantry inside the merge. Cook and adjust only take the pantry lock,
-  // so this order cannot deadlock.
+  // lockUserPantry inside the merge, then the pantry-cap advisory lock (only when
+  // the merge creates rows). Cook and adjust only take the pantry row lock and
+  // POST /pantry only takes the advisory lock, so this order cannot deadlock.
   return prisma.$transaction(async (tx) => {
     const listId = await findActiveListIdForUpdate(tx, userId);
     if (!listId) throw emptyError();
