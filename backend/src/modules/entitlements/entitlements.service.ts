@@ -86,6 +86,27 @@ function sameIdentity(row: Entitlement, tx: VerifiedTransaction): boolean {
   return row.environment === tx.environment && row.originalTransactionId === tx.originalTransactionId;
 }
 
+const PRODUCTION = 'Production';
+
+/**
+ * Whether a verified transaction may overwrite the user's existing row.
+ * - Never an older message for the row.
+ * - Never a non-Production (free Sandbox/TestFlight) purchase over a Production
+ *   row in any status, so a refunded Production unlock cannot be re-activated
+ *   for free (WR-01).
+ * - A different purchase never replaces an active row, except that a real
+ *   Production purchase supersedes a Sandbox one.
+ */
+function mayReplace(existing: Entitlement, verified: VerifiedTransaction): boolean {
+  if (verified.signedDate.getTime() < existing.lastSignedAt.getTime()) return false;
+  const existingProd = existing.environment === PRODUCTION;
+  const verifiedProd = verified.environment === PRODUCTION;
+  if (existingProd && !verifiedProd) return false;
+  if (sameIdentity(existing, verified)) return true;
+  if (verifiedProd && !existingProd) return true;
+  return existing.status !== ENTITLEMENT_STATUS.ACTIVE;
+}
+
 /** Upserts the entitlement for a verified transaction. Reused by the webhook. */
 export async function applyVerifiedTransaction(
   tx: Prisma.TransactionClient,
@@ -107,14 +128,7 @@ export async function applyVerifiedTransaction(
   const existing = owner ?? (await tx.entitlement.findUnique({
     where: { userId_productId: { userId, productId: verified.productId } },
   }));
-  if (existing) {
-    const stale = verified.signedDate.getTime() < existing.lastSignedAt.getTime();
-    const differentPurchase = !sameIdentity(existing, verified);
-    // Never let an older message, or a different purchase, replace an active entitlement.
-    if (stale || (differentPurchase && existing.status === ENTITLEMENT_STATUS.ACTIVE)) {
-      return toView(existing);
-    }
-  }
+  if (existing && !mayReplace(existing, verified)) return toView(existing);
 
   const revoked = verified.revocationDate !== null;
   const data = {
