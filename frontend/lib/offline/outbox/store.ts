@@ -5,7 +5,8 @@ import { IN_DOUBT_CODE } from './fold';
 import { NewOpSchema, barrierFor, entityOf, type LastError, type NewOp, type OutboxOp } from './op-types';
 import { rowToOp, toJson } from './store-rows';
 
-const KEY_RE = /^[A-Za-z0-9._:-]{8,255}$/;
+// Capped at 200 (server allows 255) so derived keys such as `${key}.preview` stay valid.
+const KEY_RE = /^[A-Za-z0-9._:-]{8,200}$/;
 // An op enqueued with caller-supplied key/body was already sent once: mark it so it is never coalesced.
 const SENT_MARK: LastError = { reason: 'transient' };
 const OPEN_STATES = `('queued','in_flight','failed','blocked','paused_auth')`;
