@@ -1,0 +1,50 @@
+import type { LastError, OpKind } from './op-types';
+
+export const MAX_TRANSIENT_ATTEMPTS = 8;
+
+export type TransportFailure = {
+  network: boolean;
+  timeout: boolean;
+  status?: number;
+  code?: string;
+  retryAfterMs?: number;
+};
+
+export type Outcome =
+  | { kind: 'ok' }
+  | { kind: 'retry'; countsAttempt: boolean; retryAfterMs?: number }
+  | { kind: 'pause-auth' }
+  | { kind: 'park'; error: LastError };
+
+const IN_FLIGHT = 'IDEMPOTENCY_IN_FLIGHT';
+const DELETE_KINDS: readonly OpKind[] = ['shopping.item.delete', 'pantry.delete'];
+
+function park(reason: LastError['reason'], f: TransportFailure): Outcome {
+  const error: LastError = { reason };
+  if (f.status !== undefined) error.status = f.status;
+  if (f.code !== undefined) error.code = f.code;
+  return { kind: 'park', error };
+}
+
+function transient(f: TransportFailure, attempts: number): Outcome {
+  if (attempts + 1 >= MAX_TRANSIENT_ATTEMPTS) {
+    return { kind: 'park', error: { reason: 'max-attempts', ...(f.status !== undefined ? { status: f.status } : {}) } };
+  }
+  const out: Outcome = { kind: 'retry', countsAttempt: true };
+  if (f.retryAfterMs !== undefined) out.retryAfterMs = f.retryAfterMs;
+  return out;
+}
+
+export function classify(f: TransportFailure, ctx: { kind: OpKind; attempts: number }): Outcome {
+  if (f.network || f.timeout) return { kind: 'retry', countsAttempt: false };
+  const s = f.status;
+  if (s === 401) return { kind: 'pause-auth' };
+  if (s === 409 && f.code === IN_FLIGHT) {
+    return { kind: 'retry', countsAttempt: false, ...(f.retryAfterMs !== undefined ? { retryAfterMs: f.retryAfterMs } : {}) };
+  }
+  if (s === 409) return park('conflict', f);
+  if (s === 404) return DELETE_KINDS.includes(ctx.kind) ? { kind: 'ok' } : park('gone', f);
+  if (s === 410) return park('gone', f);
+  if (s === 429 || (s !== undefined && s >= 500) || s === undefined) return transient(f, ctx.attempts);
+  return park('invalid', f);
+}
