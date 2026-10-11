@@ -40,6 +40,11 @@ function foldShoppingOp(list: ShoppingList, op: OutboxOp): ShoppingList {
     }
     case 'shopping.item.delete':
       return removeItem(list, payloadOf(op, 'shopping.item.delete').id).list ?? list;
+    case 'shopping.finish': {
+      const { input } = payloadOf(op, 'shopping.finish');
+      const keep = input.carryOver === 'discard' ? [] : list.items.filter((i) => !i.isChecked);
+      return { ...list, items: keep };
+    }
     default:
       return list;
   }

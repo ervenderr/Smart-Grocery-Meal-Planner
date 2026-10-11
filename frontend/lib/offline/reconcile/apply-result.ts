@@ -1,8 +1,9 @@
 import type { PantryItem } from '@/types/pantry.types';
-import type { ShoppingItem } from '@/types/shopping.types';
+import type { ShoppingItem, ShoppingList } from '@/types/shopping.types';
 import { normalizePantryItem } from '@/lib/pantry/normalize';
 import { removeItem, upsertItem } from '@/lib/shopping/list-cache';
 import type { OutboxOp } from '../outbox/op-types';
+import { SHOPPING_ACTIVE_KEY } from '../cache/cache-keys';
 import { pantryWrites, shoppingWrite, type CacheWrites } from './cache-writes';
 
 export type { CacheWrites } from './cache-writes';
@@ -41,6 +42,11 @@ export function applyResult(op: OutboxOp, result: unknown): CacheWrites {
     }
     case 'pantry.delete':
       return pantryWrites((items) => items.filter((i) => i.id !== op.entityId));
+    case 'shopping.finish': {
+      const list = (result as { list?: unknown } | null)?.list;
+      if (!list || typeof list !== 'object' || !Array.isArray((list as ShoppingList).items)) return NONE;
+      return [{ key: SHOPPING_ACTIVE_KEY, update: () => list }];
+    }
     default:
       return NONE;
   }

@@ -47,3 +47,24 @@ describe('applyResult', () => {
     expect(applyResult(fin, {})).toEqual([]);
   });
 });
+
+describe('applyResult finish and cook', () => {
+  it('shopping.finish writes the returned list to the active key', async () => {
+    const { applyResult } = await import('./apply-result');
+    const { makeOp } = await import('../outbox/fixtures.test-helper');
+    const { SHOPPING_ACTIVE_KEY } = await import('../cache/cache-keys');
+    const op = makeOp({ kind: 'shopping.finish', label: 'f', payload: { input: { occurredAt: '2026-10-11T10:00:00.000Z', receiptDate: '2026-10-11' } } });
+    const newList = { id: 'L2', items: [] };
+    const writes = applyResult(op, { list: newList });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].key).toEqual(SHOPPING_ACTIVE_KEY);
+    expect(writes[0].update({ id: 'old', items: [{}] })).toEqual(newList);
+    expect(applyResult(op, { nope: 1 })).toEqual([]);
+  });
+  it('cook.apply yields no writes', async () => {
+    const { applyResult } = await import('./apply-result');
+    const { makeOp, ID_A } = await import('../outbox/fixtures.test-helper');
+    const op = makeOp({ kind: 'cook.apply', label: 'c', payload: { target: { recipeId: ID_A }, servings: 1, occurredAt: '2026-10-11T10:00:00.000Z' } });
+    expect(applyResult(op, { updated: 1, usedUp: 0 })).toEqual([]);
+  });
+});

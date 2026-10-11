@@ -73,3 +73,24 @@ describe('foldMealPlans', () => {
     expect(plan.meals[0].cookedAt).toBeNull();
   });
 });
+
+describe('fold cook and finish', () => {
+  const NOW = '2026-10-11T10:00:00.000Z';
+  const finish = (carryOver?: 'carry' | 'discard') =>
+    makeOp({ kind: 'shopping.finish', label: 'Finish', payload: { input: { ...(carryOver ? { carryOver } : {}), occurredAt: NOW, receiptDate: '2026-10-11' } } });
+  const checked = { ...list, items: [{ ...list.items[0], isChecked: true }, { ...list.items[0], id: ID_A, isChecked: false }] };
+
+  it('pending finish removes checked items', () => {
+    expect(foldShoppingList(checked, [finish('carry')]).items.map((i) => i.id)).toEqual([ID_A]);
+  });
+  it('finish with discard removes all items', () => {
+    expect(foldShoppingList(checked, [finish('discard')]).items).toEqual([]);
+  });
+  it('cook.apply marks the meal cooked and leaves pantry untouched', () => {
+    const cook = makeOp({ kind: 'cook.apply', label: 'Adobo', payload: { target: { mealPlanItemId: ID_B }, servings: 2, occurredAt: NOW } });
+    const plans = [{ id: 'p', meals: [{ id: ID_B }] }] as unknown as MealPlan[];
+    expect(foldMealPlans(plans, [cook])[0].meals[0]).toMatchObject({ cookedAt: NOW });
+    const items = [pantry(5)];
+    expect(foldPantryList(items, [cook])).toEqual(items);
+  });
+});
