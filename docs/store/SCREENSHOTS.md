@@ -37,7 +37,7 @@ Pre-capture: set Philippine peso currency, tidy demo data so item names are real
 Notes:
 - Screens 1-3 carry the story (research note 04: first three screenshots matter most).
 - Screen 8 depends on Phase 11 (offline core), which is in 1.0 scope. Replace with the AI suggestion screen (with the AI-generated badge and consent explained) if offline slips. Do not show AI output without its AI label in a screenshot.
-- Do not show a price, "free forever", or features that are not in the build (Guideline 2.3, metadata accuracy). Phase 12 is in 1.0 scope, so add the optional 9th: the Kitcha Full unlock sheet (also reused as the IAP review screenshot, see IAP.md).
+- Do not show a price, "free forever", or features that are not in the build (Guideline 2.3, metadata accuracy). Phase 12 is in 1.0 scope, so add the optional 9th: the Kumaun Full unlock sheet (also reused as the IAP review screenshot, see IAP.md).
 - Do not include the Open Food Facts logo in screenshots without checking its brand terms; text attribution lives in the app.
 - Optional later: 15-30 second app preview video per size.
 

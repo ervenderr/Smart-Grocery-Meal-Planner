@@ -80,7 +80,7 @@
 				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
 			</array>
 		</dict>
-		<!-- ADD ONLY WHEN PHASE 12 SHIPS (Kitcha Full, entitlement stored per user):
+		<!-- ADD ONLY WHEN PHASE 12 SHIPS (Kumaun Full, entitlement stored per user):
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypePurchaseHistory</string>

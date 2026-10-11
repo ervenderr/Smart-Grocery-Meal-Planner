@@ -1,4 +1,4 @@
-# In-App Purchase setup: Kitcha Full (non-consumable)
+# In-App Purchase setup: Kumaun Full (non-consumable)
 
 Status: PLANNED (ROADMAP Phase 12). Nothing here exists in App Store Connect or code yet. Field limits verified 2026-10-11 at https://developer.apple.com/help/app-store-connect/reference/in-app-purchases-and-subscriptions/in-app-purchase-information ; creation steps at https://developer.apple.com/help/app-store-connect/manage-in-app-purchases/create-consumable-or-non-consumable-in-app-purchases .
 
@@ -7,9 +7,9 @@ Status: PLANNED (ROADMAP Phase 12). Nothing here exists in App Store Connect or 
 | Field | Value | Limit / note |
 |-------|-------|--------------|
 | Type | Non-Consumable | One-time, restorable. No subscription (3.1.2 rules do not apply). |
-| Reference name | `Kitcha Full (one-time unlock)` | max 64 chars, internal only |
+| Reference name | `Kumaun Full (one-time unlock)` | max 64 chars, internal only |
 | Product ID | `app.kitcha.mobile.full` | max 100 chars, letters/digits/hyphen/period/underscore. Cannot be edited or reused after saving, so decide the bundle id first. The Xcode bundle id today is `app.kitcha.mobile` (verified in project.pbxproj and capacitor.config.ts); changing the name does not require changing it. |
-| Display name (en-US) | `Kitcha Full` | 2-30 chars |
+| Display name (en-US) | `Kumaun Full` | 2-30 chars |
 | Description (en-US) | `Unlimited pantry and more AI ideas.` (35 chars) | max 45 chars. Must be true of what Phase 12 ships. |
 | Price | USD 9.99 base | Pick the USD price point in "Price Schedule", then review each storefront. |
 | Philippines | Open the price list and set PHP manually (see notes) | |
@@ -21,7 +21,7 @@ Status: PLANNED (ROADMAP Phase 12). Nothing here exists in App Store Connect or 
 Review notes text:
 
 ```
-Kitcha Full is a one-time non-consumable unlock (no subscription). Free tier: up to 25 pantry items. To test: sign in with the demo account (see App Review Information), add pantry items until the 26th, tap Unlock Kitcha Full, then Restore Purchases under Settings > Kitcha Full. Free users keep barcode scanning, expiry reminders, recipes, meal plans and shopping lists.
+Kumaun Full is a one-time non-consumable unlock (no subscription). Free tier: up to 25 pantry items. To test: sign in with the demo account (see App Review Information), add pantry items until the 26th, tap Unlock Kumaun Full, then Restore Purchases under Settings > Kumaun Full. Free users keep barcode scanning, expiry reminders, recipes, meal plans and shopping lists.
 ```
 
 ### Philippines pricing notes
@@ -33,13 +33,13 @@ Kitcha Full is a one-time non-consumable unlock (no subscription). Free tier: up
 ## Review screenshot requirement
 
 - Required for every IAP; shows the item being offered; it is for App Review only, not shown on the store. Once uploaded it can be replaced but not removed.
-- Must meet one of the screenshot specs the app supports (Apple page above does not give pixels). Use the 1290 x 2796 or 1320 x 2868 portrait capture of the paywall/upgrade sheet that shows the name `Kitcha Full`, the price and the Restore button. Take it with `scripts/store/capture-screenshots.sh` once Phase 12 UI exists.
+- Must meet one of the screenshot specs the app supports (Apple page above does not give pixels). Use the 1290 x 2796 or 1320 x 2868 portrait capture of the paywall/upgrade sheet that shows the name `Kumaun Full`, the price and the Restore button. Take it with `scripts/store/capture-screenshots.sh` once Phase 12 UI exists.
 - The IAP must also be attached to the app version when submitting the first time (App Store Connect > version page > In-App Purchases and Subscriptions) and in "Ready to Submit" state, otherwise it is not reviewed with the build.
 
 ## Restore purchases (mandatory)
 
 - Guideline 3.1.1: "you should make sure you have a restore mechanism for any restorable in-app purchases" (https://developer.apple.com/app-store/review/guidelines/ , fetched 2026-10-11).
-- Implement a visible "Restore Purchases" button on the upgrade sheet and in Settings. It must work on a fresh install and after account switch; a user who signs in on another device should also get the entitlement from the server (entitlement is keyed to the Kitcha account).
+- Implement a visible "Restore Purchases" button on the upgrade sheet and in Settings. It must work on a fresh install and after account switch; a user who signs in on another device should also get the entitlement from the server (entitlement is keyed to the Kumaun account).
 - Free-tier limit prompt may be dismissed (ROADMAP success criterion 3); Restore must be reachable without hitting the limit.
 - The purchase does not cancel on account deletion: Apple purchases belong to the Apple Account. Say so in the delete-account screen, and keep the server entitlement row deletable with the account (Cascade).
 
@@ -50,7 +50,7 @@ Source: https://developer.apple.com/help/app-store-connect/test-in-app-purchases
 1. Human: App Store Connect > Users and Access > Sandbox > + (Account Holder/Admin/App Manager/Developer role). Name, a NEW email never used for an Apple Account (plus-addressing works, e.g. `you+kitchasbx1@gmail.com`), strong password, country Philippines. Name/email/password cannot be edited afterwards; the country can.
 2. Create the IAP in App Store Connect (Missing Metadata is fine for sandbox, but it must have a localization, price and review screenshot to reach "Ready to Submit"). Metadata changes can take up to 1 hour to reach sandbox.
 3. Real iPhone: enable Developer Mode, install a development-signed or TestFlight build. Sign in with the sandbox account under Settings > Developer > Sandbox Apple Account (location of the toggle varies by iOS version, UNVERIFIED), not the main Apple Account. You do not need to sign out of your own account.
-4. Buy Kitcha Full; confirm the server entitlement flips (webhook or verification call logged). Delete the app, reinstall, tap Restore Purchases, confirm entitlement returns.
+4. Buy Kumaun Full; confirm the server entitlement flips (webhook or verification call logged). Delete the app, reinstall, tap Restore Purchases, confirm entitlement returns.
 5. Refund test: Sandbox cannot easily simulate a user-requested refund from device; use the App Store Server API test notification and your webhook with a mocked REFUND payload (agent-doable with fixtures).
 6. Simulator: StoreKit Configuration file testing in Xcode works without a tester account but cannot exercise the server path (UNVERIFIED for Capacitor plugin compatibility).
 7. TestFlight purchases use the sandbox environment automatically; no real charge.
@@ -73,7 +73,7 @@ All human-only (Account Holder). Sources: https://developer.apple.com/help/app-s
 
 Options:
 
-A. **RevenueCat**: Capacitor plugin `@revenuecat/purchases-capacitor` handles StoreKit, restore and receipt validation; RevenueCat calls our webhook. Free under USD 2,500 monthly tracked revenue then 1 percent (from research note 04, https://www.revenuecat.com/pricing/; the 1 percent basis is ambiguous in sources, so confirm). Set `app_user_id` to the Kitcha user UUID (never the email) after login.
+A. **RevenueCat**: Capacitor plugin `@revenuecat/purchases-capacitor` handles StoreKit, restore and receipt validation; RevenueCat calls our webhook. Free under USD 2,500 monthly tracked revenue then 1 percent (from research note 04, https://www.revenuecat.com/pricing/; the 1 percent basis is ambiguous in sources, so confirm). Set `app_user_id` to the Kumaun user UUID (never the email) after login.
 
 B. **Direct StoreKit 2 + `@apple/app-store-server-library` (Node)**: client buys via a Capacitor StoreKit 2 plugin (the weakest link; community plugins are less mature, not evaluated here), sends the signed transaction JWS to `POST /billing/verify`; server verifies the x5c chain to Apple Root CA G3, checks `bundleId` (`app.kitcha.mobile`), `productId`, `environment`, then upserts the entitlement. Refunds/revocation arrive through App Store Server Notifications V2 (`REFUND`, `REVOKE`; dedupe by `notificationUUID`). No fee but about 3-5 days of work and more edge cases.
 
