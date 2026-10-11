@@ -1,0 +1,27 @@
+{
+  "identifier" : "BE132582-A02D-4A6B-AD12-B3C724A1307E",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "6760120391",
+      "localizations" : [
+        {
+          "description" : "Unlimited pantry and more AI ideas.",
+          "displayName" : "Kumaun Full",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.kitcha.mobile.full",
+      "referenceName" : "Kumaun Full (one-time unlock)",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {},
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
