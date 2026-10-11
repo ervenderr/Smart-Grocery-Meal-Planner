@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { clearUserSessionState, USER_SCOPED_STORAGE_KEYS } from './session-cleanup';
+import { REMINDER_PREFS_KEY, REMINDER_SNOOZE_KEY } from '@/lib/reminders/prefs';
 
 describe('clearUserSessionState', () => {
+  it('scopes reminder prefs and snooze to the user session', () => {
+    expect(USER_SCOPED_STORAGE_KEYS).toContain(REMINDER_PREFS_KEY);
+    expect(USER_SCOPED_STORAGE_KEYS).toContain(REMINDER_SNOOZE_KEY);
+  });
+
   it('clears the whole query cache', () => {
     const cache = { clear: vi.fn() };
     clearUserSessionState(cache);

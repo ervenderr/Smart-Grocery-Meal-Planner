@@ -2,7 +2,13 @@
  * Per-user client state that must never outlive a session.
  * Keep this list in sync with any new sessionStorage/localStorage user data.
  */
-export const USER_SCOPED_STORAGE_KEYS = ['current-shopping-list'] as const;
+export const USER_SCOPED_STORAGE_KEYS = [
+  'current-shopping-list',
+  // Must equal REMINDER_PREFS_KEY / REMINDER_SNOOZE_KEY (asserted in tests); literals
+  // here avoid pulling the reminders module into the auth import graph.
+  'kitcha:reminder-prefs',
+  'kitcha:reminder-snooze-until',
+] as const;
 
 export interface ClearableCache {
   clear: () => void;
