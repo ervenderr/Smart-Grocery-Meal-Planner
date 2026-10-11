@@ -16,7 +16,12 @@ export interface TriggerDeps {
 }
 
 const defaultLoadApp = () =>
-  loadPlugin(() => import('@capacitor/app') as unknown as Promise<{ App: AppLike }>);
+  loadPlugin(
+    () =>
+      (process.env.NEXT_PUBLIC_NATIVE_BUILD === '1'
+        ? import('@capacitor/app')
+        : Promise.resolve(null)) as unknown as Promise<{ App: AppLike } | null>,
+  );
 
 /** Wires foreground, background and connectivity-regain triggers. Returns a remover. */
 export async function attachTriggers(runtime: OfflineRuntime, deps: TriggerDeps = {}): Promise<() => void> {

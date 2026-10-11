@@ -1,4 +1,3 @@
-import type { SQLiteConnection } from '@capacitor-community/sqlite';
 import { loadPlugin } from '@/lib/platform/native';
 import { createNativeSqlDb, type NativeConnectionLike } from './native-sqldb';
 import { DB_NAME } from './schema';
@@ -30,11 +29,13 @@ const DB_VERSION = 1;
 let memo: Promise<SqlDb | null> | null = null;
 
 async function productionLoader(): Promise<SqliteModuleLike | null> {
-  // Dynamic import inside loadPlugin keeps the plugin (and jeep-sqlite) out of the web bundle.
-  const mod = await loadPlugin(() => import('@capacitor-community/sqlite'));
-  if (!mod) return null;
-  const sqlite = new mod.SQLiteConnection(mod.CapacitorSQLite) as SQLiteConnection;
-  return { sqlite: sqlite as unknown as SqliteConnectionLike };
+  // The inline env check is replaced at build time, so web builds drop the whole native loader chunk.
+  const mod = await loadPlugin(() =>
+    process.env.NEXT_PUBLIC_NATIVE_BUILD === '1'
+      ? import('./native-sqlite-loader')
+      : Promise.resolve(null),
+  );
+  return mod ? mod.loadNativeSqlite() : null;
 }
 
 async function openConnection(sqlite: SqliteConnectionLike): Promise<NativeConnectionLike> {

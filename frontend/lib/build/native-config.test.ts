@@ -4,9 +4,9 @@ import { assertNativeEnv, buildNextOptions } from './native-config';
 const API = 'https://x.example';
 
 describe('buildNextOptions', () => {
-  it('returns an empty config for the web build', () => {
-    expect(buildNextOptions({})).toEqual({});
-    expect(buildNextOptions({ BUILD_TARGET: 'web' })).toEqual({});
+  it('pins the native flag off for the web build', () => {
+    expect(buildNextOptions({})).toEqual({ env: { NEXT_PUBLIC_NATIVE_BUILD: '0' } });
+    expect(buildNextOptions({ BUILD_TARGET: 'web' })).toEqual({ env: { NEXT_PUBLIC_NATIVE_BUILD: '0' } });
   });
 
   it('returns a fresh object each call', () => {

@@ -12,7 +12,12 @@ type NetworkModule = {
 };
 
 const defaultLoader = (): Promise<NetworkModule | null> =>
-  loadPlugin(() => import('@capacitor/network') as unknown as Promise<NetworkModule>);
+  loadPlugin(
+    () =>
+      (process.env.NEXT_PUBLIC_NATIVE_BUILD === '1'
+        ? import('@capacitor/network')
+        : Promise.resolve(null)) as unknown as Promise<NetworkModule | null>,
+  );
 
 /** Feeds the OS network hint into connectivity. No-op on web. */
 export async function attachNativeNetwork(

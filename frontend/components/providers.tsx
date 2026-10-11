@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { queryClient } from '@/lib/react-query';
 import { CurrencyProvider } from '@/lib/currency/currency-provider';
 import { ErrorBoundary } from '@/components/common/error-boundary';
+import { OfflineBootGate } from '@/components/offline/offline-boot-gate';
 import { NavigationRegistrar } from '@/components/platform/navigation-registrar';
 
 /**
@@ -18,7 +19,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <NavigationRegistrar />
-        <CurrencyProvider>{children}</CurrencyProvider>
+        <OfflineBootGate>
+          <CurrencyProvider>{children}</CurrencyProvider>
+        </OfflineBootGate>
         <Toaster
           position="top-right"
           containerStyle={{ top: 'calc(env(safe-area-inset-top) + 0.5rem)' }}

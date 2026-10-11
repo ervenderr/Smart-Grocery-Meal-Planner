@@ -33,9 +33,12 @@ export function assertNativeEnv(env: BuildEnv): void {
   }
 }
 
-/** Pure: returns a fresh Next config fragment. Web builds get an empty object. */
+/**
+ * Pure: returns a fresh Next config fragment. Web builds only pin NEXT_PUBLIC_NATIVE_BUILD=0 so
+ * native-only dynamic imports are dead-code eliminated (no plugin chunks in the web bundle).
+ */
 export function buildNextOptions(env: BuildEnv): NextConfig {
-  if (!isNativeTarget(env)) return {};
+  if (!isNativeTarget(env)) return { env: { NEXT_PUBLIC_NATIVE_BUILD: '0' } };
   const base: NextConfig = {
     output: 'export',
     trailingSlash: true,
