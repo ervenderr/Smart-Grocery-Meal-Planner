@@ -11,6 +11,7 @@ import type {
   CookPreviewInput,
   CookPreviewResponse,
 } from '../../types/cook.types';
+import { clampOccurredAt } from '../shopping/shopping.receipt-window';
 import { lockUserPantry } from '../pantry/pantry.lock';
 import { resolveStaples } from '../intelligence/staples';
 import { COOK_ERROR_CODES, COOK_PANTRY_READ_CAP } from './cook.constants';
@@ -99,10 +100,15 @@ async function applyDeductions(
  * Once-only marker: conditional update inside the apply transaction, so a replay
  * or concurrent double apply loses (409) and a later failure rolls it back.
  */
-async function markMealCooked(tx: Tx, userId: string, mealPlanItemId: string): Promise<void> {
+async function markMealCooked(
+  tx: Tx,
+  userId: string,
+  mealPlanItemId: string,
+  cookedAt: Date,
+): Promise<void> {
   const { count } = await tx.mealPlanItem.updateMany({
     where: { id: mealPlanItemId, cookedAt: null, mealPlan: { userId, deletedAt: null } },
-    data: { cookedAt: new Date() },
+    data: { cookedAt },
   });
   if (count > 0) return;
   const existing = await tx.mealPlanItem.findFirst({
@@ -117,9 +123,11 @@ export async function applyCook(
   input: CookApplyInput,
 ): Promise<CookApplyResponse> {
   const { mealPlanItem } = await resolveCookTarget(userId, input);
+  // occurredAt: Phase 11 offline queued cook (additive)
+  const cookedAt = clampOccurredAt(input.occurredAt);
   try {
     return await prisma.$transaction(async (tx) => {
-      if (mealPlanItem) await markMealCooked(tx, userId, mealPlanItem.id);
+      if (mealPlanItem) await markMealCooked(tx, userId, mealPlanItem.id, cookedAt);
       return applyDeductions(tx, userId, input.deductions);
     });
   } catch (error) {

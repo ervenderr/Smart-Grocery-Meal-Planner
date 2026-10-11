@@ -29,6 +29,8 @@ export interface CookApplyInput {
   readonly recipeId?: string;
   readonly mealPlanItemId?: string;
   readonly deductions: readonly CookDeductionInput[];
+  /** ISO-8601 time the user tapped "cooked" offline; clamped server-side. */
+  readonly occurredAt?: string;
 }
 
 export interface CookApplyResponse {

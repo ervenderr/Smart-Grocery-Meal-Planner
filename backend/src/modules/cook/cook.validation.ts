@@ -98,4 +98,9 @@ export const validateApply: ValidationChain[] = [
     .isFloat({ min: 0, max: MAX_DEDUCTION_USE })
     .withMessage(`use must be between 0 and ${MAX_DEDUCTION_USE}`)
     .toFloat(),
+  // occurredAt: Phase 11 offline queued cook (additive)
+  body("occurredAt")
+    .optional()
+    .isISO8601()
+    .withMessage("occurredAt must be an ISO-8601 timestamp"),
 ];
