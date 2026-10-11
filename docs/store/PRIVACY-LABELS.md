@@ -72,7 +72,7 @@ The privacy policy text (`frontend/app/privacy`, edited by whoever owns it, not 
 
 Implementation follow-up for the backend owner: the 30-day log retention must be enforced on Railway (log retention setting or log drain), not just stated. Human/agent task, tracked in SUBMISSION-CHECKLIST.md.
 
-Phase 12 is implemented and in 1.0 scope, so Purchases > Purchase History is declared in 1.0. The manifest entry is added to `mobile/ios/App/App/PrivacyInfo.xcprivacy` in plan 12-15 (see the block in `PrivacyInfo.proposed.xcprivacy`); if 12-15 recorded the wiring as human_needed, the manifest entry is still PENDING and must be added before archive.
+Phase 12 is implemented and in 1.0 scope, so Purchases > Purchase History is declared in 1.0. The Purchase History entry is live in `mobile/ios/App/App/PrivacyInfo.xcprivacy` (activated by plan 12-15, plutil lint OK).
 
 ## Open questions for the owner
 

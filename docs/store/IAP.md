@@ -67,7 +67,7 @@ Product ID, plugin boundary and the verification design come from 12-CONTEXT.md;
 - NOT automated: React component behavior (vitest is Node-only for `lib/**`), real StoreKit purchases, and the webhook against Apple.
 
 ### 2. Simulator with Xcode (StoreKit configuration)
-1. Open `mobile/ios/App` in Xcode. Scheme App > Edit Scheme > Run > Options > StoreKit Configuration = `Kumaun.storekit` (pre-wired by plan 12-15 if it ran; otherwise set it by hand, the file is `mobile/storekit/Kumaun.storekit`).
+1. Open `mobile/ios/App` in Xcode. Scheme App > Edit Scheme > Run > Options > StoreKit Configuration = `Kumaun.storekit` (wired in the shared scheme `App.xcscheme` by plan 12-15; confirm Xcode shows it, otherwise pick `mobile/storekit/Kumaun.storekit` by hand).
 2. Run a local backend with `IAP_ALLOW_XCODE_ENV=true` in `backend/.env` (never in production; the server refuses to boot with it in production). Xcode-environment JWS are not Apple-signed, so without this flag verify returns `INVALID_TRANSACTION`.
 3. Cmd+R, sign in, add items to the 26th, buy from the sheet, then Settings > Kumaun Full > Restore Purchases. Refund: Xcode Debug > StoreKit > Manage Transactions > refund or revoke, then relaunch; the app rechecks on launch and resume.
 4. 12-03 CLI probe result: SKIPPED. `SKTestSession(contentsOf: Kumaun.storekit)` loaded, but `Product.products(for:)` threw `URLError -1008` (it went to the real App Store instead of the local config on the iOS 26.5 simulator runtime, consistent with forum thread 826971). `xcodebuild test` therefore cannot prove a purchase; the mapping unit test passes. Real StoreKit checks are human_needed.
@@ -89,7 +89,7 @@ Source: https://developer.apple.com/help/app-store-connect/test-in-app-purchases
 1. Set the Railway variable `APPLE_APP_APPLE_ID` (App Store Connect > the app > App Information > Apple ID, a number). Confirm the defaults `APPLE_BUNDLE_ID=app.kitcha.mobile` and `IAP_PRODUCT_ID=app.kitcha.mobile.full`, and leave `IAP_ONLINE_CHECKS` unset (default true in production). Never set `IAP_ALLOW_XCODE_ENV` on Railway.
 2. After the Railway deploy (nothing is deployed yet), register the webhook URL `https://<api-host>/api/v1/webhooks/app-store` as both the Production and the Sandbox Server URL, Version 2, in App Store Connect > App Information > App Store Server Notifications. Then press "Request a Test Notification" and check the Railway logs for a 200.
 3. Create a sandbox tester (section 3 above).
-4. In Xcode > App target > Signing & Capabilities confirm the In-App Purchase capability is present (plan 12-15 adds it unless it recorded the wiring as human_needed).
+4. In Xcode > App target > Signing & Capabilities confirm the In-App Purchase capability is present (plan 12-15 does not edit project.pbxproj, so add it by hand if missing; StoreKit 2 needs no entitlements file or Info.plist key).
 5. Run the TestFlight sandbox purchase, delete-and-restore, second-device and refund checks (sections 3 and 4). Record results in the submission checklist.
 6. Capture and upload the review screenshot (next section) to the IAP in App Store Connect.
 7. Attach the IAP to the 1.0 version (version page > In-App Purchases and Subscriptions) so it is reviewed with the build. The product must be Ready to Submit first.
