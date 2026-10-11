@@ -19,14 +19,27 @@ export interface NativeConnectionLike {
  * Inside a manual transaction the plugin must not open its own (`transaction=false`);
  * outside one, the plugin's default per-call transaction (`true`) keeps writes atomic.
  */
-function build(conn: NativeConnectionLike, inTx: boolean): SqlDb {
+type Serial = <T>(task: () => Promise<T>) => Promise<T>;
+
+/** The plugin has one connection: overlapping transactions fail, so top-level writes run one at a time. */
+function createSerial(): Serial {
+  let tail: Promise<unknown> = Promise.resolve();
+  return <T>(task: () => Promise<T>): Promise<T> => {
+    const result = tail.then(task, task);
+    tail = result.catch(() => undefined);
+    return result;
+  };
+}
+
+function build(conn: NativeConnectionLike, inTx: boolean, serial: Serial): SqlDb {
   const own = !inTx;
+  const guard: Serial = inTx ? (task) => task() : serial;
   const self: SqlDb = {
     async exec(sql) {
-      await conn.execute(sql, own);
+      await guard(() => conn.execute(sql, own));
     },
     async run(sql, params = []): Promise<SqlRunResult> {
-      const res = await conn.run(sql, [...params], own);
+      const res = await guard(() => conn.run(sql, [...params], own));
       return { changes: res.changes?.changes ?? 0, lastInsertRowid: res.changes?.lastId };
     },
     async query<T>(sql: string, params: readonly unknown[] = []): Promise<T[]> {
@@ -35,24 +48,26 @@ function build(conn: NativeConnectionLike, inTx: boolean): SqlDb {
     },
     async transaction<T>(fn: (tx: SqlDb) => Promise<T>): Promise<T> {
       if (inTx) return fn(self);
-      await conn.beginTransaction();
-      try {
-        const out = await fn(build(conn, true));
-        await conn.commitTransaction();
-        return out;
-      } catch (error) {
+      return serial(async () => {
+        await conn.beginTransaction();
         try {
-          await conn.rollbackTransaction();
-        } catch {
-          // rollback failure must not mask the original error
+          const out = await fn(build(conn, true, serial));
+          await conn.commitTransaction();
+          return out;
+        } catch (error) {
+          try {
+            await conn.rollbackTransaction();
+          } catch {
+            // rollback failure must not mask the original error
+          }
+          throw error;
         }
-        throw error;
-      }
+      });
     },
   };
   return self;
 }
 
 export function createNativeSqlDb(conn: NativeConnectionLike): SqlDb {
-  return build(conn, false);
+  return build(conn, false, createSerial());
 }
