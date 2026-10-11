@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/common/empty-state';
 import { haptic } from '@/lib/native/native-haptics';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { usePlatform } from '@/lib/platform/use-platform';
 import { getOfflineRuntime } from '@/lib/offline/runtime';
 import { buildSheetModel } from '@/lib/offline/status/sheet-model';
 import { discardAllFailed, discardOp, retryAll, retryOp, runSheetAction } from '@/lib/offline/status/actions';
@@ -22,14 +23,15 @@ export function PendingChangesSheet() {
   const setOpen = usePendingSheet((s) => s.setOpen);
   const status = useOfflineStatus();
   const userId = useAuthStore((s) => s.user?.id ?? null);
+  const { native } = usePlatform();
   const [confirmAll, setConfirmAll] = useState(false);
 
   const model = useMemo(
     () =>
       status
-        ? buildSheetModel({ ops: status.ops, connectivity: status.connectivity, draining: status.draining, bootstrapping: false })
+        ? buildSheetModel({ ops: status.ops, connectivity: status.connectivity, draining: status.draining, bootstrapping: false, platform: native ? 'native' : 'web' })
         : null,
-    [status],
+    [status, native],
   );
   const kinds = useMemo(() => new Map((status?.ops ?? []).map((o) => [o.seq, o.kind] as const)), [status]);
 

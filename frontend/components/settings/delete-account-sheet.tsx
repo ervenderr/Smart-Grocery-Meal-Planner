@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { haptic } from '@/lib/native/native-haptics';
 import { accountApi } from '@/lib/api/account';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { ENTITLEMENT_COPY } from '@/lib/entitlements/copy';
 import {
   canSubmitDelete,
   classifyDeleteError,
@@ -82,6 +83,7 @@ function DeleteAccountForm({ onClose, onBusyChange }: DeleteAccountFormProps) {
         This permanently deletes your pantry, recipes, meal plans, shopping lists, budget and AI
         usage. This can&apos;t be undone.
       </p>
+      <p className="text-sm text-gray-700">{ENTITLEMENT_COPY.deleteAccountNote}</p>
 
       <Input
         ref={inputRef}

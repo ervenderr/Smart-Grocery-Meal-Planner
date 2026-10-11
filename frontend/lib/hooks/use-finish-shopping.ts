@@ -1,9 +1,14 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { shoppingApi } from '@/lib/api/shopping';
 import { getApiErrorMessage } from '@/lib/api/errors';
+import { isUpgradeRequired } from '@/lib/entitlements/upgrade-error';
+import { openUpgradeSheet } from '@/lib/entitlements/upgrade-sheet-store';
+import { ENTITLEMENT_COPY } from '@/lib/entitlements/copy';
+import { isNative } from '@/lib/platform/native';
 import { haptic } from '@/lib/native/native-haptics';
 import { queryKeys } from '@/lib/react-query';
 import { SHOPPING_MUTATION_SCOPE } from '@/lib/hooks/use-shopping-list';
@@ -44,7 +49,9 @@ async function applyQueuedFinish(
 
 export function useFinishShopping() {
   const queryClient = useQueryClient();
-  return useMutation({
+  const mutateRef = useRef<((v: FinishShoppingVariables) => void) | null>(null);
+  const retriedRef = useRef(false);
+  const mutation = useMutation({
     // Same scope as the item writes: Finish is sent only after every earlier
     // check-off/price edit has reached the server, so the saved total matches the sheet.
     scope: SHOPPING_MUTATION_SCOPE,
@@ -69,6 +76,7 @@ export function useFinishShopping() {
       return outcome.mode === 'direct' ? { queued: false, result: outcome.result } : { queued: true };
     },
     onSuccess: async (outcome) => {
+      retriedRef.current = false;
       haptic('success');
       if (outcome.queued) {
         toast.success(FINISH_QUEUED_COPY);
@@ -82,9 +90,30 @@ export function useFinishShopping() {
         void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
       }
     },
-    onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Couldn't finish this trip. Try again.")),
+    onError: (error, variables) => {
+      if (isUpgradeRequired(error) && !retriedRef.current) {
+        // The server rolled the finish back; the list stays intact.
+        if (isNative()) {
+          openUpgradeSheet({
+            onUnlocked: () => {
+              retriedRef.current = true;
+              mutateRef.current?.(variables);
+            },
+          });
+        } else {
+          toast.error(ENTITLEMENT_COPY.finishLimitWeb);
+        }
+        return;
+      }
+      retriedRef.current = false;
+      toast.error(getApiErrorMessage(error, "Couldn't finish this trip. Try again."));
+    },
   });
+  const { mutate } = mutation;
+  useEffect(() => {
+    mutateRef.current = (v) => mutate(v);
+  }, [mutate]);
+  return mutation;
 }
 
 export function useShoppingHistory(page: number, enabled = true) {

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { AlertTriangle, CloudUpload, RefreshCw, ShoppingCart, Package, ChefHat, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePlatform } from '@/lib/platform/use-platform';
+import { openUpgradeSheet } from '@/lib/entitlements/upgrade-sheet-store';
 import type { OutboxOp } from '@/lib/offline/outbox/op-types';
 import type { SheetRow } from '@/lib/offline/status/sheet-model';
 
@@ -42,6 +44,7 @@ function BadgeIcon({ kind }: { kind: SheetRow['badge']['kind'] }) {
 export function PendingChangeRow({ row, kind, onRetry, onDiscard }: PendingChangeRowProps) {
   const [confirming, setConfirming] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const { native } = usePlatform();
   const failed = row.badge.kind === 'failed' || row.badge.kind === 'conflict';
 
   const confirmDiscard = async () => {
@@ -82,6 +85,11 @@ export function PendingChangeRow({ row, kind, onRetry, onDiscard }: PendingChang
             {failed && row.reason && <p className="text-xs text-red-800">{row.reason}</p>}
             {failed && (
               <div className="flex flex-wrap gap-2">
+                {row.needsUpgrade && native && (
+                  <Button variant="ghost" size="sm" onClick={() => openUpgradeSheet()}>
+                    Unlock Kumaun Full
+                  </Button>
+                )}
                 {row.canRetry && (
                   <Button variant="ghost" size="sm" onClick={() => onRetry(row.seq)}>
                     Retry change
