@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { PlusSquare, Share, X } from 'lucide-react';
 import { usePreferences } from '@/lib/hooks/use-preferences';
 import { shouldShowOnboarding } from '@/lib/onboarding/onboarding';
+import { isNative } from '@/lib/platform/native';
 import { isIosSafari, isStandalone } from '@/lib/pwa/detect-ios';
 import { HINT_DISMISSED_KEY, safeGetItem, safeSetItem, type StorageLike } from '@/lib/pwa/storage';
 
@@ -19,6 +20,7 @@ function getLocalStorage(): StorageLike | undefined {
 }
 
 function canShowHint(): boolean {
+  if (isNative()) return false;
   const standalone = isStandalone({
     navigatorStandalone: (navigator as Navigator & { standalone?: boolean }).standalone,
     displayModeStandalone: window.matchMedia('(display-mode: standalone)').matches,

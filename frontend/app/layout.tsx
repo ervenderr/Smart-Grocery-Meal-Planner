@@ -2,6 +2,10 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
+import { NativeShell } from '@/components/platform/native-shell';
+import { isNativeBuild } from '@/lib/platform/native';
+
+const nativeBuild = isNativeBuild();
 
 const inter = Inter({
   subsets: ['latin'],
@@ -12,7 +16,9 @@ export const metadata: Metadata = {
   title: 'Kitcha',
   description: 'Plan meals, track groceries, and manage your budget with ease',
   keywords: ['meal planning', 'grocery', 'budget tracking', 'pantry management'],
-  appleWebApp: { capable: true, title: 'Kitcha', statusBarStyle: 'default' },
+  ...(nativeBuild
+    ? {}
+    : { appleWebApp: { capable: true, title: 'Kitcha', statusBarStyle: 'default' as const } }),
   icons: {
     icon: [
       { url: '/kitcha-logo.svg', type: 'image/svg+xml' },
@@ -27,6 +33,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: '#ffffff',
+  // Pinch-zoom is locked only in the native build; web keeps it.
+  ...(nativeBuild ? { maximumScale: 1, userScalable: false } : {}),
 };
 
 export default function RootLayout({
@@ -35,9 +43,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="light">
+    <html lang="en" suppressHydrationWarning className={nativeBuild ? 'light native' : 'light'}>
       <body className={`${inter.variable} bg-white font-sans text-gray-900 antialiased`}>
         <Providers>{children}</Providers>
+        <NativeShell />
       </body>
     </html>
   );

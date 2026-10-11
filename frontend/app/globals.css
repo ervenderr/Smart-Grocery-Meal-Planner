@@ -133,3 +133,39 @@ a,
     scroll-behavior: auto !important;
   }
 }
+
+/* Native (Capacitor WKWebView) only: scoped to html.native so web is unchanged */
+html.native,
+html.native body {
+  overscroll-behavior: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+html.native main {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+html.native button,
+html.native [role='tab'],
+html.native nav,
+html.native [data-bottom-nav],
+html.native li {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+html.native input,
+html.native textarea,
+html.native [data-selectable] {
+  -webkit-touch-callout: default;
+  user-select: text;
+}
+
+html.keyboard-open [data-bottom-nav] {
+  display: none;
+}
