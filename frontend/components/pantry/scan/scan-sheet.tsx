@@ -5,10 +5,14 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { foodApi } from '@/lib/api/food';
 import { pantryApi } from '@/lib/api/pantry';
+import { haptic } from '@/lib/native/native-haptics';
+import { isNative, loadPlugin } from '@/lib/platform/native';
 import { isIosSafari, isStandalone } from '@/lib/pwa/detect-ios';
 import { resolveBarcode, type BarcodeResolution } from '@/lib/scan/resolve-barcode';
 import { isCameraAvailable } from '@/lib/scan/merge-scan';
+import { NATIVE_SCAN_ERROR_COPY } from '@/lib/scan/scan-adapter';
 import { useBarcodeScanner } from '@/lib/scan/use-barcode-scanner';
+import { useNativeScanner } from '@/lib/scan/use-native-scanner';
 import { CameraView } from './camera-view';
 import { ManualBarcodeForm } from './manual-barcode-form';
 import {
@@ -16,6 +20,7 @@ import {
   CameraDeniedCard,
   LookingUp,
   LookupFailedCard,
+  NativeReadErrorCard,
   ScanUnsupportedCard,
   UnknownProductCard,
 } from './scan-states';
@@ -88,17 +93,25 @@ function ScanBody({
   onBarcode,
   onAddWithoutBarcode,
 }: Omit<ScanSheetProps, 'isOpen'>) {
+  const [native] = useState(() => isNative());
   const [state, setState] = useState<ScanState>(() =>
-    hasMediaDevices() ? { name: 'requesting' } : { name: 'unsupported' }
+    native || hasMediaDevices() ? { name: 'requesting' } : { name: 'unsupported' }
   );
   const busyRef = useRef(false);
   const lookupRef = useRef<(barcode: string) => void>(() => undefined);
   const handleDetected = useCallback((code: string) => lookupRef.current(code), []);
-  const scanner = useBarcodeScanner({
-    active: state.name === 'requesting',
+  const webScanner = useBarcodeScanner({
+    active: !native && state.name === 'requesting',
     onDetected: handleDetected,
   });
+  const nativeScanner = useNativeScanner({
+    active: native && state.name === 'requesting',
+    onDetected: handleDetected,
+    onCancel: onClose,
+  });
+  const scanner = native ? nativeScanner : webScanner;
   const view = deriveView(state, scanner.status, scanner.failure);
+  const openSettings = native ? openAppSettings : undefined;
 
   const lookup = useCallback(
     async (barcode: string) => {
@@ -107,6 +120,7 @@ function ScanBody({
       setState({ name: 'looking-up', barcode });
       try {
         const resolution = await resolveBarcode(barcode, realDeps);
+        haptic(resolution.kind === 'own' || resolution.kind === 'found' ? 'success' : 'warning');
         if (resolution.kind === 'own' || resolution.kind === 'found') {
           onResolved?.(resolution);
           onClose();
@@ -163,15 +177,44 @@ function ScanBody({
         }
       : undefined;
 
+  if (native && nativeScanner.readError && view === 'unsupported') {
+    return (
+      <>
+        <LiveRegion text="Couldn't read that barcode" />
+        <NativeReadErrorCard
+          body={NATIVE_SCAN_ERROR_COPY}
+          onTypeInstead={toManual}
+          onRetry={nativeScanner.retry}
+        />
+      </>
+    );
+  }
+  if (native && (view === 'requesting' || view === 'scanning')) {
+    return (
+      <>
+        <LiveRegion text={STATUS_TEXT.requesting} />
+        <div className="flex h-full flex-col items-center justify-end bg-black px-6 pb-12">
+          <button
+            type="button"
+            data-testid="scan-manual-entry"
+            className="min-h-11 text-base font-semibold text-white underline"
+            onClick={toManual}
+          >
+            Enter code instead
+          </button>
+        </div>
+      </>
+    );
+  }
   if (view === 'requesting' || view === 'scanning') {
     return (
       <>
         <LiveRegion text={STATUS_TEXT[view]} />
         <CameraView
-          videoRef={scanner.videoRef}
+          videoRef={webScanner.videoRef}
           scanning={view === 'scanning'}
-          torch={scanner.torch}
-          slowHint={scanner.slowHint}
+          torch={webScanner.torch}
+          slowHint={webScanner.slowHint}
           onTypeInstead={toManual}
         />
       </>
@@ -186,6 +229,7 @@ function ScanBody({
             iosStandalone={isIosStandalone()}
             onTypeInstead={toManual}
             onRetry={scanner.retry}
+            onOpenSettings={openSettings}
           />
         ) : view === 'busy' ? (
           <CameraBusyCard onTypeInstead={toManual} onRetry={scanner.retry} />
@@ -218,7 +262,7 @@ function ScanBody({
               onAddWithoutBarcode={withoutBarcode}
               submitLabel={mode === 'return' ? 'Use this barcode' : 'Look up barcode'}
               cameraAvailable={isCameraAvailable({
-                hasMediaDevices: hasMediaDevices(),
+                hasMediaDevices: native || hasMediaDevices(),
                 failure: scanner.failure,
               })}
               onScanWithCamera={() => setState({ name: 'requesting' })}
@@ -253,6 +297,19 @@ function LiveRegion({ text }: { text: string }) {
   );
 }
 
+/** @capacitor/app 8.1.2 has no openSettings; the app-settings: URL opens the app's iOS Settings page. */
+async function openAppSettings(): Promise<void> {
+  const mod = await loadPlugin(() => import('@capacitor/app'));
+  const url = 'app-settings:';
+  if (mod && 'openUrl' in mod.App) {
+    await (mod.App as unknown as { openUrl: (o: { url: string }) => Promise<unknown> }).openUrl({
+      url,
+    });
+    return;
+  }
+  window.location.href = url;
+}
+
 function hasMediaDevices(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
 }
@@ -272,8 +329,8 @@ function isIosStandalone(): boolean {
 /** Maps the sheet state plus live camera status to the view that should render. */
 function deriveView(
   state: ScanState,
-  status: ReturnType<typeof useBarcodeScanner>['status'],
-  failure: ReturnType<typeof useBarcodeScanner>['failure']
+  status: 'idle' | 'requesting' | 'scanning' | 'failed',
+  failure: 'denied' | 'unavailable' | 'busy' | null
 ): ScanState['name'] {
   if (state.name !== 'requesting') return state.name;
   if (status === 'scanning') return 'scanning';

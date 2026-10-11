@@ -215,6 +215,7 @@ export function AddPantryItemModal({
             variant="outline"
             className="h-11 w-full"
             disabled={isLoading}
+            data-testid="scan-open"
             onClick={() => setScanOpen(true)}
           >
             <ScanBarcode className="h-5 w-5" aria-hidden="true" />

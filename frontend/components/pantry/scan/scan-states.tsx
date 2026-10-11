@@ -85,11 +85,21 @@ interface CameraProblemProps {
   title: string;
   body: string;
   extra?: string;
+  typeLabel?: string;
+  onOpenSettings?: () => void;
   onTypeInstead: () => void;
   onRetry?: () => void;
 }
 
-function CameraProblem({ title, body, extra, onTypeInstead, onRetry }: CameraProblemProps) {
+function CameraProblem({
+  title,
+  body,
+  extra,
+  typeLabel = 'Type the barcode',
+  onOpenSettings,
+  onTypeInstead,
+  onRetry,
+}: CameraProblemProps) {
   return (
     <div className="flex h-full flex-col bg-black">
       <CameraTopBar />
@@ -99,8 +109,18 @@ function CameraProblem({ title, body, extra, onTypeInstead, onRetry }: CameraPro
         <p className="text-base text-gray-300">{body}</p>
         {extra && <p className="text-base text-gray-300">{extra}</p>}
         <div className="pb-safe w-full max-w-sm space-y-3">
-          <Button fullWidth onClick={onTypeInstead}>
-            Type the barcode
+          {onOpenSettings && (
+            <Button fullWidth className="min-h-11" onClick={onOpenSettings}>
+              Open Settings
+            </Button>
+          )}
+          <Button
+            fullWidth
+            variant={onOpenSettings ? 'outline' : 'primary'}
+            data-testid="scan-manual-entry"
+            onClick={onTypeInstead}
+          >
+            {typeLabel}
           </Button>
           {onRetry && (
             <Button variant="outline" fullWidth onClick={onRetry}>
@@ -113,22 +133,35 @@ function CameraProblem({ title, body, extra, onTypeInstead, onRetry }: CameraPro
   );
 }
 
+export const NATIVE_DENIED_COPY =
+  'Camera access is off. Turn it on in Settings, or enter the code instead.';
+
 export function CameraDeniedCard({
   iosStandalone,
   onTypeInstead,
   onRetry,
+  onOpenSettings,
 }: {
   iosStandalone: boolean;
   onTypeInstead: () => void;
   onRetry: () => void;
+  onOpenSettings?: () => void;
 }) {
   return (
     <CameraProblem
       title="Camera access is off"
-      body="Allow camera access in your browser settings to scan, or type the barcode instead."
-      extra={
-        iosStandalone ? 'On iPhone: Settings > Safari > Camera, or Settings > Kitcha.' : undefined
+      body={
+        onOpenSettings
+          ? NATIVE_DENIED_COPY
+          : 'Allow camera access in your browser settings to scan, or type the barcode instead.'
       }
+      extra={
+        !onOpenSettings && iosStandalone
+          ? 'On iPhone: Settings > Safari > Camera, or Settings > Kitcha.'
+          : undefined
+      }
+      typeLabel={onOpenSettings ? 'Enter code instead' : undefined}
+      onOpenSettings={onOpenSettings}
       onTypeInstead={onTypeInstead}
       onRetry={onRetry}
     />
@@ -156,6 +189,26 @@ export function CameraBusyCard({
     <CameraProblem
       title="Camera is busy"
       body="Camera is in use by another app or tab. Close it and try again, or type the barcode instead."
+      onTypeInstead={onTypeInstead}
+      onRetry={onRetry}
+    />
+  );
+}
+
+export function NativeReadErrorCard({
+  body,
+  onTypeInstead,
+  onRetry,
+}: {
+  body: string;
+  onTypeInstead: () => void;
+  onRetry: () => void;
+}) {
+  return (
+    <CameraProblem
+      title="Couldn't read that barcode"
+      body={body}
+      typeLabel="Enter code instead"
       onTypeInstead={onTypeInstead}
       onRetry={onRetry}
     />
