@@ -93,9 +93,16 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
       const pending = await pendingFor(tx, userId, entityType, entityId);
       const plan = opts ? ({ type: 'insert' } as const) : planEnqueue(pending, op);
       if (plan.type === 'merge') {
-        await tx.run('UPDATE outbox SET payload_json = ?, inverse_json = ?, updated_at = ? WHERE seq = ?',
-          [JSON.stringify(plan.payload), toJson(plan.inverse), now(), plan.seq]);
-        return getBySeq(tx, plan.seq);
+        const target = pending.find((p) => p.seq === plan.seq);
+        const valid = target !== undefined && NewOpSchema.safeParse({ kind: target.kind, label: target.label, payload: plan.payload }).success;
+        if (valid) {
+          await tx.run('UPDATE outbox SET payload_json = ?, inverse_json = ?, updated_at = ? WHERE seq = ?',
+            [JSON.stringify(plan.payload), toJson(plan.inverse), now(), plan.seq]);
+          return getBySeq(tx, plan.seq);
+        }
+        // Never write a merged payload that would fail validation on read: queue the op on its own instead.
+        const blockedMerge = pending.some((p) => p.state === 'failed' || p.state === 'blocked');
+        return getBySeq(tx, await insertRow(tx, userId, op, now(), opts, blockedMerge));
       }
       if (plan.type === 'drop') {
         for (const seq of plan.seqs) await tx.run('DELETE FROM outbox WHERE seq = ?', [seq]);
@@ -104,6 +111,19 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
       const dropped = plan.type === 'drop' ? new Set(plan.seqs) : new Set<number>();
       const blocked = pending.some((p) => !dropped.has(p.seq) && (p.state === 'failed' || p.state === 'blocked'));
       return getBySeq(tx, await insertRow(tx, userId, op, now(), opts, blocked));
+    });
+  }
+
+  function parkOp(seq: number, error: LastError): Promise<void> {
+    return mutate(async (tx) => {
+      const op = await getBySeq(tx, seq);
+      if (!op) return;
+      await tx.run(`UPDATE outbox SET state = 'failed', last_error_json = ?, updated_at = ? WHERE seq = ?`,
+        [JSON.stringify(error), now(), seq]);
+      await tx.run(
+        `UPDATE outbox SET state = 'blocked', updated_at = ? WHERE user_id = ? AND entity_type = ? AND entity_id = ? AND seq > ? AND state = 'queued'`,
+        [now(), op.userId, op.entityType, op.entityId, seq]
+      );
     });
   }
 
@@ -127,6 +147,11 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
       [userId, at]
     );
     for (const op of mapRows(rows)) {
+      if (op.state !== 'queued') {
+        // Row read back as failed/invalid (payload no longer validates): persist that so dependents park visibly.
+        await parkOp(op.seq, op.lastError ?? { reason: 'invalid' });
+        continue;
+      }
       if (!(await hasEarlierBarrier(op, userId))) return op;
     }
     return null;
@@ -165,17 +190,7 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
         `UPDATE outbox SET state = 'queued', attempts = attempts + ?, last_error_json = ?, next_attempt_at = ?, updated_at = ? WHERE seq = ?`,
         [countsAttempt ? 1 : 0, JSON.stringify(error), nextAttemptAt, now(), seq]
       ),
-    park: (seq, error) =>
-      mutate(async (tx) => {
-        const op = await getBySeq(tx, seq);
-        if (!op) return;
-        await tx.run(`UPDATE outbox SET state = 'failed', last_error_json = ?, updated_at = ? WHERE seq = ?`,
-          [JSON.stringify(error), now(), seq]);
-        await tx.run(
-          `UPDATE outbox SET state = 'blocked', updated_at = ? WHERE user_id = ? AND entity_type = ? AND entity_id = ? AND seq > ? AND state = 'queued'`,
-          [now(), op.userId, op.entityType, op.entityId, seq]
-        );
-      }),
+    park: parkOp,
     pauseAuth: (userId) =>
       mutate(async (tx) => {
         await tx.run(`UPDATE outbox SET state = 'paused_auth', last_error_json = ?, updated_at = ? WHERE user_id = ? AND state = 'in_flight'`,

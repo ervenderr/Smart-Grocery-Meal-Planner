@@ -38,8 +38,10 @@ function planUpdate(eligible: readonly OutboxOp[], incoming: NewOp & { payload: 
   const patch = incoming.payload.patch;
   const create = lastOf(eligible, [createKind]);
   if (create) {
-    const item = (create.payload as { item: object }).item;
-    return { type: 'merge', seq: create.seq, payload: { item: { ...item, ...patch } } as Payload, inverse: create.inverse };
+    const merged = { ...(create.payload as { item: object }).item, ...patch };
+    // A create has no "cleared" state: a null in the patch means the field is simply not set.
+    const item = createKind === 'pantry.create' ? Object.fromEntries(Object.entries(merged).filter(([, v]) => v !== null)) : merged;
+    return { type: 'merge', seq: create.seq, payload: { item } as Payload, inverse: create.inverse };
   }
   const prior = lastOf(eligible, [incoming.kind]);
   if (!prior) return INSERT;

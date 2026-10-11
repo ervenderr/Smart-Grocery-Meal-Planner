@@ -24,13 +24,20 @@ export const RowSchema = z.object({
 
 const parseJson = (s: string | null): unknown => (s === null ? null : JSON.parse(s));
 
-/** Returns null (and logs only the seq) when a stored row fails validation. */
+const INVALID: LastError = { reason: 'invalid' };
+
+/**
+ * Returns null (and logs only the seq) when a stored row is structurally unreadable.
+ * A readable row whose payload no longer validates is returned as failed/invalid so the
+ * user can see and discard it instead of it silently blocking its entity forever.
+ */
 export function rowToOp(raw: unknown): OutboxOp | null {
   const seq = (raw as { seq?: unknown } | null)?.seq;
   try {
     const r = RowSchema.parse(raw);
     const payload = parseJson(r.payload_json);
-    const checked = NewOpSchema.parse({ kind: r.kind, label: r.label, payload });
+    const checked = NewOpSchema.safeParse({ kind: r.kind, label: r.label, payload });
+    if (!checked.success) console.warn(`[outbox] invalid payload in row seq=${String(seq)}`);
     return {
       seq: r.seq,
       opId: r.op_id,
@@ -39,19 +46,19 @@ export function rowToOp(raw: unknown): OutboxOp | null {
       kind: r.kind,
       entityType: r.entity_type,
       entityId: r.entity_id,
-      payload: checked.payload,
+      payload: checked.success ? checked.data.payload : (payload as OutboxOp['payload']),
       inverse: parseJson(r.inverse_json),
       resolved: parseJson(r.resolved_json),
       label: r.label,
-      state: r.state,
+      state: checked.success ? r.state : 'failed',
       attempts: r.attempts,
-      lastError: parseJson(r.last_error_json) as LastError | null,
+      lastError: checked.success ? (parseJson(r.last_error_json) as LastError | null) : INVALID,
       nextAttemptAt: r.next_attempt_at,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
     };
   } catch {
-    console.warn(`[outbox] skipping invalid row seq=${String(seq)}`);
+    console.warn(`[outbox] skipping unreadable row seq=${String(seq)}`);
     return null;
   }
 }
