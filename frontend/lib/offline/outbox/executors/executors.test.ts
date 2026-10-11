@@ -65,7 +65,8 @@ describe('executors', () => {
 
 describe('registry', () => {
   it('returns null for unknown kinds and honors extras', () => {
-    expect(createExecutorRegistry().get('cook.apply')).toBeNull();
+    expect(createExecutorRegistry().get('cook.apply')).not.toBeNull();
+    expect(createExecutorRegistry().get('bogus' as never)).toBeNull();
     const extra: Executor = { run: async () => 1 };
     expect(createExecutorRegistry({ 'cook.apply': extra }).get('cook.apply')).toBe(extra);
   });

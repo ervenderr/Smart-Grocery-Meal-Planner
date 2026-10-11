@@ -38,6 +38,7 @@ beforeEach(async () => {
   events = [];
   timers = [];
   netFailures = 0;
+  noCookExecutor = false;
   responder = () => ({ ok: true });
   store = createOutboxStore({ db, now: () => clock });
   const transport: Transport = {
@@ -52,7 +53,7 @@ beforeEach(async () => {
   worker = createDrainWorker({
     store,
     transport,
-    executors: createExecutorRegistry(),
+    executors: { get: (kind) => (kind === 'cook.apply' && noCookExecutor ? null : createExecutorRegistry().get(kind)) },
     connectivity: { isReachable: async () => reachable, reportNetworkFailure: () => void (netFailures += 1) },
     getUserId: () => user,
     now: () => clock,
@@ -69,6 +70,7 @@ afterEach(() => {
   db.close();
 });
 
+let noCookExecutor = false;
 const drain = async () => {
   worker.kick('test');
   await worker.whenIdle();
@@ -178,6 +180,7 @@ describe('drain worker', () => {
   });
 
   it('parks ops with no executor as invalid', async () => {
+    noCookExecutor = true;
     await store.enqueue(U, { kind: 'cook.apply', label: 'Cook', payload: { target: { recipeId: ID_A }, servings: 2, occurredAt: '2026-01-01T00:00:00.000Z' } });
     await drain();
     const [op] = await store.list(U);
