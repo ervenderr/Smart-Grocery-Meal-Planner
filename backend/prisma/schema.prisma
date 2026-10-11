@@ -72,6 +72,7 @@ model User {
   aiReports         AiReport[]
   refreshTokens     RefreshToken[]
   idempotencyKeys   IdempotencyKey[]
+  entitlements      Entitlement[]
 
   @@index([email])
   @@map("users")
@@ -637,4 +638,36 @@ model RefreshToken {
   @@index([familyId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+model Entitlement {
+  id                    String    @id @default(uuid())
+  userId                String    @map("user_id")
+  productId             String    @map("product_id") @db.VarChar(100)
+  originalTransactionId String    @map("original_transaction_id") @db.VarChar(40)
+  latestTransactionId   String    @map("latest_transaction_id") @db.VarChar(40)
+  environment           String    @db.VarChar(16)
+  status                String    @db.VarChar(16)
+  purchasedAt           DateTime  @map("purchased_at")
+  revokedAt             DateTime? @map("revoked_at")
+  revocationReason      Int?      @map("revocation_reason")
+  lastSignedAt          DateTime  @map("last_signed_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@unique([environment, originalTransactionId])
+  @@map("entitlements")
+}
+
+model AppStoreNotification {
+  notificationUuid String   @id @map("notification_uuid") @db.VarChar(64)
+  notificationType String   @map("notification_type") @db.VarChar(40)
+  subtype          String?  @db.VarChar(40)
+  environment      String   @db.VarChar(16)
+  receivedAt       DateTime @default(now()) @map("received_at")
+
+  @@map("app_store_notifications")
 }
