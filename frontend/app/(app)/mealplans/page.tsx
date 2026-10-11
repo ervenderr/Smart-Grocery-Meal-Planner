@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Plus, Calendar, ShoppingCart, Sparkles, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ import { MealPlanDetailModal } from '@/components/mealplans/meal-plan-detail-mod
 import { MealPlanCard } from '@/components/mealplans/meal-plan-card';
 import { AIMealPlanModal } from '@/components/ai/ai-meal-plan-modal';
 import { mealPlanApi } from '@/lib/api/mealplans';
+import { useMealPlansList } from '@/lib/hooks/use-meal-plans';
+import { MEAL_PLANS_ALL_KEY } from '@/lib/offline/cache/cache-keys';
 import { PantryNote } from '@/components/shopping/pantry-note';
 import { useGenerateShoppingList } from '@/lib/hooks/use-generate-shopping-list';
 import toast from 'react-hot-toast';
@@ -24,9 +27,11 @@ export default function MealPlansPage() {
   const router = useRouter();
   const generateList = useGenerateShoppingList();
   const [selectedPreviewPlan, setSelectedPreviewPlan] = useState<MealPlan | null>(null);
-  const [loadError, setLoadError] = useState(false);
-  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const list = useMealPlansList({ sort: 'startDate-desc' });
+  const mealPlans = list.data ?? [];
+  const loading = list.isPending;
+  const loadError = list.isError && !list.data;
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAIMealPlanModal, setShowAIMealPlanModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -35,27 +40,9 @@ export default function MealPlansPage() {
   const [showShoppingList, setShowShoppingList] = useState(false);
   const [shoppingListData, setShoppingListData] = useState<any>(null);
 
-  const fetchMealPlans = async () => {
-    setLoading(true);
-    setLoadError(false);
-    try {
-      const response = await mealPlanApi.getAll({
-        sortBy: 'startDate',
-        sortOrder: 'desc',
-      });
-      setMealPlans(response.items || []);
-    } catch (error: any) {
-      console.error('Fetch meal plans error:', error);
-      setLoadError(true);
-      toast.error('Failed to load meal plans');
-    } finally {
-      setLoading(false);
-    }
+  const fetchMealPlans = () => {
+    void queryClient.invalidateQueries({ queryKey: MEAL_PLANS_ALL_KEY });
   };
-
-  useEffect(() => {
-    fetchMealPlans();
-  }, []);
 
   const handleView = (mealPlan: MealPlan) => {
     setSelectedMealPlan(mealPlan);
@@ -100,9 +87,8 @@ export default function MealPlansPage() {
   // Quiet refresh (no spinner) so the open detail modal flips to "Cooked".
   const refreshAfterCook = async () => {
     try {
-      const response = await mealPlanApi.getAll({ sortBy: 'startDate', sortOrder: 'desc' });
-      const items = response.items || [];
-      setMealPlans(items);
+      await queryClient.invalidateQueries({ queryKey: MEAL_PLANS_ALL_KEY });
+      const items = queryClient.getQueryData<MealPlan[]>(MEAL_PLANS_ALL_KEY) ?? [];
       setSelectedMealPlan((current) => items.find((p) => p.id === current?.id) ?? current);
     } catch (error) {
       console.error('Refresh after cook error:', error);
@@ -211,7 +197,7 @@ export default function MealPlansPage() {
           title="Couldn't load your meal plans"
           description="Check your connection and try again."
           actionLabel="Try again"
-          onAction={fetchMealPlans}
+          onAction={() => void list.refetch()}
         />
       ) : mealPlans.length === 0 ? (
         <EmptyState

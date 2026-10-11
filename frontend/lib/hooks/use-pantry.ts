@@ -5,6 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { pantryApi } from '@/lib/api/pantry';
 import { fetchAllPantryItems } from '@/lib/pantry/fetch-all-pantry';
+import { filterPantryItems } from '@/lib/pantry/filter-list';
+import { normalizePantryItem } from '@/lib/pantry/normalize';
+import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
 import { queryKeys } from '@/lib/react-query';
 import type { PantryItem } from '@/types/pantry.types';
 
@@ -18,27 +21,19 @@ const UNDO_WINDOW_MS = 5000;
 /** Ids hidden while their delete is deferred; survives refetches until the timer settles. */
 const pendingRemovalIds = new Set<string>();
 
-/** The API returns Decimal quantities as strings; the UI works in numbers. */
-const normalizeItem = (item: PantryItem): PantryItem => ({
-  ...item,
-  quantity: Number(item.quantity),
-});
-
 export function usePantryList(filters: PantryFilters) {
+  const { category, search } = filters;
   return useQuery({
-    queryKey: queryKeys.pantry.list(filters),
+    queryKey: PANTRY_ALL_KEY,
     queryFn: async () => {
-      const items = await fetchAllPantryItems((page, limit) =>
-        pantryApi.getAll({
-          page,
-          limit,
-          category: filters.category || undefined,
-          search: filters.search || undefined,
-        }),
-      );
-      return items.map(normalizeItem);
+      const items = await fetchAllPantryItems((page, limit) => pantryApi.getAll({ page, limit }));
+      return items.map(normalizePantryItem);
     },
-    select: (items) => items.filter((item) => !pendingRemovalIds.has(item.id)),
+    select: (items) =>
+      filterPantryItems(
+        items.filter((item) => !pendingRemovalIds.has(item.id)),
+        { category, search },
+      ),
   });
 }
 

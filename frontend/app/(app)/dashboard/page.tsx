@@ -8,8 +8,8 @@ import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { ShoppingCart, Package, Calendar, TrendingUp, ChefHat, Plus, AlertCircle, CheckCircle } from 'lucide-react';
 import { analyticsApi } from '@/lib/api/analytics';
 import { pantryApi } from '@/lib/api/pantry';
-import { recipeApi } from '@/lib/api/recipes';
-import { mealPlanApi } from '@/lib/api/mealplans';
+import { useRecipesList } from '@/lib/hooks/use-recipes';
+import { useMealPlansList } from '@/lib/hooks/use-meal-plans';
 import { EmptyState } from '@/components/common/empty-state';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { ExpiringItem } from '@/types/pantry.types';
@@ -29,25 +29,23 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsDashboard | null>(null);
   const [pantryCount, setPantryCount] = useState(0);
-  const [recipeCount, setRecipeCount] = useState(0);
-  const [mealPlanCount, setMealPlanCount] = useState(0);
+  const recipes = useRecipesList({});
+  const mealPlans = useMealPlansList();
+  const recipeCount = recipes.data?.length ?? 0;
+  const mealPlanCount = mealPlans.data?.length ?? 0;
 
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [analyticsData, pantryData, recipesData, mealPlansData, expiringData] = await Promise.all([
+      const [analyticsData, pantryData, expiringData] = await Promise.all([
         analyticsApi.getDashboard(30).catch(() => null),
         pantryApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
-        recipeApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
-        mealPlanApi.getAll({ limit: 1 }).catch(() => ({ items: [], pagination: { total: 0, page: 1, limit: 1, totalPages: 1 } })),
         pantryApi.getExpiringSoon(7).catch(() => []),
       ]);
 
       setAnalytics(analyticsData);
       setExpiring(toExpiringItems(expiringData));
       setPantryCount(pantryData.pagination?.total || 0);
-      setRecipeCount(recipesData.pagination?.total || 0);
-      setMealPlanCount(mealPlansData.pagination?.total || 0);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {

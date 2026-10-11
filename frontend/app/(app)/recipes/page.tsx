@@ -14,6 +14,9 @@ import { RecipeDetailModal } from '@/components/recipes/recipe-detail-modal';
 import { AIRecipeSuggestionsModal } from '@/components/ai/ai-recipe-suggestions-modal';
 import { RecipeCard } from '@/components/recipes/recipe-card';
 import { recipeApi } from '@/lib/api/recipes';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRecipesList } from '@/lib/hooks/use-recipes';
+import { RECIPES_ALL_KEY } from '@/lib/offline/cache/cache-keys';
 import toast from 'react-hot-toast';
 import {
   RECIPES_CAPPED_NOTE,
@@ -22,6 +25,8 @@ import {
   localDateString,
 } from '@/lib/recipes/cook-first';
 import type { Recipe, RecipeFilters } from '@/types/recipe.types';
+
+const RECIPES_PAGE_SIZE = 50;
 
 const CATEGORY_CHIPS = [
   { value: '', label: 'All' },
@@ -50,19 +55,32 @@ export default function RecipesPage() {
 function RecipesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const queryClient = useQueryClient();
   const [expiringSort, setExpiringSort] = useState(false);
-  const [recipesCapped, setRecipesCapped] = useState(false);
-  const [badges, setBadges] = useState<Map<string, string>>(new Map());
+  const [cookFirst, setCookFirst] = useState<{
+    recipes: Recipe[];
+    badges: Map<string, string>;
+    capped: boolean;
+    loading: boolean;
+    error: boolean;
+  }>({ recipes: [], badges: new Map(), capped: false, loading: false, error: false });
   const [searchQuery, setSearchQuery] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [filters, setFilters] = useState<RecipeFilters>({
     category: undefined,
     difficulty: undefined,
     sortBy: 'createdAt',
     sortOrder: 'desc',
   });
+
+  const list = useRecipesList({ ...filters, search: appliedSearch || undefined });
+  const recipes = expiringSort
+    ? cookFirst.recipes
+    : (list.data ?? []).slice(0, RECIPES_PAGE_SIZE);
+  const loading = expiringSort ? cookFirst.loading : list.isPending;
+  const loadError = expiringSort ? cookFirst.error : list.isError && !list.data;
+  const badges = expiringSort ? cookFirst.badges : new Map<string, string>();
+  const recipesCapped = expiringSort && cookFirst.capped;
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -71,52 +89,45 @@ function RecipesPageContent() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Recipe | null>(null);
 
-  const fetchRecipes = async (
-    activeFilters: RecipeFilters = filters,
-    search: string = searchQuery,
-    byExpiring: boolean = expiringSort
-  ) => {
-    setLoading(true);
-    setLoadError(false);
+  // "Use expiring first" is an online ranking; failures fall back to the error state.
+  const fetchCookFirst = async (search: string = appliedSearch) => {
+    setCookFirst((prev) => ({ ...prev, loading: true, error: false }));
     try {
-      if (byExpiring) {
-        const result = await recipeApi.getCookFirst({
-          includeAll: true,
-          today: localDateString(),
-        });
-        const entries = filterCookFirstEntries(result.items, {
-          search,
-          category: activeFilters.category,
-          difficulty: activeFilters.difficulty,
-        });
-        const next = new Map<string, string>();
-        entries.forEach((entry) => {
-          const badge = expiringBadge(entry);
-          if (badge) next.set(entry.recipe.id, badge);
-        });
-        setBadges(next);
-        setRecipesCapped(result.recipesCapped === true);
-        setRecipes(entries.map((entry) => entry.recipe));
-        return;
-      }
-      setBadges(new Map());
-      setRecipesCapped(false);
-      const response = await recipeApi.getAll({
-        ...activeFilters,
-        search: search || undefined,
+      const result = await recipeApi.getCookFirst({
+        includeAll: true,
+        today: localDateString(),
       });
-      setRecipes(response.items || []);
+      const entries = filterCookFirstEntries(result.items, {
+        search,
+        category: filters.category,
+        difficulty: filters.difficulty,
+      });
+      const next = new Map<string, string>();
+      entries.forEach((entry) => {
+        const badge = expiringBadge(entry);
+        if (badge) next.set(entry.recipe.id, badge);
+      });
+      setCookFirst({
+        recipes: entries.map((entry) => entry.recipe),
+        badges: next,
+        capped: result.recipesCapped === true,
+        loading: false,
+        error: false,
+      });
     } catch (error: any) {
       console.error('Fetch recipes error:', error);
-      setLoadError(true);
+      setCookFirst((prev) => ({ ...prev, loading: false, error: true }));
       toast.error('Failed to load recipes');
-    } finally {
-      setLoading(false);
     }
   };
 
+  const refreshRecipes = () => {
+    void queryClient.invalidateQueries({ queryKey: RECIPES_ALL_KEY });
+    if (expiringSort) void fetchCookFirst();
+  };
+
   useEffect(() => {
-    fetchRecipes();
+    if (expiringSort) void fetchCookFirst();
   }, [filters, expiringSort]);
 
   useEffect(() => {
@@ -127,19 +138,15 @@ function RecipesPageContent() {
   }, [searchParams, router]);
 
   const handleClearFilters = () => {
-    const cleared: RecipeFilters = {
-      ...filters,
-      category: undefined,
-      difficulty: undefined,
-    };
     setSearchQuery('');
-    setFilters(cleared);
-    fetchRecipes(cleared, '');
+    setAppliedSearch('');
+    setFilters({ ...filters, category: undefined, difficulty: undefined });
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchRecipes();
+    setAppliedSearch(searchQuery);
+    if (expiringSort) void fetchCookFirst(searchQuery);
   };
 
   const handleView = (recipe: Recipe) => {
@@ -157,7 +164,7 @@ function RecipesPageContent() {
       try {
         await recipeApi.delete(recipe.id);
         toast.success('Recipe deleted successfully');
-        fetchRecipes();
+        refreshRecipes();
         setDeleteConfirm(null);
       } catch (error: any) {
         console.error('Delete error:', error);
@@ -297,7 +304,7 @@ function RecipesPageContent() {
           title="Couldn't load your recipes"
           description="Check your connection and try again."
           actionLabel="Try again"
-          onAction={() => fetchRecipes()}
+          onAction={() => (expiringSort ? void fetchCookFirst() : void list.refetch())}
         />
       ) : recipes.length === 0 ? (
         searchQuery || filters.category || filters.difficulty ? (
@@ -338,7 +345,7 @@ function RecipesPageContent() {
       <AddRecipeModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onSuccess={() => fetchRecipes()}
+        onSuccess={refreshRecipes}
       />
 
       <EditRecipeModal
@@ -347,7 +354,7 @@ function RecipesPageContent() {
           setShowEditModal(false);
           setSelectedRecipe(null);
         }}
-        onSuccess={() => fetchRecipes()}
+        onSuccess={refreshRecipes}
         recipe={selectedRecipe}
       />
 
@@ -363,7 +370,7 @@ function RecipesPageContent() {
       <AIRecipeSuggestionsModal
         isOpen={showAISuggestionsModal}
         onClose={() => setShowAISuggestionsModal(false)}
-        onRecipeAdded={() => fetchRecipes()}
+        onRecipeAdded={refreshRecipes}
       />
     </div>
   );
