@@ -64,7 +64,9 @@ export function createStatusSource(runtime: SourceRuntime, getUserId: () => stri
     }, ANNOUNCE_DEBOUNCE_MS);
   };
 
+  let refreshSeq = 0;
   const refresh = async (): Promise<void> => {
+    const seq = (refreshSeq += 1);
     const userId = getUserId();
     let ops: OutboxOp[] = [];
     if (userId) {
@@ -74,7 +76,8 @@ export function createStatusSource(runtime: SourceRuntime, getUserId: () => stri
         return;
       }
     }
-    if (!detach) return;
+    // Concurrent refreshes can resolve out of order: only the newest may commit.
+    if (!detach || seq !== refreshSeq) return;
     commit({ ops, counts: countOps(ops) });
     scheduleAnnounce();
   };
