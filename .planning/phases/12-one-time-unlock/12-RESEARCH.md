@@ -232,7 +232,7 @@ The constructor throws if `Environment.PRODUCTION` and `appAppleId` is undefined
 An offline create that reached the server before the connection dropped is replayed with the same client `id`. If the count check runs before the existing-id check, the replay returns 403 for an item that already exists. Check existing id (owner) first. Non-2xx responses are not cached by the idempotency middleware (reservation released), so retry after unlock with the same key works.
 
 ### Pitfall 6: Other pantry create path
-`shopping-pantry.service.ts` (`createMany` when a shopping trip finishes) also creates pantry rows. Recommend NOT gating it (gating would break the atomic finish flow); those items count toward the 25 so the next direct add is blocked. Documented bypass; see Open Question 1.
+`shopping-pantry.service.ts` (`createMany` when a shopping trip finishes) also creates pantry rows. Original recommendation was not to gate it. RESOLVED: gated inside the finish transaction (advisory lock + capacity check before createMany; 403 rolls back the whole finish), see Open Question 1.
 
 ### Pitfall 7: Webhook is public and behind origin/CORS middleware
 `app.ts` mounts `originGuard` and CORS before routes. Apple calls have no `Origin` header. Verify in a supertest that a POST without Origin passes, and that `httpsRedirect` does not 301 the call (Apple will not follow it). Keep the 1 MB JSON limit. Return 200 for verified or already-seen or unknown-transaction notifications, 400 for invalid signature, 5xx for DB errors (Apple retries non-200).
@@ -410,21 +410,28 @@ The existing global daily cap of 100 is the true spend guard; paid numbers only 
 | A3 | `.storekit` JSON schema fields and scheme attachment path syntax | Xcode Wiring | Human opens in Xcode once to confirm |
 | A4 | In-App Purchase capability needs no entitlements/Info.plist entry for StoreKit 2 | Xcode Wiring | Human confirms in Signing & Capabilities |
 | A5 | ASSN V2: Apple retries non-200; sandbox retries are shorter; two URLs (production + sandbox) configured per app in App Store Connect > App Information | Pitfall 7, owner steps | Missed refunds until launch re-check; owner steps may differ in UI |
-| A6 | Shopping-finish pantry creates should not be gated | Pitfall 6 | A user can exceed 25 via shopping finish |
+| A6 | (Superseded) Shopping-finish pantry creates ARE gated per orchestrator decision; see Open Question 1 RESOLVED | Pitfall 6 | n/a |
 | A7 | `AppStore.sync()` prompts for Apple ID and should be user-initiated; `currentEntitlements` first | Plugin skeleton | Extra sign-in prompts if wrong |
 | A8 | `originGuard`/`httpsRedirect` allow Apple's origin-less POST | Pitfall 7 | Webhook silently rejected; verify with a supertest |
 | A9 | Xcode 26.6 + iOS 26.5 sim still cannot sync `.storekit` from CLI (forum thread is mixed: DTS says fixed in 26.6 RC, a July reply says it persists) | Validation | Planner should include a 10-minute probe task, not rely on it |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should shopping-finish (bought-it) pantry creates be gated?**
    - Known: only `POST /pantry` and the shopping merge create pantry rows (plus the reviewer seed tool).
    - Unclear: owner intent for the bypass.
    - Recommendation: do not gate; count them; revisit in 1.1.
+   - RESOLVED: Gate it (orchestrator decision per CONTEXT "403 UPGRADE_REQUIRED for free users beyond 25"). `applyPantryMergeInTx` checks capacity with the same advisory lock + `assertPantryCapacity(adding = plan.creates.length)` inside the finish transaction; a 403 rolls the whole finish back (trip not completed, nothing created). Updates-only merges and finishes without addToPantry are not blocked. Plan 12-07 (backend), 12-05 / 12-12 (frontend copy and sheet).
 2. **"More AI recipe ideas each month" truthfulness.** Free has only a daily cap (20/day = up to 600/month), so a monthly paid cap of 600 is not "more". Recommend enabling `AI_FREE_MONTHLY_LIMIT=100` and paid 600 (a behavior change for free users, contradicting "keep current per-user quotas for free"), OR soften the benefit copy to "Higher daily AI limit". Needs owner decision; default ships with free unchanged and paid 40/day + 600/month.
+   - RESOLVED: Free unchanged (20/day, no monthly cap: `AI_FREE_MONTHLY_LIMIT=0`); paid 40/day + 600/month, all env-overridable (12-01, 12-08). Benefit copy softened to "More AI recipe ideas every day" (12-10).
 3. **`APPLE_APP_APPLE_ID` value** (numeric App Store Connect Apple ID) is required before Production verification; owner step.
+   - RESOLVED: Owner supplies it as Railway variable `APPLE_APP_APPLE_ID`; until set, Production JWS return 503 `IAP_NOT_CONFIGURED` while Sandbox works (12-06). Tracked in IAP.md "Owner steps" (12-13).
 4. **Simulator E2E feasibility** on this machine (see Validation); resolve with a quick probe in Wave 0.
+   - RESOLVED: Probe runs in 12-03 (SKTestSession test target, XCTSkip if products are empty) and its result is recorded. Scripted UI E2E uses the E2E-only mock store; a real Simulator `.storekit` purchase and the TestFlight sandbox purchase are human_needed regardless of the probe (12-14 validation map).
 5. **Offline entitlement cache.** Whether to persist the entitlement hint in the offline SQLite cache (Phase 11) or keep it in memory/react-query only. Recommend react-query + localStorage key per user; the server decides anyway.
+   - RESOLVED: Cache the last-known entitlement (GET /entitlements/me) in localStorage keyed per user, for display only (initial card state offline); it never unlocks anything. The server stays authoritative for every gate. Implemented in `useEntitlement` (12-10).
+6. **Package legitimacy (slopcheck unavailable).**
+   - RESOLVED: Autonomous mode, no human checkpoint. The install task runs `npm view <pkg> name version repository.url scripts maintainers` and aborts unless version 3.1.0, repo github.com/apple/app-store-server-library-node, and no install/postinstall scripts; exact pin plus `npm audit` recorded (12-02). The KumaunStore plugin is a local `file:` package (no registry fetch).
 
 ## Environment Availability
 

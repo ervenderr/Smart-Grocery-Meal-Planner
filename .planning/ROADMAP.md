@@ -186,20 +186,20 @@ Plans:
 **Plans**: 15 plans
 Plans:
 - [ ] 12-01-PLAN.md — Wave 1: IAP/limit/paid-AI env keys, additive entitlements migration, entitlement-status reader, account-deletion coverage
-- [ ] 12-02-PLAN.md — Wave 1 (TDD): @apple/app-store-server-library verifier wrapper, pinned Apple Root CA G3, offline test PKI + signer
+- [ ] 12-02-PLAN.md — Wave 2 (TDD): @apple/app-store-server-library verifier wrapper, pinned Apple Root CA G3, offline test PKI + signer
 - [ ] 12-03-PLAN.md — Wave 1: custom KumaunStore StoreKit 2 plugin package, Kumaun.storekit, CLI StoreKit probe
 - [ ] 12-04-PLAN.md — Wave 1: frontend store facade, entitlements API client, purchase/restore/recheck service, E2E-only mock store
 - [ ] 12-05-PLAN.md — Wave 1: 403 UPGRADE_REQUIRED as retryable "Needs upgrade" conflict + online error helper
-- [ ] 12-06-PLAN.md — Wave 2: POST /entitlements/verify (idempotent, claim-once) and GET /entitlements/me
-- [ ] 12-07-PLAN.md — Wave 2: atomic 25-item free pantry gate (advisory lock, replay-safe)
+- [ ] 12-06-PLAN.md — Wave 3: POST /entitlements/verify (idempotent, claim-once) and GET /entitlements/me
+- [ ] 12-07-PLAN.md — Wave 2: atomic 25-item free pantry gate on POST /pantry and trip finish (advisory lock, replay-safe)
 - [ ] 12-08-PLAN.md — Wave 2: paid AI allowance 40/day + 600/month in the atomic quota path
 - [ ] 12-10-PLAN.md — Wave 2: entitlement copy/view models/sheet store/hook, Settings Kumaun Full card, web note
-- [ ] 12-09-PLAN.md — Wave 3: App Store Server Notifications V2 webhook (refund/revoke/reversal)
+- [ ] 12-09-PLAN.md — Wave 4: App Store Server Notifications V2 webhook (refund/revoke/reversal)
 - [ ] 12-11-PLAN.md — Wave 3: upgrade sheet + native host + release-excluded E2E/screenshot route
-- [ ] 12-12-PLAN.md — Wave 3: Add Item limit handling (native sheet / web inline), Pending changes Unlock action, delete-account note
-- [ ] 12-13-PLAN.md — Wave 4: IAP.md testing guide, owner steps, review-screenshot instructions, privacy/review/checklist/env docs
-- [ ] 12-14-PLAN.md — Wave 5: full quality gate (tests, coverage, lint, typecheck, web build, native export, plugin build) + validation map
-- [ ] 12-15-PLAN.md — Wave 6 (LAST): git-log-gated Xcode wiring (cap sync, shared scheme StoreKit config, privacy manifest) or recorded pending
+- [ ] 12-12-PLAN.md — Wave 3: Add Item + Finish trip limit handling (native sheet / web message), Pending changes Unlock action, delete-account note
+- [ ] 12-13-PLAN.md — Wave 5: IAP.md testing guide, owner steps, review-screenshot instructions, privacy/review/checklist/env docs
+- [ ] 12-14-PLAN.md — Wave 6: full quality gate (tests, coverage, lint, typecheck, web build, native export, plugin build) + validation map
+- [ ] 12-15-PLAN.md — Wave 7 (LAST): git-log-gated Xcode wiring (cap sync, shared scheme StoreKit config, privacy manifest) or recorded pending
 **UI hint**: yes
 
 ### Phase 13: On-Device AI (DEFERRED to 1.1)
