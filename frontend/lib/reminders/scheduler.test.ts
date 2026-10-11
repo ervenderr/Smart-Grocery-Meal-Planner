@@ -12,7 +12,7 @@ function makePlugin(display: PermissionDisplay = 'granted', pending: number[] = 
     checkPermissions: vi.fn(async () => ({ display })),
     requestPermissions: vi.fn(async () => ({ display })),
     getPending: vi.fn(async () => ({ notifications: pending.map((id) => ({ id })) })),
-    cancel: vi.fn(async () => undefined),
+    cancel: vi.fn(async (_o: { notifications: { id: number }[] }) => undefined),
     schedule: vi.fn(async () => ({})),
   } satisfies LocalNotificationsLike;
 }

@@ -61,7 +61,7 @@ describe.each(ZONES)('buildReminderPlan in %s', (tz) => {
     [2, 'Milk expires in 2 days'],
   ] as const)('offset %i body', (offset, body) => {
     const out = run(() => buildReminderPlan([{ name: 'Milk', expiryDate: '2026-10-14' }], prefs([offset as ReminderOffset]), now()));
-    expect(out[0].body).toBe(body.replace('Milk expires', 'Milk expires'));
+    expect(out[0].body).toBe(body);
   });
   it('offset 3 says in 3 days', () => {
     const out = run(() => buildReminderPlan([{ name: 'Milk', expiryDate: '2026-10-14' }], prefs([3]), now()));
