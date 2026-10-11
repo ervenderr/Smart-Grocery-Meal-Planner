@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Package, AlertCircle, AlertTriangle, ScanBarcode } from 'lucide-react';
+import { Plus, Search, Package, AlertCircle, AlertTriangle, ScanBarcode, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import { pantryApi } from '@/lib/api/pantry';
 import { queryKeys } from '@/lib/react-query';
 import { getDaysUntilExpiry, WARNING_DAYS } from '@/lib/pantry/expiry';
 import { sortUsedUpLast } from '@/lib/pantry/quantity';
+import { filterExpiring } from '@/lib/pantry/expiring-filter';
 import {
   useDeferredRemove,
   usePantryList,
@@ -53,6 +55,17 @@ const CATEGORIES = [
 ];
 
 export default function PantryPage() {
+  // useSearchParams needs a Suspense boundary for the static export.
+  return (
+    <Suspense fallback={null}>
+      <PantryPageContent />
+    </Suspense>
+  );
+}
+
+function PantryPageContent() {
+  const router = useRouter();
+  const expiringOnly = useSearchParams().get('filter') === 'expiring';
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
@@ -73,7 +86,10 @@ export default function PantryPage() {
   const patchMutation = usePantryPatch();
   const { remove: removeUsedUp } = useDeferredRemove();
 
-  const items = useMemo(() => sortUsedUpLast(fetched ?? []), [fetched]);
+  const items = useMemo(() => {
+    const sorted = sortUsedUpLast(fetched ?? []);
+    return expiringOnly ? filterExpiring(sorted, new Date()) : sorted;
+  }, [fetched, expiringOnly]);
 
   const refreshItems = () =>
     queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
@@ -82,6 +98,7 @@ export default function PantryPage() {
     setSearchQuery('');
     setAppliedSearch('');
     setSelectedCategory('');
+    if (expiringOnly) router.replace('/pantry/');
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -210,6 +227,20 @@ export default function PantryPage() {
         </Card>
       )}
 
+      {expiringOnly && (
+        <div className="flex">
+          <button
+            type="button"
+            aria-label="Clear expiring filter"
+            onClick={() => router.replace('/pantry/')}
+            className="flex h-11 items-center gap-2 rounded-full border border-primary-500 bg-primary-50 px-4 text-sm font-semibold text-primary-700 active:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+          >
+            Expiring soon
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
       {/* Filters */}
       <Card className="p-4">
         <div className="flex flex-col gap-4 sm:flex-row">
@@ -269,7 +300,7 @@ export default function PantryPage() {
           onAction={() => void refetch()}
         />
       ) : items.length === 0 ? (
-        appliedSearch || selectedCategory ? (
+        appliedSearch || selectedCategory || expiringOnly ? (
           <EmptyState
             icon={Search}
             title="No matching items"

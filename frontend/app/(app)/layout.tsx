@@ -7,12 +7,16 @@ import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate';
 import { IosInstallHint } from '@/components/pwa/ios-install-hint';
 import { AiConsentHost } from '@/components/ai/ai-consent-host';
+import { ReminderRuntime } from '@/components/reminders/reminder-runtime';
+import { usePlatform } from '@/lib/platform/use-platform';
 
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { native } = usePlatform();
+
   return (
     <ProtectedRoute>
       <a
@@ -41,6 +45,7 @@ export default function AppLayout({
       <OnboardingGate />
       <IosInstallHint />
       <AiConsentHost />
+      {native && <ReminderRuntime />}
     </ProtectedRoute>
   );
 }
