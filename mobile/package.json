@@ -11,7 +11,8 @@
     "cap:sync": "cap sync ios",
     "build:ios": "bash scripts/build-ios.sh",
     "sim:run": "bash scripts/sim-run.sh",
-    "verify:bundle": "bash scripts/verify-bundle.sh"
+    "verify:bundle": "bash scripts/verify-bundle.sh",
+    "e2e:ios": "bash scripts/e2e-smoke.sh"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "8.0.1",
