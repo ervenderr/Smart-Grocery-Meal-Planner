@@ -40,7 +40,7 @@ export interface OutboxStore {
   discard(seq: number): Promise<OutboxOp[]>;
   discardAllFailed(userId: string): Promise<OutboxOp[]>;
   resetInFlight(): Promise<number>;
-  /** Removes every op of one user (account deletion only). */
+  /** Removes every op and pending barcode scan of one user (account deletion only). */
   deleteForUser(userId: string): Promise<number>;
   counts(userId: string): Promise<OutboxCounts>;
   subscribe(listener: () => void): () => void;
@@ -229,7 +229,11 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
         return out;
       }),
     deleteForUser: (userId) =>
-      mutate(async (tx) => (await tx.run('DELETE FROM outbox WHERE user_id = ?', [userId])).changes),
+      mutate(async (tx) => {
+        // Account deletion: the user's unresolved barcode scans go with their queued changes.
+        await tx.run('DELETE FROM pending_scan WHERE user_id = ?', [userId]);
+        return (await tx.run('DELETE FROM outbox WHERE user_id = ?', [userId])).changes;
+      }),
     resetInFlight: () =>
       mutate(async (tx) => {
         // Killed while in flight: the server may have applied it, so it is in doubt until replayed.

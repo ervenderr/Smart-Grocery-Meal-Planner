@@ -4,7 +4,8 @@ import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 import { PANTRY_ALL_KEY } from '../cache/cache-keys';
 import { readCacheMeta, writeCacheMeta } from '../cache/cache-meta';
 import { createQueryPersister } from '../cache/query-persister';
-import { ID_A } from '../outbox/fixtures.test-helper';
+import { createPendingScans } from '../barcode/pending-scan';
+import { ID_A, ID_B } from '../outbox/fixtures.test-helper';
 import { createOutboxStore, type OutboxStore } from '../outbox/store';
 import { migrate } from '../sql/migrations';
 import { createNodeSqlDb } from '../sql/node-sqldb.test-helper';
@@ -103,6 +104,23 @@ describe('applyUserTransition', () => {
     await run(null, 'A', 'expired');
     expect((await readCacheMeta(db)).userId).toBe('A');
     expect(await cacheRows()).toBe(1);
+  });
+});
+
+describe('account deletion and pending scans (WR-11)', () => {
+  it('deleting the account removes that user\'s pending_scan rows and keeps other users\'', async () => {
+    const scans = createPendingScans({ db });
+    await scans.add('A', ID_A, '0123456789012');
+    await scans.add('B', ID_B, '9876543210987');
+    await run('A', null, 'deleted');
+    const rows = await db.query<{ user_id: string }>('SELECT user_id FROM pending_scan');
+    expect(rows.map((r) => r.user_id)).toEqual(['B']);
+  });
+
+  it('logout keeps pending scans for the next sign-in', async () => {
+    await createPendingScans({ db }).add('A', ID_A, '0123456789012');
+    await run('A', null, 'logout');
+    expect(await db.query('SELECT * FROM pending_scan')).toHaveLength(1);
   });
 });
 
