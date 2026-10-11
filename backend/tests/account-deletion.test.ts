@@ -16,6 +16,7 @@ import {
   countAiUsage,
   countGlobalAiUsage,
 } from './helpers/user-owned-fixtures';
+import { grantTestEntitlement } from './helpers/entitlement-fixtures';
 
 const app = createApp();
 const PASSWORD = 'TestPass123';
@@ -69,7 +70,13 @@ describe('DELETE /api/v1/users/me', () => {
   });
 
   afterEach(async () => {
-    await prisma.aiUsage.deleteMany({ where: { scope: { in: [`user:${a.id}`, `user:${b.id}`] } } });
+    await prisma.aiUsage.deleteMany({
+      where: {
+        scope: {
+          in: [`user:${a.id}`, `user:${b.id}`, `usermonth:${a.id}`, `usermonth:${b.id}`],
+        },
+      },
+    });
     await prisma.user.deleteMany({ where: { email: { startsWith: TAG } } });
   });
 
@@ -86,6 +93,25 @@ describe('DELETE /api/v1/users/me', () => {
     const afterB = await countsFor(b.id);
     Object.entries(afterB).forEach(([name, n]) => expect([name, n]).toEqual([name, before[name]]));
     expect(await countGlobalAiUsage()).toBeGreaterThan(0);
+  });
+
+  it('removes entitlement and usermonth rows for A only, and frees the transaction id', async () => {
+    const entA = await prisma.entitlement.findFirstOrThrow({ where: { userId: a.id } });
+    expect(await prisma.aiUsage.count({ where: { scope: `usermonth:${a.id}` } })).toBe(1);
+
+    await del(a.token, { password: PASSWORD }).expect(204);
+
+    expect(await prisma.entitlement.count({ where: { userId: a.id } })).toBe(0);
+    expect(await prisma.aiUsage.count({ where: { scope: `usermonth:${a.id}` } })).toBe(0);
+    expect(await prisma.entitlement.count({ where: { userId: b.id } })).toBe(1);
+    expect(await prisma.aiUsage.count({ where: { scope: `usermonth:${b.id}` } })).toBe(1);
+
+    await expect(
+      grantTestEntitlement(b.id, {
+        environment: entA.environment as 'Sandbox' | 'Production',
+        originalTransactionId: entA.originalTransactionId,
+      })
+    ).resolves.toBeUndefined();
   });
 
   it('handles concurrent duplicate deletes without a 500', async () => {

@@ -4,13 +4,15 @@
  * meal_plan_items.recipe_id is ON DELETE RESTRICT, so plan items must be removed
  * before the user's recipes are cascaded. ai_usage has no FK to users, so the
  * user's quota rows are deleted explicitly. refresh_tokens and
- * idempotency_keys cascade via FK and are also deleted explicitly for clarity.
+ * idempotency_keys and entitlements cascade via FK and are also deleted
+ * explicitly for clarity. Monthly AI counters (usermonth:<id>) are removed too.
  */
 
 import { prisma } from '@/config/database.config';
 import { AppError } from '@/middleware/errorHandler';
 import { comparePassword } from '@/utils/password.util';
 import { logger } from '@/config/logger.config';
+import { AI_MONTH_SCOPE_PREFIX } from '@/modules/entitlements/entitlements.constants';
 
 export const INVALID_PASSWORD_CODE = 'INVALID_PASSWORD';
 
@@ -42,7 +44,10 @@ export async function deleteAccountPermanently(
     // between the plan-item delete and the user delete.
     await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`;
     await tx.mealPlanItem.deleteMany({ where: { mealPlan: { userId } } });
-    await tx.aiUsage.deleteMany({ where: { scope: `user:${userId}` } });
+    await tx.aiUsage.deleteMany({
+      where: { scope: { in: [`user:${userId}`, `${AI_MONTH_SCOPE_PREFIX}${userId}`] } },
+    });
+    await tx.entitlement.deleteMany({ where: { userId } });
     await tx.refreshToken.deleteMany({ where: { userId } });
     await tx.idempotencyKey.deleteMany({ where: { userId } });
     // deleteMany: a concurrent duplicate request that lost the race deletes 0

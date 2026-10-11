@@ -5,6 +5,7 @@
 
 import { createHash, randomUUID } from 'crypto';
 import { prisma } from '../../src/config/database.config';
+import { grantTestEntitlement } from './entitlement-fixtures';
 
 type Factory = (userId: string) => Promise<void>;
 type Counter = (userId: string) => Promise<number>;
@@ -100,6 +101,7 @@ export const OWNED_MODEL_FACTORIES: Readonly<Record<string, Factory>> = {
       },
     });
   },
+  Entitlement: (userId) => grantTestEntitlement(userId),
   IdempotencyKey: async (userId) => {
     await prisma.idempotencyKey.create({
       data: {
@@ -133,6 +135,7 @@ export const OWNED_MODEL_COUNTERS: Readonly<Record<string, Counter>> = {
   AiReport: (userId) => prisma.aiReport.count({ where: { userId } }),
   RefreshToken: (userId) => prisma.refreshToken.count({ where: { userId } }),
   IdempotencyKey: (userId) => prisma.idempotencyKey.count({ where: { userId } }),
+  Entitlement: (userId) => prisma.entitlement.count({ where: { userId } }),
 };
 
 /** Insert the user's ai_usage row and make sure today's global row exists. */
@@ -143,6 +146,11 @@ export async function seedAiUsage(userId: string): Promise<void> {
     create: { scope: `user:${userId}`, day: TODAY, count: 1 },
   });
   await prisma.aiUsage.upsert({
+    where: { scope_day: { scope: `usermonth:${userId}`, day: TODAY } },
+    update: {},
+    create: { scope: `usermonth:${userId}`, day: TODAY, count: 1 },
+  });
+  await prisma.aiUsage.upsert({
     where: { scope_day: { scope: 'global', day: TODAY } },
     update: {},
     create: { scope: 'global', day: TODAY, count: 1 },
@@ -150,7 +158,9 @@ export async function seedAiUsage(userId: string): Promise<void> {
 }
 
 export function countAiUsage(userId: string): Promise<number> {
-  return prisma.aiUsage.count({ where: { scope: `user:${userId}` } });
+  return prisma.aiUsage.count({
+    where: { scope: { in: [`user:${userId}`, `usermonth:${userId}`] } },
+  });
 }
 
 export function countGlobalAiUsage(): Promise<number> {
