@@ -1,7 +1,7 @@
 /**
  * Token store with synchronous reads from an in-memory snapshot and
  * write-through to an async secure backend (iOS Keychain on native).
- * Pure: no window/localStorage access. Never logs token values.
+ * Pure: no browser storage access. Never logs token values.
  */
 export interface SecureBackend {
   get(key: string): Promise<string | null>;
