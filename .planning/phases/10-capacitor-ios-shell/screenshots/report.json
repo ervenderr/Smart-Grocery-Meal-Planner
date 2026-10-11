@@ -1,10 +1,10 @@
 {
-  "date": "2026-10-11T02:14:32Z",
+  "date": "2026-10-11T02:23:09Z",
   "device": "iPhone 17",
   "runtime": "iOS-26-5",
   "simctl_privacy_notifications_supported": false,
   "notification_pending_check": "human_needed",
-  "duration_seconds": 40,
+  "duration_seconds": 52,
   "steps": [
     {
       "step": "render",
