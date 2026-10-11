@@ -18,7 +18,7 @@ import { createExecutorRegistry, type Executor } from './outbox/executors';
 import type { NewOp, OpKind, OutboxOp } from './outbox/op-types';
 import { createOutboxStore, type EnqueueOpts, type OutboxStore } from './outbox/store';
 import { applyResult, type CacheWrites } from './reconcile/apply-result';
-import { reapplyForKey } from './reconcile/reapply';
+import { foldEntityTypes, reapplyForKey } from './reconcile/reapply';
 import { applyUserTransition } from './session/apply-transition';
 import { consumeSessionEndIntent, registerSessionHandlers } from './session/session-hooks';
 import { planUserTransition } from './session/user-scope';
@@ -57,19 +57,22 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
   const now = args.now ?? Date.now;
   const fetchPage = args.fetchPage ?? ((cursor: string | null) => syncApi.bootstrap(cursor));
   const store = createOutboxStore({ db, now });
-  // Persist only server-confirmed data: while ops are pending the cache holds their optimistic
-  // effect, and boot re-folds pending ops, which would double-apply deltas such as pantry.adjust.
+  // Persist only server-confirmed data for folded keys: while related ops are pending the cache
+  // holds their optimistic effect, and boot re-folds pending ops, which would double-apply deltas
+  // such as pantry.adjust. Keys no op folds into (recipes, preferences...) always persist.
   let enqueuing = 0;
   const persister = createQueryPersister({
     db,
     queryClient,
     getUserId,
     now,
-    canPersist: async () => {
+    canPersist: async (key) => {
+      const types = foldEntityTypes(key);
+      if (types.length === 0) return true;
       // A pending mutation may already hold optimistic state whose op is not in the outbox yet.
       if (enqueuing > 0 || queryClient.isMutating() > 0) return false;
       const userId = getUserId();
-      return !userId || (await store.list(userId)).length === 0;
+      return !userId || !(await store.list(userId)).some((o) => types.includes(o.entityType));
     },
   });
   const connectivity = createConnectivity({

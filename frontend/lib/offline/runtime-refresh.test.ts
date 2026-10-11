@@ -4,7 +4,7 @@ import { createNodeSqlDb } from './sql/node-sqldb.test-helper';
 import { migrate } from './sql/migrations';
 import type { SqlDb } from './sql/types';
 import { createOfflineRuntime, setOfflineRuntime, type OfflineRuntime } from './runtime';
-import { PANTRY_ALL_KEY } from './cache/cache-keys';
+import { PANTRY_ALL_KEY, RECIPES_ALL_KEY, keyHash } from './cache/cache-keys';
 import { ID_A } from './outbox/fixtures.test-helper';
 
 // WR-04: a bootstrap refresh must not apply a snapshot for a user who left, nor one that
@@ -88,5 +88,19 @@ describe('persist gate (WR-05)', () => {
     await rt.persister.flush();
     const rows = await db.query<{ n: number }>('SELECT COUNT(*) AS n FROM cache_entries');
     expect(rows[0].n).toBe(0);
+  });
+});
+
+describe('persist gate per key (WR-06)', () => {
+  it('a parked pantry op blocks only pantry keys; recipes still persist', async () => {
+    make(async () => snapshot(1));
+    rt.persister.start();
+    const op = await rt.store.enqueue('u1', { kind: 'pantry.adjust', label: 'Rice', payload: { id: ID_A, delta: 2 } });
+    await rt.store.park(op!.seq, { reason: 'conflict', status: 409 });
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: ID_A, quantity: 9 }]);
+    qc.setQueryData(RECIPES_ALL_KEY, [{ id: 'r1' }]);
+    await rt.persister.flush();
+    const rows = await db.query<{ key_hash: string }>('SELECT key_hash FROM cache_entries');
+    expect(rows.map((r) => r.key_hash)).toEqual([keyHash(RECIPES_ALL_KEY)]);
   });
 });
