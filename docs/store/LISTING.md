@@ -76,7 +76,7 @@ YOUR DATA
 
 Kumaun is not medical or dietary advice. Always check ingredient labels if you have allergies.
 
-Product information provided by Open Food Facts (ODbL). Nutrition data from USDA FoodData Central.
+Product information provided by Open Food Facts (ODbL).
 ```
 
 Honesty notes (do not paste into App Store Connect):
