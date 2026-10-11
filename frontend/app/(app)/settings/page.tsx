@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Lock, Bell, Database, HelpCircle, Shield } from 'lucide-react';
+import { User, Lock, Bell, Database, HelpCircle, Shield, Smartphone } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ProfileSettings } from '@/components/settings/profile-settings';
 import { PasswordSettings } from '@/components/settings/password-settings';
@@ -11,27 +11,39 @@ import { StaplesSettings } from '@/components/settings/staples-settings';
 import { DataSettings } from '@/components/settings/data-settings';
 import { AiPrivacySettings } from '@/components/settings/ai-privacy-settings';
 import { LegalLinks } from '@/components/settings/legal-links';
+import { NativeSettings } from '@/components/settings/native-settings';
+import { usePlatform } from '@/lib/platform/use-platform';
 
-type SettingsTab = 'profile' | 'password' | 'preferences' | 'data' | 'privacy';
+type SettingsTab = 'profile' | 'password' | 'preferences' | 'data' | 'privacy' | 'device';
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
+  const { native } = usePlatform();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['profile', 'password', 'preferences', 'data', 'privacy'].includes(tab)) {
+    const allowed = native
+      ? ['profile', 'password', 'preferences', 'data', 'privacy', 'device']
+      : ['profile', 'password', 'preferences', 'data', 'privacy'];
+    if (tab && allowed.includes(tab)) {
       setActiveTab(tab as SettingsTab);
     }
-  }, [searchParams]);
+  }, [searchParams, native]);
 
-  const tabs = [
+  const baseTabs = [
     { id: 'profile' as SettingsTab, name: 'Profile', icon: User, description: 'Manage your personal information' },
     { id: 'password' as SettingsTab, name: 'Password', icon: Lock, description: 'Change your password' },
     { id: 'preferences' as SettingsTab, name: 'Preferences', icon: Bell, description: 'Customize your experience' },
     { id: 'data' as SettingsTab, name: 'Data', icon: Database, description: 'Export or manage your data' },
     { id: 'privacy' as SettingsTab, name: 'Privacy', icon: Shield, description: 'AI features, legal and support' },
   ];
+  const tabs = native
+    ? [
+        ...baseTabs,
+        { id: 'device' as SettingsTab, name: 'Device', icon: Smartphone, description: 'Reminders and haptics on this phone' },
+      ]
+    : baseTabs;
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -55,6 +67,8 @@ export default function SettingsPage() {
             <LegalLinks />
           </div>
         );
+      case 'device':
+        return native ? <NativeSettings /> : null;
       default:
         return null;
     }

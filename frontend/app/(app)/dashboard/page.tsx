@@ -16,11 +16,14 @@ import type { ExpiringItem } from '@/types/pantry.types';
 import type { AnalyticsDashboard } from '@/types/budget.types';
 import { formatExpiryLabel, toExpiringItems } from '@/lib/pantry/expiry';
 import { CookFirstCard } from '@/components/dashboard/cook-first-card';
+import { ReminderPromptCard } from '@/components/reminders/reminder-prompt-card';
+import { usePlatform } from '@/lib/platform/use-platform';
 import { budgetFromComparison, formatPercent } from '@/lib/analytics/budget';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const router = useRouter();
+  const { native } = usePlatform();
   const { format: formatCurrency } = useCurrency();
   const [expiring, setExpiring] = useState<ExpiringItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,6 +137,8 @@ export default function DashboardPage() {
           Here's an overview of your grocery and meal planning activity.
         </p>
       </div>
+
+      {native && <ReminderPromptCard />}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
