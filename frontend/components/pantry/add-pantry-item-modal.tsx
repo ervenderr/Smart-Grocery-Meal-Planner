@@ -11,6 +11,11 @@ import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { ScanBarcode } from 'lucide-react';
 import { pantryApi } from '@/lib/api/pantry';
+import { useQueryClient } from '@tanstack/react-query';
+import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
+import { offlineWrite } from '@/lib/offline/facade';
+import { newId } from '@/lib/offline/ids';
+import { buildPantryCreate } from '@/lib/offline/ops/pantry-ops';
 import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { mergeScanIntoForm } from '@/lib/scan/merge-scan';
 import { prefillFromOwnItem, prefillFromProduct } from '@/lib/scan/prefill';
@@ -22,6 +27,7 @@ import type { FoodAttribution, FoodProduct } from '@/lib/api/food';
 import toast from 'react-hot-toast';
 import type {
   CreatePantryItemData,
+  PantryItem,
   PantryItemCategory,
   PantryItemUnit,
 } from '@/types/pantry.types';
@@ -100,6 +106,7 @@ export function AddPantryItemModal({
   headerSlot,
   enableScan = false,
 }: AddPantryItemModalProps) {
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [scanAttribution, setScanAttribution] = useState<FoodAttribution | null>(null);
@@ -171,7 +178,7 @@ export function AddPantryItemModal({
     setIsLoading(true);
 
     try {
-      await pantryApi.create({
+      const payload: CreatePantryItemData = {
         ingredientName: data.ingredientName,
         category: data.category as PantryItemCategory,
         quantity: data.quantity,
@@ -181,11 +188,24 @@ export function AddPantryItemModal({
         location: (data.location as any) || undefined,
         notes: data.notes || undefined,
         barcode: data.barcode || undefined,
+      };
+      const id = newId();
+      const outcome = await offlineWrite({
+        op: () => buildPantryCreate(payload, id),
+        direct: () => pantryApi.create(payload),
       });
+      if (outcome.mode === 'queued') {
+        // Show the new item immediately; the drain swaps in the server row.
+        const stamp = new Date().toISOString();
+        queryClient.setQueryData<PantryItem[] | undefined>(PANTRY_ALL_KEY, (items) =>
+          items ? [{ ...payload, id, userId: '', createdAt: stamp, updatedAt: stamp }, ...items] : items
+        );
+      }
 
       toast.success('Pantry item added successfully!');
       reset();
-      onSuccess();
+      // Queued writes are reconciled by the drain; refetching now would drop the optimistic item.
+      if (outcome.mode === 'direct') onSuccess();
       onClose();
     } catch (error: any) {
       console.error('Add pantry item error:', error);

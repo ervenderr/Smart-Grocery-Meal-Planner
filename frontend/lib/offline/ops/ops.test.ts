@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { NewOpSchema } from '../outbox/op-types';
 import { buildShoppingCreate, buildShoppingDelete, buildShoppingUpdate } from './shopping-ops';
-import { buildPantryCreate, buildPantryDelete, buildPantryQuickPatchOps, buildPantryUpdate } from './pantry-ops';
+import { buildPantryCreate, buildPantryDelete, buildPantryQuickPatchOps, buildPantryUpdate, changedFields } from './pantry-ops';
 import type { PantryItem } from '@/types/pantry.types';
 import type { ShoppingItem } from '@/types/shopping.types';
 
@@ -118,5 +118,23 @@ describe('pantry op builders', () => {
     valid(op);
     expect(op.inverse).toEqual({ item: pantry() });
     expect(op.label).toBe('Rice');
+  });
+});
+
+describe('changedFields', () => {
+  it('keeps only fields that differ, comparing dates by day', () => {
+    const diff = changedFields(pantry({ notes: null }), {
+      ingredientName: 'Rice',
+      quantity: 4,
+      expiryDate: '2026-12-01',
+      notes: 'bulk',
+      barcode: null,
+      location: undefined,
+    });
+    expect(diff).toEqual({ quantity: 4, notes: 'bulk' });
+  });
+
+  it('treats an ISO timestamp and its day as equal', () => {
+    expect(changedFields(pantry({ expiryDate: '2026-12-01T00:00:00.000Z' }), { expiryDate: '2026-12-01' })).toEqual({});
   });
 });

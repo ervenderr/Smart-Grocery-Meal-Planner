@@ -61,3 +61,17 @@ export function buildPantryDelete(item: PantryItem): NewOp {
     inverse: { item },
   };
 }
+
+const dayOf = (value: unknown): unknown => (typeof value === 'string' ? value.split('T')[0] : value);
+
+/** Fields of `next` that differ from the displayed item, so a queued edit carries only real changes. */
+export function changedFields(current: PantryItem, next: UpdatePantryItemData): UpdatePantryItemData {
+  const entries = Object.entries(next).filter(([key, value]) => {
+    if (value === undefined) return false;
+    const existing = current[key as keyof PantryItem];
+    if (key === 'quantity') return Number(existing) !== Number(value);
+    if (key === 'expiryDate' || key === 'purchaseDate') return dayOf(existing ?? null) !== dayOf(value);
+    return (existing ?? null) !== value;
+  });
+  return Object.fromEntries(entries) as UpdatePantryItemData;
+}

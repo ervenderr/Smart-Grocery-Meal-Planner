@@ -10,11 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { pantryApi } from '@/lib/api/pantry';
+import { useQueryClient } from '@tanstack/react-query';
+import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
+import { offlineWriteMany } from '@/lib/offline/facade';
+import { buildPantryUpdate, changedFields } from '@/lib/offline/ops/pantry-ops';
 import { BarcodeField } from '@/components/pantry/barcode-field';
 import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { ScanBarcode } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { PantryItem, PantryItemCategory, PantryItemUnit } from '@/types/pantry.types';
+import type { PantryItem, PantryItemCategory, PantryItemUnit, UpdatePantryItemData } from '@/types/pantry.types';
 
 const pantryItemSchema = z.object({
   ingredientName: z.string().min(1, 'Item name is required'),
@@ -82,6 +86,7 @@ export function EditPantryItemModal({
   barcodeAction,
   barcodeOverride,
 }: EditPantryItemModalProps) {
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
 
@@ -126,7 +131,7 @@ export function EditPantryItemModal({
     setIsLoading(true);
 
     try {
-      await pantryApi.update(item.id, {
+      const payload: UpdatePantryItemData = {
         ingredientName: data.ingredientName,
         category: data.category as PantryItemCategory,
         quantity: data.quantity,
@@ -136,10 +141,22 @@ export function EditPantryItemModal({
         location: data.location as any || undefined,
         notes: data.notes || undefined,
         barcode: data.barcode || null,
+      };
+      const outcome = await offlineWriteMany({
+        ops: () => buildPantryUpdate(item, changedFields(item, payload)),
+        direct: () => pantryApi.update(item.id, payload),
       });
+      if (outcome.mode === 'queued') {
+        queryClient.setQueryData<PantryItem[] | undefined>(PANTRY_ALL_KEY, (items) =>
+          items?.map((existing) =>
+            existing.id === item.id ? { ...existing, ...changedFields(item, payload) } : existing
+          )
+        );
+      }
 
       toast.success('Pantry item updated successfully!');
-      onSuccess();
+      // Queued writes are reconciled by the drain; refetching now would drop the optimistic edit.
+      if (outcome.mode === 'direct') onSuccess();
       onClose();
     } catch (error: any) {
       console.error('Update pantry item error:', error);
