@@ -144,6 +144,7 @@ export function createApp(): Application {
       documentation: `/api/${config.apiVersion}/docs`,
       endpoints: {
         auth: `/api/${config.apiVersion}/auth`,
+        entitlements: `/api/${config.apiVersion}/entitlements`,
         health: "/health",
       },
     });
@@ -200,6 +201,10 @@ export function createApp(): Application {
   console.log("  - Loading sync routes...");
   const syncRoutes = require("./modules/sync/sync.routes").default;
 
+  console.log("  - Loading entitlements routes...");
+  const entitlementsRoutes =
+    require("./modules/entitlements/entitlements.routes").default;
+
   console.log("✅ All route modules loaded successfully");
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
@@ -217,6 +222,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/shopping`, shoppingRoutes);
   app.use(`/api/${config.apiVersion}/cook`, cookRoutes);
   app.use(`/api/${config.apiVersion}/sync`, syncRoutes);
+  app.use(`/api/${config.apiVersion}/entitlements`, entitlementsRoutes);
 
   console.log("✅ All routes registered successfully");
 
