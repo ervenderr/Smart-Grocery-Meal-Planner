@@ -89,3 +89,19 @@ Screenshots (`.planning/phases/10-capacitor-ios-shell/screenshots/`): `00-releas
 - [ ] Signing team setup and run on the connected iPhone (00008110-001914C02146401E)
 - [ ] Login from the device (CORS `capacitor://localhost`)
 - [ ] Notification pending-count check after granting permission (Simulator could not grant it)
+
+## Phase 11 offline E2E results
+
+Run: `cd mobile && npm run e2e:offline` (iPhone 17 Simulator, iOS 26.5, about 55 s, throwaway account created and deleted by the script). simctl has no airplane-mode switch, so the E2E-only forced-offline flag stands in for it; real airplane mode and reboot are in the 11-22 human checklist.
+
+| Step | Result |
+|------|--------|
+| seed (online: recipe, meal plan, pantry item, shopping item, bootstrap refresh) | ok, 1 of each hydrated |
+| offline-write (forced offline; shopping check, pantry +2 then +3, pantry create) | ok, 3 queued ops (the two adjusts coalesced to one) |
+| app terminated with `simctl terminate` | kill while offline and queue non-empty |
+| offline-cold-start (relaunch, still offline) | ok, pantry 2, recipes 1, meal plans 1, shopping 1 from SQLite, queue 3 intact, optimistic quantity 6, `hydrateMs` 0 |
+| reconnect (flag off, drain) | ok, pantry delta exactly +5, created item exactly once, shopping item checked, queue drained |
+| replay (same Idempotency-Key and body resent) | ok, server quantity unchanged |
+| done | ok |
+
+Screenshots and `offline-report.json`: `.planning/phases/11-offline-core/screenshots/`. The runner screens show the step status text only (the E2E route), not the app UI.
