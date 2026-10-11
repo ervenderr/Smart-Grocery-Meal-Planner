@@ -66,7 +66,14 @@ export function createQueryPersister(opts: QueryPersisterOptions): QueryPersiste
     });
   };
 
+  const deferred = new Map<string, readonly unknown[]>();
+
   const writeKey = async (key: readonly unknown[]): Promise<void> => {
+    if (suspended) {
+      // Mid session change: write once the transition settles (resume), never under a stale user.
+      deferred.set(keyHash(key), key);
+      return;
+    }
     const userId = getUserId();
     if (!userId) return;
     if (opts.canPersist && !(await opts.canPersist())) return;
@@ -104,20 +111,21 @@ export function createQueryPersister(opts: QueryPersisterOptions): QueryPersiste
     pendingKeys.delete(hash);
   };
 
-  const start = (): (() => void) =>
-    queryClient.getQueryCache().subscribe((event) => {
+  const start = (): (() => void) => {
+    // Persisted data must outlive in-memory GC in every session, not only ones that ran hydrateAll.
+    for (const prefix of GC_PREFIXES) queryClient.setQueryDefaults(prefix, { gcTime: Infinity });
+    return queryClient.getQueryCache().subscribe((event) => {
       const key = event.query.queryKey;
       if (!isPersistedKey(key)) return;
       if (event.type === 'removed') {
+        // A removal from memory (GC or clear) never deletes the on-disk row; only wipe() does.
         cancel(keyHash(key));
-        if (suspended) return;
-        enqueue(async () => {
-          await db.run('DELETE FROM cache_entries WHERE key_hash = ?', [keyHash(key)]);
-        });
+        deferred.delete(keyHash(key));
         return;
       }
       if (event.type === 'updated' && event.action.type === 'success') schedule(key);
     });
+  };
 
   const hydrateAll = async (): Promise<{ restored: number; dropped: number }> => {
     const userId = getUserId();
@@ -162,9 +170,13 @@ export function createQueryPersister(opts: QueryPersisterOptions): QueryPersiste
     },
     resume: () => {
       suspended = false;
+      const keys = [...deferred.values()];
+      deferred.clear();
+      keys.forEach(schedule);
     },
     wipe: async () => {
       for (const hash of [...timers.keys()]) cancel(hash);
+      deferred.clear();
       await chain;
       await wipeCache(db);
     },

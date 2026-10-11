@@ -116,10 +116,10 @@ describe('regression: queryClient.clear during session changes', () => {
     expect(await cacheRows()).toBe(1);
   });
 
-  it('without suspension the clear would delete rows (guards the test above)', async () => {
+  it('even without suspension an in-memory clear keeps rows; only wipe deletes them (CR-05)', async () => {
     clearUserSessionState(qc);
     await runtime.persister.flush();
-    expect(await cacheRows()).toBe(0);
+    expect(await cacheRows()).toBe(1);
   });
 
   it('an expire-style transition never deletes outbox rows', async () => {

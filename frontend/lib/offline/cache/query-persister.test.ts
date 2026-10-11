@@ -106,18 +106,18 @@ describe('query persister', () => {
   it('drops corrupt rows and counts them', async () => {
     await db.run(
       'INSERT INTO cache_entries (key_hash,key_json,state_json,user_id,updated_at) VALUES (?,?,?,?,?)',
-      [keyHash(PANTRY_ALL_KEY), '["pantry"]', '{not json', 'u1', 1],
+      [keyHash(PANTRY_ALL_KEY), '["pantry"]', '{not json', 'u1', 1]
     );
     await db.run(
       'INSERT INTO cache_entries (key_hash,key_json,state_json,user_id,updated_at) VALUES (?,?,?,?,?)',
-      ['x', '["pantry","x"]', '{"queryKey":"nope"}', 'u1', 1],
+      ['x', '["pantry","x"]', '{"queryKey":"nope"}', 'u1', 1]
     );
     const fresh = new QueryClient();
     expect(await make(fresh).hydrateAll()).toEqual({ restored: 0, dropped: 2 });
     fresh.clear();
   });
 
-  it('keeps rows when cleared while suspended, deletes when not', async () => {
+  it('keeps rows when queries are removed from memory (only wipe deletes rows)', async () => {
     const p = make();
     p.start();
     qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'a' }]);
@@ -131,7 +131,38 @@ describe('query persister', () => {
     await p.flush();
     qc.clear();
     await p.flush();
+    expect(await count()).toBe(1);
+  });
+
+  it('a GC removal in a session that never hydrated keeps the persisted row (CR-05)', async () => {
+    const p = make();
+    p.start();
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'a' }]);
+    await p.flush();
+    const query = qc.getQueryCache().find({ queryKey: [...PANTRY_ALL_KEY], exact: true });
+    qc.getQueryCache().remove(query!);
+    await p.flush();
+    expect(await count()).toBe(1);
+  });
+
+  it('defers writes while suspended and performs them on resume', async () => {
+    const p = make();
+    p.start();
+    p.suspend();
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'a' }]);
+    await p.flush();
     expect(await count()).toBe(0);
+    p.resume();
+    await p.flush();
+    expect(await count()).toBe(1);
+  });
+
+  it('start() sets infinite gcTime for persisted prefixes without hydrateAll (CR-05)', () => {
+    const p = make();
+    expect(qc.getQueryDefaults([...PANTRY_ALL_KEY]).gcTime).toBeUndefined();
+    p.start();
+    expect(qc.getQueryDefaults([...PANTRY_ALL_KEY]).gcTime).toBe(Infinity);
+    expect(qc.getQueryDefaults(['shopping', 'active']).gcTime).toBe(Infinity);
   });
 
   it('wipe deletes cache rows and stop unsubscribes', async () => {
