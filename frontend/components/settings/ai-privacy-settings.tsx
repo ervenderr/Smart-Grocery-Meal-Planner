@@ -55,7 +55,7 @@ export function AiPrivacySettings() {
       </div>
       {caption && <p className="text-sm text-gray-600">{caption}</p>}
       <p id={DESC_ID} className="mt-2 text-sm text-gray-600">
-        Kitcha only sends pantry item names, diet tags and plan settings to an AI provider when
+        Kumaun only sends pantry item names, diet tags and plan settings to an AI provider when
         you use AI features.
       </p>
       <a
@@ -66,7 +66,7 @@ export function AiPrivacySettings() {
       </a>
 
       <Modal isOpen={confirmOpen} onClose={closeConfirm} title="Turn off AI features?" size="sm">
-        <p className="text-sm text-gray-700">Kitcha will stop sending data to AI providers.</p>
+        <p className="text-sm text-gray-700">Kumaun will stop sending data to AI providers.</p>
         {withdraw.isError && (
           <p role="alert" className="mt-3 text-sm text-red-600">
             Couldn&apos;t save your choice. Check your connection and try again.

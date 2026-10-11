@@ -45,7 +45,7 @@ const COPY: Partial<Record<CookStatus, EmptyCopy>> = {
   },
   noOfflineData: {
     title: 'Nothing saved on this device yet',
-    description: 'Connect once so Kitcha can save your pantry and recipes for offline use.',
+    description: 'Connect once so Kumaun can save your pantry and recipes for offline use.',
   },
   error: {
     title: "Couldn't work out what you can cook.",

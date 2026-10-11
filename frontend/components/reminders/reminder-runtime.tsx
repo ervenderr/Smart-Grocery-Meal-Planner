@@ -75,7 +75,7 @@ export function ReminderRuntime() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature, tick, isAuthenticated]);
 
-  // Logout cancels every Kitcha-owned pending reminder, including when the
+  // Logout cancels every Kumaun-owned pending reminder, including when the
   // protected layout unmounts in the same tick as the sign-out.
   useEffect(() => {
     if (wasAuthenticated.current && !isAuthenticated) {

@@ -3,8 +3,8 @@ import { LegalSection, LegalShell } from '@/components/legal/legal-shell';
 import { resolveSupportContact } from '@/lib/legal/legal-config';
 
 export const metadata: Metadata = {
-  title: 'Support | Kitcha',
-  description: 'Get help with Kitcha: contact us and read answers to common questions.',
+  title: 'Support | Kumaun',
+  description: 'Get help with Kumaun: contact us and read answers to common questions.',
   robots: { index: true, follow: true },
 };
 

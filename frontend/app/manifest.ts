@@ -5,8 +5,8 @@ export const dynamic = 'force-static';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/dashboard',
-    name: 'Kitcha',
-    short_name: 'Kitcha',
+    name: 'Kumaun',
+    short_name: 'Kumaun',
     description: 'Plan meals, track groceries, and manage your budget with ease',
     start_url: '/dashboard',
     scope: '/',

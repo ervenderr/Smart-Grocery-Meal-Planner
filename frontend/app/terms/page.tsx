@@ -3,8 +3,8 @@ import { LegalSection, LegalShell } from '@/components/legal/legal-shell';
 import { resolveSupportContact } from '@/lib/legal/legal-config';
 
 export const metadata: Metadata = {
-  title: 'Terms of Use | Kitcha',
-  description: 'The terms that apply when you use Kitcha, including AI-generated content.',
+  title: 'Terms of Use | Kumaun',
+  description: 'The terms that apply when you use Kumaun, including AI-generated content.',
   robots: { index: true, follow: true },
 };
 
@@ -16,7 +16,7 @@ export default function TermsPage() {
   return (
     <LegalShell title="Terms of Use">
       <LegalSection heading="Acceptance">
-        <p>By creating an account or using Kitcha you agree to these terms.</p>
+        <p>By creating an account or using Kumaun you agree to these terms.</p>
       </LegalSection>
 
       <LegalSection heading="Your account">
@@ -28,7 +28,7 @@ export default function TermsPage() {
 
       <LegalSection heading="Acceptable use">
         <p>
-          Do not misuse Kitcha: no attempts to break, overload or reverse engineer the service, no
+          Do not misuse Kumaun: no attempts to break, overload or reverse engineer the service, no
           unlawful content, and no automated abuse of AI features.
         </p>
       </LegalSection>
@@ -36,7 +36,7 @@ export default function TermsPage() {
       <LegalSection heading="AI-generated content">
         <p>
           AI suggestions may be inaccurate or incomplete. Always check ingredients against your
-          allergies and dietary needs. Kitcha does not provide medical or nutrition advice. If a
+          allergies and dietary needs. Kumaun does not provide medical or nutrition advice. If a
           suggestion looks wrong, use Report suggestion on the result.
         </p>
       </LegalSection>
@@ -57,7 +57,7 @@ export default function TermsPage() {
 
       <LegalSection heading="Limitation of liability">
         <p>
-          Kitcha is provided as is, without warranties. To the extent permitted by law, we are not
+          Kumaun is provided as is, without warranties. To the extent permitted by law, we are not
           liable for indirect or consequential damages, or for decisions made on the basis of
           AI-generated content.
         </p>

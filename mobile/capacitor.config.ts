@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 // Bundled static export only: there is intentionally no remote-origin setting here.
 const config: CapacitorConfig = {
   appId: 'app.kitcha.mobile',
-  appName: 'Kitcha',
+  appName: 'Kumaun',
   webDir: '../frontend/out',
   backgroundColor: '#f9fafb',
   ios: {

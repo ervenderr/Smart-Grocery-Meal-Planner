@@ -86,8 +86,8 @@ describe('getPageTitle', () => {
     expect(getPageTitle('/recipes/cook')).toBe('Cook from what you have');
     expect(getPageTitle('/recipes')).toBe('Recipes');
   });
-  it('falls back to Kitcha', () => {
-    expect(getPageTitle('/unknown')).toBe('Kitcha');
-    expect(getPageTitle(null)).toBe('Kitcha');
+  it('falls back to Kumaun', () => {
+    expect(getPageTitle('/unknown')).toBe('Kumaun');
+    expect(getPageTitle(null)).toBe('Kumaun');
   });
 });

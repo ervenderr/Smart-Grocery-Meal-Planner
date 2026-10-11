@@ -55,7 +55,7 @@ export function IosInstallHint() {
       className="fixed inset-x-4 bottom-[calc(4rem+env(safe-area-inset-bottom)+0.5rem)] z-40 animate-slide-up rounded-xl border border-gray-200 bg-white p-4 shadow-soft lg:inset-x-auto lg:bottom-4 lg:right-4 lg:max-w-sm"
     >
       <div className="flex items-start justify-between gap-2">
-        <h2 className="text-base font-semibold text-gray-900">Install Kitcha on your device</h2>
+        <h2 className="text-base font-semibold text-gray-900">Install Kumaun on your device</h2>
         <button
           type="button"
           onClick={dismiss}

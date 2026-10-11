@@ -157,7 +157,7 @@ export function CameraDeniedCard({
       }
       extra={
         !onOpenSettings && iosStandalone
-          ? 'On iPhone: Settings > Safari > Camera, or Settings > Kitcha.'
+          ? 'On iPhone: Settings > Safari > Camera, or Settings > Kumaun.'
           : undefined
       }
       typeLabel={onOpenSettings ? 'Enter code instead' : undefined}

@@ -1,4 +1,4 @@
-# App Store Listing: Kitcha (iPhone and iPad)
+# App Store Listing: Kumaun (iPhone and iPad)
 
 Status: DRAFT for Phase 14. Verify limits with `node scripts/store/check-listing-limits.mjs` after any edit.
 Every fenced block under a heading ending in `(max N)` is length-checked by that script.
@@ -7,15 +7,15 @@ Apple limits verified 2026-10-11: name 2-30 and subtitle <=30 at https://develop
 
 ## Name
 
-Name is **Kitcha** (owner decision: keep; see `NAME-CHECK.md`). Clearance (App Store search and trademark) is still to be run by the owner before submit; the fallbacks below are contingency. A same-category app "Kitcha: Save, Plan, Cook" (Kamp Inc) is reported to exist. Apple requires unique names (2-30 chars). Options, in order of preference (the first is the chosen name):
+Name is **Kumaun** (owner decision: "Kitcha" was taken on the App Store; see `NAME-CHECK.md`). Clearance (App Store search and trademark) for "Kumaun" is still to be run by the owner before submit; the fallbacks below are contingency. Apple requires unique names (2-30 chars). Options, in order of preference (the first is the chosen name):
 
-1. `Kitcha: Pantry & Meal Planner` (29 chars) if the name is available in App Store Connect. A descriptive suffix does not remove the trademark/confusion risk (Guideline 5.2); this is the owner's decision.
-2. `Kitcha` alone, if available.
+1. `Kumaun: Pantry & Meal Planner` (29 chars) if the name is available in App Store Connect. A descriptive suffix does not remove the trademark/confusion risk (Guideline 5.2); this is the owner's decision.
+2. `Kumaun` alone, if available.
 3. A coined fallback from NAME-CHECK.md (Larderly, Pantrio, Fridgely, Mealoop, Cookmarq, Snackpad). If renamed, bundle id `app.kitcha.mobile` can stay (bundle id is invisible to users), but the product id in IAP.md shares its prefix.
 
 ### Name (max 30)
 ```text
-Kitcha: Pantry & Meal Planner
+Kumaun: Pantry & Meal Planner
 ```
 
 ### Subtitle (max 30)
@@ -37,7 +37,7 @@ Keyword rules applied: comma separated, no spaces after commas, no words repeate
 
 ### Description (max 4000)
 ```text
-Kitcha helps you see what you have, decide what to cook, and buy only what you need.
+Kumaun helps you see what you have, decide what to cook, and buy only what you need.
 
 KNOW WHAT IS IN YOUR KITCHEN
 - Keep a pantry list with quantities, locations and expiry dates.
@@ -63,33 +63,33 @@ WORKS WHEN YOUR SIGNAL DOES NOT
 
 OPTIONAL AI SUGGESTIONS
 - Ask for recipe ideas and meal plans based on your pantry and dietary preferences.
-- AI is off until you say yes. Before the first use, Kitcha explains what is sent (ingredient names, quantities and dietary tags only, never your name or email) and asks for your permission. You can keep using every other feature without it.
+- AI is off until you say yes. Before the first use, Kumaun explains what is sent (ingredient names, quantities and dietary tags only, never your name or email) and asks for your permission. You can keep using every other feature without it.
 - AI results are clearly labelled, can contain mistakes, and can be reported from inside the app.
 
 FREE TO START
 - The free version includes barcode scanning, expiry reminders, recipes, meal plans, shopping lists and up to 25 pantry items.
-- Kitcha Full is a single one-time purchase (no subscription) that removes the pantry limit and adds more AI suggestions. Purchases can be restored on any of your devices.
+- Kumaun Full is a single one-time purchase (no subscription) that removes the pantry limit and adds more AI suggestions. Purchases can be restored on any of your devices.
 
 YOUR DATA
 - You can delete your account and all of its data from Settings at any time.
 - No ads, no tracking, and we do not sell your data.
 
-Kitcha is not medical or dietary advice. Always check ingredient labels if you have allergies.
+Kumaun is not medical or dietary advice. Always check ingredient labels if you have allergies.
 
 Product information provided by Open Food Facts (ODbL). Nutrition data from USDA FoodData Central.
 ```
 
 Honesty notes (do not paste into App Store Connect):
-- Version 1.0 scope (owner decision 2026-10-11): ships Phase 11 offline support and the Phase 12 one-time Kitcha Full unlock. On-device AI (Phase 13) is DEFERRED to 1.1, so this listing makes no on-device AI or Apple Intelligence claim; do not add one. AI suggestions use the server provider with explicit consent and need a connection.
+- Version 1.0 scope (owner decision 2026-10-11): ships Phase 11 offline support and the Phase 12 one-time Kumaun Full unlock. On-device AI (Phase 13) is DEFERRED to 1.1, so this listing makes no on-device AI or Apple Intelligence claim; do not add one. AI suggestions use the server provider with explicit consent and need a connection.
 - Offline claims must match what Phase 11 delivers: offline viewing, edits that sync later, scanning, rules-based "What can I cook?". Offline barcode scanning means the camera scan works; the product lookup itself needs a connection unless Phase 11 caches it. Re-verify each claim on the shipping build and soften the wording if not.
-- "FREE TO START" last bullets (25 items, Kitcha Full): Phase 12 is in 1.0 scope but not built as of 2026-10-11. Remove the Kitcha Full bullet if Phase 12 does not ship in the same version, otherwise reviewers will look for a purchase that does not exist. The $9.99 price is in IAP.md, not in this text.
+- "FREE TO START" last bullets (25 items, Kumaun Full): Phase 12 is in 1.0 scope but not built as of 2026-10-11. Remove the Kumaun Full bullet if Phase 12 does not ship in the same version, otherwise reviewers will look for a purchase that does not exist. The $9.99 price is in IAP.md, not in this text.
 - "Nutrition data from USDA": remove the line unless USDA data is actually shown in the shipped UI.
 - "Finish a trip", "Items you already have are subtracted": built in v1.0 phases 4-5 per ROADMAP; confirm on device.
 - Do not state a price in the description (Apple discourages pricing text in metadata; the store shows the price).
 
 ### What's New (max 4000)
 ```text
-Welcome to Kitcha on iPhone. Track your pantry and expiry dates, scan barcodes, plan meals, build shopping lists and keep an eye on your grocery budget.
+Welcome to Kumaun on iPhone. Track your pantry and expiry dates, scan barcodes, plan meals, build shopping lists and keep an eye on your grocery budget.
 ```
 
 ## Other fields

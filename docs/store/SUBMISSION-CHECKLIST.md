@@ -1,4 +1,4 @@
-# App Store submission checklist (Kitcha iPhone and iPad, v1.0.0)
+# App Store submission checklist (Kumaun iPhone and iPad, v1.0.0)
 
 Legend: **H** human-only (account, money, identity, physical device, final click). **A** agent-doable. **H+A** agent prepares, human confirms.
 Dated 2026-10-11. Starting point: Apple enrollment pending. Companion docs: LISTING.md, PRIVACY-LABELS.md, IAP.md, SCREENSHOTS.md, NAME-CHECK.md, REVIEW-NOTES.md.
@@ -12,13 +12,13 @@ Dated 2026-10-11. Starting point: Apple enrollment pending. Companion docs: LIST
 
 ## 1. Name, domain, URLs
 
-5. [H] Run NAME-CHECK.md clearance (App Store, USPTO, IPOPHL). Reserve the name by creating the app record. Decision made: keep Kitcha (clearance still owner-run; fallbacks only if it fails). If renamed: update LISTING.md, display name, IAP display name. [A] can rerun the keyword/length script.
+5. [H] Run NAME-CHECK.md clearance (App Store, USPTO, IPOPHL). Reserve the name by creating the app record. Decision made: Name: Kumaun (Kitcha was taken on the App Store; clearance still owner-run; fallbacks only if it fails). If renamed: update LISTING.md, display name, IAP display name. [A] can rerun the keyword/length script.
 6. [H] Domain/hosting decision for support URL and email (`NEXT_PUBLIC_SUPPORT_EMAIL`). [A] pages already exist: `frontend/app/privacy`, `terms`, `support`; update copy per PRIVACY-LABELS.md required clauses (AI provider label, Zapier, 30-day log retention, Phase 12 purchases).
 7. [H+A] Deploy backend to Railway and frontend to Vercel; fill API base URL and `<vercel-host>` placeholders in REVIEW-NOTES.md and LISTING.md. Backend must stay up during review (Guideline 2.1: "turn on your back-end service").
 
 ## 2. App binary (depends on Phases 9-13)
 
-8. [A] Finish Phase 11 offline core and Phase 12 unlock ($9.99 Kitcha Full): both are in 1.0 scope (decided). Phase 13 on-device AI is deferred to 1.1. If Phase 12 slips, remove the Kitcha Full lines from LISTING.md.
+8. [A] Finish Phase 11 offline core and Phase 12 unlock ($9.99 Kumaun Full): both are in 1.0 scope (decided). Phase 13 on-device AI is deferred to 1.1. If Phase 12 slips, remove the Kumaun Full lines from LISTING.md.
 9. [A] Compliance code: privacy manifest from `PrivacyInfo.proposed.xcprivacy` into the App target; `ITSAppUsesNonExemptEncryption=false`; keep `TARGETED_DEVICE_FAMILY=1,2` (iPad supported, decided); app icon 1024 (no alpha) and launch screen; version/build numbers. (Touching mobile/ios is another agent's/owner's area now.)
 10. [H] Confirm bundle id `app.kitcha.mobile` is what you want forever; register it (Certificates, Identifiers and Profiles) and set the Team in Xcode (signing).
 11. [H] Create the App Store Connect app record (name, primary language, bundle id, SKU).
@@ -44,13 +44,13 @@ Required because iPad is supported (Apple reviews on iPad). Run on a built simul
 
 - [ ] A. Layout in portrait and landscape: every main screen (pantry, recipes, meal plan, shopping list, budget, settings, offline banner) fills the screen with no clipped content, no stretched phone layout, no overlap with safe areas; rotate mid-screen and state is kept.
 - [ ] A. Navigation: sidebar versus bottom nav is deliberate on iPad (either is fine, but only one is shown, it does not overlap content, and all destinations are reachable in both orientations and in Split View / Slide Over sizes).
-- [ ] A. Modals and sheets: add/edit pantry item, consent sheet, Kitcha Full unlock sheet, delete account confirm, and barcode scanner present at a sensible size (not full-bleed edge to edge text), are dismissible, and are not cut off in landscape.
+- [ ] A. Modals and sheets: add/edit pantry item, consent sheet, Kumaun Full unlock sheet, delete account confirm, and barcode scanner present at a sensible size (not full-bleed edge to edge text), are dismissible, and are not cut off in landscape.
 - [ ] A. Keyboard: software keyboard does not cover focused inputs (login, add item, search, budget), scrolls into view, dismisses, and the hardware keyboard Tab/Return works in forms.
 - [ ] A. Touch targets and text scale at default and larger Dynamic Type; no horizontal scroll.
 - [ ] A. Camera: barcode scan opens and works (simulator has no camera, so the scan itself is H on a real iPad or an iPhone-only claim in review notes: confirm which).
 - [ ] H. One pass on a real iPad (or the TestFlight build) before submitting: scan, notifications, purchase sandbox.
 
-## Guideline risks specific to Kitcha
+## Guideline risks specific to Kumaun
 
 Guideline text checked at https://developer.apple.com/app-store/review/guidelines/ on 2026-10-11 (page body truncated after 5.3.4; later sections not read).
 
@@ -65,15 +65,15 @@ Guideline text checked at https://developer.apple.com/app-store/review/guideline
 | 5.2 Intellectual property (name) | MEDIUM | NAME-CHECK.md. Also Open Food Facts attribution (ODbL/CC BY-SA). |
 | 1.4.1 health/medical claims | LOW | Keep "not medical or dietary advice; check labels for allergies" near nutrition and dietary filters. No allergen-free guarantees. |
 | 4.5.4 push permission wording (from memory, UNVERIFIED) | LOW | Local notifications only; ask for permission in context after the first perishable item, not at launch; app works if declined. |
-| 2.3 Accurate metadata | MEDIUM | Do not advertise unshipped features in LISTING.md or screenshots: offline and Kitcha Full only if they ship in 1.0; no on-device AI or Apple Intelligence claim (deferred to 1.1). See honesty notes in LISTING.md. |
+| 2.3 Accurate metadata | MEDIUM | Do not advertise unshipped features in LISTING.md or screenshots: offline and Kumaun Full only if they ship in 1.0; no on-device AI or Apple Intelligence claim (deferred to 1.1). See honesty notes in LISTING.md. |
 
 ## Open questions: decided (2026-10-11)
 
 | Question | Decision |
 |----------|----------|
-| App name | Keep Kitcha. Listing name `Kitcha: Pantry & Meal Planner` (29 chars). Clearance still owner-run. |
+| App name | Kumaun (Kitcha was taken on the App Store). Listing name `Kumaun: Pantry & Meal Planner` (29 chars). Clearance still owner-run. |
 | iPad | Supported (`TARGETED_DEVICE_FAMILY=1,2`): 13-inch iPad screenshots plus the iPad QA above. |
-| 1.0 scope | Phase 11 offline plus Phase 12 one-time $9.99 Kitcha Full. Phase 13 on-device AI deferred to 1.1; no on-device claims in the listing. |
+| 1.0 scope | Phase 11 offline plus Phase 12 one-time $9.99 Kumaun Full. Phase 13 on-device AI deferred to 1.1; no on-device claims in the listing. |
 | AI provider | Keep current env-configured OpenAI-compatible provider, label default `Dahl Inference`, named via the label. Gemini wording dropped. |
 | Zapier webhooks | Keep; disclose in PRIVACY-LABELS.md and the policy. |
 | Server logs | 30-day retention for request logs with client IPs; policy clause required; not collected for tracking. |
@@ -82,7 +82,7 @@ Guideline text checked at https://developer.apple.com/app-store/review/guideline
 ## Remaining human-only items
 
 - [H] Apple Developer enrollment, Paid Apps Agreement, bank and tax forms, Small Business Program, PH VAT advice (section 0).
-- [H] Run name clearance for Kitcha: App Store Connect availability, App Store search, USPTO, WIPO, IPOPHL, EUIPO (NAME-CHECK.md). Switch to a fallback only if it fails.
+- [H] Run name clearance for Kumaun: App Store Connect availability, App Store search, USPTO, WIPO, IPOPHL, EUIPO (NAME-CHECK.md). Switch to a fallback only if it fails.
 - [H] Confirm the exact AI provider and operator name (and its retention/training terms) before the privacy policy is published.
 - [H] Approve and publish the privacy policy text with the required clauses; fill legal name, support email, domain, `<vercel-host>`, API host.
 - [H] Enforce or confirm 30-day log retention on Railway.

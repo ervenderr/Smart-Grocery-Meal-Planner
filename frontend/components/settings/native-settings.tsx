@@ -188,7 +188,7 @@ export function NativeSettings() {
           <div className="rounded-lg bg-gray-50 p-4">
             <h3 className="text-base font-semibold text-gray-900">Nothing expiring soon</h3>
             <p className="text-base text-gray-600">
-              Add items with expiry dates to your pantry and Kitcha will remind you before they go off.
+              Add items with expiry dates to your pantry and Kumaun will remind you before they go off.
             </p>
           </div>
         )}

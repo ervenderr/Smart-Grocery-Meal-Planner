@@ -14,7 +14,7 @@ type FAQItem = {
 const faqs: FAQItem[] = [
   // Getting Started
   {
-    question: 'How do I get started with Kitcha?',
+    question: 'How do I get started with Kumaun?',
     answer: 'Start by adding items to your pantry. Go to the Pantry page and click "Add Item" to track what you already have at home. This helps the AI suggest recipes based on available ingredients and prevents duplicate purchases.',
     category: 'getting-started',
   },
@@ -107,7 +107,7 @@ const faqs: FAQItem[] = [
   // AI Features
   {
     question: 'What AI features are available?',
-    answer: 'Kitcha offers three AI features: 1) Recipe Suggestions from your pantry items, 2) Meal Plan Generation based on budget and preferences, 3) Ingredient Substitution suggestions for shopping lists.',
+    answer: 'Kumaun offers three AI features: 1) Recipe Suggestions from your pantry items, 2) Meal Plan Generation based on budget and preferences, 3) Ingredient Substitution suggestions for shopping lists.',
     category: 'ai',
   },
   {
@@ -154,7 +154,7 @@ export default function HelpPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Help & Support</h1>
         <p className="mt-1 text-sm text-gray-600">
-          Find answers to common questions and learn how to use Kitcha
+          Find answers to common questions and learn how to use Kumaun
         </p>
       </div>
 

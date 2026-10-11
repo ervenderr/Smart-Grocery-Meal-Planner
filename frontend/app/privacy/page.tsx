@@ -8,9 +8,9 @@ import {
 } from '@/lib/legal/legal-config';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Kitcha',
+  title: 'Privacy Policy | Kumaun',
   description:
-    'How Kitcha collects, uses and protects your data, including how AI features process your pantry information.',
+    'How Kumaun collects, uses and protects your data, including how AI features process your pantry information.',
   robots: { index: true, follow: true },
 };
 
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
 
       <LegalSection heading="How we use it">
         <p>
-          We use your data only to run Kitcha: showing your pantry, planning meals, building
+          We use your data only to run Kumaun: showing your pantry, planning meals, building
           shopping lists, tracking your budget and keeping your account secure. We do not sell your
           data.
         </p>
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
 
       <LegalSection heading="AI processing and providers">
         <p>
-          When you use an AI feature, Kitcha sends a request to {AI_PROVIDER_LABEL}. The request
+          When you use an AI feature, Kumaun sends a request to {AI_PROVIDER_LABEL}. The request
           contains:
         </p>
         <ul className="list-disc space-y-1 pl-6">
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
       </LegalSection>
 
       <LegalSection heading="Children">
-        <p>Kitcha is not directed to children under 13 and we do not knowingly collect their data.</p>
+        <p>Kumaun is not directed to children under 13 and we do not knowingly collect their data.</p>
       </LegalSection>
 
       <LegalSection heading="Contact">

@@ -16,8 +16,8 @@ export function DashboardSidebar() {
         <div className="flex h-16 items-center border-b border-gray-200 px-6">
           <Link href="/dashboard" className="flex items-center gap-2">
             <Image
-              src="/kitcha-logo-name.svg"
-              alt="Kitcha"
+              src="/kumaun-logo-name.svg"
+              alt="Kumaun"
               width={120}
               height={32}
               priority

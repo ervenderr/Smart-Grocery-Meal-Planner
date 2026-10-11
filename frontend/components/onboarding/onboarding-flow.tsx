@@ -130,7 +130,7 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
       }
       const rejected = await saveItems();
       await markComplete();
-      toast.success("You're all set! Welcome to Kitcha.");
+      toast.success("You're all set! Welcome to Kumaun.");
       if (rejected.length > 0) {
         toast.error(`We couldn't add: ${rejected.join(', ')}. You can add them from Pantry.`);
       }
@@ -184,7 +184,7 @@ export function OnboardingFlow({ initial }: OnboardingFlowProps) {
         >
           <div className="mx-auto flex h-full max-w-md flex-col px-4">
             <div className="flex min-h-14 items-center justify-between gap-2">
-              <Image src="/kitcha-logo.svg" alt="Kitcha" width={32} height={32} priority />
+              <Image src="/kitcha-logo.svg" alt="Kumaun" width={32} height={32} priority />
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">
                   Step {state.step + 1} of {TOTAL_STEPS}

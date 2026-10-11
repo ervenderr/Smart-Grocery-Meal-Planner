@@ -45,7 +45,7 @@ describe('createReminderScheduler', () => {
       notifications: [
         {
           id: REMINDER_ID_BASE,
-          title: 'Kitcha',
+          title: 'Kumaun',
           body: 'Milk expires tomorrow',
           schedule: { at: new Date(2026, 9, 11, 9, 0) },
           extra: { route: '/pantry/?filter=expiring' },

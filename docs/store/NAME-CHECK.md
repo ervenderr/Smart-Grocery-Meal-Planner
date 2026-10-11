@@ -2,9 +2,9 @@
 
 ## Status
 
-Decision: keep Kitcha; clearance (App Store search + trademark) still to be run by owner before submit.
+Decision: Name: Kumaun (Kitcha was taken on the App Store). Clearance for "Kumaun" (App Store search + trademark) still to be run by owner before submit.
 
-The collision note below and the fallback names stay as contingency if clearance fails. Code and assets keep the name Kitcha.
+The collision note below and the fallback names stay as contingency if clearance fails. User-visible text and logo now say Kumaun; internal identifiers (bundle id `app.kitcha.mobile`, package names, URLs, storage keys) keep the old "kitcha" spelling.
 
 This is not a trademark clearance or legal advice; the owner decides (human gate). Code is not renamed in this phase.
 
@@ -17,7 +17,7 @@ App Store names must be unique, and an identical name in the same category invit
 ## Clearance checklist
 
 - [ ] App Store Connect name availability (reserve the name by creating a new app record)
-- [ ] App Store search for "Kitcha", "Kitchi", "Kitch" (https://apps.apple.com)
+- [ ] App Store search for "Kumaun", "Kumaon", "Kumaun Pantry" (https://apps.apple.com)
 - [ ] Google Play search for the same variants (https://play.google.com/store)
 - [ ] USPTO Trademark Search (https://tmsearch.uspto.gov)
 - [ ] WIPO Global Brand Database (https://branddb.wipo.int)
@@ -29,11 +29,12 @@ App Store names must be unique, and an identical name in the same category invit
 
 | Date | Name | Result |
 |------|------|--------|
-| 2026-10-11 | Kitcha | Owner decision: keep. Clearance checklist above still open (owner, before submit). |
+| 2026-10-11 | Kitcha | Rejected: name already taken on the App Store ("Kitcha: Save, Plan, Cook" by Kamp Inc). |
+| 2026-10-11 | Kumaun | Owner decision: Name: Kumaun (Kitcha was taken on the App Store). Clearance checklist above still open for "Kumaun" (owner, before submit). |
 
 ## Fallback names
 
-Coined, distinct names (none start with "Kitcha"). Run the same checklist for each before adopting.
+Coined, distinct names (none start with "Kumaun"). Run the same checklist for each before adopting.
 
 - **Larderly**: pantry-first, friendly adverb-style coinage.
 - **Pantrio**: pantry plus a trio of plan, cook, shop.

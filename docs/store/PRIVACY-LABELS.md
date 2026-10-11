@@ -65,9 +65,9 @@ Note: the Capacitor WKWebView's localStorage/IndexedDB/SQLite plugin usage by th
 The privacy policy text (`frontend/app/privacy`, edited by whoever owns it, not here) MUST contain:
 
 1. **AI provider**: names the provider using the configurable label (default `Dahl Inference`), says what is sent (ingredient names, quantities, dietary tags; no name or email), that it is sent only after explicit consent, and links the provider's retention/training terms. OWNER TO CONFIRM the exact provider and operator name before publishing. AI is not available in on-device form in 1.0.
-2. **Zapier webhooks**: "Kitcha offers optional Zapier webhook integrations. If you configure one, Kitcha sends the events you select (for example pantry or shopping list changes) to the webhook URL you provide, which may be a Zapier or other third-party endpoint. You choose the URL and the events; we do not enable it by default. Data sent there is governed by that service's policy, and you can remove the webhook at any time."
+2. **Zapier webhooks**: "Kumaun offers optional Zapier webhook integrations. If you configure one, Kumaun sends the events you select (for example pantry or shopping list changes) to the webhook URL you provide, which may be a Zapier or other third-party endpoint. You choose the URL and the events; we do not enable it by default. Data sent there is governed by that service's policy, and you can remove the webhook at any time."
 3. **Server logs**: "Our servers keep request logs, which include your IP address, for 30 days for security, abuse prevention and debugging, then delete them. We do not use them for tracking or advertising." Server logs are not collected for tracking.
-4. Purchase data (Kitcha Full entitlement) now that Phase 12 is in 1.0 scope; account deletion behavior; Open Food Facts and USDA attributions.
+4. Purchase data (Kumaun Full entitlement) now that Phase 12 is in 1.0 scope; account deletion behavior; Open Food Facts and USDA attributions.
 5. Offline: data cached on the device for offline use stays on the device until sync or sign-out.
 
 Implementation follow-up for the backend owner: the 30-day log retention must be enforced on Railway (log retention setting or log drain), not just stated. Human/agent task, tracked in SUBMISSION-CHECKLIST.md.

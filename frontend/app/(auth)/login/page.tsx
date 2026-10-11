@@ -31,8 +31,8 @@ export default function LoginPage() {
           {/* Logo */}
             <Link href="/" className="flex items-center">
             <Image
-              src="/kitcha-logo-name.png"
-              alt="Kitcha"
+              src="/kumaun-logo-name.png"
+              alt="Kumaun"
               width={160}
               height={56}
               priority

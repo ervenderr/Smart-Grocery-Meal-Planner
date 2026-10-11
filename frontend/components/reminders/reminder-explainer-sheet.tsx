@@ -88,7 +88,7 @@ export function ReminderExplainerSheet({
                   Never waste food by surprise
                 </Dialog.Title>
                 <p className="text-base text-gray-600">
-                  Kitcha can remind you before things in your pantry expire. Reminders are set up on
+                  Kumaun can remind you before things in your pantry expire. Reminders are set up on
                   your phone and work even offline.
                 </p>
                 <Card className="flex items-start gap-3 bg-gray-50 p-4">
@@ -128,7 +128,7 @@ export function ReminderExplainerSheet({
                   Reminders are off
                 </Dialog.Title>
                 <p className="text-base text-gray-600">
-                  Turn on notifications for Kitcha in iOS Settings to get expiry reminders.
+                  Turn on notifications for Kumaun in iOS Settings to get expiry reminders.
                 </p>
                 <Button size="lg" className={CTA_CLASS} onClick={() => void openSettings()}>
                   Open Settings

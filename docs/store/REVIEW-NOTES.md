@@ -1,4 +1,4 @@
-# App Review Notes (Kitcha)
+# App Review Notes (Kumaun)
 
 Paste the relevant parts into App Store Connect > App Review Information (and the Play Console app access section). No secrets live in this file.
 
