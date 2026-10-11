@@ -91,19 +91,22 @@ const PRODUCTION = 'Production';
 
 /**
  * Whether a verified transaction may overwrite the user's existing row.
- * - Never an older message for the row.
  * - Never a non-Production (free Sandbox/TestFlight) purchase over a Production
  *   row in any status, so a refunded Production unlock cannot be re-activated
  *   for free (WR-01).
- * - A different purchase never replaces an active row, except that a real
- *   Production purchase supersedes a Sandbox one.
+ * - For the same purchase, never an older message. signedDate is only compared
+ *   within one purchase: the dates of two unrelated purchases say nothing about
+ *   which should win (REVIEW-2 WR-01).
+ * - A real Production purchase always supersedes a Sandbox one.
+ * - Otherwise a different purchase only replaces a row that is not active.
  */
 function mayReplace(existing: Entitlement, verified: VerifiedTransaction): boolean {
-  if (verified.signedDate.getTime() < existing.lastSignedAt.getTime()) return false;
   const existingProd = existing.environment === PRODUCTION;
   const verifiedProd = verified.environment === PRODUCTION;
   if (existingProd && !verifiedProd) return false;
-  if (sameIdentity(existing, verified)) return true;
+  if (sameIdentity(existing, verified)) {
+    return verified.signedDate.getTime() >= existing.lastSignedAt.getTime();
+  }
   if (verifiedProd && !existingProd) return true;
   return existing.status !== ENTITLEMENT_STATUS.ACTIVE;
 }

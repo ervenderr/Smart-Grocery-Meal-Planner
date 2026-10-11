@@ -67,6 +67,27 @@ describe('Sandbox vs Production entitlements (WR-01)', () => {
     expect((await rowOf(userId)).environment).toBe('Production');
   });
 
+  it('a Production purchase signed before the Sandbox row still supersedes it (REVIEW-2 WR-01)', async () => {
+    const userId = await makeUser('sandbox-newer-than-prod');
+    await verifyAndClaim(userId, jws('Sandbox', { signedDate: TEST_SIGNED_MS + 60_000 }));
+    const view = await verifyAndClaim(userId, jws('Production', { signedDate: TEST_SIGNED_MS }));
+    expect(view).toMatchObject({ status: 'active', environment: 'Production' });
+    expect((await rowOf(userId)).environment).toBe('Production');
+  });
+
+  it('an older JWS for the same purchase still never overwrites a newer one', async () => {
+    const userId = await makeUser('same-purchase-older');
+    const id = randomTransactionId();
+    const signed = (extra: Record<string, number>) =>
+      signTestTransaction({ originalTransactionId: id, transactionId: id, environment: 'Production', ...extra });
+    await verifyAndClaim(
+      userId,
+      signed({ signedDate: TEST_SIGNED_MS + 60_000, revocationDate: TEST_SIGNED_MS + 30_000, revocationReason: 0 }),
+    );
+    const view = await verifyAndClaim(userId, signed({ signedDate: TEST_SIGNED_MS }));
+    expect(view.status).toBe('revoked');
+  });
+
   it('a different Sandbox purchase still replaces a revoked Sandbox row (tester flow)', async () => {
     const userId = await makeUser('sandbox-retry');
     await verifyAndClaim(userId, jws('Sandbox', { revocationDate: TEST_SIGNED_MS, revocationReason: 0 }));
