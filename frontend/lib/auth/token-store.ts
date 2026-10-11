@@ -66,12 +66,14 @@ export function createTokenStore(backend: SecureBackend): TokenStore {
         backend.get(SECURE_REFRESH_KEY),
       ]);
       // Writes made before init finished win over the stored values.
-      if (!ready && snapshot === EMPTY) snapshot = freeze(access, refresh);
+      if (snapshot === EMPTY) snapshot = freeze(access, refresh);
       ready = true;
       return { snapshot, readFailed: false };
     } catch (error) {
       logFailure('read', error);
       ready = true;
+      // A failed read (e.g. device locked) must not be memoized: allow a retry.
+      initPromise = null;
       return { snapshot, readFailed: true };
     }
   };

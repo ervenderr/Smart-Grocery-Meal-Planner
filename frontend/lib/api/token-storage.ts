@@ -7,7 +7,7 @@
  * for tokens. Call whenTokenStorageReady() before deciding on auth state.
  * All functions are no-ops on the server and never throw on storage errors.
  */
-import { isNative } from '@/lib/platform/native';
+import { isNative, loadPlugin } from '@/lib/platform/native';
 import { createTokenStore, type TokenStore } from '@/lib/auth/token-store';
 import { createKeychainBackend } from '@/lib/auth/keychain-backend';
 import { runNativeBoot } from '@/lib/auth/native-boot';
@@ -96,13 +96,41 @@ async function hydrateNative(): Promise<{ readFailed: boolean }> {
   return { readFailed };
 }
 
-/** Memoized. Web resolves immediately; native resolves once Keychain tokens are loaded. */
+let resumeRetryArmed = false;
+
+function retryHydrationOnResume(): void {
+  if (resumeRetryArmed) return;
+  resumeRetryArmed = true;
+  void loadPlugin(() => import('@capacitor/app')).then(async (mod) => {
+    if (!mod) {
+      resumeRetryArmed = false;
+      return;
+    }
+    const handle = await mod.App.addListener('resume', () => {
+      void handle.remove();
+      resumeRetryArmed = false;
+      void whenTokenStorageReady();
+    });
+  });
+}
+
+/** Memoized on success. Web resolves immediately; native resolves once Keychain tokens are loaded. */
 export function whenTokenStorageReady(): Promise<{ readFailed: boolean }> {
   if (!isNative()) return Promise.resolve({ readFailed: false });
-  readyPromise ??= hydrateNative().catch((error) => {
-    console.error('Token storage init failed:', error instanceof Error ? error.message : 'unknown');
-    return { readFailed: true };
-  });
+  readyPromise ??= hydrateNative()
+    .catch((error) => {
+      console.error('Token storage init failed:', error instanceof Error ? error.message : 'unknown');
+      return { readFailed: true };
+    })
+    .then((result) => {
+      if (result.readFailed) {
+        // Do not memoize a failed hydration (device may have been locked):
+        // retry on the next call and when the app resumes.
+        readyPromise = null;
+        retryHydrationOnResume();
+      }
+      return result;
+    });
   return readyPromise;
 }
 

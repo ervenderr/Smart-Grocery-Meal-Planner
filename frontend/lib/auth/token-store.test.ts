@@ -53,6 +53,18 @@ describe('createTokenStore', () => {
     expect(JSON.stringify(spy.mock.calls)).not.toContain('SECRET');
   });
 
+  it('a failed init is not memoized and a later init recovers tokens', async () => {
+    const { store, backend } = setup({ access: 'A', refresh: 'R' });
+    backend.get.mockRejectedValueOnce(new Error('locked'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect((await store.init()).readFailed).toBe(true);
+    backend.get.mockImplementation(async (k: string) => (k === 'access' ? 'A' : 'R'));
+    const retry = await store.init();
+    expect(retry.readFailed).toBe(false);
+    expect(store.getAccess()).toBe('A');
+    expect(store.getRefresh()).toBe('R');
+  });
+
   it('set updates memory synchronously and writes through', async () => {
     const { store, backend } = setup();
     const p = store.set({ token: 'A', refreshToken: 'R' });
