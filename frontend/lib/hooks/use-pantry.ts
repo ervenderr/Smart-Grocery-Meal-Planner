@@ -9,6 +9,8 @@ import { filterPantryItems } from '@/lib/pantry/filter-list';
 import { normalizePantryItem } from '@/lib/pantry/normalize';
 import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
 import { queryKeys } from '@/lib/react-query';
+import { offlineWrite, offlineWriteMany } from '@/lib/offline/facade';
+import { buildPantryDelete, buildPantryQuickPatchOps } from '@/lib/offline/ops/pantry-ops';
 import type { PantryItem } from '@/types/pantry.types';
 
 export type PantryQuickPatch = { quantity?: number; expiryDate?: string | null };
@@ -45,19 +47,42 @@ const applyPatch = (item: PantryItem, patch: PantryQuickPatch): PantryItem => ({
   ...(patch.expiryDate !== undefined ? { expiryDate: patch.expiryDate } : {}),
 });
 
+/** Item as displayed before the optimistic patch (base for delta/inverse), keyed by mutation variables. */
+const currentItems = new WeakMap<object, PantryItem | undefined>();
+const queuedWrites = new WeakSet<object>();
+
 export function usePantryPatch() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    PantryItem,
+    PantryItem | null,
     unknown,
     { id: string; patch: PantryQuickPatch },
     { snapshot: ListSnapshot }
   >({
-    mutationFn: ({ id, patch }) => pantryApi.update(id, patch),
-    onMutate: async ({ id, patch }) => {
+    mutationFn: async (vars) => {
+      const outcome = await offlineWriteMany({
+        ops: () => {
+          const current = currentItems.get(vars);
+          if (!current) throw new Error('Cannot queue a pantry change for an item that is not loaded');
+          return buildPantryQuickPatchOps(current, vars.patch);
+        },
+        direct: () => pantryApi.update(vars.id, vars.patch),
+      });
+      if (outcome.mode === 'queued') {
+        queuedWrites.add(vars);
+        return null;
+      }
+      return outcome.result;
+    },
+    onMutate: async (vars) => {
+      const { id, patch } = vars;
       await queryClient.cancelQueries({ queryKey: queryKeys.pantry.all });
       const snapshot = queryClient.getQueriesData<PantryItem[]>({ queryKey: LIST_KEY });
+      currentItems.set(
+        vars,
+        snapshot.flatMap(([, items]) => items ?? []).find((item) => item.id === id)
+      );
       queryClient.setQueriesData<PantryItem[]>({ queryKey: LIST_KEY }, (items) =>
         items?.map((item) => (item.id === id ? applyPatch(item, patch) : item))
       );
@@ -66,7 +91,9 @@ export function usePantryPatch() {
     onError: (_error, _vars, context) => {
       context?.snapshot.forEach(([key, data]) => queryClient.setQueryData(key, data));
     },
-    onSettled: () => {
+    onSettled: (_data, _error, vars) => {
+      // Queued writes are reconciled by the drain; a refetch now would overwrite optimistic state.
+      if (queuedWrites.has(vars)) return;
       void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
     },
   });
@@ -89,13 +116,18 @@ export function useDeferredRemove() {
       clearTimeout(entry.timer);
       pending.current.delete(item.id);
       toast.dismiss(entry.toastId);
+      let queued = false;
       try {
-        await pantryApi.delete(item.id);
+        const outcome = await offlineWrite({
+          op: () => buildPantryDelete(item),
+          direct: () => pantryApi.delete(item.id),
+        });
+        queued = outcome.mode === 'queued';
       } catch {
         toast.error(`Couldn't remove ${item.ingredientName}. Try again.`);
       } finally {
         pendingRemovalIds.delete(item.id);
-        void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
+        if (!queued) void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
       }
     },
     [queryClient]

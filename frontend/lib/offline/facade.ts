@@ -14,3 +14,14 @@ export async function offlineWrite<T>(
   if (runtime) return { mode: 'queued', op: await runtime.enqueue(op()) };
   return { mode: 'direct', result: await direct() };
 }
+
+/** Like offlineWrite for edits that need several ordered ops (e.g. a field update plus a quantity delta). */
+export async function offlineWriteMany<T>(
+  { ops, direct }: { ops: () => NewOp[]; direct: () => Promise<T> },
+  runtime: Pick<OfflineRuntime, 'enqueue'> | null = getOfflineRuntime(),
+): Promise<WriteOutcome<T>> {
+  if (!runtime) return { mode: 'direct', result: await direct() };
+  let last: OutboxOp | null = null;
+  for (const op of ops()) last = await runtime.enqueue(op);
+  return { mode: 'queued', op: last };
+}

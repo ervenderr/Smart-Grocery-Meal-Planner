@@ -101,7 +101,9 @@ export default function ShoppingPage() {
     deleteItem.mutate(
       { itemId: item.id },
       {
-        onSuccess: (removed) => {
+        onSuccess: (result) => {
+          // Queued (native) deletes return no server row; the displayed item is the same data.
+          const removed = result ?? item;
           // Guard: a fast double-tap must not re-create the item twice.
           let undone = false;
           toast(
