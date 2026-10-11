@@ -1,12 +1,9 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { API_BASE_URL, API_ROUTES } from '@/lib/constants/api-routes';
-import { queryClient } from '@/lib/react-query';
-import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 import { isAiConsentRequiredError } from '@/lib/ai/consent-flow';
 import { useAiConsentStore } from '@/lib/ai/consent-store';
-import { clearTokens, getAccessToken, setTokens, getRefreshToken } from '@/lib/api/token-storage';
-import { isNative } from '@/lib/platform/native';
-import { navigate } from '@/lib/platform/navigation';
+import { getAccessToken, setTokens, getRefreshToken } from '@/lib/api/token-storage';
+import { expireSession } from '@/lib/api/session-expiry';
 import { createAuthErrorHandler, createRefreshCoordinator } from '@/lib/api/session-refresh';
 
 /**
@@ -41,14 +38,7 @@ class ApiClient {
     this.handleUnauthorized = createAuthErrorHandler({
       coordinator,
       retry: (config) => this.client.request(config),
-      onSessionExpired: () => {
-        clearTokens();
-        if (typeof window !== 'undefined') {
-          clearUserSessionState(queryClient, window.sessionStorage, window.localStorage);
-          if (isNative()) navigate('/login/', { replace: true });
-          else window.location.href = '/login';
-        }
-      },
+      onSessionExpired: expireSession,
     });
 
     this.setupInterceptors();
