@@ -1,0 +1,57 @@
+{
+  "suite": "offline",
+  "date": "2026-10-11T05:53:24Z",
+  "device": "iPhone 17",
+  "runtime": "iOS-26-5",
+  "offline_mode": "forced-offline flag (simctl has no airplane mode)",
+  "duration_seconds": 56,
+  "steps": [
+    {
+      "step": "seed",
+      "ok": true,
+      "pantry": 1,
+      "recipes": 1,
+      "mealPlans": 1,
+      "shopping": 1,
+      "refreshed": "ok"
+    },
+    {
+      "step": "offline-write",
+      "ok": true,
+      "queued": 3,
+      "total": 3,
+      "adjustOps": 1
+    },
+    {
+      "step": "offline-cold-start",
+      "ok": true,
+      "pantry": 2,
+      "recipes": 1,
+      "mealPlans": 1,
+      "shopping": 1,
+      "queued": 3,
+      "stillOffline": true,
+      "hydrateMs": 0,
+      "optimisticQty": 6,
+      "createdShown": true
+    },
+    {
+      "step": "reconnect",
+      "ok": true,
+      "delta": true,
+      "createdOnce": true,
+      "checked": true,
+      "drained": true
+    },
+    {
+      "step": "replay",
+      "ok": true,
+      "unchanged": true,
+      "accepted": true
+    },
+    {
+      "step": "done",
+      "ok": true
+    }
+  ]
+}

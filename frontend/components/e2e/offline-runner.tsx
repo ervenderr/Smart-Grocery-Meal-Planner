@@ -109,16 +109,20 @@ export function OfflineE2eRunner() {
       console.log(formatE2eLine(step, { ok, ...data }));
       setStatus(`${step} ${ok ? 'PASS' : 'FAIL'}`);
     };
+    let stage = 'start';
     const userId = (): string => useAuthStore.getState().user?.id ?? '';
 
     const runSeed = async () => {
+      stage = 'login';
       const res = await authApi.login({
         email: process.env.NEXT_PUBLIC_E2E_EMAIL ?? '',
         password: process.env.NEXT_PUBLIC_E2E_PASSWORD ?? '',
       });
       useAuthStore.getState().setAuth(res.token, res.user, res.refreshToken);
       await flushTokenWrites();
+      stage = 'runtime';
       const runtime = await loadRuntime();
+      stage = 'create-data';
       const tag = newId().slice(0, 8);
       const recipe = await recipeApi.create({
         name: `E2E Recipe ${tag}`,
@@ -143,11 +147,15 @@ export function OfflineE2eRunner() {
         unit: 'items',
       });
       const shopping = await shoppingApi.addItem({ itemName: `E2E Shop ${tag}`, quantity: 1, unit: 'items' });
+      stage = 'refresh';
       const refreshed = await runtime.refreshFromServer('e2e');
+      // Server-confirmed data must be on disk before going offline (the persister debounces writes).
+      await runtime.persister.flush();
       const sizes = canonicalSizes();
       emit('seed', refreshed === 'ok' && allNonEmpty(sizes), { ...sizes, refreshed });
 
       // Offline writes: forced-offline stands in for airplane mode (simctl has no switch).
+      stage = 'enqueue';
       setForcedOffline(true);
       const offline = await waitFor(() => runtime.connectivity.getState() === 'offline', 5000);
       const list = queryClient.getQueryData<ShoppingList>(SHOPPING_ACTIVE_KEY);
@@ -205,16 +213,20 @@ export function OfflineE2eRunner() {
       const hydrateMs = Date.now() - mountedAt;
       const sizes = canonicalSizes();
       const queued = (await runtime.store.list(userId())).length;
+      const pantryList = queryClient.getQueryData<PantryItem[]>(PANTRY_ALL_KEY) ?? [];
+      const shownQty = Number(pantryList.find((i) => i.id === state?.pantryId)?.quantity ?? -1);
+      const createdShown = pantryList.some((i) => i.id === state?.createdId);
       const stillOffline = runtime.connectivity.getState() === 'offline';
       emit(
         'offline-cold-start',
         Boolean(state) && hydrated && allNonEmpty(sizes) && stillOffline && queued === state?.queuedBefore,
-        { ...sizes, queued, stillOffline, hydrateMs }
+        { ...sizes, queued, stillOffline, hydrateMs, optimisticQty: shownQty, createdShown }
       );
       if (!state) return;
       // Let the offline UI be captured before reconnecting.
       await sleep(4000);
 
+      stage = 'reconnect';
       setForcedOffline(false);
       const reachable = await runtime.connectivity.isReachable();
       runtime.drain.kick('e2e');
@@ -268,8 +280,9 @@ export function OfflineE2eRunner() {
     };
 
     void run().catch((error) => {
-      console.error('E2E offline runner crashed:', error instanceof Error ? error.message : 'unknown');
-      emit('done', false);
+      const reason = error instanceof Error ? error.message.slice(0, 80) : 'unknown';
+      console.error('E2E offline runner crashed:', reason);
+      emit('done', false, { stage, reason });
     });
   }, [router]);
 
