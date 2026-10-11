@@ -46,8 +46,16 @@ const asFailure = (e: unknown): TransportFailure => {
   return isFailure ? (f as TransportFailure) : { network: false, timeout: false };
 };
 
+/** Server IDEMPOTENCY_TTL_HOURS (48h) minus a 6h safety margin. */
+export const SAFE_REPLAY_MS = (48 - 6) * 60 * 60 * 1000;
+export const REPLAY_EXPIRED_CODE = 'REPLAY_EXPIRED';
+
 export function createDrainWorker(deps: DrainDeps): DrainWorker {
   const now = deps.now ?? Date.now;
+  const replayExpired = (op: OutboxOp): boolean => {
+    const since = op.lastError?.code === IN_DOUBT_CODE ? op.lastError.since : undefined;
+    return since !== undefined && now() - since > SAFE_REPLAY_MS;
+  };
   const setTimer = deps.setTimer ?? ((fn, ms) => setTimeout(fn, ms));
   const clearTimer = deps.clearTimer ?? ((h) => clearTimeout(h as ReturnType<typeof setTimeout>));
   const emit = (e: DrainEvent): void => deps.onEvent?.(e);
@@ -90,8 +98,16 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
       case 'retry': {
         const at = now() + nextDelayMs(op.attempts, { retryAfterMs: outcome.retryAfterMs });
         // A timeout may have reached the server: record it as in doubt so refreshes replay it first.
-        const code = failure.timeout ? IN_DOUBT_CODE : failure.code;
-        const error: LastError = { reason: 'transient', ...(failure.status !== undefined ? { status: failure.status } : {}), ...(code !== undefined ? { code } : {}) };
+        // Once in doubt it stays in doubt (with its start time) until a conclusive answer arrives.
+        const wasInDoubt = op.lastError?.code === IN_DOUBT_CODE;
+        const inDoubt = failure.timeout || wasInDoubt;
+        const code = inDoubt ? IN_DOUBT_CODE : failure.code;
+        const error: LastError = {
+          reason: 'transient',
+          ...(failure.status !== undefined ? { status: failure.status } : {}),
+          ...(code !== undefined ? { code } : {}),
+          ...(inDoubt ? { since: (wasInDoubt ? op.lastError?.since : undefined) ?? now() } : {}),
+        };
         await deps.store.scheduleRetry(op.seq, error, at, outcome.countsAttempt);
         emit({ type: 'retry-scheduled', op, at });
         if (failure.network || failure.timeout) {
@@ -116,6 +132,14 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
     // Claim and re-read atomically: an enqueue may have merged into or dropped this row since nextReady read it.
     const claimed = await deps.store.claim(op.seq);
     if (!claimed) return true;
+    if (replayExpired(claimed)) {
+      // The server's idempotency record may be gone, so a replay could apply the change twice.
+      const error: LastError = { reason: 'conflict', code: REPLAY_EXPIRED_CODE };
+      await deps.store.park(claimed.seq, error);
+      tally.parked += 1;
+      emit({ type: 'parked', op: claimed, error });
+      return true;
+    }
     try {
       const result = await executor.run(claimed, { transport: deps.transport, store: deps.store });
       await deps.store.complete(claimed.seq);

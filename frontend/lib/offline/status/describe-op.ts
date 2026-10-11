@@ -12,6 +12,7 @@ export const REASON_COPY = {
   gone: "This item was already removed, so the change wasn't applied.",
   conflict: "This was already updated elsewhere. Your change wasn't applied.",
   invalid: "The server couldn't accept this change. Edit the item and try again.",
+  replayExpired: 'This change may already be saved. Check the item, then retry or discard it.',
   maxAttempts: (n: number) => `Couldn't reach the server after ${n} tries. Check your connection and retry.`,
 } as const;
 
@@ -65,7 +66,7 @@ export function reasonCopy(op: OutboxOp): string | null {
     case 'gone':
       return REASON_COPY.gone;
     case 'conflict':
-      return REASON_COPY.conflict;
+      return op.lastError.code === 'REPLAY_EXPIRED' ? REASON_COPY.replayExpired : REASON_COPY.conflict;
     case 'invalid':
       return REASON_COPY.invalid;
     case 'max-attempts':

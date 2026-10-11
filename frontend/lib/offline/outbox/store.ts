@@ -211,7 +211,10 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
       mutate(async (tx) => {
         const op = await getBySeq(tx, seq);
         if (!op || op.state !== 'failed') return;
-        await tx.run(`UPDATE outbox SET state = 'queued', next_attempt_at = 0, updated_at = ? WHERE seq = ?`, [now(), seq]);
+        // A manual retry is an explicit "send it": clear any in-doubt/expired marker but keep the
+        // row marked as sent (non-null error) so it is never coalesced into.
+        await tx.run(`UPDATE outbox SET state = 'queued', last_error_json = ?, next_attempt_at = 0, updated_at = ? WHERE seq = ?`,
+          [JSON.stringify(SENT_MARK), now(), seq]);
         await tx.run(
           `UPDATE outbox SET state = 'queued', updated_at = ? WHERE user_id = ? AND entity_type = ? AND entity_id = ? AND seq > ? AND state = 'blocked'`,
           [now(), op.userId, op.entityType, op.entityId, seq]
@@ -229,12 +232,14 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
       mutate(async (tx) => (await tx.run('DELETE FROM outbox WHERE user_id = ?', [userId])).changes),
     resetInFlight: () =>
       mutate(async (tx) => {
-        const res = await tx.run(
-          `UPDATE outbox SET state = 'queued', last_error_json = ?, updated_at = ? WHERE state = 'in_flight'`,
-          // Killed while in flight: the server may have applied it, so it is in doubt until replayed.
-          [JSON.stringify({ reason: 'transient', code: IN_DOUBT_CODE }), now()]
-        );
-        return res.changes;
+        // Killed while in flight: the server may have applied it, so it is in doubt until replayed.
+        const rows = mapRows(await tx.query<unknown>(`SELECT * FROM outbox WHERE state = 'in_flight'`));
+        for (const op of rows) {
+          const since = op.lastError?.code === IN_DOUBT_CODE ? (op.lastError.since ?? now()) : now();
+          await tx.run(`UPDATE outbox SET state = 'queued', last_error_json = ?, updated_at = ? WHERE seq = ?`,
+            [JSON.stringify({ reason: 'transient', code: IN_DOUBT_CODE, since }), now(), op.seq]);
+        }
+        return rows.length;
       }),
     async counts(userId) {
       const rows = await db.query<{ state: string; n: number }>(

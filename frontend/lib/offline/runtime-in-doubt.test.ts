@@ -55,7 +55,7 @@ describe('in-doubt ops', () => {
     await store.markInFlight(op!.seq);
     await store.resetInFlight();
     const [row] = await store.list('u1');
-    expect(row.lastError).toEqual({ reason: 'transient', code: 'IN_DOUBT' });
+    expect(row.lastError).toMatchObject({ reason: 'transient', code: 'IN_DOUBT' });
     expect(isInDoubt(row)).toBe(true);
   });
 

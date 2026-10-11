@@ -107,6 +107,8 @@ export type LastError = {
   reason: 'gone' | 'conflict' | 'invalid' | 'max-attempts' | 'transient' | 'auth';
   status?: number;
   code?: string;
+  /** For IN_DOUBT errors: when the op first became in doubt (epoch ms). */
+  since?: number;
 };
 
 export type OutboxOp = {
