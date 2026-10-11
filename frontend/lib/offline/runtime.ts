@@ -1,6 +1,12 @@
 import { notifyManager, type QueryClient } from '@tanstack/react-query';
 import type { apiClient } from '@/lib/api/client';
+import { foodApi } from '@/lib/api/food';
 import { syncApi } from '@/lib/api/sync';
+import type { PantryItem } from '@/types/pantry.types';
+import { createBarcodeCache, type BarcodeCache } from './barcode/barcode-cache';
+import { createPendingScans, type PendingScans } from './barcode/pending-scan';
+import { resolvePendingScans } from './barcode/resolve-pending';
+import { PANTRY_ALL_KEY } from './cache/cache-keys';
 import { fetchBootstrapSnapshot } from './cache/bootstrap-client';
 import { createQueryPersister, type QueryPersister } from './cache/query-persister';
 import { applySnapshot } from './cache/seed';
@@ -22,6 +28,7 @@ export interface OfflineRuntime {
   persister: QueryPersister;
   connectivity: Connectivity;
   drain: DrainWorker;
+  barcode: { cache: BarcodeCache; pending: PendingScans };
   enqueue(op: NewOp, opts?: EnqueueOpts): Promise<OutboxOp | null>;
   refreshFromServer(reason: string): Promise<RefreshResult>;
   onEvent(listener: (e: DrainEvent) => void): () => void;
@@ -117,7 +124,38 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     return inflight;
   };
 
+  const barcode = { cache: createBarcodeCache({ db, now }), pending: createPendingScans({ db, now }) };
+  let resolvingScans = false;
+
+  // Resolves unknown scans saved offline once a drain finishes while online (fill blanks only).
+  const resolveScans = async (): Promise<void> => {
+    const userId = getUserId();
+    const items = queryClient.getQueryData<PantryItem[]>(PANTRY_ALL_KEY);
+    if (resolvingScans || !userId || !items || connectivity.getState() === 'offline') return;
+    resolvingScans = true;
+    try {
+      const list = await barcode.pending.listUnresolved(userId);
+      if (list.length === 0) return;
+      const queued = new Set((await store.list(userId)).map((o) => o.entityId));
+      await resolvePendingScans({
+        pending: barcode.pending,
+        list,
+        cache: barcode.cache,
+        userId,
+        lookup: (code) => foodApi.lookupBarcode(code),
+        getItem: (id) => items.find((i) => i.id === id),
+        isCreatePending: (id) => queued.has(id),
+        enqueue: (op) => runtime.enqueue(op),
+      });
+    } catch (error) {
+      console.error('Pending scan resolution failed:', error instanceof Error ? error.name : 'unknown');
+    } finally {
+      resolvingScans = false;
+    }
+  };
+
   const handleEvent = (e: DrainEvent): void => {
+    if (e.type === 'finished') void resolveScans();
     if (e.type === 'applied') {
       applyWrites(applyResult(e.op, e.result));
     } else if (e.type === 'finished' && e.applied > 0) {
@@ -141,11 +179,12 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     onEvent: handleEvent,
   });
 
-  return {
+  const runtime: OfflineRuntime = {
     store,
     persister,
     connectivity,
     drain,
+    barcode,
     async enqueue(op, opts) {
       const userId = getUserId();
       if (!userId) throw new Error('Cannot enqueue offline change without a signed-in user');
@@ -175,6 +214,7 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
       listeners.clear();
     },
   };
+  return runtime;
 }
 
 let current: OfflineRuntime | null = null;

@@ -3,8 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { foodApi } from '@/lib/api/food';
-import { pantryApi } from '@/lib/api/pantry';
+import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
+import { createScanDeps } from '@/lib/offline/barcode/scan-deps';
+import { getOfflineRuntime } from '@/lib/offline/runtime';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import type { PantryItem } from '@/types/pantry.types';
 import { haptic } from '@/lib/native/native-haptics';
 import { isNative, loadPlugin } from '@/lib/platform/native';
 import { isIosSafari, isStandalone } from '@/lib/pwa/detect-ios';
@@ -13,6 +18,7 @@ import { isCameraAvailable } from '@/lib/scan/merge-scan';
 import { NATIVE_SCAN_ERROR_COPY } from '@/lib/scan/scan-adapter';
 import { useBarcodeScanner } from '@/lib/scan/use-barcode-scanner';
 import { useNativeScanner } from '@/lib/scan/use-native-scanner';
+import { onlineScanDeps } from './online-scan-deps';
 import { CameraView } from './camera-view';
 import { ManualBarcodeForm } from './manual-barcode-form';
 import {
@@ -44,19 +50,6 @@ interface ScanSheetProps {
   onBarcode?: (code: string) => void;
   onAddWithoutBarcode?: () => void;
 }
-
-const realDeps = {
-  findOwn: async (barcode: string) => {
-    const response = await pantryApi.getAll({
-      barcode,
-      limit: 1,
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-    });
-    return response.items[0] ?? null;
-  },
-  lookup: (barcode: string) => foodApi.lookupBarcode(barcode),
-};
 
 const STATUS_TEXT: Record<ScanState['name'], string> = {
   requesting: 'Starting camera',
@@ -97,6 +90,20 @@ function ScanBody({
   const [state, setState] = useState<ScanState>(() =>
     native || hasMediaDevices() ? { name: 'requesting' } : { name: 'unsupported' }
   );
+  const queryClient = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id ?? null);
+  // Offline-aware deps when the offline runtime exists (native); plain API deps on web.
+  const getDeps = useCallback(() => {
+    const runtime = getOfflineRuntime();
+    if (!runtime || !userId) return onlineScanDeps;
+    return createScanDeps({
+      userId,
+      getPantryItems: () => queryClient.getQueryData<PantryItem[]>(PANTRY_ALL_KEY) ?? [],
+      cache: runtime.barcode.cache,
+      isOnline: () => runtime.connectivity.getState() !== 'offline',
+      onlineLookup: (code) => foodApi.lookupBarcode(code),
+    });
+  }, [queryClient, userId]);
   const busyRef = useRef(false);
   const lookupRef = useRef<(barcode: string) => void>(() => undefined);
   const handleDetected = useCallback((code: string) => lookupRef.current(code), []);
@@ -119,9 +126,13 @@ function ScanBody({
       busyRef.current = true;
       setState({ name: 'looking-up', barcode });
       try {
-        const resolution = await resolveBarcode(barcode, realDeps);
+        const resolution = await resolveBarcode(barcode, getDeps());
         haptic(resolution.kind === 'own' || resolution.kind === 'found' ? 'success' : 'warning');
-        if (resolution.kind === 'own' || resolution.kind === 'found') {
+        if (
+          resolution.kind === 'own' ||
+          resolution.kind === 'found' ||
+          resolution.kind === 'offline-unknown'
+        ) {
           onResolved?.(resolution);
           onClose();
         } else {
@@ -135,7 +146,7 @@ function ScanBody({
         busyRef.current = false;
       }
     },
-    [onClose, onResolved]
+    [onClose, onResolved, getDeps]
   );
 
   const handleDetectedCode = (barcode: string) => {

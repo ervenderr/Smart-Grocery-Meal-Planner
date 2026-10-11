@@ -40,7 +40,7 @@ async function run(over: { lookup?: () => Promise<{ product: FoodProduct; attrib
   const pending = createPendingScans({ db });
   const cache = createBarcodeCache({ db });
   await pending.add('u1', 'p1', '4800016644801');
-  const enqueue = vi.fn(async () => null);
+  const enqueue = vi.fn(async (_op: unknown) => null);
   const result = await resolvePendingScans({
     pending,
     list: await pending.listUnresolved('u1'),

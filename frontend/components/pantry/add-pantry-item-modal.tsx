@@ -16,6 +16,8 @@ import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
 import { offlineWrite } from '@/lib/offline/facade';
 import { newId } from '@/lib/offline/ids';
 import { buildPantryCreate } from '@/lib/offline/ops/pantry-ops';
+import { getOfflineRuntime } from '@/lib/offline/runtime';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { mergeScanIntoForm } from '@/lib/scan/merge-scan';
 import { prefillFromOwnItem, prefillFromProduct } from '@/lib/scan/prefill';
@@ -109,6 +111,7 @@ export function AddPantryItemModal({
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
+  const [offlineScan, setOfflineScan] = useState(false);
   const [scanAttribution, setScanAttribution] = useState<FoodAttribution | null>(null);
 
   const {
@@ -153,6 +156,7 @@ export function AddPantryItemModal({
   // Merge into the open form (never reset) so typed input survives a scan.
   const handleScanResolved = (resolution: BarcodeResolution) => {
     if (resolution.kind === 'failed') return;
+    setOfflineScan(resolution.kind === 'offline-unknown');
     const incoming =
       resolution.kind === 'found'
         ? prefillFromProduct(resolution.product, resolution.barcode)
@@ -171,6 +175,8 @@ export function AddPantryItemModal({
     if (resolution.kind === 'found') toast.success('Product found. Check the details and save.');
     else if (resolution.kind === 'own')
       toast.success("You've added this before. Details filled in from your pantry.");
+    else if (resolution.kind === 'offline-unknown')
+      toast("You're offline. Barcode saved, add the details yourself.");
     else toast("We don't know this product yet. Barcode saved, add the details yourself.");
   };
 
@@ -197,6 +203,11 @@ export function AddPantryItemModal({
       if (outcome.mode === 'queued') {
         // Show the new item immediately; the drain swaps in the server row.
         const stamp = new Date().toISOString();
+        const runtime = getOfflineRuntime();
+        const userId = useAuthStore.getState().user?.id;
+        if (offlineScan && payload.barcode && runtime && userId) {
+          await runtime.barcode.pending.add(userId, id, payload.barcode);
+        }
         queryClient.setQueryData<PantryItem[] | undefined>(PANTRY_ALL_KEY, (items) =>
           items ? [{ ...payload, id, userId: '', createdAt: stamp, updatedAt: stamp }, ...items] : items
         );
@@ -204,6 +215,7 @@ export function AddPantryItemModal({
 
       toast.success('Pantry item added successfully!');
       reset();
+      setOfflineScan(false);
       // Queued writes are reconciled by the drain; refetching now would drop the optimistic item.
       if (outcome.mode === 'direct') onSuccess();
       onClose();
@@ -220,6 +232,7 @@ export function AddPantryItemModal({
   const handleClose = () => {
     if (!isLoading) {
       reset();
+      setOfflineScan(false);
       setScanAttribution(null);
       onClose();
     }
@@ -277,6 +290,12 @@ export function AddPantryItemModal({
             error={errors.barcode?.message}
             disabled={isLoading}
           />
+          {offlineScan && barcodeValue && (
+            <p className="text-sm text-gray-600">
+              You&apos;re offline. Add a name now and we&apos;ll fill in product details when
+              you&apos;re back online.
+            </p>
+          )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Select
