@@ -14,7 +14,7 @@ public class KumaunStorePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "currentEntitlements", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "sync", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "finish", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "finishUnfinished", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "unfinishedTransactions", returnType: CAPPluginReturnPromise)
     ]
 
     /// JS event name for transactions delivered outside purchase() (WR-04).
@@ -161,21 +161,22 @@ public class KumaunStorePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// Finishes every unfinished verified transaction for the product without a
-    /// server round trip. JS calls this only when the server already reports the
-    /// account as active, so StoreKit stops re-delivering those transactions.
-    /// Non-consumables stay in currentEntitlements after finish, so Restore still works.
-    @objc func finishUnfinished(_ call: CAPPluginCall) {
+    /// Lists unfinished verified transactions for the product without finishing
+    /// any of them. JS finishes only the purchase the server already holds and
+    /// verifies the rest, so an unrecorded purchase is never finished blindly
+    /// (REVIEW-2 WR-03). Revoked transactions are included so the server can
+    /// learn about a refund.
+    @objc func unfinishedTransactions(_ call: CAPPluginCall) {
         guard let id = productId(from: call) else { return }
         Task {
-            var finished = 0
+            var transactions: [[String: Any]] = []
             for await result in Transaction.unfinished {
                 if case .verified(let transaction) = result, transaction.productID == id {
-                    await transaction.finish()
-                    finished += 1
+                    transactions.append(StoreMapping.transactionDictionary(
+                        jws: result.jwsRepresentation, transaction: transaction))
                 }
             }
-            call.resolve(["finished": finished])
+            call.resolve(["transactions": transactions])
         }
     }
 }

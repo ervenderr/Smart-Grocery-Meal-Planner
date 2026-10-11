@@ -6,7 +6,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { useIsOnline } from '@/lib/offline/status/use-offline-status';
 import { loadPlugin } from '@/lib/platform/native';
 import { getStoreDeps } from '@/lib/native/store/store-deps';
-import { recheckEntitlements } from '@/lib/native/store/store-service';
+import { recheckEntitlements, type ServerEntitlement } from '@/lib/native/store/store-service';
 import { refreshEntitlementQueries } from '@/lib/entitlements/refresh';
 import {
   createRecheckController,
@@ -34,13 +34,15 @@ export function useEntitlementRecheck(enabled: boolean): void {
   const query = useEntitlementMeQuery();
   const serverReady = query.isSuccess && !query.isPlaceholderData;
   const serverStatus: EntitlementStatus | null = serverReady ? query.data.status : null;
+  const heldPurchase: string | null = serverReady ? (query.data.originalTransactionId ?? null) : null;
 
   const onlineRef = useRef(online);
-  const statusRef = useRef<EntitlementStatus | null>(serverStatus);
+  const serverRef = useRef<ServerEntitlement | null>(null);
   useEffect(() => {
     onlineRef.current = online;
-    statusRef.current = serverStatus;
-  }, [online, serverStatus]);
+    serverRef.current =
+      serverStatus === null ? null : { status: serverStatus, originalTransactionId: heldPurchase };
+  }, [online, serverStatus, heldPurchase]);
 
   // One controller per signed-in user, so a new account starts fresh.
   const controllerRef = useRef<RecheckController | null>(null);
@@ -51,9 +53,9 @@ export function useEntitlementRecheck(enabled: boolean): void {
       userId === null
         ? null
         : createRecheckController({
-            run: async (status) => {
+            run: async (server) => {
               const deps = await getStoreDeps(() => onlineRef.current, userId);
-              return deps ? recheckEntitlements(deps, status) : 'skipped';
+              return deps ? recheckEntitlements(deps, server) : 'skipped';
             },
             now: () => Date.now(),
             minIntervalMs: RECHECK_MIN_INTERVAL_MS,
@@ -67,9 +69,9 @@ export function useEntitlementRecheck(enabled: boolean): void {
 
   const trigger = useCallback((reason: RecheckTrigger) => {
     const controller = controllerRef.current;
-    const status = statusRef.current;
-    if (!enabledRef.current || !controller || status === null || !onlineRef.current) return;
-    void controller.trigger(reason, status).then((result) => {
+    const server = serverRef.current;
+    if (!enabledRef.current || !controller || server === null || !onlineRef.current) return;
+    void controller.trigger(reason, server).then((result) => {
       if (result === 'verified') refreshEntitlementQueries();
     });
   }, []);

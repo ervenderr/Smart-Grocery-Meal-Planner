@@ -40,6 +40,7 @@ describe('isEntitled / getEntitlementSummary', () => {
       status: 'none',
       productId: config.iap.productId,
       environment: null,
+      originalTransactionId: null,
       purchasedAt: null,
       revokedAt: null,
     });

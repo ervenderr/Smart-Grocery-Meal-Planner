@@ -181,26 +181,65 @@ export async function restorePurchases(deps: StoreDeps): Promise<RestoreOutcome>
   }
 }
 
-/**
- * Launch/resume re-check. Never prompts for Apple ID (no AppStore sync). When the
- * server already says active, no verify is sent; device transactions left
- * unfinished (e.g. claimed from another device) are finished so StoreKit stops
- * re-delivering them (WR-04).
- */
+/** What /entitlements/me (loaded from the server) says this account holds. */
+export interface ServerEntitlement {
+  status: EntitlementStatus;
+  /** Absent on servers that predate REVIEW-2 WR-03; then nothing is finished unverified. */
+  originalTransactionId: string | null;
+}
+
 export type RecheckResult = 'verified' | 'skipped' | 'pending' | 'claimed-elsewhere' | 'failed';
 
-export async function recheckEntitlements(
+async function finishQuietly(deps: StoreDeps, tx: StoreTransaction): Promise<void> {
+  try {
+    await deps.plugin.finish({ transactionId: tx.transactionId });
+  } catch {
+    // Best effort; StoreKit re-delivers it and the next recheck handles it again.
+  }
+}
+
+/**
+ * Server already says active (REVIEW-2 WR-03). Only the device transactions of
+ * the purchase the server holds are finished locally. Every other unfinished
+ * transaction is verified first, so an unrecorded purchase (for example a real
+ * Production one while the account holds a Sandbox unlock) reaches the server
+ * before StoreKit forgets it. verifyAndFinish finishes after a 2xx. A 409
+ * claimed one is already recorded for another account, so it is finished too:
+ * this account is already unlocked and nothing is lost.
+ */
+async function settleUnfinishedWhileActive(
   deps: StoreDeps,
-  serverStatus: EntitlementStatus
+  server: ServerEntitlement
 ): Promise<RecheckResult> {
-  if (serverStatus === 'active') {
-    try {
-      await deps.plugin.finishUnfinished(PRODUCT);
-    } catch {
-      // Best effort; retried on the next recheck.
-    }
+  let txs: StoreTransaction[];
+  try {
+    ({ transactions: txs } = await deps.plugin.unfinishedTransactions(PRODUCT));
+  } catch {
     return 'skipped';
   }
+  const held = server.originalTransactionId;
+  const isHeld = (tx: StoreTransaction) => held !== null && tx.originalTransactionId === held;
+  for (const tx of txs.filter(isHeld)) await finishQuietly(deps, tx);
+  const others = newestFirst(txs.filter((tx) => !isHeld(tx)));
+  if (others.length === 0) return 'skipped';
+  const results = await verifyAll(deps, others);
+  for (const [i, tx] of others.entries()) {
+    if (results[i] === 'claimed') await finishQuietly(deps, tx);
+  }
+  if (results.some((r) => r === 'active' || r === 'revoked')) return 'verified';
+  return results.includes('transient') ? 'pending' : 'skipped';
+}
+
+/**
+ * Launch/resume re-check. Never prompts for Apple ID (no AppStore sync). When the
+ * server already says active, see settleUnfinishedWhileActive. Otherwise the
+ * device's current entitlements are verified.
+ */
+export async function recheckEntitlements(
+  deps: StoreDeps,
+  server: ServerEntitlement
+): Promise<RecheckResult> {
+  if (server.status === 'active') return settleUnfinishedWhileActive(deps, server);
   let txs: StoreTransaction[];
   try {
     txs = await readEntitlements(deps);

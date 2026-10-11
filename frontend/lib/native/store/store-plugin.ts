@@ -36,8 +36,8 @@ export interface KumaunStorePlugin {
   currentEntitlements(options: { productId: string }): Promise<{ transactions: StoreTransaction[] }>;
   sync(): Promise<void>;
   finish(options: { transactionId: string }): Promise<void>;
-  /** Finishes unfinished transactions for the product without verifying (server already active). */
-  finishUnfinished(options: { productId: string }): Promise<{ finished: number }>;
+  /** Lists verified unfinished transactions for the product. Finishes nothing (REVIEW-2 WR-03). */
+  unfinishedTransactions(options: { productId: string }): Promise<{ transactions: StoreTransaction[] }>;
   addListener(
     event: typeof TRANSACTION_UPDATED_EVENT,
     listener: (update: StoreTransactionUpdate) => void

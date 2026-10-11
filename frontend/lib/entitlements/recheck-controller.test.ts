@@ -7,7 +7,7 @@ function setup(results: RecheckResult[] = ['verified']) {
   let clock = 0;
   const calls: EntitlementStatus[] = [];
   let i = 0;
-  const controller = createRecheckController({
+  const controller = createRecheckController<EntitlementStatus>({
     run: async (status) => {
       calls.push(status);
       const r = results[Math.min(i, results.length - 1)];
@@ -39,7 +39,7 @@ describe('createRecheckController (WR-07)', () => {
 
   it('never runs two at once', async () => {
     let release: (r: RecheckResult) => void = () => undefined;
-    const controller = createRecheckController({
+    const controller = createRecheckController<EntitlementStatus>({
       run: () => new Promise<RecheckResult>((r) => (release = r)),
       now: () => 0,
       minIntervalMs: 0,
@@ -61,7 +61,7 @@ describe('createRecheckController (WR-07)', () => {
 
   it('a throwing run reports failed and does not wedge the controller', async () => {
     let n = 0;
-    const controller = createRecheckController({
+    const controller = createRecheckController<EntitlementStatus>({
       run: async () => {
         n += 1;
         if (n === 1) throw new Error('boom');

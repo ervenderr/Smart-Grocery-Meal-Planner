@@ -27,6 +27,8 @@ export interface EntitlementMeView {
   status: 'active' | 'revoked' | 'none';
   productId: string;
   environment: string | null;
+  /** Lets the app finish only the device transaction the server already holds (REVIEW-2 WR-03). */
+  originalTransactionId: string | null;
   purchasedAt: string | null;
   revokedAt: string | null;
   limits: { pantry: number | null; aiDaily: number; aiMonthly: number | null };
@@ -205,6 +207,7 @@ export async function getMe(userId: string): Promise<EntitlementMeView> {
     status: summary.status,
     productId: summary.productId,
     environment: summary.environment,
+    originalTransactionId: summary.originalTransactionId,
     purchasedAt: summary.purchasedAt ? summary.purchasedAt.toISOString() : null,
     revokedAt: summary.revokedAt ? summary.revokedAt.toISOString() : null,
     limits: {

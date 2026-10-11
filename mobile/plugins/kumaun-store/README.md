@@ -17,7 +17,7 @@ documented fallback behind the same TypeScript interface.
 | `currentEntitlements({ productId })` | `{ transactions: [{ jws, originalTransactionId, transactionId }] }` (verified, non-revoked only) |
 | `sync()` | `{}`; runs `AppStore.sync()`, so call it only from an explicit Restore tap |
 | `finish({ transactionId })` | `{}`; call only after the server accepted the JWS |
-| `finishUnfinished({ productId })` | `{ finished }`; finishes unfinished transactions without verifying. Call only when the server already reports the account active |
+| `unfinishedTransactions({ productId })` | `{ transactions: [{ jws, originalTransactionId, transactionId }] }` for verified unfinished transactions (revoked included). Finishes nothing: JS finishes only the purchase the server already holds and verifies the rest |
 | event `transactionUpdated` | `{ jws, originalTransactionId, transactionId, productId, revoked }` for every verified `Transaction.updates` delivery (started in `load()`, retained until a JS listener attaches). JS verifies it with the server, then finishes it |
 
 Reject codes: `INVALID_ARGUMENT`, `PRODUCT_NOT_FOUND`, `UNVERIFIED`, `PURCHASE_FAILED`,

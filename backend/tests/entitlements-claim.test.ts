@@ -218,6 +218,7 @@ describe('entitlements service', () => {
     expect(await getMe(userId)).toMatchObject({
       status: 'none',
       environment: null,
+      originalTransactionId: null,
       purchasedAt: null,
       limits: { pantry: 25, aiDaily: 20, aiMonthly: null },
     });
@@ -226,6 +227,7 @@ describe('entitlements service', () => {
     await verifyAndClaim(userId, signTestTransaction({ originalTransactionId: orig, transactionId: orig }));
     const active = await getMe(userId);
     expect(active.status).toBe('active');
+    expect(active.originalTransactionId).toBe(orig);
     expect(active.limits).toEqual({ pantry: null, aiDaily: 40, aiMonthly: 600 });
     expect(typeof active.purchasedAt).toBe('string');
 

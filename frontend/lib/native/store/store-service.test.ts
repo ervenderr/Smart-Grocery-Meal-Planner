@@ -40,6 +40,7 @@ function setup(opts: {
   purchase?: PurchaseResult | Error;
   owned?: StoreTransaction[][];
   syncError?: Error;
+  unfinished?: StoreTransaction[] | Error;
   verify?: (jws: string) => Promise<VerifyResult>;
   online?: boolean;
   product?: Error;
@@ -73,9 +74,10 @@ function setup(opts: {
     async finish(o) {
       calls.push(`finish:${o.transactionId}`);
     },
-    async finishUnfinished() {
-      calls.push('finishUnfinished');
-      return { finished: 1 };
+    async unfinishedTransactions() {
+      calls.push('unfinishedTransactions');
+      if (opts.unfinished instanceof Error) throw opts.unfinished;
+      return { transactions: opts.unfinished ?? [] };
     },
     async addListener(_event, listener) {
       listeners = [...listeners, listener];
@@ -229,36 +231,88 @@ describe('restorePurchases', () => {
   });
 });
 
+const server = (status: 'active' | 'revoked' | 'none', originalTransactionId: string | null = null) => ({
+  status,
+  originalTransactionId,
+});
+
 describe('recheckEntitlements', () => {
-  it('when server says active: no verify, only finishes unfinished device transactions', async () => {
+  it('when server says active with nothing unfinished: no verify, no finish', async () => {
     const s = setup({ owned: [[tx(1)]] });
-    expect(await recheckEntitlements(s.deps, 'active')).toBe('skipped');
-    expect(s.calls).toEqual(['finishUnfinished']);
+    expect(await recheckEntitlements(s.deps, server('active', 'o1'))).toBe('skipped');
+    expect(s.calls).toEqual(['unfinishedTransactions']);
     expect(s.verifyCalls).toHaveLength(0);
   });
-  it('a finishUnfinished rejection is swallowed', async () => {
-    const s = setup();
-    s.deps.plugin.finishUnfinished = async () => { throw new Error('x'); };
-    expect(await recheckEntitlements(s.deps, 'active')).toBe('skipped');
+  it('an unfinishedTransactions rejection is swallowed', async () => {
+    const s = setup({ unfinished: new Error('x') });
+    expect(await recheckEntitlements(s.deps, server('active', 'o1'))).toBe('skipped');
   });
   it.each(['none', 'revoked'] as const)('verifies device transactions when server says %s', async (status) => {
     const s = setup({ owned: [[tx(1)]] });
-    expect(await recheckEntitlements(s.deps, status)).toBe('verified');
+    expect(await recheckEntitlements(s.deps, server(status))).toBe('verified');
     expect(s.calls).not.toContain('sync');
   });
   it('skips when the device has none, never syncing', async () => {
     const s = setup({ owned: [[]] });
-    expect(await recheckEntitlements(s.deps, 'none')).toBe('skipped');
+    expect(await recheckEntitlements(s.deps, server('none'))).toBe('skipped');
     expect(s.calls).not.toContain('sync');
   });
   it('pending when offline, failed on hard rejection', async () => {
-    expect(await recheckEntitlements(setup({ owned: [[tx(1)]], online: false }).deps, 'none')).toBe('pending');
+    expect(await recheckEntitlements(setup({ owned: [[tx(1)]], online: false }).deps, server('none'))).toBe('pending');
     const f = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(400); } });
-    expect(await recheckEntitlements(f.deps, 'none')).toBe('failed');
+    expect(await recheckEntitlements(f.deps, server('none'))).toBe('failed');
   });
   it('reports claimed-elsewhere so the caller can stop rechecking (WR-07)', async () => {
     const c = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); } });
-    expect(await recheckEntitlements(c.deps, 'none')).toBe('claimed-elsewhere');
+    expect(await recheckEntitlements(c.deps, server('none'))).toBe('claimed-elsewhere');
+  });
+});
+
+describe('recheckEntitlements while active never finishes an unrecorded purchase (REVIEW-2 WR-03)', () => {
+  const held = { jws: 'jws-held', originalTransactionId: 'o-held', transactionId: '20' };
+  const renewalOfHeld = { jws: 'jws-held-2', originalTransactionId: 'o-held', transactionId: '21' };
+  const unrecorded = { jws: 'jws-prod', originalTransactionId: 'o-prod', transactionId: '30' };
+
+  it('finishes the held purchase locally without a verify', async () => {
+    const s = setup({ unfinished: [held, renewalOfHeld] });
+    expect(await recheckEntitlements(s.deps, server('active', 'o-held'))).toBe('skipped');
+    expect(s.verifyCalls).toHaveLength(0);
+    expect(s.calls).toEqual(['unfinishedTransactions', 'finish:20', 'finish:21']);
+  });
+
+  it('verifies a different unfinished purchase before finishing it, and reports verified', async () => {
+    const s = setup({ unfinished: [held, unrecorded] });
+    expect(await recheckEntitlements(s.deps, server('active', 'o-held'))).toBe('verified');
+    expect(s.verifyCalls.map((c) => c.jws)).toEqual(['jws-prod']);
+    const verifyThenFinish = s.calls.filter((c) => c.startsWith('finish'));
+    expect(verifyThenFinish).toEqual(['finish:20', 'finish:30']);
+  });
+
+  it('leaves a different purchase unfinished when its verify is transient', async () => {
+    const s = setup({ unfinished: [unrecorded], verify: async () => { throw httpError(503); } });
+    expect(await recheckEntitlements(s.deps, server('active', 'o-held'))).toBe('pending');
+    expect(s.calls.some((c) => c.startsWith('finish'))).toBe(false);
+  });
+
+  it('leaves a different purchase unfinished when the verify is a hard failure', async () => {
+    const s = setup({ unfinished: [unrecorded], verify: async () => { throw httpError(400); } });
+    expect(await recheckEntitlements(s.deps, server('active', 'o-held'))).toBe('skipped');
+    expect(s.calls.some((c) => c.startsWith('finish'))).toBe(false);
+  });
+
+  it('finishes a different purchase the server says another account already holds', async () => {
+    const s = setup({
+      unfinished: [unrecorded],
+      verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); },
+    });
+    expect(await recheckEntitlements(s.deps, server('active', 'o-held'))).toBe('skipped');
+    expect(s.calls).toContain('finish:30');
+  });
+
+  it('without a held purchase id (older server) verifies everything instead of finishing', async () => {
+    const s = setup({ unfinished: [held] });
+    expect(await recheckEntitlements(s.deps, server('active', null))).toBe('verified');
+    expect(s.verifyCalls.map((c) => c.jws)).toEqual(['jws-held']);
   });
 });
 
@@ -350,7 +404,7 @@ describe('verify dedupe across the updates listener and the recheck (REVIEW-2 WR
     await subscribeTransactionUpdates(s.deps, (r) => results.push(r));
     s.emit(update(5));
     await flush();
-    const recheck = recheckEntitlements(s.deps, 'none');
+    const recheck = recheckEntitlements(s.deps, server('none'));
     await flush();
     release();
     expect(await recheck).toBe('verified');
@@ -361,8 +415,8 @@ describe('verify dedupe across the updates listener and the recheck (REVIEW-2 WR
 
   it('a transaction verified again after the first verify settled is sent again', async () => {
     const s = setup({ owned: [[tx(5)]] });
-    await recheckEntitlements(s.deps, 'none');
-    await recheckEntitlements(s.deps, 'none');
+    await recheckEntitlements(s.deps, server('none'));
+    await recheckEntitlements(s.deps, server('none'));
     expect(s.verifyCalls).toHaveLength(2);
   });
 
@@ -382,7 +436,7 @@ describe('verify dedupe across the updates listener and the recheck (REVIEW-2 WR
         return active;
       },
     });
-    expect(await recheckEntitlements(s.deps, 'none')).toBe('claimed-elsewhere');
+    expect(await recheckEntitlements(s.deps, server('none'))).toBe('claimed-elsewhere');
     expect(await handleTransactionUpdate(s.deps, update(4))).toBe('ignored');
     expect(await handleTransactionUpdate(s.deps, update(6))).toBe('verified');
     expect(s.verifyCalls.map((c) => c.jws)).toEqual(['jws-4', 'jws-6']);

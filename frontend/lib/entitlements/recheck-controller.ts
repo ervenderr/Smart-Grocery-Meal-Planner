@@ -1,18 +1,17 @@
-import type { EntitlementStatus } from '@/lib/api/entitlements';
-import type { RecheckResult } from '@/lib/native/store/store-service';
+import type { RecheckResult, ServerEntitlement } from '@/lib/native/store/store-service';
 
 export type RecheckTrigger = 'mount' | 'resume' | 'online';
 export type RecheckSkip = 'in-flight' | 'debounced' | 'stopped';
 
-export interface RecheckControllerDeps {
-  run(serverStatus: EntitlementStatus): Promise<RecheckResult>;
+export interface RecheckControllerDeps<S = ServerEntitlement> {
+  run(server: S): Promise<RecheckResult>;
   now(): number;
   /** Minimum gap between resume/online rechecks. */
   minIntervalMs: number;
 }
 
-export interface RecheckController {
-  trigger(reason: RecheckTrigger, serverStatus: EntitlementStatus): Promise<RecheckResult | RecheckSkip>;
+export interface RecheckController<S = ServerEntitlement> {
+  trigger(reason: RecheckTrigger, server: S): Promise<RecheckResult | RecheckSkip>;
 }
 
 export const RECHECK_MIN_INTERVAL_MS = 60_000;
@@ -25,13 +24,15 @@ export const RECHECK_MIN_INTERVAL_MS = 60_000;
  *   further verify would be another 409 that burns the verify rate limit.
  * The caller only triggers once /entitlements/me has loaded from the server.
  */
-export function createRecheckController(deps: RecheckControllerDeps): RecheckController {
+export function createRecheckController<S = ServerEntitlement>(
+  deps: RecheckControllerDeps<S>
+): RecheckController<S> {
   let running = false;
   let stopped = false;
   let lastRunAt: number | null = null;
 
   return {
-    async trigger(reason, serverStatus) {
+    async trigger(reason, server) {
       if (stopped) return 'stopped';
       if (running) return 'in-flight';
       const now = deps.now();
@@ -41,7 +42,7 @@ export function createRecheckController(deps: RecheckControllerDeps): RecheckCon
       running = true;
       lastRunAt = now;
       try {
-        const result = await deps.run(serverStatus);
+        const result = await deps.run(server);
         if (result === 'claimed-elsewhere') stopped = true;
         return result;
       } catch {

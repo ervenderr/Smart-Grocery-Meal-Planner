@@ -43,6 +43,6 @@ describe('createMockStore', () => {
     await handle.remove();
     store.emitUpdate({ ...u, transactionId: 't2' });
     expect(seen).toEqual(['t1']);
-    expect(await store.finishUnfinished({ productId: 'p' })).toEqual({ finished: 0 });
+    expect(await store.unfinishedTransactions({ productId: 'p' })).toEqual({ transactions: [] });
   });
 });

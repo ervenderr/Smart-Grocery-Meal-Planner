@@ -6,6 +6,8 @@ export interface EntitlementMe {
   status: EntitlementStatus;
   productId: string;
   environment: 'Sandbox' | 'Production' | 'Xcode' | null;
+  /** Purchase the server holds for this account; absent from older servers. */
+  originalTransactionId?: string | null;
   purchasedAt: string | null;
   revokedAt: string | null;
   limits: { pantry: number | null; aiDaily: number; aiMonthly: number | null };

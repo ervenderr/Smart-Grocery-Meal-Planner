@@ -71,8 +71,8 @@ export function createMockStore(options: MockStoreOptions = {}): MockStore {
     async finish() {
       /* no-op */
     },
-    async finishUnfinished() {
-      return { finished: 0 };
+    async unfinishedTransactions() {
+      return { transactions: [] };
     },
     async addListener(_event, listener) {
       listeners = [...listeners, listener];
