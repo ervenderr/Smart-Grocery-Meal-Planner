@@ -7,6 +7,7 @@ import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate';
 import { IosInstallHint } from '@/components/pwa/ios-install-hint';
 import { AiConsentHost } from '@/components/ai/ai-consent-host';
+import { UpgradeSheetHost } from '@/components/entitlements/upgrade-sheet-host';
 import { ReminderRuntime } from '@/components/reminders/reminder-runtime';
 import { OfflineBanner } from '@/components/offline/offline-banner';
 import { PendingChangesSheet } from '@/components/offline/pending-changes-sheet';
@@ -53,6 +54,7 @@ export default function AppLayout({
       <SyncFeedback />
       <PendingChangesSheet />
       <LogoutConfirmHost />
+      {native && <UpgradeSheetHost />}
       {native && <ReminderRuntime />}
     </ProtectedRoute>
   );

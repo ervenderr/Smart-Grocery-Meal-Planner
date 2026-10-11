@@ -28,7 +28,6 @@ import {
   writeCachedEntitlement,
 } from '@/lib/entitlements/entitlement-cache';
 import { outcomeMessage, type FlowState, type Message } from '@/lib/entitlements/view-model';
-import { closeUpgradeSheet, useUpgradeSheetStore } from '@/lib/entitlements/upgrade-sheet-store';
 import { useStoreProduct } from './use-store-product';
 
 export interface UseEntitlement {
@@ -66,10 +65,6 @@ function flowAfter(kind: string): FlowState {
 
 function notifyUnlocked(): void {
   haptic('success');
-  const { onUnlocked } = useUpgradeSheetStore.getState();
-  if (!onUnlocked) return;
-  closeUpgradeSheet();
-  onUnlocked();
 }
 
 export function useEntitlement(): UseEntitlement {
