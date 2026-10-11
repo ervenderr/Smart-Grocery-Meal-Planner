@@ -1,5 +1,29 @@
 import type { NewOp, OutboxOp } from './outbox/op-types';
-import { getOfflineRuntime, type OfflineRuntime } from './runtime';
+import { BOOT_TIMEOUT_MS } from './boot';
+import { isOfflineEnabled } from './enabled';
+import { getOfflineRuntime, whenOfflineRuntime, type OfflineRuntime } from './runtime';
+
+type EnqueueRuntime = Pick<OfflineRuntime, 'enqueue'>;
+
+/**
+ * Current runtime; on native builds waits (bounded by the boot timeout) for a boot still in progress,
+ * so an early write is queued rather than sent directly while offline. Web returns null at once.
+ */
+async function resolveRuntime(): Promise<OfflineRuntime | null> {
+  const ready = getOfflineRuntime();
+  if (ready || !isOfflineEnabled()) return ready;
+  return new Promise<OfflineRuntime | null>((resolve) => {
+    let stop: () => void = () => undefined;
+    const timer = setTimeout(() => {
+      stop();
+      resolve(null);
+    }, BOOT_TIMEOUT_MS);
+    stop = whenOfflineRuntime((runtime) => {
+      clearTimeout(timer);
+      resolve(runtime);
+    });
+  });
+}
 
 export type WriteOutcome<T> = { mode: 'queued'; op: OutboxOp | null } | { mode: 'direct'; result: T };
 
@@ -9,19 +33,21 @@ export type WriteOutcome<T> = { mode: 'queued'; op: OutboxOp | null } | { mode: 
  */
 export async function offlineWrite<T>(
   { op, direct }: { op: () => NewOp; direct: () => Promise<T> },
-  runtime: Pick<OfflineRuntime, 'enqueue'> | null = getOfflineRuntime(),
+  runtime?: EnqueueRuntime | null,
 ): Promise<WriteOutcome<T>> {
-  if (runtime) return { mode: 'queued', op: await runtime.enqueue(op()) };
+  const rt = runtime === undefined ? await resolveRuntime() : runtime;
+  if (rt) return { mode: 'queued', op: await rt.enqueue(op()) };
   return { mode: 'direct', result: await direct() };
 }
 
 /** Like offlineWrite for edits that need several ordered ops (e.g. a field update plus a quantity delta). */
 export async function offlineWriteMany<T>(
   { ops, direct }: { ops: () => NewOp[]; direct: () => Promise<T> },
-  runtime: Pick<OfflineRuntime, 'enqueue'> | null = getOfflineRuntime(),
+  runtime?: EnqueueRuntime | null,
 ): Promise<WriteOutcome<T>> {
-  if (!runtime) return { mode: 'direct', result: await direct() };
+  const rt = runtime === undefined ? await resolveRuntime() : runtime;
+  if (!rt) return { mode: 'direct', result: await direct() };
   let last: OutboxOp | null = null;
-  for (const op of ops()) last = await runtime.enqueue(op);
+  for (const op of ops()) last = await rt.enqueue(op);
   return { mode: 'queued', op: last };
 }
