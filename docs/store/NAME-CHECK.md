@@ -2,7 +2,9 @@
 
 ## Status
 
-Working name: **Kitcha (not cleared)**. Code and assets keep the working name in this phase.
+Decision: keep Kitcha; clearance (App Store search + trademark) still to be run by owner before submit.
+
+The collision note below and the fallback names stay as contingency if clearance fails. Code and assets keep the name Kitcha.
 
 This is not a trademark clearance or legal advice; the owner decides (human gate). Code is not renamed in this phase.
 
@@ -27,7 +29,7 @@ App Store names must be unique, and an identical name in the same category invit
 
 | Date | Name | Result |
 |------|------|--------|
-|      |      |        |
+| 2026-10-11 | Kitcha | Owner decision: keep. Clearance checklist above still open (owner, before submit). |
 
 ## Fallback names
 

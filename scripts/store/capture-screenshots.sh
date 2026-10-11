@@ -2,7 +2,7 @@
 # Capture App Store screenshots from dedicated iPhone Simulators.
 #
 # Usage:
-#   scripts/store/capture-screenshots.sh /path/to/App.app [6.9|6.3|all]
+#   scripts/store/capture-screenshots.sh /path/to/App.app [6.9|6.3|ipad|all]
 #
 # - The .app must be an ALREADY BUILT simulator build (this script never builds).
 # - It creates and uses its OWN simulators named "Kitcha-Store-<size>" so it never
@@ -26,6 +26,12 @@
 #   Dynamic Island medium 1206x2622 (or 1179x2556)              -> iPhone 17 Pro / 16 Pro
 #   Apple's page says medium is required and large is required unless you supply
 #   Dynamic Island large; supplying both avoids any ambiguity.
+#   iPad 13-inch 2064x2752 portrait (or 2048x2732); landscape 2752x2064 / 2732x2048.
+#   Required because the app supports iPad (TARGETED_DEVICE_FAMILY 1,2). The 12.9 and
+#   11-inch sizes are optional (scaled from 13-inch). The iPad simulator is
+#   "Kitcha-Store-iPad-13"; device type is matched by prefix "iPad Pro 13-inch" (newest).
+#   Set KITCHA_IPAD_ORIENTATION=landscape to rotate (simctl has no rotate command; the
+#   script prompts you to rotate via Device > Rotate in Simulator, then checks 2752x2064).
 set -euo pipefail
 
 APP_PATH="${1:-}"
@@ -42,6 +48,7 @@ OUT_ROOT="$REPO_ROOT/docs/store/screenshots"
 TARGETS=(
   "6.9-inch|iPhone 17 Pro Max|1320x2868"
   "6.3-inch|iPhone 17 Pro|1206x2622"
+  "iPad-13|iPad Pro 13-inch|2064x2752"
 )
 
 # Screens, in App Store order. See docs/store/SCREENSHOTS.md for captions.
@@ -58,7 +65,7 @@ SCREENS=(
 
 die() { echo "error: $*" >&2; exit 1; }
 
-[[ -n "$APP_PATH" ]] || die "usage: $0 /path/to/App.app [6.9|6.3|all]"
+[[ -n "$APP_PATH" ]] || die "usage: $0 /path/to/App.app [6.9|6.3|ipad|all]"
 [[ -d "$APP_PATH" ]] || die "app bundle not found: $APP_PATH"
 [[ -f "$APP_PATH/Info.plist" ]] || die "not an app bundle (no Info.plist): $APP_PATH"
 command -v xcrun >/dev/null || die "xcrun not found (install Xcode)"
@@ -78,8 +85,12 @@ device_type_id() {
     NAME="$1" /usr/bin/python3 -I -c '
 import json,sys,os
 n=os.environ["NAME"]
-for d in json.load(sys.stdin)["devicetypes"]:
-    if d["name"]==n: print(d["identifier"]); break'
+ts=json.load(sys.stdin)["devicetypes"]
+for d in ts:
+    if d["name"]==n: print(d["identifier"]); sys.exit()
+# prefix fallback (e.g. "iPad Pro 13-inch" -> "iPad Pro 13-inch (M5)"), last listed = newest
+m=[d for d in ts if d["name"].startswith(n)]
+if m: print(m[-1]["identifier"])'
 }
 
 find_or_create_sim() {
@@ -129,6 +140,13 @@ capture_target() {
   xcrun simctl launch "$udid" "$BUNDLE_ID" >/dev/null
   sleep "$SETTLE"
 
+  if [[ "$label" == iPad-13 && "${KITCHA_IPAD_ORIENTATION:-portrait}" == landscape ]]; then
+    expect="2752x2064"
+    outdir="$OUT_ROOT/iPad-13-landscape"; mkdir -p "$outdir"
+    echo "Rotate the simulator to landscape now (Simulator > Device > Rotate Right)."
+    [[ "$ASSUME_YES" == "1" ]] || read -r -p "Press Enter when rotated... " _ </dev/tty
+  fi
+
   local i=0 name url
   for name in "${SCREENS[@]}"; do
     i=$((i + 1))
@@ -161,7 +179,8 @@ for t in "${TARGETS[@]}"; do
     all) capture_target "$label" "$type_name" "$expect" ;;
     6.9) [[ "$label" == 6.9-inch ]] && capture_target "$label" "$type_name" "$expect" ;;
     6.3) [[ "$label" == 6.3-inch ]] && capture_target "$label" "$type_name" "$expect" ;;
-    *) die "second arg must be 6.9, 6.3 or all" ;;
+    ipad) [[ "$label" == iPad-13 ]] && capture_target "$label" "$type_name" "$expect" ;;
+    *) die "second arg must be 6.9, 6.3, ipad or all" ;;
   esac
 done
 

@@ -1,4 +1,4 @@
-# App Store Listing: Kitcha (iPhone)
+# App Store Listing: Kitcha (iPhone and iPad)
 
 Status: DRAFT for Phase 14. Verify limits with `node scripts/store/check-listing-limits.mjs` after any edit.
 Every fenced block under a heading ending in `(max N)` is length-checked by that script.
@@ -7,7 +7,7 @@ Apple limits verified 2026-10-11: name 2-30 and subtitle <=30 at https://develop
 
 ## Name
 
-Working name is **Kitcha**, kept per `NAME-CHECK.md` (status: NOT CLEARED). A same-category app "Kitcha: Save, Plan, Cook" (Kamp Inc) is reported to exist. Apple requires unique names (2-30 chars). Options, in order of preference:
+Name is **Kitcha** (owner decision: keep; see `NAME-CHECK.md`). Clearance (App Store search and trademark) is still to be run by the owner before submit; the fallbacks below are contingency. A same-category app "Kitcha: Save, Plan, Cook" (Kamp Inc) is reported to exist. Apple requires unique names (2-30 chars). Options, in order of preference (the first is the chosen name):
 
 1. `Kitcha: Pantry & Meal Planner` (29 chars) if the name is available in App Store Connect. A descriptive suffix does not remove the trademark/confusion risk (Guideline 5.2); this is the owner's decision.
 2. `Kitcha` alone, if available.
@@ -45,7 +45,7 @@ KNOW WHAT IS IN YOUR KITCHEN
 - Scan a product barcode with your camera to add it fast. Product data comes from Open Food Facts.
 
 COOK WHAT YOU ALREADY HAVE
-- "What can I cook?" ranks your recipes by how much of each one you already have, right on your phone, with no signal needed.
+- "What can I cook?" ranks your recipes by how much of each one you already have, right on your device, even without a connection.
 - Save your own recipes, scale servings, and see which ingredients you are missing.
 - Get simple ingredient substitution ideas.
 
@@ -59,7 +59,7 @@ SHOP SMARTER
 - Set a grocery budget and track what you spend over time.
 
 WORKS WHEN YOUR SIGNAL DOES NOT
-- Your pantry, shopping list, recipes and meal plans are available offline. Changes you make without a connection sync when you are back online.
+- View your pantry, shopping list, recipes and meal plans offline. Changes you make without a connection are saved and sync when you are back online. Barcode scanning and "What can I cook?" work offline too. AI suggestions need a connection.
 
 OPTIONAL AI SUGGESTIONS
 - Ask for recipe ideas and meal plans based on your pantry and dietary preferences.
@@ -80,8 +80,9 @@ Product information provided by Open Food Facts (ODbL). Nutrition data from USDA
 ```
 
 Honesty notes (do not paste into App Store Connect):
-- "Works offline" and "what can I cook" on-device rules: Phase 9 (rules) and Phase 11 (offline core) are NOT complete as of 2026-10-11. Re-verify each claim on the shipping build; delete the section if not shipped.
-- "FREE TO START" last bullets (25 items, Kitcha Full): Phase 12 is PLANNED, not built. Remove the Kitcha Full bullet if Phase 12 does not ship in the same version, otherwise reviewers will look for a purchase that does not exist.
+- Version 1.0 scope (owner decision 2026-10-11): ships Phase 11 offline support and the Phase 12 one-time Kitcha Full unlock. On-device AI (Phase 13) is DEFERRED to 1.1, so this listing makes no on-device AI or Apple Intelligence claim; do not add one. AI suggestions use the server provider with explicit consent and need a connection.
+- Offline claims must match what Phase 11 delivers: offline viewing, edits that sync later, scanning, rules-based "What can I cook?". Offline barcode scanning means the camera scan works; the product lookup itself needs a connection unless Phase 11 caches it. Re-verify each claim on the shipping build and soften the wording if not.
+- "FREE TO START" last bullets (25 items, Kitcha Full): Phase 12 is in 1.0 scope but not built as of 2026-10-11. Remove the Kitcha Full bullet if Phase 12 does not ship in the same version, otherwise reviewers will look for a purchase that does not exist. The $9.99 price is in IAP.md, not in this text.
 - "Nutrition data from USDA": remove the line unless USDA data is actually shown in the shipped UI.
 - "Finish a trip", "Items you already have are subtracted": built in v1.0 phases 4-5 per ROADMAP; confirm on device.
 - Do not state a price in the description (Apple discourages pricing text in metadata; the store shows the price).
@@ -97,9 +98,9 @@ Welcome to Kitcha on iPhone. Track your pantry and expiry dates, scan barcodes, 
 |-------|-------|
 | Primary category | Food & Drink |
 | Secondary category | Lifestyle (optional; Productivity is the alternative) |
-| Platform | iPhone only for v1 (iPad: see note below) |
+| Platform | iPhone and iPad (owner decision: keep `TARGETED_DEVICE_FAMILY = "1,2"`; see iPad note below) |
 | Price | Free (with one non-consumable IAP, see IAP.md) |
-| Availability | All regions you can legally serve; start with Philippines plus the countries you test in. EEA/UK: Gemini free-tier terms do not apply to those regions, check the AI provider terms before enabling there. |
+| Availability | All regions you can legally serve; start with Philippines plus the countries you test in. The AI provider is the env-configured OpenAI-compatible one (label default `Dahl Inference`); check its terms for the EEA/UK before enabling AI there. |
 | Copyright | `2026 <Your Legal Name>` (individual enrollment: your legal name, shown as seller) |
 | Support URL | `https://<vercel-host>/support` (exists in frontend/app/support) |
 | Marketing URL (optional) | `https://<vercel-host>/` |
@@ -110,7 +111,7 @@ Welcome to Kitcha on iPhone. Track your pantry and expiry dates, scan barcodes, 
 | Export compliance | `ITSAppUsesNonExemptEncryption` = NO (HTTPS only). NOT currently in Info.plist (checked); add it or answer the prompt on every upload. |
 | Sign-in | Email and password. Demo account: see REVIEW-NOTES.md |
 
-iPad note: `TARGETED_DEVICE_FAMILY = "1,2"` in the Xcode project means the binary supports iPad, which forces iPad screenshots (13-inch) and iPad review. Either set it to iPhone-only (`1`) before the release build (human/other-agent decision, not edited here) or budget for iPad screenshots.
+iPad note: owner decision is to keep iPad supported (`TARGETED_DEVICE_FAMILY = "1,2"`). This requires 13-inch iPad screenshots (2064x2752, see SCREENSHOTS.md) and iPad review, and the iPad QA checklist in SUBMISSION-CHECKLIST.md must pass first.
 
 ## Age rating answers
 
