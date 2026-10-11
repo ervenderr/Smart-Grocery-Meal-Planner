@@ -16,7 +16,6 @@ function toShoppingItem(listId: string, op: OutboxOp): ShoppingItem {
     shoppingListId: listId,
     quantity: 1,
     unit: '',
-    category: 'other',
     costEstimateCents: null,
     actualCostCents: null,
     isChecked: false,
