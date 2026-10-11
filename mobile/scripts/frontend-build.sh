@@ -34,6 +34,8 @@ for arg in "$@"; do
 done
 
 API_URL="${API_URL:-${NEXT_PUBLIC_API_URL:-$DEFAULT_API_URL}}"
+# Public support address shown on the support page (baked into the static export).
+export NEXT_PUBLIC_SUPPORT_EMAIL="${NEXT_PUBLIC_SUPPORT_EMAIL:-ervenidjad12@gmail.com}"
 case "$API_URL" in
   https://*) ;;
   *) echo "frontend-build: API url must start with https://" >&2; exit 1 ;;
