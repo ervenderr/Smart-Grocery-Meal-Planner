@@ -24,7 +24,9 @@ export async function probeHealth(opts: {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? HEALTH_PROBE_TIMEOUT_MS);
   try {
-    const res = await opts.fetchImpl(opts.url, { signal: controller.signal, cache: 'no-store' });
+    // Detached call: WebKit throws "Illegal invocation" if window.fetch runs with `this` = opts.
+    const doFetch = opts.fetchImpl;
+    const res = await doFetch(opts.url, { signal: controller.signal, cache: 'no-store' });
     return res.status >= 200 && res.status < 300;
   } catch {
     return false;
