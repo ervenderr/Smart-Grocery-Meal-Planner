@@ -3,6 +3,11 @@
  * Real DB, offline test signer.
  */
 
+import express from 'express';
+import request from 'supertest';
+import { createApp } from '../src/app';
+import { httpsRedirect } from '../src/middleware/httpsRedirect';
+import notificationRoutes from '../src/modules/entitlements/notifications.routes';
 import { prisma } from '../src/config/database.config';
 import { AppError } from '../src/middleware/errorHandler';
 import {
@@ -221,5 +226,91 @@ describe('notifications.service', () => {
     } finally {
       setAppleVerifierForTests(testVerifier());
     }
+  });
+});
+
+describe('POST /api/v1/webhooks/app-store', () => {
+  const app = createApp();
+  const URL = '/api/v1/webhooks/app-store';
+  const post = (body: unknown) => request(app).post(URL).send(body as object);
+
+  beforeAll(() => setAppleVerifierForTests(testVerifier()));
+  afterAll(async () => {
+    resetAppleVerifierForTests();
+    await cleanup();
+  });
+
+  it('revokes on a signed REFUND with no Origin and no Authorization header', async () => {
+    const userId = await makeUser('http-refund');
+    const orig = randomTransactionId();
+    await grantTestEntitlement(userId, { originalTransactionId: orig });
+
+    const res = await post({ signedPayload: notify('REFUND', orig) });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({});
+    expect(await isEntitled(userId)).toBe(false);
+  });
+
+  it('returns 400 for a missing, non-string or oversized signedPayload', async () => {
+    await post({}).expect(400);
+    await post({ signedPayload: 1234567890123456 }).expect(400);
+    await post({ signedPayload: 'short' }).expect(400);
+    await post({ signedPayload: 'a'.repeat(65537) }).expect(400);
+  });
+
+  it('returns 400 and changes nothing for a payload signed by an untrusted chain', async () => {
+    const userId = await makeUser('http-untrusted');
+    const orig = randomTransactionId();
+    await grantTestEntitlement(userId, { originalTransactionId: orig });
+    // Verifier that trusts no known root rejects the otherwise valid test-signed payload.
+    setAppleVerifierForTests(testVerifier({ rootCertificates: [Buffer.from('not-a-root')] }));
+    try {
+      const res = await post({ signedPayload: notify('REFUND', orig) });
+      expect(res.status).toBe(400);
+    } finally {
+      setAppleVerifierForTests(testVerifier());
+    }
+    expect(await isEntitled(userId)).toBe(true);
+  });
+
+  it('returns 200 for a duplicate notification', async () => {
+    const orig = randomTransactionId();
+    const payload = notify('REFUND', orig, { notificationUUID: uuid() });
+    await post({ signedPayload: payload }).expect(200);
+    await post({ signedPayload: payload }).expect(200);
+  });
+
+  it('returns 500 when the database fails so Apple retries', async () => {
+    const spy = jest.spyOn(prisma, '$transaction').mockRejectedValueOnce(new Error('db down'));
+    try {
+      const res = await post({ signedPayload: notify('REFUND', randomTransactionId()) });
+      expect(res.status).toBe(500);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('is not redirected by httpsRedirect when Apple calls the https URL (production wiring)', async () => {
+    const userId = await makeUser('http-https');
+    const orig = randomTransactionId();
+    await grantTestEntitlement(userId, { originalTransactionId: orig });
+
+    const prod = express();
+    prod.set('trust proxy', 2);
+    prod.use(httpsRedirect('api.example.com'));
+    prod.use(express.json({ limit: '1mb' }));
+    prod.use(URL, notificationRoutes);
+
+    const body = { signedPayload: notify('REFUND', orig) };
+    const secure = await request(prod)
+      .post(URL)
+      .set('X-Forwarded-Proto', 'https')
+      .set('X-Forwarded-For', '198.51.100.1, 203.0.113.7')
+      .send(body);
+    expect(secure.status).toBe(200);
+    expect(await isEntitled(userId)).toBe(false);
+    // Plain http would be redirected (Apple does not follow), which is why the https URL is registered.
+    const plain = await request(prod).post(URL).send(body);
+    expect(plain.status).toBe(308);
   });
 });

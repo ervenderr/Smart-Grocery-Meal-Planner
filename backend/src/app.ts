@@ -205,6 +205,10 @@ export function createApp(): Application {
   const entitlementsRoutes =
     require("./modules/entitlements/entitlements.routes").default;
 
+  console.log("  - Loading App Store webhook routes...");
+  const appStoreWebhookRoutes =
+    require("./modules/entitlements/notifications.routes").default;
+
   console.log("✅ All route modules loaded successfully");
 
   app.use(`/api/${config.apiVersion}/auth`, authRoutes);
@@ -223,6 +227,7 @@ export function createApp(): Application {
   app.use(`/api/${config.apiVersion}/cook`, cookRoutes);
   app.use(`/api/${config.apiVersion}/sync`, syncRoutes);
   app.use(`/api/${config.apiVersion}/entitlements`, entitlementsRoutes);
+  app.use(`/api/${config.apiVersion}/webhooks/app-store`, appStoreWebhookRoutes);
 
   console.log("✅ All routes registered successfully");
 
