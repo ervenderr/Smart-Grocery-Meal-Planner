@@ -16,6 +16,7 @@ import {
 import { getAppleVerifier } from './entitlements.deps';
 import { ENTITLEMENT_ERROR_CODES } from './entitlements.constants';
 import { applyVerifiedTransaction } from './entitlements.service';
+import { lockPurchase } from './entitlement-lock';
 import {
   REVERSING_TYPE,
   REVOKING_TYPES,
@@ -76,6 +77,8 @@ async function applyNotification(
 ): Promise<NotificationOutcome> {
   if (!HANDLED_TYPES.has(n.notificationType) || n.transaction === null) return 'ignored';
   const effective = effectiveTransaction(n, n.transaction);
+  // Lock before reading so a concurrent claim cannot interleave (WR-02).
+  await lockPurchase(tx, effective.environment, effective.originalTransactionId);
   if (tracksRevocation(n.notificationType)) {
     // Remember the refund/reversal even when nobody has claimed the purchase yet.
     await recordRevocationState(tx, {

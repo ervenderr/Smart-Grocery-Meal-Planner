@@ -14,6 +14,7 @@ import { getAppleVerifier } from './entitlements.deps';
 import { ENTITLEMENT_ERROR_CODES, ENTITLEMENT_STATUS } from './entitlements.constants';
 import { getEntitlementSummary } from './entitlement-status';
 import { withRevocationState } from './revocation-tombstone';
+import { lockPurchase, lockUserEntitlement } from './entitlement-lock';
 
 export interface EntitlementView {
   status: 'active' | 'revoked';
@@ -113,6 +114,9 @@ export async function applyVerifiedTransaction(
   userId: string,
   signed: VerifiedTransaction,
 ): Promise<EntitlementView> {
+  // Serialize with the webhook and concurrent claims before any read (WR-02).
+  await lockPurchase(tx, signed.environment, signed.originalTransactionId);
+  await lockUserEntitlement(tx, userId);
   // A refund/revoke recorded before this purchase was claimed overrides an older JWS.
   const verified = await withRevocationState(tx, signed);
   const owner = await tx.entitlement.findUnique({
