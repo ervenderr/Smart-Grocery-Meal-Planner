@@ -57,8 +57,11 @@ cleanup() {
   if [ -n "$UDID" ]; then
     xcrun simctl uninstall "$UDID" "$BUNDLE_ID" >/dev/null 2>&1
   fi
-  # E2E output embeds the throwaway credentials: wipe it under the build lock.
-  "$SCRIPT_DIR/with-build-lock.sh" rm -rf "$frontend_dir/out" "$mobile_dir/ios/App/App/public"
+  # E2E output embeds the credentials as plaintext JS: wipe every location it lands
+  # (static export, Next build cache, synced iOS assets, built Simulator app) under the build lock.
+  "$SCRIPT_DIR/with-build-lock.sh" rm -rf \
+    "$frontend_dir/out" "$frontend_dir/.next" \
+    "$mobile_dir/ios/App/App/public" "$mobile_dir/build"
   log "cleanup done (exit $rc)"
   exit "$rc"
 }
