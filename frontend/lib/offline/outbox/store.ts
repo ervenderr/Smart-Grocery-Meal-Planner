@@ -62,15 +62,20 @@ async function pendingFor(db: SqlDb, userId: string, entityType: string, entityI
 
 async function insertRow(db: SqlDb, userId: string, op: NewOp, now: number, opts: EnqueueOpts | undefined, blocked: boolean): Promise<number> {
   const { entityType, entityId } = entityOf(op);
+  const opId = newId();
   const res = await db.run(
     `INSERT INTO outbox (op_id, idempotency_key, user_id, kind, entity_type, entity_id, payload_json,
        inverse_json, resolved_json, label, state, attempts, last_error_json, next_attempt_at, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 0, ?, ?)`,
-    [newId(), opts?.idempotencyKey ?? newId(), userId, op.kind, entityType, entityId, JSON.stringify(op.payload),
+    [opId, opts?.idempotencyKey ?? newId(), userId, op.kind, entityType, entityId, JSON.stringify(op.payload),
       toJson(op.inverse), toJson(opts?.resolved), op.label, blocked ? 'blocked' : 'queued',
       opts ? JSON.stringify(SENT_MARK) : null, now, now]
   );
-  return res.lastInsertRowid as number;
+  if (typeof res.lastInsertRowid === 'number' && Number.isFinite(res.lastInsertRowid)) return res.lastInsertRowid;
+  // The native plugin may omit changes.lastId: find the row by its unique op id instead.
+  const rows = await db.query<{ seq: number }>('SELECT seq FROM outbox WHERE op_id = ?', [opId]);
+  if (!rows[0]) throw new Error('Outbox insert did not produce a row');
+  return rows[0].seq;
 }
 
 export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () => number }): OutboxStore {
