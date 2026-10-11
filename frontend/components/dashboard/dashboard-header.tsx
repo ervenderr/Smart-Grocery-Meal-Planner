@@ -9,6 +9,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { useLogout } from '@/lib/auth/use-logout';
 import { getPageTitle } from '@/lib/navigation';
 import { NotificationsDropdown } from './notifications-dropdown';
+import { SyncStatusIndicator } from '@/components/offline/sync-status-indicator';
 
 export function DashboardHeader() {
   const router = useRouter();
@@ -46,6 +47,8 @@ export function DashboardHeader() {
 
       {/* Right Side */}
       <div className="flex items-center gap-3">
+        <SyncStatusIndicator />
+
         {/* Notifications */}
         <NotificationsDropdown />
 

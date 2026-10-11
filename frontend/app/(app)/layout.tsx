@@ -8,6 +8,9 @@ import { OnboardingGate } from '@/components/onboarding/onboarding-gate';
 import { IosInstallHint } from '@/components/pwa/ios-install-hint';
 import { AiConsentHost } from '@/components/ai/ai-consent-host';
 import { ReminderRuntime } from '@/components/reminders/reminder-runtime';
+import { OfflineBanner } from '@/components/offline/offline-banner';
+import { PendingChangesSheet } from '@/components/offline/pending-changes-sheet';
+import { SyncFeedback } from '@/components/offline/sync-feedback';
 import { usePlatform } from '@/lib/platform/use-platform';
 
 export default function AppLayout({
@@ -33,9 +36,10 @@ export default function AppLayout({
           <DashboardHeader />
 
           {/* Page Content */}
+          <OfflineBanner />
           <main
             id="main"
-            className="flex-1 overflow-y-auto overscroll-contain bg-gray-50 p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:p-6 sm:pb-[calc(5rem+env(safe-area-inset-bottom))] lg:p-8"
+            className="flex-1 overflow-y-auto overscroll-contain bg-gray-50 p-4 pb-[calc(5rem+env(safe-area-inset-bottom)+var(--offline-banner-h,0px))] sm:p-6 sm:pb-[calc(5rem+env(safe-area-inset-bottom)+var(--offline-banner-h,0px))] lg:p-8 lg:pb-8"
           >
             {children}
           </main>
@@ -45,6 +49,8 @@ export default function AppLayout({
       <OnboardingGate />
       <IosInstallHint />
       <AiConsentHost />
+      <SyncFeedback />
+      <PendingChangesSheet />
       {native && <ReminderRuntime />}
     </ProtectedRoute>
   );
