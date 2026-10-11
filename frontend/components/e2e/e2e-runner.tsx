@@ -20,6 +20,7 @@ interface StepResult {
 const INJECTED_RAW = ' 4800016644801 ';
 const INJECTED_CODE = '4800016644801';
 const DASHBOARD_DELAY_MS = 1500;
+const OPT_IN_WAIT_MS = 10000;
 
 function storageEntries(): [string, string][] {
   const out: [string, string][] = [];
@@ -86,8 +87,11 @@ export function E2eRunner() {
       await whenTokenStorageReady();
       const access = getAccessToken() ?? '';
       const leaks = findTokenLeaks(storageEntries(), access).length;
-      emit('relaunch', Boolean(access) && useAuthStore.getState().isAuthenticated && leaks === 0, {
+      const isAuthenticated = useAuthStore.getState().isAuthenticated;
+      emit('relaunch', Boolean(access) && isAuthenticated && leaks === 0, {
         leaks,
+        hasAccess: Boolean(access),
+        isAuthenticated,
       });
     };
 
@@ -136,7 +140,8 @@ export function E2eRunner() {
       }
       let permission = await scheduler.checkPermission();
       if (permission === 'prompt' || permission === 'prompt-with-rationale') {
-        await scheduler.requestOptIn();
+        // The system alert cannot be answered on a headless Simulator: do not wait forever.
+        await Promise.race([scheduler.requestOptIn(), sleep(OPT_IN_WAIT_MS)]);
         permission = await scheduler.checkPermission();
       }
       const sync = await scheduler.sync([{ name: 'E2E Milk', expiryDate: localDatePlusDays(3) }], {

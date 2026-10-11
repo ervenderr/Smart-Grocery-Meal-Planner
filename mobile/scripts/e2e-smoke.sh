@@ -91,7 +91,7 @@ fi
 # Best effort: click the Allow button of the notification alert (needs Accessibility).
 auto_allow() {
   local i
-  for i in $(seq 1 40); do
+  for i in $(seq 1 5); do
     osascript -e 'tell application "System Events" to tell process "Simulator" to click button "Allow" of window 1' >/dev/null 2>&1 && return 0
     sleep 2
   done

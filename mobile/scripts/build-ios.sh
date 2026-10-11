@@ -6,7 +6,7 @@
 #   --skip-export  reuse the existing frontend/out
 #   --skip-xcode   stop after `cap sync`
 # Env:   API_URL (default production, must be https://), SIM_DEVICE
-# No signing is used (CODE_SIGNING_ALLOWED=NO). Prints the App.app path.
+# Simulator build is ad-hoc signed ("-") so the Keychain works (unsigned builds get -34018). Prints the App.app path.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -86,7 +86,7 @@ log "building for Simulator $UDID"
   xcodebuild -project App.xcodeproj -scheme App -configuration Debug \
     -destination "platform=iOS Simulator,id=$UDID" \
     -derivedDataPath "$mobile_dir/build" \
-    CODE_SIGNING_ALLOWED=NO -quiet build
+    CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=YES -quiet build
 )
 APP_PATH="$mobile_dir/build/Build/Products/Debug-iphonesimulator/App.app"
 [ -d "$APP_PATH" ] || die "build finished but $APP_PATH is missing"
