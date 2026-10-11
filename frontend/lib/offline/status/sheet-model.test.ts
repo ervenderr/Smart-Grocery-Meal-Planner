@@ -58,7 +58,7 @@ describe('buildSheetModel', () => {
     expect(buildSheetModel({ connectivity: 'online', draining: false, bootstrapping: false, ops: [mk('A')] }).waiting).toHaveLength(1);
   });
   it('flags upgrade conflicts and threads platform to the reason', () => {
-    const op = makeOp({ kind: 'pantry.create', payload: { item: { id: ID_A, itemName: 'Rice' } }, label: 'Rice' } as NewOp, {
+    const op = makeOp({ kind: 'pantry.create', payload: { item: { id: ID_A, itemName: 'Rice' } }, label: 'Rice' } as unknown as NewOp, {
       state: 'failed',
       lastError: { reason: 'conflict', status: 403, code: 'UPGRADE_REQUIRED' },
     });
