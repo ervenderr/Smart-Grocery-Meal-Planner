@@ -66,7 +66,8 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     getUserId,
     now,
     canPersist: async () => {
-      if (enqueuing > 0) return false;
+      // A pending mutation may already hold optimistic state whose op is not in the outbox yet.
+      if (enqueuing > 0 || queryClient.isMutating() > 0) return false;
       const userId = getUserId();
       return !userId || (await store.list(userId)).length === 0;
     },

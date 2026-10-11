@@ -77,3 +77,16 @@ describe('refreshFromServer races', () => {
     expect((qc.getQueryData(PANTRY_ALL_KEY) as { quantity: number }[])[0].quantity).toBe(7);
   });
 });
+
+describe('persist gate (WR-05)', () => {
+  it('does not persist canonical data while a mutation is mid-flight (optimistic state not yet in the outbox)', async () => {
+    make(async () => snapshot(1));
+    rt.persister.start();
+    const mutation = qc.getMutationCache().build(qc, { mutationFn: () => new Promise(() => {}) });
+    void mutation.execute(undefined);
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: ID_A, quantity: 9 }]);
+    await rt.persister.flush();
+    const rows = await db.query<{ n: number }>('SELECT COUNT(*) AS n FROM cache_entries');
+    expect(rows[0].n).toBe(0);
+  });
+});

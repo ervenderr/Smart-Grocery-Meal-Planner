@@ -198,4 +198,23 @@ describe('query persister', () => {
     await p.flush();
     expect(await count()).toBe(1);
   });
+
+  it('persists the state read before canPersist, never an optimistic write that lands during the check (WR-05)', async () => {
+    const p = createQueryPersister({
+      db,
+      queryClient: qc,
+      getUserId: () => userId,
+      writeDelayMs: 150,
+      canPersist: async () => {
+        qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'optimistic' }]);
+        return true;
+      },
+    });
+    p.start();
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'server' }]);
+    await vi.advanceTimersByTimeAsync(200);
+    const rows = await db.query<{ state_json: string }>('SELECT state_json FROM cache_entries');
+    expect(rows[0].state_json).toContain('"server"');
+    expect(rows[0].state_json).not.toContain('"optimistic"');
+  });
 });

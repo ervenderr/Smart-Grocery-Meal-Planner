@@ -76,15 +76,22 @@ export function createQueryPersister(opts: QueryPersisterOptions): QueryPersiste
     }
     const userId = getUserId();
     if (!userId) return;
-    if (opts.canPersist && !(await opts.canPersist())) return;
     const hash = keyHash(key);
     const query = queryClient.getQueryCache().find({ queryKey: key as unknown[], exact: true });
     if (!query || query.state.status !== 'success') return;
+    // Snapshot first, then check: an optimistic write landing during the async check is then
+    // either excluded from this snapshot or visible to the check (pending mutation / outbox op).
     const state = dehydrate(queryClient, {
       shouldDehydrateQuery: (q) => q.queryHash === query.queryHash,
     });
     const entry = state.queries[0];
     if (!entry) return;
+    if (opts.canPersist && !(await opts.canPersist())) return;
+    if (suspended) {
+      deferred.set(hash, key);
+      return;
+    }
+    if (getUserId() !== userId) return;
     const { queryKey, queryHash, state: s } = entry;
     const slim = { queryKey, queryHash, state: { data: s.data, dataUpdatedAt: s.dataUpdatedAt, status: s.status } };
     await db.run(UPSERT, [hash, JSON.stringify(key), JSON.stringify(slim), userId, now()]);
