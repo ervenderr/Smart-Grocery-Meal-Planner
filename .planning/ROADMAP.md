@@ -183,7 +183,23 @@ Plans:
   1. User can buy the $9.99 unlock once in the sandbox and can restore the purchase on a fresh install, with no recurring charge
   2. After purchase or refund, the backend entitlement updates and paid-only actions (pantry beyond 25 items, server AI beyond a small free allowance) succeed or are refused server-side accordingly
   3. A free user can still scan barcodes, get expiry alerts and keep up to 25 pantry items, and the upgrade prompt appears only at a limit and can be dismissed
-**Plans**: TBD
+**Plans**: 15 plans
+Plans:
+- [ ] 12-01-PLAN.md — Wave 1: IAP/limit/paid-AI env keys, additive entitlements migration, entitlement-status reader, account-deletion coverage
+- [ ] 12-02-PLAN.md — Wave 1 (TDD): @apple/app-store-server-library verifier wrapper, pinned Apple Root CA G3, offline test PKI + signer
+- [ ] 12-03-PLAN.md — Wave 1: custom KumaunStore StoreKit 2 plugin package, Kumaun.storekit, CLI StoreKit probe
+- [ ] 12-04-PLAN.md — Wave 1: frontend store facade, entitlements API client, purchase/restore/recheck service, E2E-only mock store
+- [ ] 12-05-PLAN.md — Wave 1: 403 UPGRADE_REQUIRED as retryable "Needs upgrade" conflict + online error helper
+- [ ] 12-06-PLAN.md — Wave 2: POST /entitlements/verify (idempotent, claim-once) and GET /entitlements/me
+- [ ] 12-07-PLAN.md — Wave 2: atomic 25-item free pantry gate (advisory lock, replay-safe)
+- [ ] 12-08-PLAN.md — Wave 2: paid AI allowance 40/day + 600/month in the atomic quota path
+- [ ] 12-10-PLAN.md — Wave 2: entitlement copy/view models/sheet store/hook, Settings Kumaun Full card, web note
+- [ ] 12-09-PLAN.md — Wave 3: App Store Server Notifications V2 webhook (refund/revoke/reversal)
+- [ ] 12-11-PLAN.md — Wave 3: upgrade sheet + native host + release-excluded E2E/screenshot route
+- [ ] 12-12-PLAN.md — Wave 3: Add Item limit handling (native sheet / web inline), Pending changes Unlock action, delete-account note
+- [ ] 12-13-PLAN.md — Wave 4: IAP.md testing guide, owner steps, review-screenshot instructions, privacy/review/checklist/env docs
+- [ ] 12-14-PLAN.md — Wave 5: full quality gate (tests, coverage, lint, typecheck, web build, native export, plugin build) + validation map
+- [ ] 12-15-PLAN.md — Wave 6 (LAST): git-log-gated Xcode wiring (cap sync, shared scheme StoreKit config, privacy manifest) or recorded pending
 **UI hint**: yes
 
 ### Phase 13: On-Device AI (DEFERRED to 1.1)
@@ -226,6 +242,6 @@ Phases execute in numeric order. Phases 7, 8 and 9 are independent and need no X
 | 9. Offline Rules Engine | v2.0 | 0/8 | Planned | - |
 | 10. Capacitor iOS Shell | v2.0 | 0/10 | Planned | - |
 | 11. Offline Core | v2.0 | 0/0 | Not started | - |
-| 12. One-Time Unlock | v2.0 | 0/0 | Not started | - |
+| 12. One-Time Unlock | v2.0 | 0/15 | Planned | - |
 | 13. On-Device AI | v2.0 | 0/0 | Not started | - |
 | 14. TestFlight & App Store Release | v2.0 | 0/0 | Not started | - |
