@@ -148,7 +148,30 @@ Plans:
   4. Offline, user can view a recipe with servings scaling, mark meals in the plan, and queue "Cooked it" and "Finish trip", with clear messages if a conflict appears on reconnect
   5. User always sees connectivity and pending-changes status and can see, retry or discard failed queued changes
   6. Queued changes survive killing the app and rebooting the phone, are applied exactly once, and conflicts resolve last-write-wins per field with delete-wins
-**Plans**: TBD
+**Plans**: 22 plans
+Plans:
+- [ ] 11-01-PLAN.md — SqlDb seam, on-device schema, forward-only migrations, node:sqlite test adapter, UUID helper
+- [ ] 11-02-PLAN.md — Backend additive: optional occurredAt on POST /cook/apply (tested, NOT deployed)
+- [ ] 11-03-PLAN.md — Automated legitimacy gate + install @capacitor-community/sqlite and @capacitor/network, native SqlDb adapter, Simulator persistence spike
+- [ ] 11-04-PLAN.md — Read cache: canonical keys, per-key SQLite persister, bootstrap pager, snapshot seeder
+- [ ] 11-05-PLAN.md — Outbox core: op taxonomy, error classification, backoff, coalescing, folding, SQLite store
+- [ ] 11-06-PLAN.md — Connectivity (network hint + /health probe), E2E forced-offline flag, idempotent transport, apiClient offline gate
+- [ ] 11-07-PLAN.md — Recipes, meal plans, dashboard and pantry on canonical React Query keys with local filtering
+- [ ] 11-08-PLAN.md — Sequential drain worker + shopping/pantry executors, exactly-once vs flaky server and simulated kill
+- [ ] 11-09-PLAN.md — Cache reconciliation: reapply pending ops, server-result patching, rollback from inverses
+- [ ] 11-10-PLAN.md — Offline runtime, boot (hydrate before first render, fail-open), triggers, boot gate and first-launch offline screen
+- [ ] 11-11-PLAN.md — Shopping and pantry writes through the outbox facade (native) with web unchanged
+- [ ] 11-12-PLAN.md — Status logic: indicator states, plain-language rows and failure copy, sheet model, retry/discard actions
+- [ ] 11-13-PLAN.md — Status UI: header pill, offline banner, Pending changes sheet, aggregated drain toasts
+- [ ] 11-14-PLAN.md — Two-phase queued cook executor, queued finish trip, builders, lock predicate, folds
+- [ ] 11-15-PLAN.md — Cooked it / meal mark and Finish trip offline in the UI, online calls idempotent with queue fallback
+- [ ] 11-16-PLAN.md — Offline barcode scan: local own-pantry match, barcode cache, pending scans resolved on reconnect
+- [ ] 11-17-PLAN.md — Offline recipe servings scaling and per-row pending/failed markers
+- [ ] 11-18-PLAN.md — Online-only actions disabled offline with "Needs a connection"
+- [ ] 11-19-PLAN.md — Session-safe offline state (expiry keeps queue, account switch wipes cache, deletion cleans up)
+- [ ] 11-20-PLAN.md — Logout warning for unsynced changes; account deletion intent
+- [ ] 11-21-PLAN.md — Simulator offline E2E (forced offline, kill/relaunch, exactly-once) and phase gate
+- [ ] 11-22-PLAN.md — Real-iPhone airplane/reboot checklist (human-verify, non-blocking)
 **UI hint**: yes
 
 ### Phase 12: One-Time Unlock

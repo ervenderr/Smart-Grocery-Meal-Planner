@@ -332,16 +332,21 @@ export function createNodeSqlDb(): SqlDb { const db = new DatabaseSync(':memory:
 | A7 | Per-key persister write volume is acceptable (hundreds of rows) on device | Pattern 2 | May need batching; measure in the spike |
 | A8 | Skipping SQLCipher encryption in v1 is acceptable to the owner | Pitfall 10 | Privacy expectation; sandboxed grocery data only |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What does "mark" a meal plan item mean for OFF-07?**
    - What we know: `MealPlanItem` has no completed flag besides `cookedAt`, set only by `POST /cook/apply` (once-only). Meal plan update rebuilds items and is online-only per CONTEXT.
    - What's unclear: whether "mark" must work without deducting pantry.
    - Recommendation: treat "Mark as cooked" in the meal plan as the queued `cook.apply` op with `mealPlanItemId` (deducts on sync, consistent with OFF-06 and research-v2/03 "Mark cooked, deduct when online"). If a pure mark is wanted, that is an additive backend endpoint (not planned; flag to the user).
+   - RESOLVED: queued cook.apply (plan 11-15).
 2. **Does the owner want `occurredAt` on `cook/apply`?** Without it, queued cooks get the sync time as `cookedAt`. Additive and small; list as an optional backend task, do not deploy.
+   - RESOLVED: added additively, not deployed (plan 11-02).
 3. **Web IndexedDB fallback.** CONTEXT marks optional. Recommendation: skip in this phase (web keeps legacy direct path; indicator never renders), revisit later.
+   - RESOLVED: skipped; web keeps direct path (plans 11-03/11-10).
 4. **Notification mark-read, preferences edits offline.** Not in the op list; leave online-only.
+   - RESOLVED: online-only (plan 11-18).
 5. **Persisting Phase 9 `cook.*` queries:** confirm `COOK_PANTRY_KEY`/`COOK_RECIPES_KEY` are the same data as the canonical lists to avoid double storage; if possible alias them to the canonical keys.
+   - RESOLVED: executors of 11-07/11-15 MUST reuse the canonical list keys for cook queries (alias COOK_PANTRY_KEY/COOK_RECIPES_KEY to them) so no data is stored twice.
 
 ## Environment Availability
 

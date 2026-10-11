@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Kitcha for iPhone
 status: planning
-stopped_at: Phase 10 executed; verification human_needed
-last_updated: "2026-10-11T02:16:09.038Z"
+stopped_at: Phase 11 UI-SPEC approved
+last_updated: "2026-10-11T04:30:50.463Z"
 last_activity: 2026-10-10
 progress:
   total_phases: 8
@@ -95,9 +95,9 @@ Offline service worker (old OFF-01..04) is superseded by the Capacitor offline c
 
 ## Session Continuity
 
-Last session: 2026-10-11T02:16:09.032Z
-Stopped at: Phase 10 executed; verification human_needed
-Resume file: .planning/phases/10-capacitor-ios-shell/10-VERIFICATION.md
+Last session: 2026-10-11T04:30:50.455Z
+Stopped at: Phase 11 UI-SPEC approved
+Resume file: .planning/phases/11-offline-core/11-UI-SPEC.md
 
 ## Operator Next Steps
 
