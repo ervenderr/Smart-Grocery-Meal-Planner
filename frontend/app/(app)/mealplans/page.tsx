@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Plus, Calendar, ShoppingCart, Sparkles, AlertCircle } from 'lucide-react';
+import { NeedsConnection } from '@/components/offline/needs-connection';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/common/empty-state';
@@ -110,14 +111,33 @@ export default function MealPlansPage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button variant="outline" className="w-full sm:w-auto" onClick={() => setShowAIMealPlanModal(true)}>
-            <Sparkles className="h-4 w-4" />
-            AI Generate
-          </Button>
-          <Button className="w-full sm:w-auto" onClick={() => setShowAddModal(true)}>
-            <Plus className="h-4 w-4" />
-            Create Meal Plan
-          </Button>
+          <NeedsConnection>
+            {(disabled, describedById) => (
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => setShowAIMealPlanModal(true)}
+                disabled={disabled}
+                aria-describedby={describedById}
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Generate
+              </Button>
+            )}
+          </NeedsConnection>
+          <NeedsConnection>
+            {(disabled, describedById) => (
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => setShowAddModal(true)}
+                disabled={disabled}
+                aria-describedby={describedById}
+              >
+                <Plus className="h-4 w-4" />
+                Create Meal Plan
+              </Button>
+            )}
+          </NeedsConnection>
         </div>
       </div>
 
@@ -150,15 +170,20 @@ export default function MealPlansPage() {
           </div>
           {selectedPreviewPlan && (
             <div className="mb-4 flex flex-wrap gap-2">
-              <Button
-                className="text-sm"
-                disabled={generateList.isPending}
-                onClick={() =>
-                  generateList.mutate(selectedPreviewPlan.id)
-                }
-              >
-                {generateList.isPending ? 'Adding...' : 'Add to my list'}
-              </Button>
+              <NeedsConnection inline>
+                {(disabled, describedById) => (
+                  <Button
+                    className="text-sm"
+                    disabled={disabled || generateList.isPending}
+                    aria-describedby={describedById}
+                    onClick={() =>
+                      generateList.mutate(selectedPreviewPlan.id)
+                    }
+                  >
+                    {generateList.isPending ? 'Adding...' : 'Add to my list'}
+                  </Button>
+                )}
+              </NeedsConnection>
               {generateList.isSuccess && generateList.variables === selectedPreviewPlan.id && (
                 <Button variant="outline" className="text-sm" onClick={() => router.push('/shopping')}>
                   Open list

@@ -1,6 +1,7 @@
 'use client';
 
 import { Edit2, Trash2, Calendar, Banknote, Flame, Heart, ShoppingCart } from 'lucide-react';
+import { NeedsConnection } from '@/components/offline/needs-connection';
 import { Card } from '@/components/ui/card';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import type { MealPlan } from '@/types/mealplan.types';
@@ -75,13 +76,17 @@ export function MealPlanCard({ mealPlan, onEdit, onDelete, onView, onGenerateSho
       )}
 
       {/* Actions */}
+      <NeedsConnection>
+      {(disabled, describedById) => (
       <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
         <button
+          disabled={disabled}
+          aria-describedby={describedById}
           onClick={(e) => {
             e.stopPropagation();
             onGenerateShoppingList(mealPlan);
           }}
-          className="h-11 rounded-lg px-2 text-sm text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors flex items-center justify-center gap-1"
+          className="h-11 rounded-lg px-2 text-sm text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-1"
           title="Generate shopping list"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
@@ -98,16 +103,20 @@ export function MealPlanCard({ mealPlan, onEdit, onDelete, onView, onGenerateSho
           Edit
         </button>
         <button
+          disabled={disabled}
+          aria-describedby={describedById}
           onClick={(e) => {
             e.stopPropagation();
             onDelete(mealPlan);
           }}
-          className="h-11 rounded-lg px-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1"
+          className="h-11 rounded-lg px-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-1"
         >
           <Trash2 className="h-3.5 w-3.5" />
           Delete
         </button>
       </div>
+      )}
+      </NeedsConnection>
     </Card>
   );
 }

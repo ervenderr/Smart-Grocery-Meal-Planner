@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { NeedsConnection } from '@/components/offline/needs-connection';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/loading-spinner';
 import { mealPlanApi } from '@/lib/api/mealplans';
@@ -87,14 +88,19 @@ export function GenerateFromPlan({ defaultExpanded }: GenerateFromPlanProps) {
                         {formatRange(plan.startDate, plan.endDate)}
                       </p>
                     </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={generate.isPending}
-                      onClick={() => generate.mutate(plan.id)}
-                    >
-                      {pending ? 'Adding...' : 'Add to list'}
-                    </Button>
+                    <NeedsConnection>
+                      {(disabled, describedById) => (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          disabled={disabled || generate.isPending}
+                          aria-describedby={describedById}
+                          onClick={() => generate.mutate(plan.id)}
+                        >
+                          {pending ? 'Adding...' : 'Add to list'}
+                        </Button>
+                      )}
+                    </NeedsConnection>
                   </li>
                 );
               })}
