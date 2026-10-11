@@ -28,6 +28,7 @@ export const API_ROUTES = {
     BASE: `/api/${API_VERSION}/pantry`,
     BY_ID: (id: string) => `/api/${API_VERSION}/pantry/${id}`,
     EXPIRING_SOON: `/api/${API_VERSION}/pantry/expiring-soon`,
+    ADJUST: (id: string) => `/api/${API_VERSION}/pantry/${id}/adjust`,
   },
 
   // Recipes
