@@ -122,7 +122,18 @@ Plans:
   4. User opts in to expiry notifications and receives a local notification for an item nearing expiry, even in airplane mode
   5. Key actions give haptic feedback, a shopping list can be shared via the native share sheet, and layouts respect safe areas and the keyboard
   6. One scripted command builds, installs and launches the app in the Simulator and an automated smoke E2E passes
-**Plans**: TBD
+**Plans**: 10 plans
+Plans:
+- [ ] 10-01-PLAN.md — Wave 1: automated dependency legitimacy gate + exact-pinned installs, env-switched static export, platform helper, build lock, Capacitor SPM iOS project
+- [ ] 10-02-PLAN.md — Wave 2 (TDD): token store with Keychain write-through, Keychain backend, native boot scrub, native-safe persist partialize
+- [ ] 10-03-PLAN.md — Wave 2 (TDD): reminder prefs, plan builder, route allowlist, permission-gated scheduler + native binding
+- [ ] 10-04-PLAN.md — Wave 2 (TDD): native scan adapter, haptics wrapper + prefs, share text builder + bindings
+- [ ] 10-05-PLAN.md — Wave 2: build:ios, sim:run, verify:bundle scripts and README (signing, iPhone run, human_needed)
+- [ ] 10-08-PLAN.md — Wave 2: native chrome (status bar, safe areas, scroll lock, keyboard, splash, native-only viewport, install-hint off)
+- [ ] 10-06-PLAN.md — Wave 3: token-storage facade, hydration-aware routing, native `/` auth router, soft navigation
+- [ ] 10-07-PLAN.md — Wave 3: native scanner in scan sheet, haptic call sites, Share list button
+- [ ] 10-09-PLAN.md — Wave 3: reminders explainer/prompt/settings (Device tab), runtime sync + tap deep link, Pantry expiring filter
+- [ ] 10-10-PLAN.md — Wave 4: E2E self-check route + e2e:ios smoke, full phase gate, coverage, screenshots, human_needed record
 **UI hint**: yes
 
 ### Phase 11: Offline Core
@@ -190,7 +201,7 @@ Phases execute in numeric order. Phases 7, 8 and 9 are independent and need no X
 | 7. Store Readiness | v2.0 | 0/0 | Not started | - |
 | 8. Offline Sync Backend | v2.0 | 11/11 | Complete    | 2026-10-10 |
 | 9. Offline Rules Engine | v2.0 | 0/8 | Planned | - |
-| 10. Capacitor iOS Shell | v2.0 | 0/0 | Not started | - |
+| 10. Capacitor iOS Shell | v2.0 | 0/10 | Planned | - |
 | 11. Offline Core | v2.0 | 0/0 | Not started | - |
 | 12. Subscription | v2.0 | 0/0 | Not started | - |
 | 13. On-Device AI | v2.0 | 0/0 | Not started | - |

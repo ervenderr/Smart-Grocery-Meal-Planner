@@ -2,7 +2,7 @@
 phase: 10
 slug: capacitor-ios-shell
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-10-11
 ---

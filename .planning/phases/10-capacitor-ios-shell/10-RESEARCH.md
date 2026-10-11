@@ -357,15 +357,19 @@ Use `whenUnlockedThisDeviceOnly` so tokens do not migrate via backups (confirm e
 | A7 | Token-store async design fits `ProtectedRoute` 100 ms hydration timer | Pattern 2 | Race shows /login flash; must await init before the timer logic |
 | A8 | `Device.isVirtual` true on Simulator | Pitfall 4 | Scan button opens native UI and errors; catch and route to manual |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Single vs dual install of Capacitor JS packages**
    - Known: `cap sync` reads plugins from the directory holding `capacitor.config` (spike: `mobile/node_modules`). Frontend TS imports need the JS packages resolvable from `frontend/`.
    - Unclear: whether to duplicate pins in `frontend/package.json`.
    - Recommendation: duplicate exact pins (only `core` plus the plugin JS) in `frontend/`; add a vitest/CI check that versions match. Alternative: `frontend` dynamic imports resolved via path alias to `mobile/node_modules` (rejected: fragile).
+   - RESOLVED: duplicate exact pins; parity enforced by verify-deps.mjs --parity (plan 10-01).
 2. **Test account for E2E login against production**: need throwaway account creation (signup) done by the script, and deletion at the end via the existing delete-account endpoint; confirm rate limits.
+   - RESOLVED: script creates and deletes the account (plan 10-10).
 3. **Does the real device need extra CORS?** `capacitor://localhost` already allowed (Phase 7); verify with a device login.
+   - RESOLVED: human_needed device login check (plan 10-10, README).
 4. **Maestro spike outcome** unknown until installed; decide at execution (see Validation).
+   - RESOLVED: Maestro not installed; simctl + in-app self-check used, spike skipped (plan 10-10).
 
 ## Environment Availability
 
