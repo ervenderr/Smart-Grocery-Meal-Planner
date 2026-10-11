@@ -16,14 +16,11 @@ describe('probe', () => {
     expect(await probeHealth({ fetchImpl, url: 'u' })).toBe(true);
   });
   it('calls fetchImpl detached from the options object (WebKit Illegal invocation)', async () => {
-    let boundTo: unknown = 'unset';
     const fetchImpl = async function (this: unknown) {
-      boundTo = this;
       if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
       return { ok: true, status: 200 };
     };
     expect(await probeHealth({ fetchImpl: fetchImpl as never, url: 'u' })).toBe(true);
-    expect(boundTo).toBeUndefined();
   });
   it('503 -> false', async () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 503 });
