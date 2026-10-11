@@ -8,6 +8,7 @@ import { queryKeys } from '@/lib/react-query';
 import { offlineWrite, type WriteOutcome } from '@/lib/offline/facade';
 import { newId } from '@/lib/offline/ids';
 import { getOfflineRuntime } from '@/lib/offline/runtime';
+import { withPendingOps } from '@/lib/offline/reconcile/fold-query';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { isFinishPending } from '@/lib/offline/ops/finish-ops';
 import {
@@ -104,7 +105,8 @@ interface DeleteContext {
 export function useShoppingList() {
   return useQuery({
     queryKey: queryKeys.shopping.active(),
-    queryFn: shoppingApi.getActiveList,
+    // Pending outbox ops are folded over every refetch so the optimistic overlay survives.
+    queryFn: withPendingOps(queryKeys.shopping.active(), () => shoppingApi.getActiveList()),
     staleTime: THIRTY_SECONDS_MS,
     // Per-query override so a second device stays fresh.
     refetchOnWindowFocus: true,

@@ -10,6 +10,7 @@ import { normalizePantryItem } from '@/lib/pantry/normalize';
 import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
 import { queryKeys } from '@/lib/react-query';
 import { offlineWrite, offlineWriteMany } from '@/lib/offline/facade';
+import { withPendingOps } from '@/lib/offline/reconcile/fold-query';
 import { buildPantryDelete, buildPantryQuickPatchOps } from '@/lib/offline/ops/pantry-ops';
 import type { PantryItem } from '@/types/pantry.types';
 
@@ -27,10 +28,11 @@ export function usePantryList(filters: PantryFilters) {
   const { category, search } = filters;
   return useQuery({
     queryKey: PANTRY_ALL_KEY,
-    queryFn: async () => {
+    // Pending outbox ops are folded over every refetch so the optimistic overlay survives.
+    queryFn: withPendingOps<PantryItem[]>(PANTRY_ALL_KEY, async () => {
       const items = await fetchAllPantryItems((page, limit) => pantryApi.getAll({ page, limit }));
       return items.map(normalizePantryItem);
-    },
+    }),
     select: (items) =>
       filterPantryItems(
         items.filter((item) => !pendingRemovalIds.has(item.id)),

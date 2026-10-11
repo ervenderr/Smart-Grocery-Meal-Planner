@@ -8,7 +8,7 @@ import type { OutboxStore } from './store';
 
 export type DrainEvent =
   | { type: 'started' }
-  | { type: 'applied'; op: OutboxOp; result: unknown }
+  | { type: 'applied'; op: OutboxOp; result: unknown; remaining?: OutboxOp[] }
   | { type: 'parked'; op: OutboxOp; error: LastError }
   | { type: 'retry-scheduled'; op: OutboxOp; at: number }
   | { type: 'offline' }
@@ -117,7 +117,8 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
       const result = await executor.run(claimed, { transport: deps.transport, store: deps.store });
       await deps.store.complete(claimed.seq);
       tally.applied += 1;
-      emit({ type: 'applied', op: claimed, result });
+      // Ops still pending after this one: the cache patch re-applies them over the server row.
+      emit({ type: 'applied', op: claimed, result, remaining: await deps.store.list(userId) });
       return true;
     } catch (e) {
       return onFailure(claimed, userId, e, tally);

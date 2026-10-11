@@ -162,7 +162,7 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
   const handleEvent = (e: DrainEvent): void => {
     if (e.type === 'finished') void resolveScans();
     if (e.type === 'applied') {
-      applyWrites(applyResult(e.op, e.result));
+      applyWrites(applyResult(e.op, e.result, e.remaining));
     } else if (e.type === 'finished' && e.applied > 0) {
       const userId = getUserId();
       if (userId) {
