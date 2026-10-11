@@ -17,7 +17,7 @@ export interface ShareDeps {
   copy: ((text: string) => Promise<void>) | null;
 }
 
-export const SHARE_TITLE = 'Kitcha shopping list';
+export const SHARE_TITLE = 'Kumaun shopping list';
 export const SHARE_EMPTY_TEXT = 'Nothing left to buy.';
 export const SHARE_ERROR_COPY = "Couldn't open sharing. Try again.";
 export const SHARE_COPIED_COPY = 'List copied';

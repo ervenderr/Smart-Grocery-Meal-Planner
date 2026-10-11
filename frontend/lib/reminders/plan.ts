@@ -72,7 +72,7 @@ export function buildReminderPlan(
     .map(([, g], index) =>
       Object.freeze({
         id: REMINDER_ID_BASE + index,
-        title: 'Kitcha' as const,
+        title: 'Kumaun' as const,
         body: formatReminderBody([...g.names].sort((a, b) => a.localeCompare(b, 'en')), g.offset),
         fireAt: g.fireAt,
         route: EXPIRING_ROUTE,

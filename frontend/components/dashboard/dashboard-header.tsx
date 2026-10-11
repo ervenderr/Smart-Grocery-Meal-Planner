@@ -23,7 +23,7 @@ export function DashboardHeader() {
       {/* Left Side */}
       <div className="flex min-w-0 items-center gap-2 lg:gap-4">
         {/* Compact brand + page title (below lg) */}
-        <Link href="/dashboard" className="flex shrink-0 items-center lg:hidden" aria-label="Kitcha home">
+        <Link href="/dashboard" className="flex shrink-0 items-center lg:hidden" aria-label="Kumaun home">
           <Image src="/kitcha-logo.svg" alt="" width={32} height={32} className="h-8 w-8" />
         </Link>
         <span className="truncate text-xl font-semibold text-gray-900 lg:hidden" aria-hidden="true">

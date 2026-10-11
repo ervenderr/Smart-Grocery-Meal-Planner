@@ -34,7 +34,7 @@ export function StepBudget({
   return (
     <div className="space-y-6">
       <p className="text-base text-gray-600">
-        Tell us your weekly grocery budget so Kitcha can keep you on track.
+        Tell us your weekly grocery budget so Kumaun can keep you on track.
       </p>
       <Select
         label="Currency"

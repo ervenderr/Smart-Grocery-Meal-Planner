@@ -21,7 +21,7 @@ describe('buildShareText', () => {
       item({ itemName: 'Eggs', isChecked: true }),
       item({ itemName: 'Rice', category: 'pantry', quantity: 1.5, unit: 'kg' }),
     ]);
-    expect(r.title).toBe('Kitcha shopping list');
+    expect(r.title).toBe('Kumaun shopping list');
     expect(r.count).toBe(2);
     expect(r.text).toContain('[ ] Milk (2 L)');
     expect(r.text).toContain('[ ] Rice (1.5 kg)');

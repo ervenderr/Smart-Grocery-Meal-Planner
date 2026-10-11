@@ -52,7 +52,7 @@ describe.each(ZONES)('buildReminderPlan in %s', (tz) => {
     expect(out).toHaveLength(1);
     expect(out[0].fireAt.getTime()).toBe(new Date(2026, 9, 11, 9, 0).getTime());
     expect(out[0].body).toBe('Milk expires tomorrow');
-    expect(out[0].title).toBe('Kitcha');
+    expect(out[0].title).toBe('Kumaun');
     expect(out[0].route).toBe(EXPIRING_ROUTE);
     expect(out[0].id).toBe(REMINDER_ID_BASE);
   });

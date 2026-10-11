@@ -1,4 +1,4 @@
-# Kitcha - Frontend
+# Kumaun - Frontend
 
 Mobile-first PWA built with Next.js 16.4 (App Router), React 19.3, TypeScript and Tailwind CSS 4. See the [root README](../README.md) for the product overview and deployment notes.
 

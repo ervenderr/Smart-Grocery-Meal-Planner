@@ -14,7 +14,7 @@ export interface ReminderItem {
 
 export interface ReminderNotification {
   readonly id: number;
-  readonly title: 'Kitcha';
+  readonly title: 'Kumaun';
   readonly body: string;
   readonly fireAt: Date;
   readonly route: string;

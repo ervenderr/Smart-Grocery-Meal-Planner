@@ -13,12 +13,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Kitcha',
+  title: 'Kumaun',
   description: 'Plan meals, track groceries, and manage your budget with ease',
   keywords: ['meal planning', 'grocery', 'budget tracking', 'pantry management'],
   ...(nativeBuild
     ? {}
-    : { appleWebApp: { capable: true, title: 'Kitcha', statusBarStyle: 'default' as const } }),
+    : { appleWebApp: { capable: true, title: 'Kumaun', statusBarStyle: 'default' as const } }),
   icons: {
     icon: [
       { url: '/kitcha-logo.svg', type: 'image/svg+xml' },

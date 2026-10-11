@@ -72,7 +72,7 @@ const PAGE_TITLES: Readonly<Record<string, string>> = {
   '/help': 'Help',
 };
 
-const DEFAULT_TITLE = 'Kitcha';
+const DEFAULT_TITLE = 'Kumaun';
 
 function stripQuery(href: string): string {
   const index = href.indexOf('?');

@@ -1,7 +1,7 @@
 import { getApiErrorMessage } from '@/lib/api/errors';
 
 export const RETRYABLE_ERROR_COPY =
-  "We couldn't reach Kitcha. Check your connection and try again.";
+  "We couldn't reach Kumaun. Check your connection and try again.";
 export const NON_RETRYABLE_FALLBACK_COPY =
   "We couldn't save part of your setup. Please review your choices, or continue without saving.";
 

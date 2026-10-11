@@ -22,8 +22,8 @@ export default function Home() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center">
             <Image
-              src="/kitcha-logo-name.svg"
-              alt="Kitcha"
+              src="/kumaun-logo-name.svg"
+              alt="Kumaun"
               width={120}
               height={32}
               priority
@@ -185,7 +185,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-8">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-          <p>&copy; 2025 Kitcha. Built with ❤️ for better grocery management.</p>
+          <p>&copy; 2025 Kumaun. Built with ❤️ for better grocery management.</p>
         </div>
       </footer>
     </div>
