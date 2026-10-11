@@ -14,6 +14,8 @@ import { EditPantryItemModal } from '@/components/pantry/edit-pantry-item-modal'
 import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { PantryItemCard } from '@/components/pantry/pantry-item-card';
 import { pantryApi } from '@/lib/api/pantry';
+import { offlineWrite } from '@/lib/offline/facade';
+import { buildPantryDelete } from '@/lib/offline/ops/pantry-ops';
 import { queryKeys } from '@/lib/react-query';
 import { getDaysUntilExpiry, WARNING_DAYS } from '@/lib/pantry/expiry';
 import { sortUsedUpLast } from '@/lib/pantry/quantity';
@@ -157,9 +159,12 @@ function PantryPageContent() {
   const handleDelete = async (item: PantryItem) => {
     if (deleteConfirm?.id === item.id) {
       try {
-        await pantryApi.delete(item.id);
+        const outcome = await offlineWrite({
+          op: () => buildPantryDelete(item),
+          direct: () => pantryApi.delete(item.id),
+        });
         toast.success('Item deleted successfully');
-        await refreshItems();
+        if (outcome.mode === 'direct') await refreshItems();
         setDeleteConfirm(null);
       } catch (error: any) {
         console.error('Delete error:', error);
