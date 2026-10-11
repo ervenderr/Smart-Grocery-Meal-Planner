@@ -213,7 +213,7 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
         if (!op || op.state !== 'failed') return;
         // A manual retry is an explicit "send it": clear any in-doubt/expired marker but keep the
         // row marked as sent (non-null error) so it is never coalesced into.
-        await tx.run(`UPDATE outbox SET state = 'queued', last_error_json = ?, next_attempt_at = 0, updated_at = ? WHERE seq = ?`,
+        await tx.run(`UPDATE outbox SET state = 'queued', attempts = 0, last_error_json = ?, next_attempt_at = 0, updated_at = ? WHERE seq = ?`,
           [JSON.stringify(SENT_MARK), now(), seq]);
         await tx.run(
           `UPDATE outbox SET state = 'queued', updated_at = ? WHERE user_id = ? AND entity_type = ? AND entity_id = ? AND seq > ? AND state = 'blocked'`,
