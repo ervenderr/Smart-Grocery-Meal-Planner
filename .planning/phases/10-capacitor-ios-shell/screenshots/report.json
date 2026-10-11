@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-11T02:14:32Z",
+  "device": "iPhone 17",
+  "runtime": "iOS-26-5",
+  "simctl_privacy_notifications_supported": false,
+  "notification_pending_check": "human_needed",
+  "duration_seconds": 40,
+  "steps": [
+    {
+      "step": "render",
+      "ok": true,
+      "origin": "capacitor://localhost"
+    },
+    {
+      "step": "login",
+      "ok": true,
+      "leaks": 0
+    },
+    {
+      "step": "relaunch",
+      "ok": true,
+      "leaks": 0,
+      "hasAccess": true,
+      "isAuthenticated": true
+    },
+    {
+      "step": "scan",
+      "ok": true,
+      "virtualRoutesToManual": true,
+      "injected": true
+    },
+    {
+      "step": "haptics",
+      "ok": true
+    },
+    {
+      "step": "notifications",
+      "ok": true,
+      "permission": "prompt",
+      "status": "not-granted",
+      "pending": 0
+    },
+    {
+      "step": "done",
+      "ok": true
+    }
+  ]
+}
