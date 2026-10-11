@@ -15,10 +15,12 @@ import {
   PaginatedPantryResponse,
   PantryStats,
 } from "../../types/pantry.types";
-import { Prisma } from "@prisma/client";
+import { Prisma, PantryItem } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import { formatPantryItem } from "./pantry.format";
 import { notifyLowStock } from "./pantry.low-stock";
+import { assertPantryCapacity, lockPantryCap } from "./pantry.limit";
+import { config } from "../../config/env.config";
 
 export class PantryService {
   /**
@@ -47,31 +49,51 @@ export class PantryService {
       throw new AppError("Quantity must be greater than 0", 400);
     }
 
-    // Create the pantry item
-    let item;
+    // Count + insert under the per-user cap lock so concurrent creates cannot
+    // push a free user past the limit (12-07).
+    let result: { item: PantryItem; created: boolean };
     try {
-      item = await prisma.pantryItem.create({
-        data: {
-          ...(id ? { id } : {}),
+      result = await prisma.$transaction(async (tx) => {
+        await lockPantryCap(tx, userId);
+        if (id) {
+          const replay = await this.findReplay(tx, userId, id);
+          if (replay) return { item: replay, created: false };
+        }
+        await assertPantryCapacity(
+          tx,
           userId,
-          ingredientName: ingredientName.trim(),
-          quantity: new Decimal(quantity),
-          unit,
-          category,
-          expiryDate: expiryDate ? new Date(expiryDate) : null,
-          purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
-          purchasePriceCents,
-          location,
-          notes,
-          barcode: barcode ?? null,
-        },
+          config.entitlements.freePantryLimit,
+          1
+        );
+        const row = await tx.pantryItem.create({
+          data: {
+            ...(id ? { id } : {}),
+            userId,
+            ingredientName: ingredientName.trim(),
+            quantity: new Decimal(quantity),
+            unit,
+            category,
+            expiryDate: expiryDate ? new Date(expiryDate) : null,
+            purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
+            purchasePriceCents,
+            location,
+            notes,
+            barcode: barcode ?? null,
+          },
+        });
+        return { item: row, created: true };
       });
     } catch (error) {
       if (id && this.isPrimaryKeyConflict(error)) {
-        return this.resolveClientIdReplay(userId, id);
+        const replay = await this.findReplay(prisma, userId, id);
+        if (replay) return { item: this.formatItem(replay), created: false };
       }
       throw error;
     }
+    if (!result.created) {
+      return { item: this.formatItem(result.item), created: false };
+    }
+    const item = result.item;
 
     logger.info("Pantry item created", {
       service: "kitcha-api",
@@ -96,13 +118,16 @@ export class PantryService {
    * resurrect anything otherwise. The existing row is returned unchanged with no
    * payload comparison (a stale create replayed after a later edit must not 409);
    * payload-mismatch detection is the Idempotency-Key middleware's job.
+   * Returns null when the id is free.
    */
-  private async resolveClientIdReplay(
+  private async findReplay(
+    db: Prisma.TransactionClient | typeof prisma,
     userId: string,
     id: string
-  ): Promise<{ item: PantryItemResponse; created: boolean }> {
-    const existing = await prisma.pantryItem.findUnique({ where: { id } });
-    if (!existing || existing.userId !== userId) {
+  ): Promise<PantryItem | null> {
+    const existing = await db.pantryItem.findUnique({ where: { id } });
+    if (!existing) return null;
+    if (existing.userId !== userId) {
       throw new AppError("Client id already in use", 409, true, {
         code: "CLIENT_ID_CONFLICT",
       });
@@ -112,7 +137,7 @@ export class PantryService {
         code: "CLIENT_ID_DELETED",
       });
     }
-    return { item: this.formatItem(existing), created: false };
+    return existing;
   }
 
   /**
