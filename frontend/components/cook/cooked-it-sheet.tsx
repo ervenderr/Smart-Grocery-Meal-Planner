@@ -18,7 +18,7 @@ import { useIsOnline } from '@/lib/offline/status/use-offline-status';
 import type { CookApplyResult } from '@/types/cook.types';
 import { getApiErrorCode } from '@/lib/api/errors';
 import { haptic } from '@/lib/native/native-haptics';
-import { queryKeys } from '@/lib/react-query';
+import { refreshAfterCook } from '@/lib/offline/ops/cook-ops';
 import { cookSuccessToast, deductionCount, isPreviewStale, toDeductions } from '@/lib/cook/preview';
 import type { CookPreview, CookRow, CookTarget } from '@/types/cook.types';
 
@@ -153,7 +153,7 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
     onSuccess: (result) => {
       haptic('success');
       toast.success(result ? cookSuccessToast(result) : COOK_QUEUED_TOAST);
-      void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
+      refreshAfterCook(queryClient, result);
       onCooked?.();
       onClose();
     },
