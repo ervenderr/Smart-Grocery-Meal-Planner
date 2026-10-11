@@ -18,6 +18,7 @@ const root = join(here, '..', '..');
 
 const IONIC = 'github.com/ionic-team/';
 const APARAJITA = 'github.com/aparajita/';
+const CAP_COMMUNITY = 'github.com/capacitor-community/';
 const VITEST = 'github.com/vitest-dev/';
 
 export const EXPECTED = Object.freeze([
@@ -34,6 +35,8 @@ export const EXPECTED = Object.freeze([
   { name: '@capacitor/app', version: '8.1.2', repo: IONIC },
   { name: '@capacitor/device', version: '8.0.3', repo: IONIC },
   { name: '@aparajita/capacitor-secure-storage', version: '8.0.1', repo: APARAJITA },
+  { name: '@capacitor-community/sqlite', version: '8.1.1', repo: CAP_COMMUNITY },
+  { name: '@capacitor/network', version: '8.0.1', repo: IONIC },
   { name: '@vitest/coverage-v8', version: '5.0.3', repo: VITEST },
 ]);
 
