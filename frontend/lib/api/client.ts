@@ -5,6 +5,8 @@ import { clearUserSessionState } from '@/lib/auth/session-cleanup';
 import { isAiConsentRequiredError } from '@/lib/ai/consent-flow';
 import { useAiConsentStore } from '@/lib/ai/consent-store';
 import { clearTokens, getAccessToken, setTokens, getRefreshToken } from '@/lib/api/token-storage';
+import { isNative } from '@/lib/platform/native';
+import { navigate } from '@/lib/platform/navigation';
 import { createAuthErrorHandler, createRefreshCoordinator } from '@/lib/api/session-refresh';
 
 /**
@@ -43,7 +45,8 @@ class ApiClient {
         clearTokens();
         if (typeof window !== 'undefined') {
           clearUserSessionState(queryClient, window.sessionStorage, window.localStorage);
-          window.location.href = '/login';
+          if (isNative()) navigate('/login/', { replace: true });
+          else window.location.href = '/login';
         }
       },
     });

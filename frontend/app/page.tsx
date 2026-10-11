@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import { isNativeBuild } from '@/lib/platform/native';
+import { NativeEntry } from '@/components/platform/native-entry';
 import {
   ShoppingCart,
   Calendar,
@@ -11,6 +13,8 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
+  if (isNativeBuild()) return <NativeEntry />;
+
   return (
     <div className="min-h-dvh bg-gradient-to-b from-primary-50 to-white">
       {/* Header */}

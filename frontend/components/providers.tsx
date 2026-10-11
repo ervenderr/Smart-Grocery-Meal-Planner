@@ -7,15 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { queryClient } from '@/lib/react-query';
 import { CurrencyProvider } from '@/lib/currency/currency-provider';
 import { ErrorBoundary } from '@/components/common/error-boundary';
-import { whenTokenStorageReady } from '@/lib/api/token-storage';
-
-/** Starts Keychain hydration at app start (no-op on web). */
-function TokenHydration() {
-  useEffect(() => {
-    void whenTokenStorageReady();
-  }, []);
-  return null;
-}
+import { NavigationRegistrar } from '@/components/platform/navigation-registrar';
 
 /**
  * Application Providers
@@ -25,7 +17,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TokenHydration />
+        <NavigationRegistrar />
         <CurrencyProvider>{children}</CurrencyProvider>
         <Toaster
           position="top-right"

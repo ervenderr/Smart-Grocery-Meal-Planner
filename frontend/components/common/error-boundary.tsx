@@ -3,6 +3,8 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isNative } from '@/lib/platform/native';
+import { navigate } from '@/lib/platform/navigation';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -31,6 +33,24 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     console.error('Error Boundary caught an error:', error, errorInfo);
   }
 
+  private reset(): void {
+    this.setState({ hasError: false, error: null });
+  }
+
+  private handleRetry = (): void => {
+    if (isNative()) this.reset();
+    else window.location.reload();
+  };
+
+  private handleGoHome = (): void => {
+    if (isNative()) {
+      navigate('/', { replace: true });
+      this.reset();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       return (
@@ -53,13 +73,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             )}
             <div className="mt-6 flex gap-3 justify-center">
               <Button
-                onClick={() => window.location.reload()}
+                onClick={this.handleRetry}
                 variant="primary"
               >
                 Refresh Page
               </Button>
               <Button
-                onClick={() => window.location.href = '/'}
+                onClick={this.handleGoHome}
                 variant="outline"
               >
                 Go Home
