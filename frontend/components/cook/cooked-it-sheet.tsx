@@ -9,7 +9,13 @@ import { Button } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/pantry/quantity-stepper';
 import { CookPreviewRows } from '@/components/cook/cook-preview-rows';
 import { CookNotes } from '@/components/cook/cook-notes';
+import { OfflineCookBody } from '@/components/cook/offline-cook-body';
+import { COOK_QUEUED_TOAST, queueCook } from '@/components/cook/queue-cook';
 import { cookApi } from '@/lib/api/cook';
+import { directThenQueue } from '@/lib/offline/direct-or-queue';
+import { getOfflineRuntime } from '@/lib/offline/runtime';
+import { useIsOnline } from '@/lib/offline/status/use-offline-status';
+import type { CookApplyResult } from '@/types/cook.types';
 import { getApiErrorCode } from '@/lib/api/errors';
 import { haptic } from '@/lib/native/native-haptics';
 import { queryKeys } from '@/lib/react-query';
@@ -40,9 +46,11 @@ const ALREADY_COOKED_COPY = 'This meal is already marked as cooked.';
 const APPLY_ERROR_COPY = "We couldn't update your pantry. Nothing was changed. Try again.";
 
 export function CookedItSheet(props: CookedItSheetProps) {
+  const online = useIsOnline();
+  const offlineBody = !online && getOfflineRuntime() !== null;
   return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} title="Cooked it?" size="md">
-      {props.isOpen && <CookedItBody {...props} />}
+      {props.isOpen && (offlineBody ? <OfflineCookBody {...props} /> : <CookedItBody {...props} />)}
     </Modal>
   );
 }
@@ -121,10 +129,30 @@ function CookedItBody({ onClose, target, title, plannedServings, onCooked }: Coo
   const count = deductionCount(editableRows, uses);
 
   const apply = useMutation({
-    mutationFn: () => cookApi.apply(target, toDeductions(editableRows, uses)),
+    mutationFn: async (): Promise<CookApplyResult | null> => {
+      const deductions = toDeductions(editableRows, uses);
+      const runtime = getOfflineRuntime();
+      if (!runtime) return cookApi.apply(target, deductions);
+      const now = new Date();
+      const occurredAt = now.toISOString();
+      const outcome = await directThenQueue({
+        send: (idempotencyKey) => cookApi.apply(target, deductions, { idempotencyKey, occurredAt }),
+        queue: (idempotencyKey) =>
+          queueCook({
+            runtime,
+            queryClient,
+            target,
+            servings: effectiveServings,
+            title,
+            now,
+            opts: { idempotencyKey, resolved: { ...target, deductions, occurredAt } },
+          }),
+      });
+      return outcome.mode === 'direct' ? outcome.result : null;
+    },
     onSuccess: (result) => {
       haptic('success');
-      toast.success(cookSuccessToast(result));
+      toast.success(result ? cookSuccessToast(result) : COOK_QUEUED_TOAST);
       void queryClient.invalidateQueries({ queryKey: queryKeys.pantry.all });
       onCooked?.();
       onClose();
