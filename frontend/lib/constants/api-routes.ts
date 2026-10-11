@@ -95,4 +95,9 @@ export const API_ROUTES = {
     STATS: `/api/${API_VERSION}/notifications/stats`,
     GENERATE: `/api/${API_VERSION}/notifications/generate`,
   },
+
+  // Sync
+  SYNC: {
+    BOOTSTRAP: `/api/${API_VERSION}/sync/bootstrap`,
+  },
 } as const;
