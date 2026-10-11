@@ -5,9 +5,9 @@
  */
 
 /** Single switch: set to false once the owner has reviewed the legal text. */
-export const DRAFT_BANNER_ENABLED = true;
+export const DRAFT_BANNER_ENABLED = false;
 export const DRAFT_BANNER_TEXT = 'Draft: pending owner review.';
-export const LEGAL_LAST_UPDATED = 'October 10, 2026';
+export const LEGAL_LAST_UPDATED = 'October 12, 2026';
 
 export const LEGAL_ROUTES = {
   privacy: '/privacy',
