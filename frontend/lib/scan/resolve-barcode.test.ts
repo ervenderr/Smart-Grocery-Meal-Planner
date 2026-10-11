@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { FoodAttribution, FoodProduct } from '@/lib/api/food';
 import type { PantryItem } from '@/types/pantry.types';
+import { OfflineError } from '@/lib/api/offline-error';
 import { resolveBarcode } from './resolve-barcode';
 
 const attribution: FoodAttribution = { name: 'OFF', url: 'u', license: 'l', note: 'n' };
@@ -31,6 +32,13 @@ describe('resolveBarcode', () => {
       lookup: async () => Promise.reject(apiError('LOOKUP_NOT_FOUND')),
     });
     expect(r).toEqual({ kind: 'unknown', barcode: '4800016644801' });
+  });
+  it('maps an offline rejection to offline-unknown', async () => {
+    const r = await resolveBarcode('4800016644801', {
+      findOwn: async () => null,
+      lookup: async () => Promise.reject(new OfflineError()),
+    });
+    expect(r).toEqual({ kind: 'offline-unknown', barcode: '4800016644801' });
   });
   it('maps an empty product name to unknown', async () => {
     const r = await resolveBarcode('4800016644801', {

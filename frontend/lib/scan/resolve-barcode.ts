@@ -1,14 +1,16 @@
 import type { FoodAttribution, FoodProduct } from '@/lib/api/food';
 import { getApiErrorCode } from '@/lib/api/errors';
+import { isOfflineError } from '@/lib/api/offline-error';
 import type { PantryItem } from '@/types/pantry.types';
 
 export type BarcodeResolution =
   | { kind: 'own'; barcode: string; item: PantryItem }
   | { kind: 'found'; barcode: string; product: FoodProduct; attribution: FoodAttribution }
   | { kind: 'unknown'; barcode: string }
+  | { kind: 'offline-unknown'; barcode: string }
   | { kind: 'failed'; barcode: string };
 
-interface ResolveDeps {
+export interface ResolveDeps {
   findOwn: (barcode: string) => Promise<PantryItem | null>;
   lookup: (barcode: string) => Promise<{ product: FoodProduct; attribution: FoodAttribution }>;
 }
@@ -32,6 +34,7 @@ export async function resolveBarcode(
     }
     return { kind: 'found', barcode: code, product, attribution };
   } catch (error) {
+    if (isOfflineError(error)) return { kind: 'offline-unknown', barcode: code };
     if (getApiErrorCode(error) === 'LOOKUP_NOT_FOUND') {
       return { kind: 'unknown', barcode: code };
     }
