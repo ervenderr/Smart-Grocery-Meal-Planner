@@ -32,7 +32,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 - [ ] **Phase 9: Offline Rules Engine** - Network-free "what can I cook" ranking and ingredient substitutions
 - [ ] **Phase 10: Capacitor iOS Shell** - Static-export Capacitor app with secure token storage, native scan, local notifications, simulator smoke test (HUMAN GATE: install Xcode, real iPhone)
 - [ ] **Phase 11: Offline Core** - SQLite read cache and write outbox so the whole app works with no signal
-- [ ] **Phase 12: Subscription** - Kitcha Plus via RevenueCat with server-side entitlement gating (HUMAN GATE: Apple Developer enrollment, App Store Connect products)
+- [ ] **Phase 12: One-Time Unlock** - Kitcha Full at $9.99 (non-consumable IAP) with server-side entitlement gating (HUMAN GATE: Apple Developer enrollment, App Store Connect product)
 - [ ] **Phase 13: On-Device AI** - Apple Foundation Models suggestions with server fallback and a recorded comparison (HUMAN GATE: Apple Intelligence iPhone 15 Pro or newer)
 - [ ] **Phase 14: TestFlight & App Store Release** - Scripted TestFlight upload, complete listing, submission (HUMAN GATE: enrollment, screenshots, submit)
 
@@ -151,21 +151,21 @@ Plans:
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 12: Subscription
-**Goal**: Users can subscribe to Kitcha Plus and paid features are enforced on the server while the core pantry stays free
+### Phase 12: One-Time Unlock
+**Goal**: Users can buy Kitcha Full once for $9.99 and paid features are enforced on the server while a useful free tier stays free
 **Depends on**: Phase 7 (store readiness), Phase 10 (native shell), Phase 8 (backend groundwork)
 **Requirements**: SUB-01, SUB-02, SUB-03
-**Human gate**: Apple Developer Program enrollment, App Store Connect subscription products and sandbox tester, and a RevenueCat account/keys are required (agents build and test the backend webhook and paywall code against mocks first).
+**Human gate**: Apple Developer Program enrollment, App Store Connect non-consumable product and sandbox tester (RevenueCat optional) are required (agents build and test the backend webhook and paywall code against mocks first).
 **Success Criteria** (what must be TRUE):
-  1. User can start a 7-day trial on an annual or monthly plan in the sandbox, and can restore purchases on a fresh install
-  2. After purchase or cancellation, the backend entitlement updates from the RevenueCat webhook and paid-only actions (AI beyond the free quota, unlimited pantry, nutrition) succeed or are refused server-side accordingly
-  3. A free user can still scan barcodes and get expiry alerts, and the paywall appears only when a gated action is tried and can be dismissed
+  1. User can buy the $9.99 unlock once in the sandbox and can restore the purchase on a fresh install, with no recurring charge
+  2. After purchase or refund, the backend entitlement updates and paid-only actions (pantry beyond 25 items, server AI beyond a small free allowance) succeed or are refused server-side accordingly
+  3. A free user can still scan barcodes, get expiry alerts and keep up to 25 pantry items, and the upgrade prompt appears only at a limit and can be dismissed
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 13: On-Device AI
 **Goal**: Supported iPhones generate recipe suggestions on-device, and everything else falls back to the server transparently
-**Depends on**: Phase 10 (native shell), Phase 7 (AI consent and labels), Phase 12 (gated AI quota for the fallback path)
+**Depends on**: Phase 10 (native shell), Phase 7 (AI consent and labels), Phase 12 (gated AI allowance for the fallback path)
 **Requirements**: AI-01, AI-02, AI-03
 **Human gate**: Needs an Apple Intelligence-capable iPhone (15 Pro or newer) with Apple Intelligence enabled for real verification; the Simulator is unreliable for Foundation Models.
 **Success Criteria** (what must be TRUE):
@@ -203,6 +203,6 @@ Phases execute in numeric order. Phases 7, 8 and 9 are independent and need no X
 | 9. Offline Rules Engine | v2.0 | 0/8 | Planned | - |
 | 10. Capacitor iOS Shell | v2.0 | 0/10 | Planned | - |
 | 11. Offline Core | v2.0 | 0/0 | Not started | - |
-| 12. Subscription | v2.0 | 0/0 | Not started | - |
+| 12. One-Time Unlock | v2.0 | 0/0 | Not started | - |
 | 13. On-Device AI | v2.0 | 0/0 | Not started | - |
 | 14. TestFlight & App Store Release | v2.0 | 0/0 | Not started | - |

@@ -42,10 +42,10 @@ Research: `.planning/research-v2/` (01 native path, 02 on-device AI, 03 offline 
 - [ ] **OFF-08**: User gets rules-based "what can I cook" recipe ranking from the pantry and ingredient substitutions with no network and no model
 - [ ] **OFF-09**: Queued changes survive app kill and reboot, are applied exactly once, and conflicts follow last-write-wins per field with delete-wins
 
-### Subscription (SUB)
-- [ ] **SUB-01**: User can subscribe to Kitcha Plus (annual/monthly, 7-day trial) and restore purchases via StoreKit through RevenueCat
-- [ ] **SUB-02**: Backend stores entitlements from RevenueCat webhooks and gates paid features (AI quota beyond free tier, unlimited pantry, nutrition) server-side
-- [ ] **SUB-03**: Free tier keeps barcode scanning and expiry alerts; paywall appears only at gated actions and can be dismissed
+### One-Time Unlock (SUB)
+- [ ] **SUB-01**: User can buy Kitcha Full once for $9.99 (non-consumable in-app purchase, regional tier) and restore the purchase on a new install, via StoreKit 2
+- [ ] **SUB-02**: Backend verifies the purchase (App Store Server API/receipt or RevenueCat) and stores an entitlement; paid features are gated server-side (unlimited pantry, offline AI-free extras, server-AI monthly allowance)
+- [ ] **SUB-03**: Free tier is useful (barcode scanning, expiry alerts, up to 25 pantry items); an upgrade prompt appears only at the limit and can be dismissed; no recurring charges anywhere
 
 ### On-Device AI (AI)
 - [ ] **AI-01**: On supported iPhones (Apple Intelligence), user can generate recipe suggestions from the pantry on-device with structured, schema-valid output and no network
