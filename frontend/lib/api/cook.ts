@@ -18,8 +18,13 @@ export const cookApi = {
 
   apply: async (
     target: CookTarget,
-    deductions: readonly CookDeduction[]
+    deductions: readonly CookDeduction[],
+    opts?: { idempotencyKey?: string; occurredAt?: string }
   ): Promise<CookApplyResult> => {
-    return apiClient.post<CookApplyResult>(API_ROUTES.COOK.APPLY, { ...target, deductions });
+    return apiClient.post<CookApplyResult>(
+      API_ROUTES.COOK.APPLY,
+      { ...target, deductions, ...(opts?.occurredAt ? { occurredAt: opts.occurredAt } : {}) },
+      opts?.idempotencyKey ? { headers: { 'Idempotency-Key': opts.idempotencyKey } } : undefined
+    );
   },
 };

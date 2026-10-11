@@ -40,8 +40,15 @@ export const shoppingApi = {
     });
   },
 
-  finish: async (input: FinishShoppingInput = {}): Promise<FinishShoppingResult> => {
-    return apiClient.post<FinishShoppingResult>(API_ROUTES.SHOPPING.FINISH, input);
+  finish: async (
+    input: FinishShoppingInput = {},
+    opts?: { idempotencyKey?: string }
+  ): Promise<FinishShoppingResult> => {
+    return apiClient.post<FinishShoppingResult>(
+      API_ROUTES.SHOPPING.FINISH,
+      input,
+      opts?.idempotencyKey ? { headers: { 'Idempotency-Key': opts.idempotencyKey } } : undefined
+    );
   },
 
   getHistory: async (params?: { page?: number; limit?: number }): Promise<ShoppingHistoryPage> => {

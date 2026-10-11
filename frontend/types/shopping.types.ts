@@ -66,6 +66,8 @@ export interface FinishShoppingInput {
   /** User's local date, YYYY-MM-DD */
   receiptDate?: string;
   addToPantry?: boolean;
+  /** ISO timestamp the trip was finished (offline-queued finishes) */
+  occurredAt?: string;
 }
 
 export interface ShoppingHistoryEntry {
