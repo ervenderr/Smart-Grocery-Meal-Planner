@@ -51,6 +51,26 @@ const isLoopbackHost = (hostname: string): boolean =>
   hostname === "[::]" ||
   /^127\./.test(hostname);
 
+const REVERSE_DNS = /^[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]+)+$/;
+const reverseDnsId = (fallback: string) =>
+  z.string().max(100).regex(REVERSE_DNS, "must be a reverse-DNS identifier").default(fallback);
+
+/** One-time unlock (IAP) keys, pantry free limit and paid AI allowance. */
+const iapEnvShape = {
+  APPLE_BUNDLE_ID: reverseDnsId("app.kitcha.mobile"),
+  IAP_PRODUCT_ID: reverseDnsId("app.kitcha.mobile.full"),
+  APPLE_APP_APPLE_ID: z.preprocess(
+    blankToUndefined,
+    z.coerce.number().int().positive().optional()
+  ),
+  IAP_ONLINE_CHECKS: z.preprocess(blankToUndefined, z.enum(["true", "false"]).optional()),
+  IAP_ALLOW_XCODE_ENV: z.enum(["true", "false"]).default("false"),
+  FREE_PANTRY_LIMIT: z.coerce.number().int().min(1).max(1000).default(25),
+  AI_PAID_USER_DAILY_LIMIT: z.coerce.number().int().min(1).max(1000).default(40),
+  AI_FREE_MONTHLY_LIMIT: z.coerce.number().int().min(0).max(100000).default(0),
+  AI_PAID_MONTHLY_LIMIT: z.coerce.number().int().min(0).max(100000).default(600),
+};
+
 export const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -109,6 +129,7 @@ export const envSchema = z
       .default("https://github.com/ervenderr/Smart-Grocery-Meal-Planner"),
     SPOONACULAR_API_KEY: z.string().optional(),
     ZAPIER_WEBHOOK_URL: z.url().optional(),
+    ...iapEnvShape,
   })
   .superRefine((env, ctx) => {
     const formatMessage = "must be a bare origin (scheme://host[:port], no path)";
@@ -128,6 +149,14 @@ export const envSchema = z
         code: "custom",
         path: ["PORT"],
         message: "is required in production (provided by the platform)",
+      });
+    }
+    if (env.IAP_ALLOW_XCODE_ENV === "true") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["IAP_ALLOW_XCODE_ENV"],
+        message:
+          "must be false in production (Xcode/LocalTesting JWS are not signature-verified)",
       });
     }
     if (!env.AI_BASE_URL.startsWith("https://")) {

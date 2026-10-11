@@ -86,7 +86,25 @@ export const config = Object.freeze({
     jsonMode: parsed.AI_JSON_MODE,
     userDailyLimit: parsed.AI_USER_DAILY_LIMIT,
     globalDailyLimit: parsed.AI_GLOBAL_DAILY_LIMIT,
+    paidUserDailyLimit: parsed.AI_PAID_USER_DAILY_LIMIT,
+    freeMonthlyLimit: parsed.AI_FREE_MONTHLY_LIMIT,
+    paidMonthlyLimit: parsed.AI_PAID_MONTHLY_LIMIT,
   }),
+
+  // One-time unlock (StoreKit 2 verification)
+  iap: Object.freeze({
+    bundleId: parsed.APPLE_BUNDLE_ID,
+    appAppleId: parsed.APPLE_APP_APPLE_ID,
+    productId: parsed.IAP_PRODUCT_ID,
+    onlineChecks:
+      parsed.IAP_ONLINE_CHECKS !== undefined
+        ? parsed.IAP_ONLINE_CHECKS === "true"
+        : parsed.NODE_ENV === "production",
+    allowXcodeEnv: parsed.IAP_ALLOW_XCODE_ENV === "true",
+  }),
+
+  // Free-tier limits
+  entitlements: Object.freeze({ freePantryLimit: parsed.FREE_PANTRY_LIMIT }),
 
   // Food data lookups (Open Food Facts / USDA)
   foodData: Object.freeze({
@@ -122,7 +140,18 @@ export const config = Object.freeze({
     readonly jsonMode: "off" | "json_object";
     readonly userDailyLimit: number;
     readonly globalDailyLimit: number;
+    readonly paidUserDailyLimit: number;
+    readonly freeMonthlyLimit: number;
+    readonly paidMonthlyLimit: number;
   };
+  readonly iap: {
+    readonly bundleId: string;
+    readonly appAppleId: number | undefined;
+    readonly productId: string;
+    readonly onlineChecks: boolean;
+    readonly allowXcodeEnv: boolean;
+  };
+  readonly entitlements: { readonly freePantryLimit: number };
   readonly foodData: { readonly usdaApiKey?: string; readonly offContact: string };
   readonly zapier: { readonly webhookUrl?: string };
 };

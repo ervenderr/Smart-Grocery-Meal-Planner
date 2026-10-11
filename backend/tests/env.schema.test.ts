@@ -228,3 +228,58 @@ describe("parseEnv offline-sync settings", () => {
     expect(env.IDEMPOTENCY_TTL_HOURS).toBe(168);
   });
 });
+
+describe("parseEnv: one-time unlock keys", () => {
+  it("applies IAP / pantry / paid-AI defaults", () => {
+    const env = parseEnv(base());
+    expect(env.APPLE_BUNDLE_ID).toBe("app.kitcha.mobile");
+    expect(env.IAP_PRODUCT_ID).toBe("app.kitcha.mobile.full");
+    expect(env.APPLE_APP_APPLE_ID).toBeUndefined();
+    expect(env.IAP_ALLOW_XCODE_ENV).toBe("false");
+    expect(env.FREE_PANTRY_LIMIT).toBe(25);
+    expect(env.AI_PAID_USER_DAILY_LIMIT).toBe(40);
+    expect(env.AI_FREE_MONTHLY_LIMIT).toBe(0);
+    expect(env.AI_PAID_MONTHLY_LIMIT).toBe(600);
+    expect(env.AI_USER_DAILY_LIMIT).toBe(20);
+  });
+
+  it("leaves IAP_ONLINE_CHECKS unset by default and accepts explicit values", () => {
+    expect(parseEnv(base()).IAP_ONLINE_CHECKS).toBeUndefined();
+    expect(parseEnv(base({ IAP_ONLINE_CHECKS: "false" })).IAP_ONLINE_CHECKS).toBe("false");
+    expect(() => parseEnv(base({ IAP_ONLINE_CHECKS: "maybe" }))).toThrow(/IAP_ONLINE_CHECKS/);
+  });
+
+  it("parses APPLE_APP_APPLE_ID as a positive integer", () => {
+    expect(parseEnv(base({ APPLE_APP_APPLE_ID: "1234567890" })).APPLE_APP_APPLE_ID).toBe(
+      1234567890
+    );
+    expect(() => parseEnv(base({ APPLE_APP_APPLE_ID: "abc" }))).toThrow(/APPLE_APP_APPLE_ID/);
+    expect(() => parseEnv(base({ APPLE_APP_APPLE_ID: "0" }))).toThrow(/APPLE_APP_APPLE_ID/);
+  });
+
+  it.each(["0", "1001"])("rejects FREE_PANTRY_LIMIT=%s", (value) => {
+    expect(() => parseEnv(base({ FREE_PANTRY_LIMIT: value }))).toThrow(/FREE_PANTRY_LIMIT/);
+  });
+
+  it("rejects a negative AI_PAID_MONTHLY_LIMIT", () => {
+    expect(() => parseEnv(base({ AI_PAID_MONTHLY_LIMIT: "-1" }))).toThrow(
+      /AI_PAID_MONTHLY_LIMIT/
+    );
+  });
+
+  it("rejects IAP_ALLOW_XCODE_ENV=true in production", () => {
+    expect(() => parseEnv(prod({ IAP_ALLOW_XCODE_ENV: "true" }))).toThrow(
+      /IAP_ALLOW_XCODE_ENV/
+    );
+    expect(parseEnv(base({ IAP_ALLOW_XCODE_ENV: "true" })).IAP_ALLOW_XCODE_ENV).toBe("true");
+    expect(parseEnv(prod()).IAP_ALLOW_XCODE_ENV).toBe("false");
+  });
+
+  it.each(["nodots", "has space.x", "bad/slash.x", `a.${"b".repeat(100)}`])(
+    "rejects non reverse-DNS identifier %s",
+    (value) => {
+      expect(() => parseEnv(base({ APPLE_BUNDLE_ID: value }))).toThrow(/APPLE_BUNDLE_ID/);
+      expect(() => parseEnv(base({ IAP_PRODUCT_ID: value }))).toThrow(/IAP_PRODUCT_ID/);
+    }
+  );
+});
