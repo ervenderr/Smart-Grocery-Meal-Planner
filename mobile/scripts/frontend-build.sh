@@ -52,7 +52,10 @@ build_native() {
     NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY="kitcha:e2e-force-offline" \
     BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
   else
-    BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
+    # Release: scrub any inherited E2E vars so they can never be inlined into the bundle.
+    env -u NEXT_PUBLIC_E2E -u NEXT_PUBLIC_E2E_EMAIL -u NEXT_PUBLIC_E2E_PASSWORD \
+      -u NEXT_PUBLIC_E2E_SUITE -u NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY \
+      BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
   fi
   rm -f out/top-view-tasty-food-devices.jpg
   if [ ! -f out/index.html ]; then
