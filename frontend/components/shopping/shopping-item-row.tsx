@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Check, Trash2 } from 'lucide-react';
 import { AislePriceInput } from '@/components/shopping/aisle-price-input';
+import { PendingMarker } from '@/components/offline/pending-marker';
+import { usePendingEntityStates } from '@/lib/offline/status/use-offline-status';
 import { haptic } from '@/lib/native/native-haptics';
 import { useCurrency } from '@/lib/currency/currency-provider';
 import { itemCheckboxLabel, priceChipLabel } from '@/lib/shopping/a11y';
@@ -28,6 +30,7 @@ export function ShoppingItemRow({
 }: ShoppingItemRowProps) {
   const { format } = useCurrency();
   const [pricing, setPricing] = useState(false);
+  const pendingState = usePendingEntityStates('shopping-item').get(item.id);
   const handleToggle = () => {
     haptic('light');
     onToggle(item);
@@ -89,6 +92,9 @@ export function ShoppingItemRow({
               <span className="text-sm text-gray-600">{largeMeta}</span>
             </span>
           </button>
+          <span className="flex items-center self-center">
+            <PendingMarker state={pendingState} />
+          </span>
           {onSetActualPrice && (
             <button
               type="button"
@@ -148,6 +154,7 @@ export function ShoppingItemRow({
         </span>
         <span className="text-sm text-gray-600">{meta}</span>
       </button>
+      <PendingMarker state={pendingState} />
       {onDelete && (
         <button
           type="button"

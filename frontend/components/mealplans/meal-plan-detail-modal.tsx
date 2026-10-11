@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Calendar, Banknote, Flame, Heart, Clock, Users, ChefHat, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PendingMarker } from '@/components/offline/pending-marker';
+import { usePendingEntityStates } from '@/lib/offline/status/use-offline-status';
 import { CookedItSheet } from '@/components/cook/cooked-it-sheet';
 import { Modal } from '@/components/ui/modal';
 import { useCurrency } from '@/lib/currency/currency-provider';
@@ -23,6 +25,7 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan, onCooked }: Mea
   const { format } = useCurrency();
   const [cookingMeal, setCookingMeal] = useState<MealPlanItem | null>(null);
   const [justCooked, setJustCooked] = useState<readonly string[]>([]);
+  const cookStates = usePendingEntityStates('cook');
   if (!mealPlan) return null;
 
   const formatDate = (dateString: string) => {
@@ -61,12 +64,15 @@ export function MealPlanDetailModal({ isOpen, onClose, mealPlan, onCooked }: Mea
     const cookedAt = meal.cookedAt ?? (justCooked.includes(meal.id) ? new Date().toISOString() : null);
     if (cookedAt) {
       return (
-        <span
-          title={`Cooked ${new Date(cookedAt).toLocaleDateString()}`}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-sm font-semibold text-gray-700"
-        >
-          <CheckCircle className="h-4 w-4" aria-hidden="true" />
-          Cooked
+        <span className="inline-flex shrink-0 items-center gap-1">
+          <span
+            title={`Cooked ${new Date(cookedAt).toLocaleDateString()}`}
+            className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-sm font-semibold text-gray-700"
+          >
+            <CheckCircle className="h-4 w-4" aria-hidden="true" />
+            Cooked
+          </span>
+          <PendingMarker state={cookStates.get(meal.id)} />
         </span>
       );
     }

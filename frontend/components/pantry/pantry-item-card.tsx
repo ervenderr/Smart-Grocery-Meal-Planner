@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Edit2, Trash2, MapPin, Calendar, AlertTriangle } from 'lucide-react';
+import { PendingMarker } from '@/components/offline/pending-marker';
+import { usePendingEntityStates } from '@/lib/offline/status/use-offline-status';
 import { Card } from '@/components/ui/card';
 import { ExpirySheet } from '@/components/pantry/expiry-sheet';
 import { QuantityStepper } from '@/components/pantry/quantity-stepper';
@@ -31,6 +33,7 @@ export function PantryItemCard({
     onPatch(item, { quantity: next })
   );
   const [expiryOpen, setExpiryOpen] = useState(false);
+  const pendingState = usePendingEntityStates('pantry-item').get(item.id);
   const usedUp = Number(item.quantity) === 0 && quantity === 0;
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -59,6 +62,7 @@ export function PantryItemCard({
           {/* Item Name & Category */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <h3 className="font-semibold text-gray-900 truncate">{item.ingredientName}</h3>
+            <PendingMarker state={pendingState} />
             <span className={`rounded-full px-2 py-0.5 text-sm font-semibold w-fit ${getCategoryColor(item.category)}`}>
               {item.category}
             </span>
