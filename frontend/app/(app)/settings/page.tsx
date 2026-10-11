@@ -12,6 +12,8 @@ import { DataSettings } from '@/components/settings/data-settings';
 import { AiPrivacySettings } from '@/components/settings/ai-privacy-settings';
 import { LegalLinks } from '@/components/settings/legal-links';
 import { NativeSettings } from '@/components/settings/native-settings';
+import { KumaunFullCard } from '@/components/settings/kumaun-full-card';
+import { KumaunFullWebNote } from '@/components/settings/kumaun-full-web-note';
 import { usePlatform } from '@/lib/platform/use-platform';
 
 type SettingsTab = 'profile' | 'password' | 'preferences' | 'data' | 'privacy' | 'device';
@@ -83,6 +85,8 @@ export default function SettingsPage() {
           Manage your account settings and preferences
         </p>
       </div>
+
+      {native ? <KumaunFullCard /> : <KumaunFullWebNote />}
 
       {/* Mobile section chips */}
       <div
