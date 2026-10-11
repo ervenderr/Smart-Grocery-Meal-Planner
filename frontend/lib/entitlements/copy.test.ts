@@ -4,8 +4,8 @@ import { ENTITLEMENT_COPY } from './copy';
 function allStrings(): string[] {
   return Object.values(ENTITLEMENT_COPY).flatMap((v) => {
     if (typeof v === 'string') return [v];
-    if (Array.isArray(v)) return v as string[];
-    return [v('X')];
+    if (Array.isArray(v)) return [...v];
+    return typeof v === 'function' ? [v('X')] : [];
   });
 }
 
