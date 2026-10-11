@@ -43,7 +43,9 @@ function build(conn: NativeConnectionLike, inTx: boolean, serial: Serial): SqlDb
       return { changes: res.changes?.changes ?? 0, lastInsertRowid: res.changes?.lastId };
     },
     async query<T>(sql: string, params: readonly unknown[] = []): Promise<T[]> {
-      const res = await conn.query(sql, [...params]);
+      // Top-level reads wait their turn too: on the single connection they would otherwise run
+      // inside another task's open transaction and observe uncommitted (maybe rolled back) rows.
+      const res = await guard(() => conn.query(sql, [...params]));
       return (res.values ?? []) as T[];
     },
     async transaction<T>(fn: (tx: SqlDb) => Promise<T>): Promise<T> {

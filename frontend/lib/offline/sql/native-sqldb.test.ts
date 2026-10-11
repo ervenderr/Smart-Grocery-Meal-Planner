@@ -19,7 +19,11 @@ function fakeConn(log: string[] = []) {
       log.push(`run:${sql}`);
       return { changes: { changes: 1 } };
     },
-    query: async () => ({ values: [] }),
+    query: async (sql) => {
+      await tick();
+      log.push(`query:${sql}${open ? ':in-tx' : ''}`);
+      return { values: [] };
+    },
     beginTransaction: async () => {
       await tick();
       if (open) throw new Error('cannot start a transaction within a transaction');
@@ -80,5 +84,25 @@ describe('createNativeSqlDb serialization', () => {
     const db = createNativeSqlDb(conn);
     await db.transaction((tx) => tx.transaction(async (inner) => void (await inner.run('N'))));
     expect(log).toEqual(['begin', 'run:N', 'commit']);
+  });
+
+  it('a top-level read never runs inside another task\'s open transaction (WR-01)', async () => {
+    const { conn, log } = fakeConn();
+    const db = createNativeSqlDb(conn);
+    let outer: Promise<unknown> = Promise.resolve();
+    await db.transaction(async (tx) => {
+      await tx.run('A');
+      outer = db.query('SELECT 1'); // another task reads while this transaction is open
+      await tx.run('B');
+    });
+    await outer;
+    expect(log).toEqual(['begin', 'run:A', 'run:B', 'commit', 'query:SELECT 1']);
+  });
+
+  it('a read inside the transaction still runs directly', async () => {
+    const { conn, log } = fakeConn();
+    const db = createNativeSqlDb(conn);
+    await db.transaction(async (tx) => void (await tx.query('SELECT 2')));
+    expect(log).toEqual(['begin', 'query:SELECT 2:in-tx', 'commit']);
   });
 });
