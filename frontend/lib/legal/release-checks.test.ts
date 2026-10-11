@@ -16,8 +16,8 @@ describe('collectReleaseWarnings', () => {
     expect(warnings.some((w) => w.includes('NEXT_PUBLIC_SUPPORT_EMAIL'))).toBe(false);
   });
 
-  it('warns while the draft banner is enabled', () => {
-    expect(collectReleaseWarnings({}).some((w) => w.includes('DRAFT_BANNER_ENABLED'))).toBe(true);
+  it('does not warn about the draft banner once the legal text is published', () => {
+    expect(collectReleaseWarnings({}).some((w) => w.includes('DRAFT_BANNER_ENABLED'))).toBe(false);
   });
 });
 
