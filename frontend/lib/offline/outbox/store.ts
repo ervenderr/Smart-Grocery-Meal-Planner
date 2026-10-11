@@ -135,7 +135,7 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
   async function hasEarlierBarrier(op: OutboxOp, userId: string): Promise<boolean> {
     for (const type of barrierFor(op.kind) ?? []) {
       const rows = await db.query<{ n: number }>(
-        `SELECT COUNT(*) AS n FROM outbox WHERE user_id = ? AND seq < ? AND entity_type = ? AND state IN ('queued','in_flight')`,
+        `SELECT COUNT(*) AS n FROM outbox WHERE user_id = ? AND seq < ? AND entity_type = ? AND state IN ${OPEN_STATES}`,
         [userId, op.seq, type]
       );
       if (rows[0].n > 0) return true;
