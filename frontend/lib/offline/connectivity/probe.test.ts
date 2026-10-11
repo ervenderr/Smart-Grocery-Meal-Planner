@@ -4,8 +4,9 @@ import { healthUrl, probeHealth, HEALTH_PROBE_TIMEOUT_MS } from './probe';
 afterEach(() => vi.useRealTimers());
 
 describe('probe', () => {
-  it('healthUrl uses the origin root', () => {
-    expect(healthUrl('https://api.example.com/api/v1')).toBe('https://api.example.com/health');
+  it('healthUrl targets the CORS-enabled API root, not the CORS-less /health', () => {
+    expect(healthUrl('https://api.example.com/api/v1')).toBe('https://api.example.com/api/v1/');
+    expect(healthUrl('https://api.example.com')).toBe('https://api.example.com/api/v1/');
   });
   it('timeout constant is 3000', () => {
     expect(HEALTH_PROBE_TIMEOUT_MS).toBe(3000);

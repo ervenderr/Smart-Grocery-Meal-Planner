@@ -1,9 +1,14 @@
+import { API_VERSION } from '@/lib/constants/api-routes';
+
 export const HEALTH_PROBE_TIMEOUT_MS = 3000;
 
-/** Backend health lives at the origin root, not under the API prefix. */
+/**
+ * Probe target: the API root. The origin-level /health route is registered before the CORS
+ * middleware, so a capacitor://localhost fetch to it is blocked and would always read offline.
+ */
 export function healthUrl(apiBase: string): string {
   const base = apiBase || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
-  return new URL('/health', base).toString();
+  return new URL(`/api/${API_VERSION}/`, base).toString();
 }
 
 type FetchLike = (
