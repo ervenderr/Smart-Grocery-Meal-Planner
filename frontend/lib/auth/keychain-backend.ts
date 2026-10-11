@@ -26,12 +26,16 @@ export function createKeychainBackend(): SecureBackend {
   };
 
   const boxedPlugin = async (): Promise<{ readonly plugin: Plugin }> => {
-    const boxed = await (ready ??= configure());
-    if (!boxed) {
+    try {
+      const boxed = await (ready ??= configure());
+      if (boxed) return boxed;
+    } catch (error) {
+      // Do not cache a rejected configuration: the next call must retry.
       ready = null;
-      throw new Error('Secure storage unavailable');
+      throw error;
     }
-    return boxed;
+    ready = null;
+    throw new Error('Secure storage unavailable');
   };
 
   return {
