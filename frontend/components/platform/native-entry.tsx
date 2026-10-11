@@ -18,6 +18,10 @@ export function NativeEntry() {
         router.replace('/e2e/');
         return;
       }
+      if (process.env.NEXT_PUBLIC_SHOT === '1') {
+        router.replace('/shot/');
+        return;
+      }
       const { isAuthenticated, token } = useAuthStore.getState();
       router.replace(isAuthenticated && token ? '/dashboard/' : '/login/');
     });

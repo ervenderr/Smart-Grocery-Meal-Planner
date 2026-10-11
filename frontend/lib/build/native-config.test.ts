@@ -31,6 +31,18 @@ describe('buildNextOptions', () => {
     expect(options.pageExtensions).toEqual(['e2e.tsx', 'tsx', 'ts', 'jsx', 'js']);
   });
 
+  it('adds the shot page extension only for native shot builds', () => {
+    const options = buildNextOptions({
+      BUILD_TARGET: 'native',
+      NEXT_PUBLIC_API_URL: API,
+      NEXT_PUBLIC_SHOT: '1',
+    });
+    expect(options.pageExtensions).toEqual(['shot.tsx', 'tsx', 'ts', 'jsx', 'js']);
+    expect(buildNextOptions({ BUILD_TARGET: 'native', NEXT_PUBLIC_API_URL: API })).not.toHaveProperty(
+      'pageExtensions'
+    );
+  });
+
   it('does not share the e2e extension list between calls', () => {
     const env = { BUILD_TARGET: 'native', NEXT_PUBLIC_API_URL: API, NEXT_PUBLIC_E2E: '1' };
     const first = buildNextOptions(env).pageExtensions;
@@ -63,5 +75,17 @@ describe('assertNativeEnv', () => {
     expect(() => assertNativeEnv({ BUILD_TARGET: 'web', NEXT_PUBLIC_E2E: '1' })).toThrow(
       /NEXT_PUBLIC_E2E/
     );
+  });
+
+  it('rejects the shot flag outside native builds and combined with e2e', () => {
+    expect(() => assertNativeEnv({ NEXT_PUBLIC_SHOT: '1' })).toThrow(/NEXT_PUBLIC_SHOT/);
+    expect(() =>
+      assertNativeEnv({
+        BUILD_TARGET: 'native',
+        NEXT_PUBLIC_API_URL: API,
+        NEXT_PUBLIC_SHOT: '1',
+        NEXT_PUBLIC_E2E: '1',
+      })
+    ).toThrow(/cannot be combined/);
   });
 });

@@ -18,7 +18,7 @@ BUILD_NUMBER="${BUILD_NUMBER:-$(date -u +%y%m%d%H%M)}"
 case "$BUILD_NUMBER" in ''|*[!0-9.]*) die "BUILD_NUMBER must be digits/dots" ;; esac
 
 # Release web export + cap sync, no simulator build. Scrub E2E vars so a release never ships them.
-env -u NEXT_PUBLIC_E2E -u E2E_EMAIL -u E2E_PASSWORD \
+env -u NEXT_PUBLIC_E2E -u NEXT_PUBLIC_SHOT -u E2E_EMAIL -u E2E_PASSWORD \
   bash "$SCRIPT_DIR/build-ios.sh" --skip-xcode ${SKIP_EXPORT[@]+"${SKIP_EXPORT[@]}"}
 bash "$SCRIPT_DIR/verify-bundle.sh"
 

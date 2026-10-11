@@ -17,7 +17,11 @@ REVIEWER_PASSWORD=<strong password> npm run seed:reviewer
 
 The seed is idempotent (re-running resets the demo data), refuses `NODE_ENV=production` and non-local databases, and prints only the email and counts. The seed also refuses to run if `REVIEWER_EMAIL` already belongs to an account that is not a seeded reviewer (name "App Reviewer"), because seeding deletes that account's data.
 
-### Production procedure (owner-approved, not yet done)
+### Production reviewer account (created 2026-10-12)
+
+Email `kumaun.review@example.com` (a placeholder-domain address; it never receives mail, sign-in is password only). Password is only in `~/.appstoreconnect/reviewer.env` and in App Store Connect > App Review Information. Created through the public signup API and seeded with `scripts/seed-demo-account.mjs` plus `scripts/store/prep-reviewer-data.mjs` (PHP, weekly budget, onboarding done, past trips). AI consent is not accepted; free tier. If the account is ever deleted or the password rotated, recreate it the same way.
+
+### Production procedure (superseded: the API-based seed above was used instead)
 
 1. Run only from a trusted shell, never in CI.
 2. Use a dedicated reviewer email (default `app-review@kitcha-demo.com`), never a real user's address.

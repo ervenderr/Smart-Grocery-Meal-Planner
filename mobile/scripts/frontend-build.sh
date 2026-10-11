@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Serialized frontend build used by every verification step.
-# Usage: frontend-build.sh web|native [--e2e]
+# Usage: frontend-build.sh web|native [--e2e|--shot]
+#   --shot  store-screenshot variant (Simulator only, no credentials baked in; never ship)
 # Env:   API_URL (default https://kitcha-api-production.up.railway.app, must be https)
 #        E2E_EMAIL / E2E_PASSWORD (only used with --e2e, never echoed)
 set -euo pipefail
@@ -18,14 +19,16 @@ fi
 
 TARGET="${1:-}"
 E2E=0
+SHOT=0
 case "$TARGET" in
   web|native) ;;
-  *) echo "usage: frontend-build.sh web|native [--e2e]" >&2; exit 2 ;;
+  *) echo "usage: frontend-build.sh web|native [--e2e|--shot]" >&2; exit 2 ;;
 esac
 shift
 for arg in "$@"; do
   case "$arg" in
     --e2e) E2E=1 ;;
+    --shot) SHOT=1 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -51,10 +54,15 @@ build_native() {
     NEXT_PUBLIC_E2E_SUITE="${E2E_SUITE:-smoke}" \
     NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY="kitcha:e2e-force-offline" \
     BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
+  elif [ "$SHOT" = "1" ]; then
+    # Screenshot variant: flag only. Credentials and routes arrive at launch (SIMCTL_CHILD_*).
+    env -u NEXT_PUBLIC_E2E -u NEXT_PUBLIC_E2E_EMAIL -u NEXT_PUBLIC_E2E_PASSWORD \
+      -u NEXT_PUBLIC_E2E_SUITE -u NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY \
+      NEXT_PUBLIC_SHOT=1 BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
   else
     # Release: scrub any inherited E2E vars so they can never be inlined into the bundle.
     env -u NEXT_PUBLIC_E2E -u NEXT_PUBLIC_E2E_EMAIL -u NEXT_PUBLIC_E2E_PASSWORD \
-      -u NEXT_PUBLIC_E2E_SUITE -u NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY \
+      -u NEXT_PUBLIC_E2E_SUITE -u NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY -u NEXT_PUBLIC_SHOT \
       BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
   fi
   rm -f out/top-view-tasty-food-devices.jpg

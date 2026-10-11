@@ -10,6 +10,7 @@ const E2E_VARS = [
   'NEXT_PUBLIC_E2E_PASSWORD',
   'NEXT_PUBLIC_E2E_SUITE',
   'NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY',
+  'NEXT_PUBLIC_SHOT',
 ];
 
 describe('mobile/scripts/frontend-build.sh release branch', () => {

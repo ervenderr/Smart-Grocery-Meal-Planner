@@ -4,6 +4,7 @@ export interface BuildEnv {
   readonly BUILD_TARGET?: string;
   readonly NEXT_PUBLIC_API_URL?: string;
   readonly NEXT_PUBLIC_E2E?: string;
+  readonly NEXT_PUBLIC_SHOT?: string;
   // Allows passing process.env directly (weak-type detection otherwise rejects it).
   readonly [key: string]: string | undefined;
 }
@@ -16,12 +17,26 @@ const NATIVE_PAGE_EXTENSIONS_E2E: readonly string[] = Object.freeze([
   'js',
 ]);
 
+const NATIVE_PAGE_EXTENSIONS_SHOT: readonly string[] = Object.freeze([
+  'shot.tsx',
+  'tsx',
+  'ts',
+  'jsx',
+  'js',
+]);
+
 const isNativeTarget = (env: BuildEnv): boolean => env.BUILD_TARGET === 'native';
 
 /** Throws a clear error when the native/e2e build flags are inconsistent. */
 export function assertNativeEnv(env: BuildEnv): void {
   if (env.NEXT_PUBLIC_E2E === '1' && !isNativeTarget(env)) {
     throw new Error('NEXT_PUBLIC_E2E=1 is only allowed with BUILD_TARGET=native');
+  }
+  if (env.NEXT_PUBLIC_SHOT === '1' && !isNativeTarget(env)) {
+    throw new Error('NEXT_PUBLIC_SHOT=1 is only allowed with BUILD_TARGET=native');
+  }
+  if (env.NEXT_PUBLIC_SHOT === '1' && env.NEXT_PUBLIC_E2E === '1') {
+    throw new Error('NEXT_PUBLIC_SHOT=1 and NEXT_PUBLIC_E2E=1 cannot be combined');
   }
   if (!isNativeTarget(env)) return;
   const apiUrl = env.NEXT_PUBLIC_API_URL;
@@ -45,7 +60,11 @@ export function buildNextOptions(env: BuildEnv): NextConfig {
     images: { unoptimized: true },
     env: { NEXT_PUBLIC_NATIVE_BUILD: '1' },
   };
-  return env.NEXT_PUBLIC_E2E === '1'
-    ? { ...base, pageExtensions: [...NATIVE_PAGE_EXTENSIONS_E2E] }
-    : base;
+  if (env.NEXT_PUBLIC_E2E === '1') {
+    return { ...base, pageExtensions: [...NATIVE_PAGE_EXTENSIONS_E2E] };
+  }
+  if (env.NEXT_PUBLIC_SHOT === '1') {
+    return { ...base, pageExtensions: [...NATIVE_PAGE_EXTENSIONS_SHOT] };
+  }
+  return base;
 }

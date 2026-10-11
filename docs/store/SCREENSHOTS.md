@@ -9,7 +9,22 @@ Source: https://developer.apple.com/help/app-store-connect/reference/app-informa
 - Apple's page marks Dynamic Island medium as required, and large as required unless you provide Dynamic Island large. It does not use inch labels; the script supplies both a 6.9-inch class (1320x2868) and a 6.3-inch class (1206x2622). Smaller sizes are scaled from larger ones if missing.
 - iPad (owner decision: iPad stays supported, `TARGETED_DEVICE_FAMILY = "1,2"`): 13-inch display is REQUIRED, accepted 2064x2752 or 2048x2732 portrait, 2752x2064 or 2732x2048 landscape. 12.9-inch (2048x2732) and 11-inch (e.g. 1488x2266, 1668x2420, 1668x2388, 1640x2360) are optional and scaled from 13-inch. Same 1 to 10 images, no alpha. Re-verified 2026-10-11 at the Apple page above. The script captures 2064x2752 portrait.
 
-## How to capture
+## Captured set (2026-10-12, committed)
+
+Real Simulator captures of the production app against the seeded reviewer account (Philippine peso, 9:41, full battery), no alpha, under `docs/store/screenshots/iPhone-6.9/` (1320x2868) and `iPad-13/` (2064x2752, iPadOS window grip painted out): `01-pantry-expiring`, `02-what-can-i-cook`, `03-recipe-detail`, `04-meal-plan`, `05-shopping-list`, `06-budget`, `07-recipes`. Barcode scan (no camera in the Simulator) and the offline banner are NOT captured; take those on a real device if wanted. Uploaded to App Store Connect as `APP_IPHONE_67` (accepts 1320x2868) and `APP_IPAD_PRO_3GEN_129` (accepts 2064x2752) with `scripts/store/asc-upload-screenshots.mjs`. The 6.3-inch set is not needed (scaled from 6.9).
+
+### Non-interactive capture (screenshot build)
+
+```
+cd mobile && bash scripts/build-ios.sh --shot && bash scripts/verify-bundle.sh --shot
+node scripts/store/prep-reviewer-data.mjs      # PHP, budget, past trips (EMAIL/PASSWORD env)
+scripts/store/capture-store-screenshots.sh iPhone-6.9 com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro-Max 1320x2868
+scripts/store/capture-store-screenshots.sh iPad-13 com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M5-12GB 2064x2752
+```
+
+`--shot` builds a Simulator-only variant (`NEXT_PUBLIC_SHOT=1`, adds the `/shot/` route). Credentials and the target route are passed at launch as `SIMCTL_CHILD_KUMAUN_SHOT_*` and injected by a `#if targetEnvironment(simulator)` shim in `SceneDelegate.swift`, so nothing is baked into the bundle and the shim does not exist in device, TestFlight or App Store builds. Release exports are guarded by `verify-bundle.sh` (fails on the `__KUMAUN_SHOT__` marker or an `out/shot` route) and `frontend-build.sh` scrubs `NEXT_PUBLIC_SHOT`. Production API limit: 100 requests per 15 minutes per IP, so capture one device at a time. Wipe `frontend/out` and `mobile/build` afterwards.
+
+## How to capture (older interactive script)
 
 ```
 scripts/store/capture-screenshots.sh /path/to/Kitcha.app all     # both iPhone sizes and iPad 13-inch

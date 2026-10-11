@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Export the frontend (static), sync Capacitor, build App.app for the Simulator.
 #
-# Usage: build-ios.sh [--e2e] [--skip-export] [--skip-xcode]
+# Usage: build-ios.sh [--e2e|--shot] [--skip-export] [--skip-xcode]
 #   --e2e          export with NEXT_PUBLIC_E2E=1 (needs E2E_EMAIL and E2E_PASSWORD)
+#   --shot         store-screenshot variant (Simulator only; credentials arrive at launch via SIMCTL_CHILD_*)
 #   --skip-export  reuse the existing frontend/out
 #   --skip-xcode   stop after `cap sync`
 # Env:   API_URL (default production, must be https://), SIM_DEVICE
@@ -16,12 +17,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/lib/sim-device.sh"
 
 E2E=0
+SHOT=0
 SKIP_EXPORT=0
 SKIP_XCODE=0
 PHASE_ONLY=0
 for arg in "$@"; do
   case "$arg" in
     --e2e) E2E=1 ;;
+    --shot) SHOT=1 ;;
     --skip-export) SKIP_EXPORT=1 ;;
     --skip-xcode) SKIP_XCODE=1 ;;
     --export-sync-locked) PHASE_ONLY=1 ;;
@@ -36,6 +39,8 @@ export_and_sync() {
   if [ "$SKIP_EXPORT" = "0" ]; then
     if [ "$E2E" = "1" ]; then
       "$SCRIPT_DIR/frontend-build.sh" native --e2e
+    elif [ "$SHOT" = "1" ]; then
+      "$SCRIPT_DIR/frontend-build.sh" native --shot
     else
       "$SCRIPT_DIR/frontend-build.sh" native
     fi
@@ -63,6 +68,7 @@ if [ "$E2E" = "1" ]; then
   [ -n "${E2E_EMAIL:-}" ] || die "--e2e requires E2E_EMAIL"
   [ -n "${E2E_PASSWORD:-}" ] || die "--e2e requires E2E_PASSWORD"
 fi
+[ "$E2E" = "1" ] && [ "$SHOT" = "1" ] && die "--e2e and --shot cannot be combined"
 if [ "$SKIP_XCODE" = "0" ]; then
   for c in xcodebuild xcrun; do require_cmd "$c"; done
 fi
@@ -71,6 +77,7 @@ fi
 # frontend/out in between.
 fwd=(--export-sync-locked)
 [ "$E2E" = "1" ] && fwd+=(--e2e)
+[ "$SHOT" = "1" ] && fwd+=(--shot)
 [ "$SKIP_EXPORT" = "1" ] && fwd+=(--skip-export)
 "$SCRIPT_DIR/with-build-lock.sh" bash "${BASH_SOURCE[0]}" "${fwd[@]}"
 
