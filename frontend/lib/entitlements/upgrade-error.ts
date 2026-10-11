@@ -14,6 +14,13 @@ export function isUpgradeRequired(error: unknown): boolean {
   return responseOf(error)?.status === 403 && getApiErrorCode(error) === UPGRADE_REQUIRED_CODE;
 }
 
+/** The free limit from /entitlements/me (null when unlocked), or the default. */
+export function freeLimitOf(pantryLimit: number | null | undefined): number {
+  return typeof pantryLimit === 'number' && Number.isInteger(pantryLimit) && pantryLimit > 0
+    ? pantryLimit
+    : DEFAULT_FREE_PANTRY_LIMIT;
+}
+
 /** The free-tier limit reported by the server, or the default when absent/invalid. */
 export function upgradeLimitFrom(error: unknown): number {
   const data = responseOf(error)?.data;

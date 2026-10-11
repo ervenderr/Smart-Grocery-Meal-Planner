@@ -103,6 +103,15 @@ describe('UPGRADE_REQUIRED conflict', () => {
       "Your pantry is at the 25-item free limit, so this trip wasn't finished. Free up pantry spots, or unlock in the Kumaun iOS app, then retry.",
     );
   });
+  it('uses the limit stored on the parked error (WR-05)', () => {
+    const err40 = { ...upErr, limit: 40 } as OutboxOp['lastError'];
+    const c40 = mk({ kind: 'pantry.create', payload: { item }, label: 'Rice' }, { state: 'failed', lastError: err40 });
+    const f40 = mk({ kind: 'shopping.finish', payload: {}, label: 'Trip' }, { state: 'failed', lastError: err40 });
+    expect(reasonCopy(c40)).toContain('40-item free limit');
+    expect(reasonCopy(c40, 'web')).toContain('40-item free limit');
+    expect(reasonCopy(f40)).toContain('40-item free limit');
+    expect(reasonCopy(f40, 'web')).toContain('40-item free limit');
+  });
   it('other conflicts are unchanged', () => {
     const other = mk({ kind: 'pantry.create', payload: { item }, label: 'Rice' }, {
       state: 'failed',

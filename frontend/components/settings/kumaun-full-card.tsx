@@ -9,7 +9,7 @@ import { useEntitlement } from '@/lib/hooks/use-entitlement';
 import { usePlatform } from '@/lib/platform/use-platform';
 import { KumaunFullWebNote } from './kumaun-full-web-note';
 
-function StatusChip({ chip }: { chip: CardModel['chip'] }) {
+function StatusChip({ chip, text }: { chip: CardModel['chip']; text: string }) {
   if (chip === 'loading') {
     return (
       <span
@@ -28,7 +28,7 @@ function StatusChip({ chip }: { chip: CardModel['chip'] }) {
       }`}
     >
       {unlocked && <Check className="h-4 w-4" aria-hidden="true" />}
-      {unlocked ? C.chipUnlocked : C.chipFree}
+      {text}
     </span>
   );
 }
@@ -74,7 +74,7 @@ function NativeCard() {
         <Sparkles className="h-5 w-5 shrink-0 text-gray-700" aria-hidden="true" />
         <h2 className="text-xl font-semibold text-gray-900">{C.cardTitle}</h2>
         <div className="ml-auto">
-          <StatusChip chip={model.chip} />
+          <StatusChip chip={model.chip} text={model.chipText} />
         </div>
       </div>
       <p className="text-base text-gray-700">{model.description}</p>

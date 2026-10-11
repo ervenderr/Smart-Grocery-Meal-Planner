@@ -8,7 +8,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { usePlatform } from '@/lib/platform/use-platform';
 import { useIsOnline } from '@/lib/offline/status/use-offline-status';
 import { decidePantryAdd } from '@/lib/entitlements/pantry-gate';
-import { isUpgradeRequired } from '@/lib/entitlements/upgrade-error';
+import { freeLimitOf, isUpgradeRequired, upgradeLimitFrom } from '@/lib/entitlements/upgrade-error';
 import { openUpgradeSheet } from '@/lib/entitlements/upgrade-sheet-store';
 import { ENTITLEMENT_COPY } from '@/lib/entitlements/copy';
 import type { PantryItem } from '@/types/pantry.types';
@@ -76,7 +76,7 @@ export function usePantryAddGate(): PantryAddGate {
         return true;
       }
       if (decision === 'web-limit') {
-        setLimitError(ENTITLEMENT_COPY.webLimitInline);
+        setLimitError(ENTITLEMENT_COPY.webLimitInline(freeLimitOf(me?.limits.pantry)));
         return true;
       }
       return false;
@@ -88,7 +88,7 @@ export function usePantryAddGate(): PantryAddGate {
     (error, returnFocus, retry) => {
       if (!isUpgradeRequired(error)) return false;
       if (native) openSheet(returnFocus, retry);
-      else setLimitError(ENTITLEMENT_COPY.webLimitInline);
+      else setLimitError(ENTITLEMENT_COPY.webLimitInline(upgradeLimitFrom(error)));
       return true;
     },
     [native, openSheet]

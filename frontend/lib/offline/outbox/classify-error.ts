@@ -8,6 +8,8 @@ export type TransportFailure = {
   status?: number;
   code?: string;
   retryAfterMs?: number;
+  /** UPGRADE_REQUIRED details.limit, kept on the parked op for its reason copy. */
+  limit?: number;
 };
 
 export type Outcome =
@@ -24,6 +26,7 @@ function park(reason: LastError['reason'], f: TransportFailure): Outcome {
   const error: LastError = { reason };
   if (f.status !== undefined) error.status = f.status;
   if (f.code !== undefined) error.code = f.code;
+  if (f.limit !== undefined) error.limit = f.limit;
   return { kind: 'park', error };
 }
 

@@ -60,6 +60,16 @@ describe('buildCardModel', () => {
       price: null,
     });
   });
+  it('chip text uses the server limit (WR-05)', () => {
+    const m = buildCardModel(card({ me: { ...me('none'), limits: { pantry: 40, aiDaily: 1, aiMonthly: null } } }));
+    expect(m.chipText).toBe('Free: 40 pantry items');
+    expect(buildCardModel(card({ me: me('active') })).chipText).toBe(C.chipUnlocked);
+    expect(buildCardModel(card({ me: undefined })).chipText).toBe('Free: 25 pantry items');
+  });
+  it('sheet lead uses the server limit, default 25 when unknown (WR-05)', () => {
+    expect(buildUpgradeSheetModel(sheet({ pantryLimit: 40 })).leadText).toBe("You've used all 40 free pantry spots.");
+    expect(buildUpgradeSheetModel(sheet()).leadText).toBe("You've used all 25 free pantry spots.");
+  });
   it('revoked reverts to free with the revoked copy', () => {
     const m = buildCardModel(card({ me: me('revoked') }));
     expect(m).toMatchObject({ chip: 'free', description: C.descRevoked, showBuy: true });

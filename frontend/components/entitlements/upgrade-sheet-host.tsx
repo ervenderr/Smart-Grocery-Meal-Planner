@@ -36,6 +36,7 @@ function OpenUpgradeSheet() {
     productError: ent.productError,
     flow: ent.flow,
     message: ent.message,
+    pantryLimit: ent.me?.limits.pantry,
   });
   const model = success ? { ...baseModel, state: 'success' as const } : baseModel;
 

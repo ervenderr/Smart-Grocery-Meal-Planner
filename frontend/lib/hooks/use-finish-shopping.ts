@@ -5,7 +5,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import toast from 'react-hot-toast';
 import { shoppingApi } from '@/lib/api/shopping';
 import { getApiErrorMessage } from '@/lib/api/errors';
-import { isUpgradeRequired } from '@/lib/entitlements/upgrade-error';
+import { isUpgradeRequired, upgradeLimitFrom } from '@/lib/entitlements/upgrade-error';
 import { openUpgradeSheet } from '@/lib/entitlements/upgrade-sheet-store';
 import { ENTITLEMENT_COPY } from '@/lib/entitlements/copy';
 import { isNative } from '@/lib/platform/native';
@@ -101,7 +101,7 @@ export function useFinishShopping() {
             },
           });
         } else {
-          toast.error(ENTITLEMENT_COPY.finishLimitWeb);
+          toast.error(ENTITLEMENT_COPY.finishLimitWeb(upgradeLimitFrom(error)));
         }
         return;
       }

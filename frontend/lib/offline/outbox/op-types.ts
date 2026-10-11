@@ -107,6 +107,8 @@ export type LastError = {
   reason: 'gone' | 'conflict' | 'invalid' | 'max-attempts' | 'transient' | 'auth';
   status?: number;
   code?: string;
+  /** For UPGRADE_REQUIRED: the server's free pantry limit, shown in the reason copy. */
+  limit?: number;
   /** For IN_DOUBT errors: when the op first became in doubt (epoch ms). */
   since?: number;
 };

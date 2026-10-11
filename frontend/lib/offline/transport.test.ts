@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createTransport, OUTBOX_REQUEST_TIMEOUT_MS } from './transport';
+import { createTransport, OUTBOX_REQUEST_TIMEOUT_MS, toFailure } from './transport';
 import { OfflineError, isOfflineError, registerOfflineGate, isOfflineGateClosed } from '@/lib/api/offline-error';
 
 function setup(overrides: Partial<Record<'post' | 'patch' | 'delete', unknown>> = {}, offline = false) {
@@ -124,5 +124,17 @@ describe('offline-error', () => {
     expect(e.name).toBe('OfflineError');
     expect(isOfflineError(e)).toBe(true);
     expect(isOfflineError(new Error('x'))).toBe(false);
+  });
+});
+
+describe('toFailure UPGRADE_REQUIRED limit (WR-05)', () => {
+  const err = (status: number, data: unknown) => ({ response: { status, data, headers: {} } });
+  it('carries details.limit for UPGRADE_REQUIRED only', () => {
+    expect(toFailure(err(403, { code: 'UPGRADE_REQUIRED', limit: 40 }))).toMatchObject({
+      status: 403,
+      code: 'UPGRADE_REQUIRED',
+      limit: 40,
+    });
+    expect(toFailure(err(403, { code: 'OTHER', limit: 40 })).limit).toBeUndefined();
   });
 });

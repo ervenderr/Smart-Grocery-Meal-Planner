@@ -1,6 +1,7 @@
 import type { apiClient } from '@/lib/api/client';
 import { getApiErrorCode } from '@/lib/api/errors';
 import { isOfflineError } from '@/lib/api/offline-error';
+import { isUpgradeRequired, upgradeLimitFrom } from '@/lib/entitlements/upgrade-error';
 import type { TransportFailure } from './outbox/classify-error';
 
 export const OUTBOX_REQUEST_TIMEOUT_MS = 8000;
@@ -41,6 +42,7 @@ export function toFailure(error: unknown): TransportFailure {
   const failure: TransportFailure = { network: false, timeout: false, status };
   const code = getApiErrorCode(error);
   if (code !== undefined) failure.code = code;
+  if (isUpgradeRequired(error)) failure.limit = upgradeLimitFrom(error);
   const retryAfterMs = parseRetryAfterMs(e?.response?.headers);
   if (retryAfterMs !== undefined) failure.retryAfterMs = retryAfterMs;
   return failure;

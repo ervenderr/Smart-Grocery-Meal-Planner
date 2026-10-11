@@ -1,7 +1,11 @@
-/** All user-facing Kumaun Full strings (UI-SPEC copywriting contract). No prices live here. */
+/**
+ * All user-facing Kumaun Full strings (UI-SPEC copywriting contract). No prices live here.
+ * The free pantry limit is server-configurable (FREE_PANTRY_LIMIT), so strings that
+ * mention it take the limit from /entitlements/me or the 403 details (WR-05).
+ */
 export const ENTITLEMENT_COPY = {
   cardTitle: 'Kumaun Full',
-  chipFree: 'Free: 25 pantry items',
+  chipFree: (limit: number): string => `Free: ${limit} pantry items`,
   chipUnlocked: 'Unlocked',
   descFree:
     'Keep everything you have. Unlock unlimited pantry items and more AI recipe ideas every day with a single purchase.',
@@ -13,7 +17,7 @@ export const ENTITLEMENT_COPY = {
   restore: 'Restore Purchases',
   dismiss: 'Maybe later',
   loadingPrice: 'Loading price',
-  sheetLead: "You've used all 25 free pantry spots.",
+  sheetLead: (limit: number): string => `You've used all ${limit} free pantry spots.`,
   benefits: [
     'Unlimited pantry items',
     'More AI recipe ideas every day',
@@ -36,10 +40,10 @@ export const ENTITLEMENT_COPY = {
     'This purchase is already linked to another Kumaun account. Sign in to that account to use it.',
   webNote:
     "Kumaun Full is a one-time unlock in the iOS app. If you've unlocked it, signing in here keeps your unlimited pantry.",
-  webLimitInline:
-    'Your free pantry is full (25 items). Unlock Kumaun Full in the iOS app or remove an item to add more.',
-  finishLimitWeb:
-    "Your free pantry is full (25 items), so this trip wasn't finished. Remove pantry items, finish without adding to pantry, or unlock Kumaun Full in the iOS app.",
+  webLimitInline: (limit: number): string =>
+    `Your free pantry is full (${limit} items). Unlock Kumaun Full in the iOS app or remove an item to add more.`,
+  finishLimitWeb: (limit: number): string =>
+    `Your free pantry is full (${limit} items), so this trip wasn't finished. Remove pantry items, finish without adding to pantry, or unlock Kumaun Full in the iOS app.`,
   deleteAccountNote:
     'Deleting your account removes your Kumaun data and unlock record. Your App Store purchase belongs to your Apple Account and is not refunded or cancelled.',
 } as const;

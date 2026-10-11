@@ -53,7 +53,7 @@ export function UpgradeSheetOffer({ model, onBuy, onRestore, onRetry, onDismiss 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        <p className="text-base text-gray-900">{C.sheetLead}</p>
+        <p className="text-base text-gray-900">{model.leadText}</p>
         <ul className="flex flex-col gap-2">
           {C.benefits.map((benefit) => (
             <li key={benefit} className="flex items-start gap-2 text-base text-gray-900">

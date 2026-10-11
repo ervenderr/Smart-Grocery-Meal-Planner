@@ -2,6 +2,7 @@ import type { EntitlementMe } from '@/lib/api/entitlements';
 import type { StoreProduct } from '@/lib/native/store/store-plugin';
 import type { PurchaseOutcome, RestoreOutcome } from '@/lib/native/store/store-service';
 import { ENTITLEMENT_COPY as C } from './copy';
+import { freeLimitOf } from './upgrade-error';
 
 export type FlowState = 'idle' | 'purchasing' | 'restoring' | 'success' | 'verify-pending';
 export type Message = { tone: 'info' | 'error'; text: string } | null;
@@ -19,6 +20,7 @@ export interface CardInput {
 export interface CardModel {
   visible: 'card' | 'web-note';
   chip: 'loading' | 'free' | 'unlocked';
+  chipText: string;
   description: string;
   price: string | null;
   showBuy: boolean;
@@ -33,10 +35,13 @@ export interface SheetInput {
   productError: boolean;
   flow: FlowState;
   message: Message;
+  /** /entitlements/me limits.pantry; the lead copy uses it instead of a fixed 25. */
+  pantryLimit?: number | null;
 }
 
 export interface UpgradeSheetModel {
   state: 'offer' | 'success';
+  leadText: string;
   priceText: string | null;
   ctaLabel: string;
   buyDisabled: boolean;
@@ -73,6 +78,7 @@ export function buildCardModel(input: CardInput): CardModel {
   return {
     visible: input.native ? 'card' : 'web-note',
     chip,
+    chipText: unlocked ? C.chipUnlocked : C.chipFree(freeLimitOf(input.me?.limits.pantry)),
     description: descriptionFor(chip, input.me),
     price,
     showBuy: !unlocked && !pending,
@@ -91,6 +97,7 @@ export function buildUpgradeSheetModel(input: SheetInput): UpgradeSheetModel {
     input.message ?? (input.productError ? PRICE_ERROR : pending ? PENDING_MESSAGE : null);
   return {
     state: input.flow === 'success' ? 'success' : 'offer',
+    leadText: C.sheetLead(freeLimitOf(input.pantryLimit)),
     priceText: price,
     ctaLabel: price ? C.ctaSheet(price) : C.ctaCard,
     buyDisabled: !price || busy,

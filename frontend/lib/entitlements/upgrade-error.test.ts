@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_FREE_PANTRY_LIMIT, UPGRADE_REQUIRED_CODE, isUpgradeRequired, upgradeLimitFrom } from './upgrade-error';
+import { DEFAULT_FREE_PANTRY_LIMIT, UPGRADE_REQUIRED_CODE, freeLimitOf, isUpgradeRequired, upgradeLimitFrom } from './upgrade-error';
 
 const err = (status: number, data: unknown) => ({ response: { status, data } });
 
@@ -28,5 +28,12 @@ describe('upgradeLimitFrom', () => {
       expect(upgradeLimitFrom(err(403, { limit }))).toBe(DEFAULT_FREE_PANTRY_LIMIT);
     }
     expect(upgradeLimitFrom(null)).toBe(25);
+  });
+});
+
+describe('freeLimitOf', () => {
+  it('uses a positive integer limit from /me, else the default', () => {
+    expect(freeLimitOf(40)).toBe(40);
+    for (const v of [null, undefined, 0, -3, 2.5]) expect(freeLimitOf(v)).toBe(DEFAULT_FREE_PANTRY_LIMIT);
   });
 });

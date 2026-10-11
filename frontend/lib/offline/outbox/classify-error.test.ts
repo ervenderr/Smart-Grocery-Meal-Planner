@@ -79,4 +79,10 @@ describe('classify', () => {
     });
     expect(c({ status: 403, code: 'OTHER' })).toMatchObject({ kind: 'park', error: { reason: 'invalid' } });
   });
+  it('403 UPGRADE_REQUIRED keeps the server limit on the parked error (WR-05)', () => {
+    expect(c({ status: 403, code: 'UPGRADE_REQUIRED', limit: 40 })).toEqual({
+      kind: 'park',
+      error: { reason: 'conflict', status: 403, code: 'UPGRADE_REQUIRED', limit: 40 },
+    });
+  });
 });
