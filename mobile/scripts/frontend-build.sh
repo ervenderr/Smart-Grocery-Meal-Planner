@@ -48,6 +48,7 @@ build_native() {
     NEXT_PUBLIC_E2E=1 \
     NEXT_PUBLIC_E2E_EMAIL="${E2E_EMAIL:-}" \
     NEXT_PUBLIC_E2E_PASSWORD="${E2E_PASSWORD:-}" \
+    NEXT_PUBLIC_E2E_SUITE="${E2E_SUITE:-smoke}" \
     BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
   else
     BUILD_TARGET=native NEXT_PUBLIC_API_URL="$API_URL" npx next build
