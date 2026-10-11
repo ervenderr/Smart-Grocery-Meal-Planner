@@ -1,0 +1,21 @@
+{
+  "name": "kumaun-store",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Thin StoreKit 2 Capacitor plugin for the Kumaun Full one-time unlock. Returns signed transaction JWS for server verification.",
+  "files": [
+    "Package.swift",
+    "ios/"
+  ],
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "storekit"
+  ],
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    }
+  }
+}
