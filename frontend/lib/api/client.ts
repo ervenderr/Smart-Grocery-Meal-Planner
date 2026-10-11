@@ -4,6 +4,7 @@ import { isAiConsentRequiredError } from '@/lib/ai/consent-flow';
 import { useAiConsentStore } from '@/lib/ai/consent-store';
 import { getAccessToken, setTokens, getRefreshToken } from '@/lib/api/token-storage';
 import { expireSession } from '@/lib/api/session-expiry';
+import { isOfflineGateClosed, isOfflineError, OfflineError } from '@/lib/api/offline-error';
 import { createAuthErrorHandler, createRefreshCoordinator } from '@/lib/api/session-refresh';
 
 /**
@@ -51,6 +52,9 @@ class ApiClient {
     // Request interceptor - Add auth token
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
+        if (isOfflineGateClosed()) {
+          return Promise.reject(new OfflineError('offline'));
+        }
         const token = getAccessToken();
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -68,6 +72,9 @@ class ApiClient {
         return response;
       },
       async (error: AxiosError) => {
+        if (isOfflineError(error)) {
+          return Promise.reject(error);
+        }
         if (error.response) {
           // Handle specific error codes
           switch (error.response.status) {

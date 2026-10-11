@@ -3,11 +3,11 @@ import { createTransport, OUTBOX_REQUEST_TIMEOUT_MS } from './transport';
 import { OfflineError, isOfflineError, registerOfflineGate, isOfflineGateClosed } from '@/lib/api/offline-error';
 
 function setup(overrides: Partial<Record<'post' | 'patch' | 'delete', unknown>> = {}, offline = false) {
-  const client = {
+  const client: Record<'post' | 'patch' | 'delete', ReturnType<typeof vi.fn>> = {
     post: vi.fn().mockResolvedValue({ ok: 1 }),
     patch: vi.fn().mockResolvedValue({ ok: 2 }),
     delete: vi.fn().mockResolvedValue({ ok: 3 }),
-    ...overrides,
+    ...(overrides as Record<string, ReturnType<typeof vi.fn>>),
   };
   const onNetworkFailure = vi.fn();
   const onSuccess = vi.fn();
@@ -104,7 +104,9 @@ describe('transport', () => {
     const { t } = setup({
       post: vi.fn().mockRejectedValue({ response: { status: 503, headers: { 'retry-after': 'soon' } } }),
     });
-    const e = await t.send({ method: 'POST', url: '/x', idempotencyKey: 'k' }).catch((x) => x);
+    const e = (await t
+      .send({ method: 'POST', url: '/x', idempotencyKey: 'k' })
+      .catch((x: unknown) => x)) as { retryAfterMs?: number };
     expect(e.retryAfterMs).toBeUndefined();
   });
 });
