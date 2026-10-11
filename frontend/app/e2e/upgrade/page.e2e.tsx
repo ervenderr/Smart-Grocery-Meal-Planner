@@ -5,6 +5,7 @@ import { UpgradeSheetHost } from '@/components/entitlements/upgrade-sheet-host';
 import { openUpgradeSheet } from '@/lib/entitlements/upgrade-sheet-store';
 import { createMockStore } from '@/lib/native/store/mock-store';
 import { setStoreDepsOverride } from '@/lib/native/store/store-deps';
+import { createVerifyGate } from '@/lib/native/store/verify-gate';
 
 /**
  * E2E/screenshot-only route: exists only when built with NEXT_PUBLIC_E2E=1 (pageExtensions).
@@ -28,6 +29,7 @@ export default function UpgradeE2ePage() {
         }),
         newKey: () => `e2e-${Date.now()}`,
         isOnline: () => true,
+        gate: createVerifyGate(),
       });
     }
     openUpgradeSheet();

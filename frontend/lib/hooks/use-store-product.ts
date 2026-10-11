@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePlatform } from '@/lib/platform/use-platform';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { useIsOnline } from '@/lib/offline/status/use-offline-status';
 import { getStoreDeps } from '@/lib/native/store/store-deps';
 import { loadProduct, type StoreDeps } from '@/lib/native/store/store-service';
@@ -19,6 +20,7 @@ export interface StoreProductState {
 export function useStoreProduct(): StoreProductState {
   const { native } = usePlatform();
   const online = useIsOnline();
+  const userId = useAuthStore((s) => s.user?.id ?? null);
   const isOnlineRef = useRef(online);
   useEffect(() => {
     isOnlineRef.current = online;
@@ -27,7 +29,7 @@ export function useStoreProduct(): StoreProductState {
   const [productError, setProductError] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  const getDeps = useCallback(() => getStoreDeps(() => isOnlineRef.current), []);
+  const getDeps = useCallback(() => getStoreDeps(() => isOnlineRef.current, userId), [userId]);
 
   useEffect(() => {
     if (!native) return;

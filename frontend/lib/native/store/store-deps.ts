@@ -2,6 +2,7 @@ import { entitlementsApi } from '../../api/entitlements';
 import { newId } from '../../offline/ids';
 import { getStorePlugin } from './store-plugin';
 import type { StoreDeps } from './store-service';
+import { sessionVerifyGate } from './verify-gate';
 
 let override: StoreDeps | null = null;
 
@@ -14,12 +15,20 @@ export function setStoreDepsOverride(
   override = deps;
 }
 
+/** `userId` scopes the verify gate to the signed-in account (REVIEW-2 WR-02). */
 export async function getStoreDeps(
   isOnline: () => boolean,
+  userId: string | null,
   e2eFlag: string | undefined = process.env.NEXT_PUBLIC_E2E
 ): Promise<StoreDeps | null> {
   if (override && e2eFlag === '1') return override;
   const plugin = await getStorePlugin();
   if (!plugin) return null;
-  return { plugin, verify: entitlementsApi.verify, newKey: newId, isOnline };
+  return {
+    plugin,
+    verify: entitlementsApi.verify,
+    newKey: newId,
+    isOnline,
+    gate: sessionVerifyGate(userId),
+  };
 }

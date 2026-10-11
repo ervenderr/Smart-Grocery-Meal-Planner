@@ -15,6 +15,7 @@ import { refreshEntitlementQueries } from '@/lib/entitlements/refresh';
  */
 export function useStoreTransactionUpdates(enabled: boolean): void {
   const signedIn = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.user?.id ?? null);
   const online = useIsOnline();
   const onlineRef = useRef(online);
   useEffect(() => {
@@ -26,7 +27,7 @@ export function useStoreTransactionUpdates(enabled: boolean): void {
     let unsubscribe: (() => void) | undefined;
     let disposed = false;
     void (async () => {
-      const deps = await getStoreDeps(() => onlineRef.current);
+      const deps = await getStoreDeps(() => onlineRef.current, userId);
       if (!deps || disposed) return;
       const stop = await subscribeTransactionUpdates(deps, (result) => {
         if (result === 'verified') refreshEntitlementQueries();
@@ -38,5 +39,5 @@ export function useStoreTransactionUpdates(enabled: boolean): void {
       disposed = true;
       unsubscribe?.();
     };
-  }, [enabled, signedIn]);
+  }, [enabled, signedIn, userId]);
 }

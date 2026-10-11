@@ -52,7 +52,7 @@ export function useEntitlementRecheck(enabled: boolean): void {
         ? null
         : createRecheckController({
             run: async (status) => {
-              const deps = await getStoreDeps(() => onlineRef.current);
+              const deps = await getStoreDeps(() => onlineRef.current, userId);
               return deps ? recheckEntitlements(deps, status) : 'skipped';
             },
             now: () => Date.now(),

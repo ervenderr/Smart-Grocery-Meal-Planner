@@ -17,6 +17,7 @@ import {
   type StoreDeps,
   type UpdateResult,
 } from './store-service';
+import { createVerifyGate } from './verify-gate';
 
 const tx = (n: number): StoreTransaction => ({
   jws: `jws-${n}`,
@@ -94,6 +95,7 @@ function setup(opts: {
     },
     newKey: () => `key-${++keys}`,
     isOnline: () => opts.online ?? true,
+    gate: createVerifyGate(),
   };
   return {
     deps,
@@ -326,5 +328,79 @@ describe('subscribeTransactionUpdates (WR-04)', () => {
     unsubscribe();
     await flush();
     expect(s.listenerCount()).toBe(0);
+  });
+});
+
+describe('verify dedupe across the updates listener and the recheck (REVIEW-2 WR-02)', () => {
+  const flush = () => new Promise((r) => setTimeout(r, 0));
+
+  it('a launch-time update and the mount recheck for the same transaction send one verify', async () => {
+    let release: () => void = () => undefined;
+    const held = new Promise<void>((r) => {
+      release = r;
+    });
+    const s = setup({
+      owned: [[tx(5)]],
+      verify: async () => {
+        await held;
+        return active;
+      },
+    });
+    const results: UpdateResult[] = [];
+    await subscribeTransactionUpdates(s.deps, (r) => results.push(r));
+    s.emit(update(5));
+    await flush();
+    const recheck = recheckEntitlements(s.deps, 'none');
+    await flush();
+    release();
+    expect(await recheck).toBe('verified');
+    await flush();
+    expect(results).toEqual(['verified']);
+    expect(s.verifyCalls).toHaveLength(1);
+  });
+
+  it('a transaction verified again after the first verify settled is sent again', async () => {
+    const s = setup({ owned: [[tx(5)]] });
+    await recheckEntitlements(s.deps, 'none');
+    await recheckEntitlements(s.deps, 'none');
+    expect(s.verifyCalls).toHaveLength(2);
+  });
+
+  it('an update claimed elsewhere is not re-sent when StoreKit re-delivers it', async () => {
+    const s = setup({ verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); } });
+    expect(await handleTransactionUpdate(s.deps, update(4))).toBe('claimed-elsewhere');
+    expect(await handleTransactionUpdate(s.deps, update(4))).toBe('ignored');
+    expect(s.verifyCalls).toHaveLength(1);
+    expect(s.calls.some((c) => c.startsWith('finish'))).toBe(false);
+  });
+
+  it('a claim seen by the recheck also stops update re-deliveries; other transactions still verify', async () => {
+    const s = setup({
+      owned: [[tx(4)]],
+      verify: async (jws) => {
+        if (jws === 'jws-4') throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED');
+        return active;
+      },
+    });
+    expect(await recheckEntitlements(s.deps, 'none')).toBe('claimed-elsewhere');
+    expect(await handleTransactionUpdate(s.deps, update(4))).toBe('ignored');
+    expect(await handleTransactionUpdate(s.deps, update(6))).toBe('verified');
+    expect(s.verifyCalls.map((c) => c.jws)).toEqual(['jws-4', 'jws-6']);
+  });
+
+  it('an explicit restore still verifies a claimed transaction and clears the mark on success', async () => {
+    let claimed = true;
+    const s = setup({
+      owned: [[tx(4)]],
+      verify: async () => {
+        if (claimed) throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED');
+        return active;
+      },
+    });
+    expect(await handleTransactionUpdate(s.deps, update(4))).toBe('claimed-elsewhere');
+    claimed = false;
+    expect(await restorePurchases(s.deps)).toEqual({ kind: 'restored' });
+    expect(await handleTransactionUpdate(s.deps, update(4))).toBe('verified');
+    expect(s.verifyCalls).toHaveLength(3);
   });
 });

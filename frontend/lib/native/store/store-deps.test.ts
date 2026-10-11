@@ -5,12 +5,14 @@ import { getStorePlugin } from './store-plugin';
 import { getStoreDeps, setStoreDepsOverride } from './store-deps';
 import { createMockStore } from './mock-store';
 import type { StoreDeps } from './store-service';
+import { createVerifyGate } from './verify-gate';
 
 const fake: StoreDeps = {
   plugin: createMockStore(),
   verify: async () => ({ status: 'active', productId: 'p', environment: 'Sandbox', purchasedAt: '' }),
   newKey: () => 'k',
   isOnline: () => true,
+  gate: createVerifyGate(),
 };
 
 afterEach(() => setStoreDepsOverride(null, '1'));
@@ -25,18 +27,18 @@ describe('getStorePlugin', () => {
 describe('store deps override', () => {
   it('is ignored unless the e2e flag is 1', async () => {
     setStoreDepsOverride(fake, '0');
-    expect(await getStoreDeps(() => true, '0')).toBeNull();
+    expect(await getStoreDeps(() => true, null, '0')).toBeNull();
     setStoreDepsOverride(fake, undefined);
-    expect(await getStoreDeps(() => true, undefined)).toBeNull();
+    expect(await getStoreDeps(() => true, null, undefined)).toBeNull();
   });
 
   it('is returned when the e2e flag is 1', async () => {
     setStoreDepsOverride(fake, '1');
-    expect(await getStoreDeps(() => true, '1')).toBe(fake);
+    expect(await getStoreDeps(() => true, null, '1')).toBe(fake);
   });
 
   it('returns null on web without an override', async () => {
-    expect(await getStoreDeps(() => true, '1')).toBeNull();
+    expect(await getStoreDeps(() => true, null, '1')).toBeNull();
   });
 
   it('store-deps.ts never references the mock store', () => {

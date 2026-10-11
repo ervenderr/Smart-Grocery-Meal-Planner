@@ -9,12 +9,15 @@ import {
   type StoreTransaction,
   type StoreTransactionUpdate,
 } from './store-plugin';
+import type { VerifyGate } from './verify-gate';
 
 export interface StoreDeps {
   plugin: KumaunStorePlugin;
   verify(jws: string, idempotencyKey: string): Promise<VerifyResult>;
   newKey(): string;
   isOnline(): boolean;
+  /** Session-wide verify dedupe and claimed-elsewhere memory (REVIEW-2 WR-02). */
+  gate: VerifyGate;
 }
 
 export type PurchaseOutcome =
@@ -65,13 +68,23 @@ function classifyVerifyError(error: unknown): VerifyKind {
   return 'failed';
 }
 
-/** Verifies with the server; finishes the device transaction only after a 2xx. */
+/**
+ * Verifies with the server; finishes the device transaction only after a 2xx.
+ * Joins a verify already in flight for the same transaction (REVIEW-2 WR-02).
+ */
 async function verifyAndFinish(
   deps: StoreDeps,
   tx: StoreTransaction,
   key: string
 ): Promise<VerifyKind> {
   if (!deps.isOnline()) return 'transient';
+  const kind = await deps.gate.run(tx.transactionId, () => verifyOnce(deps, tx, key));
+  if (kind === 'claimed') deps.gate.markClaimedElsewhere(tx.transactionId);
+  else if (kind === 'active' || kind === 'revoked') deps.gate.clearClaimedElsewhere(tx.transactionId);
+  return kind;
+}
+
+async function verifyOnce(deps: StoreDeps, tx: StoreTransaction, key: string): Promise<VerifyKind> {
   let result: VerifyResult;
   try {
     result = await deps.verify(tx.jws, key);
@@ -213,13 +226,17 @@ const UPDATE_BY_VERIFY: Record<VerifyKind, UpdateResult> = {
 
 /**
  * Handles one Transaction.updates delivery: verify with the server, then finish
- * (verifyAndFinish only finishes after a 2xx). Other products are ignored.
+ * (verifyAndFinish only finishes after a 2xx). Other products are ignored, and so
+ * is a re-delivery of a transaction already claimed by another account this
+ * session: StoreKit re-sends it on every launch, and each verify would be
+ * another 409 against the verify rate limit (REVIEW-2 WR-02).
  */
 export async function handleTransactionUpdate(
   deps: StoreDeps,
   update: StoreTransactionUpdate
 ): Promise<UpdateResult> {
   if (update.productId !== IAP_PRODUCT_ID) return 'ignored';
+  if (deps.gate.isClaimedElsewhere(update.transactionId)) return 'ignored';
   const tx: StoreTransaction = {
     jws: update.jws,
     originalTransactionId: update.originalTransactionId,
@@ -230,8 +247,9 @@ export async function handleTransactionUpdate(
 }
 
 /**
- * Subscribes to native transaction updates. Deliveries are handled one at a time
- * so a burst cannot race the verify limiter. Returns an unsubscribe function.
+ * Subscribes to native transaction updates. Deliveries are handled one at a time,
+ * and deps.gate shares an in-flight verify with the launch recheck, so the same
+ * transaction is never verified twice at once. Returns an unsubscribe function.
  */
 export async function subscribeTransactionUpdates(
   deps: StoreDeps,
