@@ -17,6 +17,7 @@ export type Outcome =
   | { kind: 'park'; error: LastError };
 
 const IN_FLIGHT = 'IDEMPOTENCY_IN_FLIGHT';
+const UPGRADE_REQUIRED = 'UPGRADE_REQUIRED';
 const DELETE_KINDS: readonly OpKind[] = ['shopping.item.delete', 'pantry.delete'];
 
 function park(reason: LastError['reason'], f: TransportFailure): Outcome {
@@ -55,5 +56,7 @@ export function classify(f: TransportFailure, ctx: ClassifyContext): Outcome {
   if (s === 404) return DELETE_KINDS.includes(ctx.kind) ? { kind: 'ok' } : park('gone', f);
   if (s === 410) return park('gone', f);
   if (s === 429 || (s !== undefined && s >= 500) || s === undefined) return transient(f, ctx.attempts);
+  // Free-tier limit hit on replay: keep the op retryable (it succeeds after unlock or freeing a spot).
+  if (s === 403 && f.code === UPGRADE_REQUIRED) return park('conflict', f);
   return park('invalid', f);
 }

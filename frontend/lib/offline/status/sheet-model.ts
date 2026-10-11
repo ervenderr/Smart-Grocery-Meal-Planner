@@ -1,6 +1,6 @@
 import type { ConnectivityState } from '../connectivity/connectivity';
 import { barrierFor, type OutboxOp } from '../outbox/op-types';
-import { canRetry, describeOp, reasonCopy, rowBadge, savedAgo, type RowBadge } from './describe-op';
+import { canRetry, describeOp, isUpgradeConflict, reasonCopy, rowBadge, savedAgo, type Platform, type RowBadge } from './describe-op';
 
 export interface SheetRow {
   seq: number;
@@ -11,6 +11,7 @@ export interface SheetRow {
   attempts: number;
   canRetry: boolean;
   canDiscard: boolean;
+  needsUpgrade: boolean;
 }
 
 export interface SheetModel {
@@ -29,6 +30,7 @@ export interface SheetInput {
   draining: boolean;
   bootstrapping: boolean;
   now?: number;
+  platform?: Platform;
 }
 
 export const SHEET_COPY = {
@@ -57,16 +59,17 @@ function badgeFor(op: OutboxOp, ops: readonly OutboxOp[], now: number): RowBadge
   return { kind: 'waiting', text: `Waiting on ${waitingOn} failed ${waitingOn === 1 ? 'change' : 'changes'}` };
 }
 
-function toRow(op: OutboxOp, now: number, ops: readonly OutboxOp[] = []): SheetRow {
+function toRow(op: OutboxOp, now: number, ops: readonly OutboxOp[] = [], platform: Platform = 'native'): SheetRow {
   return {
     seq: op.seq,
     description: describeOp(op),
     savedAgo: savedAgo(op.createdAt, now),
     badge: badgeFor(op, ops, now),
-    reason: reasonCopy(op),
+    reason: reasonCopy(op, platform),
     attempts: op.attempts,
     canRetry: canRetry(op),
     canDiscard: op.state === 'failed',
+    needsUpgrade: isUpgradeConflict(op),
   };
 }
 
@@ -82,6 +85,7 @@ function summaryFor(i: SheetInput, pending: number): string {
 
 export function buildSheetModel(input: SheetInput): SheetModel {
   const now = input.now ?? Date.now();
+  const platform = input.platform ?? 'native';
   const sorted = [...input.ops].sort((a, b) => a.seq - b.seq);
   const failed = sorted.filter((o) => o.state === 'failed');
   const open = sorted.filter((o) => o.state !== 'failed');
@@ -95,8 +99,8 @@ export function buildSheetModel(input: SheetInput): SheetModel {
         : { heading: SHEET_COPY.emptyHeading, body: SHEET_COPY.emptyBody };
   return {
     summary: summaryFor(input, open.length),
-    attention: failed.map((o) => toRow(o, now, sorted)),
-    waiting: open.map((o) => toRow(o, now, sorted)),
+    attention: failed.map((o) => toRow(o, now, sorted, platform)),
+    waiting: open.map((o) => toRow(o, now, sorted, platform)),
     showRetryAll: !offline && (failed.some(canRetry) || hasBackoff),
     showDiscardAll: failed.length > 0,
     failedCount: failed.length,

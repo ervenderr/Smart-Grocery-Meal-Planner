@@ -72,4 +72,11 @@ describe('classify', () => {
     expect(c({ status: 403 })).toMatchObject({ kind: 'park', error: { reason: 'invalid' } });
     expect(c({})).toEqual({ kind: 'retry', countsAttempt: true });
   });
+  it('403 UPGRADE_REQUIRED -> park conflict with code preserved; other 403s stay invalid', () => {
+    expect(c({ status: 403, code: 'UPGRADE_REQUIRED' })).toEqual({
+      kind: 'park',
+      error: { reason: 'conflict', status: 403, code: 'UPGRADE_REQUIRED' },
+    });
+    expect(c({ status: 403, code: 'OTHER' })).toMatchObject({ kind: 'park', error: { reason: 'invalid' } });
+  });
 });

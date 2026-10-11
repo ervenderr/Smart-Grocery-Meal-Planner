@@ -57,4 +57,16 @@ describe('buildSheetModel', () => {
   it('uses Date.now when now omitted', () => {
     expect(buildSheetModel({ connectivity: 'online', draining: false, bootstrapping: false, ops: [mk('A')] }).waiting).toHaveLength(1);
   });
+  it('flags upgrade conflicts and threads platform to the reason', () => {
+    const op = makeOp({ kind: 'pantry.create', payload: { item: { id: ID_A, itemName: 'Rice' } }, label: 'Rice' } as NewOp, {
+      state: 'failed',
+      lastError: { reason: 'conflict', status: 403, code: 'UPGRADE_REQUIRED' },
+    });
+    const native = buildSheetModel({ ...base, ops: [op, mk('B', { state: 'failed', lastError: { reason: 'gone' } })] });
+    expect(native.attention[0]).toMatchObject({ needsUpgrade: true, canRetry: true, badge: { text: 'Needs upgrade' } });
+    expect(native.attention[0].reason).toContain('Unlock Kumaun Full');
+    expect(native.attention[1].needsUpgrade).toBe(false);
+    const web = buildSheetModel({ ...base, platform: 'web', ops: [op] });
+    expect(web.attention[0].reason).toContain('Kumaun iOS app');
+  });
 });

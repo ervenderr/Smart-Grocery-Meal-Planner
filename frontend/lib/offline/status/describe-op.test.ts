@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ID_A, makeOp } from '../outbox/fixtures.test-helper';
 import type { NewOp, OutboxOp } from '../outbox/op-types';
-import { canRetry, describeOp, reasonCopy, rowBadge, savedAgo } from './describe-op';
+import { canRetry, describeOp, isUpgradeConflict, reasonCopy, rowBadge, savedAgo } from './describe-op';
 
 const mk = (op: unknown, over: Partial<OutboxOp> = {}): OutboxOp => makeOp(op as NewOp, over);
 const upd = (patch: object) => mk({ kind: 'shopping.item.update', payload: { id: ID_A, patch }, label: 'Milk' });
@@ -74,5 +74,42 @@ describe('rowBadge and savedAgo', () => {
     expect(savedAgo(now - 5 * 60_000, now)).toBe('Saved 5 min ago');
     expect(savedAgo(now - 60_000, now)).toBe('Saved 1 min ago');
     expect(savedAgo(now - 2 * 3_600_000, now)).toBe('Saved 2 hours ago');
+  });
+});
+
+describe('UPGRADE_REQUIRED conflict', () => {
+  const upErr = { reason: 'conflict', status: 403, code: 'UPGRADE_REQUIRED' } as OutboxOp['lastError'];
+  const create = mk({ kind: 'pantry.create', payload: { item }, label: 'Rice' }, { state: 'failed', lastError: upErr });
+  const finish = mk({ kind: 'shopping.finish', payload: {}, label: 'Trip' }, { state: 'failed', lastError: upErr });
+  it('badges and is retryable', () => {
+    expect(isUpgradeConflict(create)).toBe(true);
+    expect(rowBadge(create, 0)).toEqual({ kind: 'conflict', text: 'Needs upgrade' });
+    expect(rowBadge(finish, 0)).toEqual({ kind: 'conflict', text: 'Needs upgrade' });
+    expect(canRetry(create)).toBe(true);
+  });
+  it('pantry create copy native and web', () => {
+    expect(reasonCopy(create)).toBe(
+      "Your pantry is at the 25-item free limit, so this item wasn't added. Unlock Kumaun Full or free up a spot, then retry.",
+    );
+    expect(reasonCopy(create, 'web')).toBe(
+      "Your pantry is at the 25-item free limit, so this item wasn't added. Free up a spot, or unlock in the Kumaun iOS app, then retry.",
+    );
+  });
+  it('trip finish copy native and web', () => {
+    expect(reasonCopy(finish)).toBe(
+      "Your pantry is at the 25-item free limit, so this trip wasn't finished. Unlock Kumaun Full or free up pantry spots, then retry.",
+    );
+    expect(reasonCopy(finish, 'web')).toBe(
+      "Your pantry is at the 25-item free limit, so this trip wasn't finished. Free up pantry spots, or unlock in the Kumaun iOS app, then retry.",
+    );
+  });
+  it('other conflicts are unchanged', () => {
+    const other = mk({ kind: 'pantry.create', payload: { item }, label: 'Rice' }, {
+      state: 'failed',
+      lastError: { reason: 'conflict', code: 'REPLAY_EXPIRED' } as OutboxOp['lastError'],
+    });
+    expect(isUpgradeConflict(other)).toBe(false);
+    expect(rowBadge(other, 0)).toEqual({ kind: 'conflict', text: 'Conflict' });
+    expect(reasonCopy(other)).toBe('This change may already be saved. Check the item, then retry or discard it.');
   });
 });
