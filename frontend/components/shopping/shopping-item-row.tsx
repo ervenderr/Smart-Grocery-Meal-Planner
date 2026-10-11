@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import { AislePriceInput } from '@/components/shopping/aisle-price-input';
 import { haptic } from '@/lib/native/native-haptics';
 import { useCurrency } from '@/lib/currency/currency-provider';
@@ -13,6 +13,7 @@ interface ShoppingItemRowProps {
   item: ShoppingItem;
   onToggle: (item: ShoppingItem) => void;
   onOpen: (item: ShoppingItem) => void;
+  onDelete?: (item: ShoppingItem) => void;
   large?: boolean;
   onSetActualPrice?: (cents: number | null) => void;
 }
@@ -21,6 +22,7 @@ export function ShoppingItemRow({
   item,
   onToggle,
   onOpen,
+  onDelete,
   large = false,
   onSetActualPrice,
 }: ShoppingItemRowProps) {
@@ -146,6 +148,19 @@ export function ShoppingItemRow({
         </span>
         <span className="text-sm text-gray-600">{meta}</span>
       </button>
+      {onDelete && (
+        <button
+          type="button"
+          aria-label={`Remove ${item.itemName}`}
+          onClick={() => {
+            haptic('light');
+            onDelete(item);
+          }}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-500 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        >
+          <Trash2 className="h-5 w-5" aria-hidden="true" />
+        </button>
+      )}
     </li>
   );
 }

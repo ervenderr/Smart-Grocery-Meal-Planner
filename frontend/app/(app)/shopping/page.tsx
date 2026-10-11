@@ -248,6 +248,7 @@ export default function ShoppingPage() {
                     })
                   }
                   onOpen={setEditing}
+                  onDelete={shoppingMode ? undefined : handleDelete}
                   large={shoppingMode}
                   onSetActualPrice={(cents) =>
                     updateItem.mutate({ itemId: item.id, patch: { actualCostCents: cents } })
