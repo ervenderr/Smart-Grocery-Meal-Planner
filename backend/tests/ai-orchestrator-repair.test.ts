@@ -37,7 +37,7 @@ const run = () =>
   });
 
 beforeEach(() => {
-  setAiDepsForTests({ limits: { userDaily: 1000, globalDaily: 100000 }, now: () => new Date('2032-02-01T12:00:00Z') });
+  setAiDepsForTests({ limits: { userDaily: 1000, globalDaily: 100000, paidUserDaily: 1000, freeMonthly: 0, paidMonthly: 0 }, now: () => new Date('2032-02-01T12:00:00Z') });
 });
 
 afterEach(async () => {

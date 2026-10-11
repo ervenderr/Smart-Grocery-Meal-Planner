@@ -4,12 +4,15 @@
  */
 
 import request from 'supertest';
+import * as entitlementStatus from '../src/modules/entitlements/entitlement-status';
+import { grantTestEntitlement } from './helpers/entitlement-fixtures';
 import { createApp } from '../src/app';
 import { prisma } from '../src/config/database.config';
 import { resetAiDepsForTests, setAiDepsForTests } from '../src/modules/ai/ai.deps';
 import {
   QuotaExceededError,
   nextUtcMidnight,
+  pruneOldUsage,
   refundQuota,
   reserveQuota,
   utcDay,
@@ -42,11 +45,19 @@ const recipeReply = (name: string): string =>
     ],
   });
 
-function useDay(day: string, limits = { userDaily: 2, globalDaily: 3 }): Date {
+const baseLimits = {
+  userDaily: 2,
+  globalDaily: 3,
+  paidUserDaily: 2,
+  freeMonthly: 0,
+  paidMonthly: 0,
+};
+
+function useDay(day: string, limits: Partial<typeof baseLimits> = {}): Date {
   usedDays.push(day);
   const at = new Date(`${day}T12:00:00Z`);
   installFakeAi();
-  setAiDepsForTests({ now: () => at, limits });
+  setAiDepsForTests({ now: () => at, limits: { ...baseLimits, ...limits } });
   return at;
 }
 
@@ -55,6 +66,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+  jest.restoreAllMocks();
   resetAiDepsForTests();
   for (const day of usedDays.splice(0)) {
     await prisma.$executeRaw`DELETE FROM ai_usage WHERE day = ${day}::date`;
@@ -62,6 +74,8 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  await prisma.$executeRaw`DELETE FROM ai_usage WHERE day = '2045-05-01'::date AND scope LIKE 'usermonth:%'`;
+  await prisma.entitlement.deleteMany({ where: { userId: { in: createdUserIds } } });
   await prisma.pantryItem.deleteMany({ where: { userId: { in: createdUserIds } } });
   await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
 });
@@ -217,5 +231,155 @@ describe('isGlobalCapNear (WR-06)', () => {
     expect(isGlobalCapNear(79, 100)).toBe(false);
     expect(isGlobalCapNear(80, 100)).toBe(true);
     expect(isGlobalCapNear(100, 100)).toBe(true);
+  });
+});
+
+describe('Monthly scope', () => {
+  const month = '2045-04-01';
+  const monthRows: string[] = [];
+
+  afterEach(async () => {
+    for (const scope of monthRows.splice(0)) {
+      await prisma.$executeRaw`DELETE FROM ai_usage WHERE scope = ${scope}`;
+    }
+  });
+
+  function monthUser(day: string): string {
+    usedDays.push(day);
+    const userId = `u-${uniqueName('m')}`;
+    monthRows.push(`usermonth:${userId}`);
+    return userId;
+  }
+
+  it('third reserve with monthly limit 2 throws user_month and rolls back the attempt', async () => {
+    const day = '2045-04-02';
+    const userId = monthUser(day);
+    const input = { userId, day, userLimit: 10, globalLimit: 100, month, userMonthlyLimit: 2 };
+    await reserveQuota(input);
+    await reserveQuota(input);
+    await expect(reserveQuota(input)).rejects.toMatchObject({ scope: 'user_month', limit: 2 });
+    expect(await count(`usermonth:${userId}`, month)).toBe(2);
+    expect(await count(`user:${userId}`, day)).toBe(2);
+    expect(await count('global', day)).toBe(2);
+  });
+
+  it('never writes a usermonth row without a monthly limit', async () => {
+    const day = '2045-04-03';
+    const userId = monthUser(day);
+    await reserveQuota({ userId, day, userLimit: 5, globalLimit: 100, month });
+    await reserveQuota({ userId, day, userLimit: 5, globalLimit: 100, month, userMonthlyLimit: null });
+    expect(await count(`usermonth:${userId}`, month)).toBe(0);
+  });
+
+  it('refundQuota decrements the monthly row and never below 0', async () => {
+    const day = '2045-04-04';
+    const userId = monthUser(day);
+    await reserveQuota({ userId, day, userLimit: 5, globalLimit: 100, month, userMonthlyLimit: 5 });
+    await refundQuota({ userId, day, month });
+    await refundQuota({ userId, day, month });
+    expect(await count(`usermonth:${userId}`, month)).toBe(0);
+    expect(await count(`user:${userId}`, day)).toBe(0);
+  });
+
+  it('pruneOldUsage keeps recent usermonth rows and drops stale ones', async () => {
+    const now = new Date('2020-06-15T12:00:00Z');
+    const userId = `u-${uniqueName('p')}`;
+    const rows: Array<[string, string]> = [
+      [`user:${userId}`, '2020-05-26'],
+      [`usermonth:${userId}`, '2020-06-01'],
+      [`usermonth:${userId}`, '2020-05-01'],
+      [`usermonth:${userId}`, '2020-03-01'],
+    ];
+    for (const [scope, day] of rows) {
+      await prisma.$executeRaw`INSERT INTO ai_usage (scope, day, count, updated_at) VALUES (${scope}, ${day}::date, 1, now())`;
+    }
+    try {
+      await pruneOldUsage(now, 14);
+      expect(await count(`user:${userId}`, '2020-05-26')).toBe(0);
+      expect(await count(`usermonth:${userId}`, '2020-06-01')).toBe(1);
+      expect(await count(`usermonth:${userId}`, '2020-05-01')).toBe(1);
+      expect(await count(`usermonth:${userId}`, '2020-03-01')).toBe(0);
+    } finally {
+      await prisma.$executeRaw`DELETE FROM ai_usage WHERE scope IN (${`user:${userId}`}, ${`usermonth:${userId}`})`;
+    }
+  });
+});
+
+describe('Entitlement-aware limits over HTTP', () => {
+  const okFetch = (a: string) => async () => chatCompletion(recipeReply(a));
+
+  it('free user is limited by userDaily even when paidUserDaily is higher', async () => {
+    useDay('2045-05-02', { userDaily: 1, paidUserDaily: 3, globalDaily: 100, paidMonthly: 600 });
+    const a = uniqueName('free');
+    const { token } = await newUser([a]);
+    fetchSpy.mockImplementation(okFetch(a));
+
+    expect((await suggest(token, { maxPrepTime: 1 })).status).toBe(200);
+    const blocked = await suggest(token, { maxPrepTime: 2 });
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.quota.scope).toBe('user');
+  });
+
+  it('entitled user gets paidUserDaily', async () => {
+    useDay('2045-05-03', { userDaily: 1, paidUserDaily: 3, globalDaily: 100, paidMonthly: 600 });
+    const a = uniqueName('paid');
+    const { token, userId } = await newUser([a]);
+    await grantTestEntitlement(userId);
+    fetchSpy.mockImplementation(okFetch(a));
+
+    for (const n of [1, 2, 3]) expect((await suggest(token, { maxPrepTime: n })).status).toBe(200);
+    const blocked = await suggest(token, { maxPrepTime: 4 });
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.quota.scope).toBe('user');
+  });
+
+  it('entitled user hitting the monthly cap gets scope user_month with next-month reset', async () => {
+    useDay('2045-05-04', { paidUserDaily: 10, globalDaily: 100, paidMonthly: 2 });
+    const a = uniqueName('month');
+    const { token, userId } = await newUser([a]);
+    await grantTestEntitlement(userId);
+    fetchSpy.mockImplementation(okFetch(a));
+
+    expect((await suggest(token, { maxPrepTime: 1 })).status).toBe(200);
+    expect((await suggest(token, { maxPrepTime: 2 })).status).toBe(200);
+    const blocked = await suggest(token, { maxPrepTime: 3 });
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.code).toBe('AI_QUOTA_EXCEEDED');
+    expect(blocked.body.quota).toEqual({
+      scope: 'user_month',
+      limit: 2,
+      remaining: 0,
+      resetsAt: '2045-06-01T00:00:00.000Z',
+    });
+    expect(blocked.body.message).toBe(
+      'Monthly AI limit reached (2/2). Resets at 2045-06-01T00:00:00.000Z (UTC).'
+    );
+  });
+
+  it('provider failure refunds the monthly row too', async () => {
+    const day = '2045-05-05';
+    useDay(day, { paidUserDaily: 10, globalDaily: 100, paidMonthly: 5 });
+    const a = uniqueName('mrefund');
+    const { token, userId } = await newUser([a]);
+    await grantTestEntitlement(userId);
+    fetchSpy.mockResolvedValueOnce(errorResponse(500));
+
+    expect((await suggest(token)).status).toBe(503);
+    expect(await count(`usermonth:${userId}`, '2045-05-01')).toBe(0);
+    expect(await count(`user:${userId}`, day)).toBe(0);
+  });
+
+  it('falls back to free limits when the entitlement lookup throws', async () => {
+    useDay('2045-05-06', { userDaily: 1, paidUserDaily: 5, globalDaily: 100, paidMonthly: 600 });
+    const a = uniqueName('lookup');
+    const { token } = await newUser([a]);
+    fetchSpy.mockImplementation(okFetch(a));
+    jest.spyOn(entitlementStatus, 'isEntitled').mockRejectedValue(new Error('db down'));
+
+    expect((await suggest(token, { maxPrepTime: 1 })).status).toBe(200);
+    const blocked = await suggest(token, { maxPrepTime: 2 });
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.quota.scope).toBe('user');
   });
 });

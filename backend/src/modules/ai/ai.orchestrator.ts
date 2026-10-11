@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { logger } from '../../config/logger.config';
 import { aiQuotaExceededError, aiUnavailableError } from './ai.errors';
 import { getAiDeps } from './ai.deps';
+import { isEntitled } from '../entitlements/entitlement-status';
+import { nextUtcMonthStart, resolveUserLimits, utcMonthStart } from './ai-limits';
 import { buildCacheKey } from './ai-cache-key';
 import { getCachedSafe, pruneExpired, setCachedSafe } from './ai-cache.repository';
 import {
@@ -123,15 +125,34 @@ async function readCache<T>(key: string, now: Date, schema: z.ZodType<T>): Promi
   return parsed.success ? parsed.data : null;
 }
 
-async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<string> {
+/** Usage periods a reservation was counted in (needed to refund it). */
+interface Reservation {
+  readonly day: string;
+  readonly month: string;
+}
+
+/** Server-side tier lookup; any failure degrades to the free limits (never a 500). */
+async function entitledOrFree(userId: string): Promise<boolean> {
+  try {
+    return await isEntitled(userId);
+  } catch (error) {
+    logger.warn('AI entitlement lookup failed, using free limits', { error: describeError(error) });
+    return false;
+  }
+}
+
+async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<Reservation> {
   const day = utcDay(now);
-  const { limits } = getAiDeps();
+  const month = utcMonthStart(now);
+  const limits = resolveUserLimits(await entitledOrFree(req.userId), getAiDeps().limits);
   try {
     const counts = await reserveQuota({
       userId: req.userId,
       day,
       userLimit: limits.userDaily,
       globalLimit: limits.globalDaily,
+      month,
+      userMonthlyLimit: limits.userMonthly,
     });
     logger.info('AI quota reserved', { feature: req.feature, ...counts });
     if (isGlobalCapNear(counts.globalCount, limits.globalDaily)) {
@@ -140,13 +161,13 @@ async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<st
         globalLimit: limits.globalDaily,
       });
     }
-    return day;
+    return { day, month };
   } catch (error) {
     if (error instanceof QuotaExceededError) {
       throw aiQuotaExceededError({
         scope: error.scope,
         limit: error.limit,
-        resetsAt: nextUtcMidnight(now),
+        resetsAt: error.scope === 'user_month' ? nextUtcMonthStart(now) : nextUtcMidnight(now),
       });
     }
     logger.error('AI quota reserve failed', { feature: req.feature, error: describeError(error) });
@@ -154,9 +175,9 @@ async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<st
   }
 }
 
-async function safeRefund(userId: string, day: string): Promise<void> {
+async function safeRefund(userId: string, reservation: Reservation): Promise<void> {
   try {
-    await refundQuota({ userId, day });
+    await refundQuota({ userId, ...reservation });
   } catch (error) {
     logger.error('AI quota refund failed', { error: describeError(error) });
   }
@@ -181,11 +202,11 @@ async function storeResult<T>(req: AiRunRequest<T>, key: string, data: T, now: D
   if (stored) pruneSometimes(now);
 }
 
-async function generate<T>(req: AiRunRequest<T>, day: string): Promise<T> {
+async function generate<T>(req: AiRunRequest<T>, reservation: Reservation): Promise<T> {
   try {
     return await callProviderWithRepair(req);
   } catch (error) {
-    await safeRefund(req.userId, day);
+    await safeRefund(req.userId, reservation);
     const kind = error instanceof ProviderError ? error.kind : 'unexpected';
     logger.warn('AI feature failed', { feature: req.feature, kind });
     throw aiUnavailableError();
@@ -204,8 +225,8 @@ export async function runAiFeature<T>(req: AiRunRequest<T>): Promise<{ data: T; 
     return { data: hit, cached: true };
   }
 
-  const day = await reserveOrThrow(req, now);
-  const data = await generate(req, day);
+  const reservation = await reserveOrThrow(req, now);
+  const data = await generate(req, reservation);
   if (req.shouldCache ? req.shouldCache(data) : true) await storeResult(req, key, data, now);
   return { data, cached: false };
 }

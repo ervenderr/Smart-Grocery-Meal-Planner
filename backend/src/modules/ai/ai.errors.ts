@@ -30,17 +30,22 @@ export function aiUnavailableError(): AppError {
 }
 
 export interface QuotaExceededInput {
-  readonly scope: 'user' | 'global';
+  readonly scope: 'user' | 'global' | 'user_month';
   readonly limit: number;
   readonly resetsAt: string;
 }
 
+function quotaMessage(scope: QuotaExceededInput['scope'], limit: number, resetsAt: string): string {
+  if (scope === 'user') return `Daily AI limit reached (${limit}/${limit}). Resets at ${resetsAt} (UTC).`;
+  if (scope === 'user_month') {
+    return `Monthly AI limit reached (${limit}/${limit}). Resets at ${resetsAt} (UTC).`;
+  }
+  return `The shared daily AI limit has been reached. Resets at ${resetsAt} (UTC).`;
+}
+
 export function aiQuotaExceededError(input: QuotaExceededInput): AppError {
   const { scope, limit, resetsAt } = input;
-  const message =
-    scope === 'user'
-      ? `Daily AI limit reached (${limit}/${limit}). Resets at ${resetsAt} (UTC).`
-      : `The shared daily AI limit has been reached. Resets at ${resetsAt} (UTC).`;
+  const message = quotaMessage(scope, limit, resetsAt);
   return new AppError(message, 429, true, {
     code: AI_ERROR_CODES.QUOTA_EXCEEDED,
     details: { quota: { scope, limit, remaining: 0, resetsAt } },

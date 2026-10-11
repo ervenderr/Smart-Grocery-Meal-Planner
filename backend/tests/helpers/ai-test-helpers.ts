@@ -60,7 +60,13 @@ export function buildTestProvider(apiKey: string | null = TEST_API_KEY): OpenAiC
 export function installFakeAi(_fetchSpy?: unknown): void {
   setAiDepsForTests({
     provider: buildTestProvider(),
-    limits: { userDaily: 100000, globalDaily: 100000 },
+    limits: {
+      userDaily: 100000,
+      globalDaily: 100000,
+      paidUserDaily: 100000,
+      freeMonthly: 0,
+      paidMonthly: 0,
+    },
   });
 }
 

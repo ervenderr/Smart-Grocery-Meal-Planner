@@ -5,12 +5,13 @@
  */
 
 import { config } from '../../config/env.config';
+import { AiLimitConfig } from './ai-limits';
 import { LlmProvider } from './providers/llm-provider';
 import { OpenAiCompatibleProvider } from './providers/openai-compatible.provider';
 
 export interface AiDeps {
   readonly provider: LlmProvider;
-  readonly limits: { readonly userDaily: number; readonly globalDaily: number };
+  readonly limits: AiLimitConfig;
   readonly now: () => Date;
   /** Overall budget for one feature run (initial call plus repair). */
   readonly totalTimeoutMs: number;
@@ -28,7 +29,13 @@ function buildDefaultDeps(): AiDeps {
       timeoutMs: config.ai.timeoutMs,
       jsonMode: config.ai.jsonMode,
     }),
-    limits: { userDaily: config.ai.userDailyLimit, globalDaily: config.ai.globalDailyLimit },
+    limits: {
+      userDaily: config.ai.userDailyLimit,
+      globalDaily: config.ai.globalDailyLimit,
+      paidUserDaily: config.ai.paidUserDailyLimit,
+      freeMonthly: config.ai.freeMonthlyLimit,
+      paidMonthly: config.ai.paidMonthlyLimit,
+    },
     now: () => new Date(),
     totalTimeoutMs: config.ai.timeoutMs,
   };
