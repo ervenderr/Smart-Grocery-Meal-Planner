@@ -10,6 +10,7 @@ import { AiConsentHost } from '@/components/ai/ai-consent-host';
 import { ReminderRuntime } from '@/components/reminders/reminder-runtime';
 import { OfflineBanner } from '@/components/offline/offline-banner';
 import { PendingChangesSheet } from '@/components/offline/pending-changes-sheet';
+import { LogoutConfirmHost } from '@/components/offline/logout-confirm-host';
 import { SyncFeedback } from '@/components/offline/sync-feedback';
 import { usePlatform } from '@/lib/platform/use-platform';
 
@@ -51,6 +52,7 @@ export default function AppLayout({
       <AiConsentHost />
       <SyncFeedback />
       <PendingChangesSheet />
+      <LogoutConfirmHost />
       {native && <ReminderRuntime />}
     </ProtectedRoute>
   );
