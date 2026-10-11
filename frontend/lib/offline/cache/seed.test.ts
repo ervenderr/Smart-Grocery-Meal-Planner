@@ -41,9 +41,10 @@ describe('applySnapshot', () => {
     const reapply = vi.fn((_k: readonly unknown[], d: unknown) => d);
     await applySnapshot({ queryClient: qc, snapshot: snap(), db, reapply });
     expect(qc.getQueryData(PANTRY_ALL_KEY)).toEqual([{ id: 'p', quantity: 2.5 }]);
-    expect(qc.getQueryData(COOK_PANTRY_KEY)).toEqual([{ id: 'p', quantity: 2.5 }]);
+    // Cook keys must match useCookFromPantry's { items, capped } shape (11-REVIEW-FIX follow-up).
+    expect(qc.getQueryData(COOK_PANTRY_KEY)).toEqual({ items: [{ id: 'p', quantity: 2.5 }], capped: false });
     expect(qc.getQueryData(RECIPES_ALL_KEY)).toEqual([{ id: 'r' }]);
-    expect(qc.getQueryData(COOK_RECIPES_KEY)).toEqual([{ id: 'r' }]);
+    expect(qc.getQueryData(COOK_RECIPES_KEY)).toEqual({ items: [{ id: 'r' }], capped: false });
     expect(qc.getQueryData(MEAL_PLANS_ALL_KEY)).toEqual([{ id: 'm' }]);
     expect(qc.getQueryData(SHOPPING_ACTIVE_KEY)).toEqual({ id: 's', items: [] });
     expect((await readCacheMeta(db)).lastBootstrapAt).toBe('2026-02-02T00:00:00Z');

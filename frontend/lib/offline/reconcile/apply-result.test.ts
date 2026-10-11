@@ -19,9 +19,16 @@ describe('applyResult', () => {
   it('accepts wrapped results and leaves other pantry rows alone', () => {
     const writes = applyResult(adjust, { data: { ...pantryItem(1), quantity: '3' } });
     const other = { ...pantryItem(1), id: 'other' };
-    const out = writes[1].update([other, pantryItem(9)]) as PantryItem[];
+    const out = writes[0].update([other, pantryItem(9)]) as PantryItem[];
     expect(out[0]).toBe(other);
     expect(out[1].quantity).toBe(3);
+  });
+  it('patches the cook key in its { items, capped } page shape', () => {
+    const writes = applyResult(adjust, { ...pantryItem(1), quantity: '4' });
+    const page = deepFreeze({ items: [pantryItem(9)], capped: false });
+    const out = writes[1].update(page) as { items: PantryItem[]; capped: boolean };
+    expect(out.items[0].quantity).toBe(4);
+    expect(out.capped).toBe(false);
   });
   it('replaces the optimistic shopping item by id', () => {
     const op = makeOp({ kind: 'shopping.item.create', label: 'Eggs', payload: { item: { id: ID_B, itemName: 'Eggs' } } });

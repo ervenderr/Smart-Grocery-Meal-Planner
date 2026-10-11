@@ -32,7 +32,8 @@ describe('rollbackOp', () => {
     const op = makeOp({ kind: 'pantry.adjust', label: 'Rice', payload: { id: ID_A, delta: 2 }, inverse: {} });
     const { writes } = rollbackOp(op);
     expect((writes[0].update(deepFreeze([pantryItem(5)])) as PantryItem[])[0].quantity).toBe(3);
-    expect((writes[1].update([pantryItem(1)]) as PantryItem[])[0].quantity).toBe(0);
+    const cook = writes[1].update({ items: [pantryItem(1)], capped: false }) as { items: PantryItem[] };
+    expect(cook.items[0].quantity).toBe(0);
   });
   it('pantry update restores previous; pantry delete restores item once', () => {
     const upd = rollbackOp(makeOp({ kind: 'pantry.update', label: 'Rice', payload: { id: ID_A, patch: { notes: 'n' } }, inverse: { previous: { notes: null } } }));

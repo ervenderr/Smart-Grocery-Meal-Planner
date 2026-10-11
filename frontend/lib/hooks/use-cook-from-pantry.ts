@@ -30,6 +30,7 @@ import {
   type SubstituteResult,
 } from '@/lib/rules';
 import { usePreferences } from '@/lib/hooks/use-preferences';
+import { cookPageItems } from '@/lib/offline/cache/cook-page';
 import type { Recipe } from '@/types/recipe.types';
 
 export const COOK_PANTRY_KEY = [...queryKeys.pantry.all, 'all-pages'] as const;
@@ -94,8 +95,9 @@ export function useCookFromPantry({ applyDiet, onlyReady }: Options): UseCookFro
   const prefsQuery = usePreferences();
   const prefs = prefsQuery.data;
 
-  const pantryRaw = pantryQuery.data?.items;
-  const recipesRaw = recipesQuery.data?.items;
+  // Tolerates a legacy plain-array cache entry persisted before the shape fix.
+  const pantryRaw = useMemo(() => cookPageItems<unknown>(pantryQuery.data), [pantryQuery.data]);
+  const recipesRaw = useMemo(() => cookPageItems<Recipe>(recipesQuery.data), [recipesQuery.data]);
   const pantry = useMemo(() => normalizePantry(pantryRaw), [pantryRaw]);
   const recipes = useMemo(() => normalizeRecipes(recipesRaw), [recipesRaw]);
   const recipesById = useMemo(() => indexById<Recipe>(recipesRaw), [recipesRaw]);

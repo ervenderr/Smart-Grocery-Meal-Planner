@@ -255,3 +255,23 @@ No further changes were needed.
 _Fixed: 2026-10-11T07:39:00Z_
 _Fixer: Claude (gsd-code-fixer)_
 _Iteration: 1_
+
+## Follow-up: COOK_PANTRY_KEY shape mismatch (fixed)
+
+**Verified real.** `applySnapshot` wrote plain arrays to both `COOK_PANTRY_KEY` and `COOK_RECIPES_KEY` (recipes had the same bug). `reapplyForKey` and `pantryWrites` only folded arrays. `useCookFromPantry` reads `data.items`, so after a bootstrap refresh it saw `undefined` items and ranked nothing until a refetch. A persisted array would also hydrate broken on an offline cold start.
+**Fix:** The new `frontend/lib/offline/cache/cook-page.ts` holds the shape helpers: `toCookPage`, `mapCookPage` and `cookPageItems`. Changes per file:
+- Seed writes `{ items, capped }`, with the same caps as `fetchAllPages`.
+- `reapplyForKey` and `pantryWrites` fold the cook key's page items and keep `capped`.
+- `mapCookPage` turns a legacy array into a page.
+- The hook reads items via `cookPageItems`, so a legacy persisted array still renders.
+**Tests:**
+- New `cook-page.test.ts`.
+- Regression cases in `seed.test.ts`, `reapply.test.ts` and `apply-result.test.ts`.
+- `rollback.test.ts` now feeds the cook key the page shape.
+**Note:** IN-06 is now unblocked. `pantryWrites` patches the cook key correctly, so the edit modal can switch to it in a follow-up.
+**Verification:**
+- `vitest run lib/offline`: 482/482 pass.
+- `tsc --noEmit`: clean.
+- `lint`: 0 errors.
+- `NEXT_PUBLIC_API_URL=https://example.invalid npm run build`: OK.
+- Simulator E2E: not run.

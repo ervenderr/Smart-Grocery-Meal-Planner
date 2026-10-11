@@ -27,7 +27,14 @@ describe('reapplyForKey', () => {
     const ops = [makeOp({ kind: 'pantry.adjust', label: 'Rice', payload: { id: ID_A, delta: -5 } })];
     const data = deepFreeze([pantryItem(3)]);
     expect((reapplyForKey(PANTRY_ALL_KEY, data, ops) as PantryItem[])[0].quantity).toBe(0);
-    expect((reapplyForKey(COOK_PANTRY_KEY, data, ops) as PantryItem[])[0].quantity).toBe(0);
+    expect((reapplyForKey(COOK_PANTRY_KEY, data, ops) as { items: PantryItem[] }).items[0].quantity).toBe(0);
+  });
+  it('folds pending ops into the cook key page shape, keeping capped', () => {
+    const ops = [makeOp({ kind: 'pantry.adjust', label: 'Rice', payload: { id: ID_A, delta: -1 } })];
+    const page = deepFreeze({ items: [pantryItem(3)], capped: true });
+    const out = reapplyForKey(COOK_PANTRY_KEY, page, ops) as { items: PantryItem[]; capped: boolean };
+    expect(out.items[0].quantity).toBe(2);
+    expect(out.capped).toBe(true);
   });
   it('marks the meal as cooked', () => {
     const ops = [makeOp({ kind: 'cook.apply', label: 'Cook', payload: { target: { mealPlanItemId: ID_C }, servings: 1, occurredAt: '2026-10-11T10:00:00.000Z' } })];

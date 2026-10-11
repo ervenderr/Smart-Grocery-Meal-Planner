@@ -10,6 +10,8 @@ import {
 } from './cache-keys';
 import { COOK_PANTRY_KEY, COOK_RECIPES_KEY } from '@/lib/hooks/use-cook-from-pantry';
 import { normalizePantryItem } from '@/lib/pantry/normalize';
+import { PANTRY_CAP, RECIPE_CAP } from '@/lib/rules/cook-data';
+import { toCookPage } from './cook-page';
 
 export interface ApplySnapshotArgs {
   queryClient: QueryClient;
@@ -28,9 +30,10 @@ export async function applySnapshot({
   const pantry = snapshot.pantry.map(normalizePantryItem);
   const writes: ReadonlyArray<readonly [readonly unknown[], unknown]> = [
     [PANTRY_ALL_KEY, pantry],
-    [COOK_PANTRY_KEY, pantry],
+    // Cook keys hold useCookFromPantry's { items, capped } page shape, not a plain list.
+    [COOK_PANTRY_KEY, toCookPage(pantry, PANTRY_CAP)],
     [RECIPES_ALL_KEY, snapshot.recipes],
-    [COOK_RECIPES_KEY, snapshot.recipes],
+    [COOK_RECIPES_KEY, toCookPage(snapshot.recipes, RECIPE_CAP)],
     [MEAL_PLANS_ALL_KEY, snapshot.mealPlans],
     ...(snapshot.shoppingList
       ? ([[SHOPPING_ACTIVE_KEY, snapshot.shoppingList]] as const)

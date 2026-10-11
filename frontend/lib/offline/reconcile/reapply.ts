@@ -3,11 +3,14 @@ import type { PantryItem } from '@/types/pantry.types';
 import type { ShoppingList } from '@/types/shopping.types';
 import { COOK_PANTRY_KEY } from '@/lib/hooks/use-cook-from-pantry';
 import { MEAL_PLANS_ALL_KEY, PANTRY_ALL_KEY, SHOPPING_ACTIVE_KEY, keyHash } from '../cache/cache-keys';
+import { mapCookPage } from '../cache/cook-page';
 import { foldMealPlans, foldPantryList, foldShoppingList } from '../outbox/fold';
 import type { EntityType, OutboxOp } from '../outbox/op-types';
 
 const SHOPPING = keyHash(SHOPPING_ACTIVE_KEY);
-const PANTRY = new Set([keyHash(PANTRY_ALL_KEY), keyHash(COOK_PANTRY_KEY)]);
+const PANTRY_ALL = keyHash(PANTRY_ALL_KEY);
+const COOK_PANTRY = keyHash(COOK_PANTRY_KEY);
+const PANTRY = new Set([PANTRY_ALL, COOK_PANTRY]);
 const PLANS = keyHash(MEAL_PLANS_ALL_KEY);
 
 /**
@@ -20,7 +23,10 @@ export function reapplyForKey(key: readonly unknown[], data: unknown, ops: reado
   if (hash === SHOPPING && typeof data === 'object' && Array.isArray((data as ShoppingList).items)) {
     return foldShoppingList(data as ShoppingList, ops);
   }
-  if (PANTRY.has(hash) && Array.isArray(data)) return foldPantryList(data as PantryItem[], ops);
+  if (hash === PANTRY_ALL && Array.isArray(data)) return foldPantryList(data as PantryItem[], ops);
+  if (hash === COOK_PANTRY) {
+    return mapCookPage<PantryItem>(data, (items) => foldPantryList(items as PantryItem[], ops));
+  }
   if (hash === PLANS && Array.isArray(data)) return foldMealPlans(data as MealPlan[], ops);
   return data;
 }
