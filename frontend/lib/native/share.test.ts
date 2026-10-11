@@ -9,7 +9,7 @@ function item(over: Partial<ShareableItem>): ShareableItem {
     isChecked: false,
     createdAt: '2026-01-01T00:00:00Z',
     quantity: 1,
-    unit: 'l',
+    unit: 'liters',
     ...over,
   };
 }
@@ -17,7 +17,7 @@ function item(over: Partial<ShareableItem>): ShareableItem {
 describe('buildShareText', () => {
   it('includes only unchecked items under category headers', () => {
     const r = buildShareText([
-      item({ itemName: 'Milk', quantity: 2, unit: 'l' }),
+      item({ itemName: 'Milk', quantity: 2, unit: 'liters' }),
       item({ itemName: 'Eggs', isChecked: true }),
       item({ itemName: 'Rice', category: 'pantry', quantity: 1.5, unit: 'kg' }),
     ]);
