@@ -110,15 +110,17 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
       emit({ type: 'parked', op, error });
       return true;
     }
-    await deps.store.markInFlight(op.seq);
+    // Claim and re-read atomically: an enqueue may have merged into or dropped this row since nextReady read it.
+    const claimed = await deps.store.claim(op.seq);
+    if (!claimed) return true;
     try {
-      const result = await executor.run(op, { transport: deps.transport, store: deps.store });
-      await deps.store.complete(op.seq);
+      const result = await executor.run(claimed, { transport: deps.transport, store: deps.store });
+      await deps.store.complete(claimed.seq);
       tally.applied += 1;
-      emit({ type: 'applied', op, result });
+      emit({ type: 'applied', op: claimed, result });
       return true;
     } catch (e) {
-      return onFailure(op, userId, e, tally);
+      return onFailure(claimed, userId, e, tally);
     }
   }
 

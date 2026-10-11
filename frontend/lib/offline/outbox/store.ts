@@ -27,6 +27,8 @@ export interface OutboxStore {
   list(userId: string): Promise<OutboxOp[]>;
   nextReady(userId: string, now: number): Promise<OutboxOp | null>;
   markInFlight(seq: number): Promise<void>;
+  /** Atomically marks a still-queued op in flight and returns the row as stored now; null if it changed state or was removed. */
+  claim(seq: number): Promise<OutboxOp | null>;
   complete(seq: number): Promise<void>;
   scheduleRetry(seq: number, error: LastError, nextAttemptAt: number, countsAttempt: boolean): Promise<void>;
   park(seq: number, error: LastError): Promise<void>;
@@ -149,6 +151,14 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
     },
     nextReady,
     markInFlight: (seq) => setState(`UPDATE outbox SET state = 'in_flight', updated_at = ? WHERE seq = ?`, [now(), seq]),
+    claim: (seq) =>
+      mutate(async (tx) => {
+        const current = await getBySeq(tx, seq);
+        if (!current || current.state !== 'queued') return null;
+        const at = now();
+        await tx.run(`UPDATE outbox SET state = 'in_flight', updated_at = ? WHERE seq = ? AND state = 'queued'`, [at, seq]);
+        return { ...current, state: 'in_flight' as const, updatedAt: at };
+      }),
     complete: (seq) => setState('DELETE FROM outbox WHERE seq = ?', [seq]),
     scheduleRetry: (seq, error, nextAttemptAt, countsAttempt) =>
       setState(
