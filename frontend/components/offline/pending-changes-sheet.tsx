@@ -10,7 +10,7 @@ import { haptic } from '@/lib/native/native-haptics';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { getOfflineRuntime } from '@/lib/offline/runtime';
 import { buildSheetModel } from '@/lib/offline/status/sheet-model';
-import { discardAllFailed, discardOp, retryAll, retryOp } from '@/lib/offline/status/actions';
+import { discardAllFailed, discardOp, retryAll, retryOp, runSheetAction } from '@/lib/offline/status/actions';
 import { usePendingSheet } from '@/lib/offline/status/sheet-store';
 import { useOfflineStatus } from '@/lib/offline/status/use-offline-status';
 import { PendingChangeRow } from './pending-change-row';
@@ -39,16 +39,13 @@ export function PendingChangesSheet() {
     setConfirmAll(false);
     setOpen(false);
   };
-  const run = (fn: (rt: NonNullable<ReturnType<typeof getOfflineRuntime>>) => Promise<unknown>) => {
-    const rt = getOfflineRuntime();
-    if (rt) void fn(rt).catch(() => toast.error("Couldn't update pending changes. Try again."));
-  };
-  const handleDiscard = async (seq: number) => {
-    const rt = getOfflineRuntime();
-    if (!rt) return;
-    await discardOp(rt, seq);
-    toast(UNDONE);
-  };
+  const run = (fn: (rt: NonNullable<ReturnType<typeof getOfflineRuntime>>) => Promise<unknown>): Promise<void> =>
+    runSheetAction(getOfflineRuntime(), fn, () => toast.error("Couldn't update pending changes. Try again."));
+  const handleDiscard = (seq: number): Promise<void> =>
+    run(async (rt) => {
+      await discardOp(rt, seq);
+      toast(UNDONE);
+    });
   const handleDiscardAll = () => {
     setConfirmAll(false);
     run(async (rt) => {

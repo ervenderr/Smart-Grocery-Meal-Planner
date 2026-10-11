@@ -5,6 +5,19 @@ import type { OfflineRuntime } from '../runtime';
 
 type ActionRuntime = Pick<OfflineRuntime, 'store' | 'drain' | 'applyWrites'>;
 
+/** Runs a pending-sheet action; any failure goes to onError (never an unhandled rejection). */
+export async function runSheetAction<R extends ActionRuntime>(
+  runtime: R | null,
+  fn: (rt: R) => Promise<unknown>,
+  onError: () => void,
+): Promise<void> {
+  if (!runtime) return;
+  try {
+    await fn(runtime);
+  } catch {
+    onError();
+  }
+}
 
 function rollBackAll(runtime: ActionRuntime, ops: readonly OutboxOp[]): number {
   for (const op of [...ops].reverse()) runtime.applyWrites(rollbackOp(op).writes);
