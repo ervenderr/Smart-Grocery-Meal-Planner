@@ -146,4 +146,25 @@ describe('query persister', () => {
     await p.flush();
     expect(await count()).toBe(0);
   });
+
+  it('skips the write while canPersist is false and writes once it is true', async () => {
+    let allowed = false;
+    const p = createQueryPersister({
+      db,
+      queryClient: qc,
+      getUserId: () => userId,
+      writeDelayMs: 150,
+      canPersist: async () => allowed,
+    });
+    p.start();
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'a' }]);
+    await vi.advanceTimersByTimeAsync(200);
+    await p.flush();
+    expect(await count()).toBe(0);
+    allowed = true;
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: 'b' }]);
+    await vi.advanceTimersByTimeAsync(200);
+    await p.flush();
+    expect(await count()).toBe(1);
+  });
 });

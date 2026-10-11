@@ -3,7 +3,13 @@ import { QueryClient } from '@tanstack/react-query';
 import { createNodeSqlDb } from './sql/node-sqldb.test-helper';
 import { migrate } from './sql/migrations';
 import type { SqlDb } from './sql/types';
-import { createOfflineRuntime, getOfflineRuntime, setOfflineRuntime, type OfflineRuntime } from './runtime';
+import {
+  createOfflineRuntime,
+  getOfflineRuntime,
+  setOfflineRuntime,
+  whenOfflineRuntime,
+  type OfflineRuntime,
+} from './runtime';
 import { PANTRY_ALL_KEY, SHOPPING_ACTIVE_KEY } from './cache/cache-keys';
 import { ID_A, ID_B } from './outbox/fixtures.test-helper';
 import type { DrainEvent } from './outbox/drain';
@@ -177,5 +183,33 @@ describe('offline runtime', () => {
     expect(l).not.toHaveBeenCalled();
     setOfflineRuntime(rt);
     expect(getOfflineRuntime()).toBe(rt);
+  });
+
+  it('does not persist optimistic cache state while ops are pending (no double fold after restart)', async () => {
+    make(async () => page({}));
+    online = false;
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: ID_A, quantity: 5 }]);
+    await rt.persister.flush();
+    await rt.enqueue(adjust);
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: ID_A, quantity: 7 }]);
+    rt.persister.start();
+    qc.setQueryData(PANTRY_ALL_KEY, [{ id: ID_A, quantity: 7 }]);
+    await rt.persister.flush();
+    const rows = await db.query<{ state_json: string }>('SELECT state_json FROM cache_entries');
+    expect(rows.every((r) => !r.state_json.includes('"quantity":7'))).toBe(true);
+  });
+
+  it('whenOfflineRuntime fires immediately when set, or later when set', () => {
+    make(async () => page({}));
+    const early = vi.fn();
+    setOfflineRuntime(null);
+    const off = whenOfflineRuntime(early);
+    expect(early).not.toHaveBeenCalled();
+    setOfflineRuntime(rt);
+    expect(early).toHaveBeenCalledWith(rt);
+    off();
+    const late = vi.fn();
+    whenOfflineRuntime(late);
+    expect(late).toHaveBeenCalledWith(rt);
   });
 });

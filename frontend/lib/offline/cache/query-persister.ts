@@ -19,6 +19,8 @@ export interface QueryPersisterOptions {
   getUserId: () => string | null;
   now?: () => number;
   writeDelayMs?: number;
+  /** When it resolves false the write is skipped (cache holds unconfirmed optimistic state). */
+  canPersist?: () => Promise<boolean>;
 }
 
 const GC_PREFIXES: readonly (readonly string[])[] = [
@@ -67,6 +69,7 @@ export function createQueryPersister(opts: QueryPersisterOptions): QueryPersiste
   const writeKey = async (key: readonly unknown[]): Promise<void> => {
     const userId = getUserId();
     if (!userId) return;
+    if (opts.canPersist && !(await opts.canPersist())) return;
     const hash = keyHash(key);
     const query = queryClient.getQueryCache().find({ queryKey: key as unknown[], exact: true });
     if (!query || query.state.status !== 'success') return;

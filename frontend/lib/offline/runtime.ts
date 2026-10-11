@@ -45,7 +45,20 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
   const now = args.now ?? Date.now;
   const fetchPage = args.fetchPage ?? ((cursor: string | null) => syncApi.bootstrap(cursor));
   const store = createOutboxStore({ db, now });
-  const persister = createQueryPersister({ db, queryClient, getUserId, now });
+  // Persist only server-confirmed data: while ops are pending the cache holds their optimistic
+  // effect, and boot re-folds pending ops, which would double-apply deltas such as pantry.adjust.
+  let enqueuing = 0;
+  const persister = createQueryPersister({
+    db,
+    queryClient,
+    getUserId,
+    now,
+    canPersist: async () => {
+      if (enqueuing > 0) return false;
+      const userId = getUserId();
+      return !userId || (await store.list(userId)).length === 0;
+    },
+  });
   const connectivity = createConnectivity({
     probe: args.probe,
     isForcedOffline: () => isForcedOffline(),
@@ -136,9 +149,14 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     async enqueue(op, opts) {
       const userId = getUserId();
       if (!userId) throw new Error('Cannot enqueue offline change without a signed-in user');
-      const row = await store.enqueue(userId, op, opts);
-      drain.kick('enqueue');
-      return row;
+      enqueuing += 1;
+      try {
+        const row = await store.enqueue(userId, op, opts);
+        drain.kick('enqueue');
+        return row;
+      } finally {
+        enqueuing -= 1;
+      }
     },
     refreshFromServer,
     onEvent(listener) {
@@ -161,6 +179,20 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
 
 let current: OfflineRuntime | null = null;
 export const getOfflineRuntime = (): OfflineRuntime | null => current;
+const readyListeners = new Set<(r: OfflineRuntime) => void>();
 export const setOfflineRuntime = (r: OfflineRuntime | null): void => {
   current = r;
+  if (r) [...readyListeners].forEach((l) => l(r));
 };
+
+/** Calls back now if the runtime exists, else once it is set (covers a boot that outlived its timeout). */
+export function whenOfflineRuntime(cb: (r: OfflineRuntime) => void): () => void {
+  if (current) {
+    cb(current);
+    return () => undefined;
+  }
+  readyListeners.add(cb);
+  return () => {
+    readyListeners.delete(cb);
+  };
+}

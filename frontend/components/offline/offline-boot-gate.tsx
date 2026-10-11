@@ -8,7 +8,7 @@ import { API_BASE_URL } from '@/lib/constants/api-routes';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { bootOffline, type BootResult } from '@/lib/offline/boot';
 import { healthUrl, probeHealth } from '@/lib/offline/connectivity/probe';
-import { getOfflineRuntime, createOfflineRuntime } from '@/lib/offline/runtime';
+import { getOfflineRuntime, createOfflineRuntime, whenOfflineRuntime } from '@/lib/offline/runtime';
 import { getDb } from '@/lib/offline/sql/get-db';
 import { attachTriggers } from '@/lib/offline/triggers';
 import { isNativeBuild } from '@/lib/platform/native';
@@ -31,6 +31,7 @@ export function OfflineBootGate({ children }: { children: ReactNode }) {
     if (!isNativeBuild() || started.current) return;
     started.current = true;
     let detach: (() => void) | null = null;
+    let stopWaiting: (() => void) | null = null;
     let cancelled = false;
 
     void bootOffline({
@@ -49,14 +50,19 @@ export function OfflineBootGate({ children }: { children: ReactNode }) {
     }).then(async (result: BootResult) => {
       if (cancelled) return;
       setPhase(result.status === 'empty-offline' ? 'empty-offline' : 'ready');
-      const runtime = getOfflineRuntime();
-      if (!runtime) return;
-      detach = await attachTriggers(runtime);
-      void runtime.refreshFromServer('boot');
+      // A boot that hit the fail-open timeout still sets the runtime later; attach then.
+      stopWaiting = whenOfflineRuntime((runtime) => {
+        void attachTriggers(runtime).then((remove) => {
+          if (cancelled) remove();
+          else detach = remove;
+        });
+        void runtime.refreshFromServer('boot');
+      });
     });
 
     return () => {
       cancelled = true;
+      stopWaiting?.();
       detach?.();
     };
   }, [queryClient]);
