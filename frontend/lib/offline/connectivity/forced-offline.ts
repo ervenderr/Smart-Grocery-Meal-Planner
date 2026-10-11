@@ -2,10 +2,9 @@
  * E2E-only forced-offline switch. Honored only when NEXT_PUBLIC_E2E === '1'
  * (native E2E builds). Release builds never set it, so the key is dead code.
  */
-export const FORCE_OFFLINE_KEY: string | null =
-  process.env.NEXT_PUBLIC_E2E === '1' ? 'kitcha:e2e-force-offline' : null;
+export const FORCE_OFFLINE_KEY: string | null = process.env.NEXT_PUBLIC_E2E_FORCE_OFFLINE_KEY || null;
 
-/** Folded to null in non-E2E builds so the literal never reaches a release bundle. */
+/** The storage key is injected only by E2E builds (frontend-build.sh --e2e), so release bundles never contain it. */
 const defaultKey = (): string | null => FORCE_OFFLINE_KEY;
 
 type ReadStorage = Pick<Storage, 'getItem'>;
