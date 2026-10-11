@@ -208,8 +208,11 @@ export function AddPantryItemModal({
         if (offlineScan && payload.barcode && runtime && userId) {
           await runtime.barcode.pending.add(userId, id, payload.barcode);
         }
+        // The drain may already have applied the create and inserted the server row.
         queryClient.setQueryData<PantryItem[] | undefined>(PANTRY_ALL_KEY, (items) =>
-          items ? [{ ...payload, id, userId: '', createdAt: stamp, updatedAt: stamp }, ...items] : items
+          items && !items.some((i) => i.id === id)
+            ? [{ ...payload, id, userId: '', createdAt: stamp, updatedAt: stamp }, ...items]
+            : items
         );
       }
 

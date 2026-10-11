@@ -52,7 +52,12 @@ export function applyResult(op: OutboxOp, result: unknown, remaining: readonly O
       const server = normalizePantryItem(raw as unknown as PantryItem);
       if (!Number.isFinite(server.quantity)) return NONE;
       const later = sameEntity(op, remaining);
-      return pantryWrites((items) => foldPantryList(items.map((i) => (i.id === server.id ? server : i)), later));
+      // Upsert: a create may be applied before its optimistic row reached the cache.
+      const upsert = (items: readonly PantryItem[]): PantryItem[] =>
+        items.some((i) => i.id === server.id)
+          ? items.map((i) => (i.id === server.id ? server : i))
+          : op.kind === 'pantry.create' ? [...items, server] : [...items];
+      return pantryWrites((items) => foldPantryList(upsert(items), later));
     }
     case 'pantry.delete':
       return pantryWrites((items) => items.filter((i) => i.id !== op.entityId));
