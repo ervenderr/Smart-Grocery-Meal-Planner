@@ -33,7 +33,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 - [ ] **Phase 10: Capacitor iOS Shell** - Static-export Capacitor app with secure token storage, native scan, local notifications, simulator smoke test (HUMAN GATE: install Xcode, real iPhone)
 - [ ] **Phase 11: Offline Core** - SQLite read cache and write outbox so the whole app works with no signal
 - [ ] **Phase 12: One-Time Unlock** - Kitcha Full at $9.99 (non-consumable IAP) with server-side entitlement gating (HUMAN GATE: Apple Developer enrollment, App Store Connect product)
-- [ ] **Phase 13: On-Device AI** - Apple Foundation Models suggestions with server fallback and a recorded comparison (HUMAN GATE: Apple Intelligence iPhone 15 Pro or newer)
+- [ ] **Phase 13: On-Device AI (DEFERRED to 1.1 - not in the 1.0 release)** - Apple Foundation Models suggestions with server fallback and a recorded comparison (HUMAN GATE: Apple Intelligence iPhone 15 Pro or newer)
 - [ ] **Phase 14: TestFlight & App Store Release** - Scripted TestFlight upload, complete listing, submission (HUMAN GATE: enrollment, screenshots, submit)
 
 ## Phase Details
@@ -163,7 +163,7 @@ Plans:
 **Plans**: TBD
 **UI hint**: yes
 
-### Phase 13: On-Device AI
+### Phase 13: On-Device AI (DEFERRED to 1.1)
 **Goal**: Supported iPhones generate recipe suggestions on-device, and everything else falls back to the server transparently
 **Depends on**: Phase 10 (native shell), Phase 7 (AI consent and labels), Phase 12 (gated AI allowance for the fallback path)
 **Requirements**: AI-01, AI-02, AI-03

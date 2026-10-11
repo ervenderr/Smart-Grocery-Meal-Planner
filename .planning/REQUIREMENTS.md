@@ -47,7 +47,7 @@ Research: `.planning/research-v2/` (01 native path, 02 on-device AI, 03 offline 
 - [ ] **SUB-02**: Backend verifies the purchase (App Store Server API/receipt or RevenueCat) and stores an entitlement; paid features are gated server-side (unlimited pantry, offline AI-free extras, server-AI monthly allowance)
 - [ ] **SUB-03**: Free tier is useful (barcode scanning, expiry alerts, up to 25 pantry items); an upgrade prompt appears only at the limit and can be dismissed; no recurring charges anywhere
 
-### On-Device AI (AI)
+### On-Device AI (AI) - DEFERRED to app version 1.1 (owner decision 2026-10-11)
 - [ ] **AI-01**: On supported iPhones (Apple Intelligence), user can generate recipe suggestions from the pantry on-device with structured, schema-valid output and no network
 - [ ] **AI-02**: Unsupported devices, long plans and failures fall back to the server AI with a clear indicator of where generation ran
 - [ ] **AI-03**: A 30-prompt comparison against the server provider is recorded and decides whether a downloadable model is needed
@@ -105,8 +105,8 @@ Research: `.planning/research-v2/` (01 native path, 02 on-device AI, 03 offline 
 | SUB-01 | Phase 12 | Pending |
 | SUB-02 | Phase 12 | Pending |
 | SUB-03 | Phase 12 | Pending |
-| AI-01 | Phase 13 | Pending |
-| AI-02 | Phase 13 | Pending |
-| AI-03 | Phase 13 | Pending |
+| AI-01 | Phase 13 (deferred to 1.1) | Deferred |
+| AI-02 | Phase 13 (deferred to 1.1) | Deferred |
+| AI-03 | Phase 13 (deferred to 1.1) | Deferred |
 | REL-01 | Phase 14 | Pending |
 | REL-02 | Phase 14 | Pending |
