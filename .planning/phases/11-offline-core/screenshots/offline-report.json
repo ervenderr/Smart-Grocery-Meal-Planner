@@ -1,10 +1,10 @@
 {
   "suite": "offline",
-  "date": "2026-10-11T05:53:24Z",
+  "date": "2026-10-11T06:00:24Z",
   "device": "iPhone 17",
   "runtime": "iOS-26-5",
   "offline_mode": "forced-offline flag (simctl has no airplane mode)",
-  "duration_seconds": 56,
+  "duration_seconds": 55,
   "steps": [
     {
       "step": "seed",
