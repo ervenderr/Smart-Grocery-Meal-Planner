@@ -26,7 +26,7 @@ Question 1, "Do you or your third-party partners collect data from this app?": *
 | User Content > Other User Content | Yes | Yes | No | App Functionality | Pantry, recipes, meal plans, shopping lists, notes, AI report notes. Also what is sent to the AI provider (ingredient names). |
 | Identifiers > User ID | Yes | Yes | No | App Functionality | Server user UUID, token subject. |
 | Usage Data > Product Interaction | Yes | Yes | No | App Functionality | Per-user AI request counters (`AiUsage`) used for quota and rate limiting. Over-declaring is safe; this is the conservative choice. |
-| Purchases > Purchase History | **Yes in 1.0 (Phase 12 in scope)** | Yes | No | App Functionality | Declare once entitlement (originalTransactionId, status) is stored server-side; the feature is not built yet. |
+| Purchases > Purchase History | **Yes (implemented in Phase 12, 1.0)** | Yes | No | App Functionality | Stored server-side per account in the `entitlements` table: originalTransactionId, latest transaction id, environment, status, purchase and revocation dates (plus Apple notification ids for dedupe). Linked to the account, not used for tracking, deleted with the account (Cascade). Card details never reach us; Apple handles payment. |
 | Financial Info | No (decided) | | | | Owner decision: grocery prices and budget stay classified as User Content (user-entered list/pantry data; Apple's Financial Info covers payment, credit, salary/assets type data). |
 | Health & Fitness | No | | | | Recipe calories are reference data, not user health data. |
 | Location, Contacts, Photos or Videos, Audio, Browsing History, Search History, Sensitive Info | No | | | | Camera frames are processed on device for scanning and not stored or sent. |
@@ -36,7 +36,7 @@ Question 1, "Do you or your third-party partners collect data from this app?": *
 
 Follow-up answers per declared type: **Linked to user's identity: Yes. Used for tracking: No.** For the question "Do you use data for tracking?": **No** (no ad networks, no data brokers, no linking with third-party data for advertising). NSPrivacyTracking in the manifest is false and there are no tracking domains.
 
-Third-party partners that receive data (declare them within the types above, per Apple's rule that partner collection counts): the AI provider (label default `Dahl Inference`, ingredient names, quantities, dietary tags, no identity), Open Food Facts and USDA (barcode and search terms, no identity), hosting (Railway for API and database, Vercel for the website). RevenueCat or App Store Server API only when Phase 12 ships.
+Third-party partners that receive data (declare them within the types above, per Apple's rule that partner collection counts): the AI provider (label default `Dahl Inference`, ingredient names, quantities, dietary tags, no identity), Open Food Facts and USDA (barcode and search terms, no identity), hosting (Railway for API and database, Vercel for the website). Apple (App Store Server Notifications V2 and JWS verification) for Kumaun Full; no RevenueCat or other purchase vendor is used.
 
 Privacy Policy URL: `https://<vercel-host>/privacy` (page exists). Before submission update it to state the clauses in the next section.
 
@@ -52,7 +52,7 @@ What exists today (2026-10-11):
 
 What to add:
 1. `NSPrivacyTracking` false, `NSPrivacyTrackingDomains` empty.
-2. `NSPrivacyCollectedDataTypes` with the five types above (Email, Name, User ID, Other User Content, Product Interaction), each Linked true, Tracking false, purpose AppFunctionality. Add Purchase History with Phase 12.
+2. `NSPrivacyCollectedDataTypes` with the five types above (Email, Name, User ID, Other User Content, Product Interaction), each Linked true, Tracking false, purpose AppFunctionality. Add Purchase History (Phase 12 is implemented, so it is a sixth type).
 3. `NSPrivacyAccessedAPITypes`: empty by evidence. After the first real archive (Xcode: Product > Archive > Distribute, or right-click the archive > Generate Privacy Report) and the first TestFlight upload, add exactly the categories Apple names in any ITMS-91053 email. The likely candidate is UserDefaults with reason `CA92.1` (read/write data only the app itself uses). Do not pre-declare reasons the code does not use.
 4. Add the file to the App target resources.
 
@@ -67,12 +67,12 @@ The privacy policy text (`frontend/app/privacy`, edited by whoever owns it, not 
 1. **AI provider**: names the provider using the configurable label (default `Dahl Inference`), says what is sent (ingredient names, quantities, dietary tags; no name or email), that it is sent only after explicit consent, and links the provider's retention/training terms. OWNER TO CONFIRM the exact provider and operator name before publishing. AI is not available in on-device form in 1.0.
 2. **Zapier webhooks**: "Kumaun offers optional Zapier webhook integrations. If you configure one, Kumaun sends the events you select (for example pantry or shopping list changes) to the webhook URL you provide, which may be a Zapier or other third-party endpoint. You choose the URL and the events; we do not enable it by default. Data sent there is governed by that service's policy, and you can remove the webhook at any time."
 3. **Server logs**: "Our servers keep request logs, which include your IP address, for 30 days for security, abuse prevention and debugging, then delete them. We do not use them for tracking or advertising." Server logs are not collected for tracking.
-4. Purchase data (Kumaun Full entitlement) now that Phase 12 is in 1.0 scope; account deletion behavior; Open Food Facts and USDA attributions.
+4. Purchase data (Kumaun Full entitlement: transaction ids, environment, status, dates; deleted with the account; Apple handles payment); account deletion behavior; Open Food Facts and USDA attributions.
 5. Offline: data cached on the device for offline use stays on the device until sync or sign-out.
 
 Implementation follow-up for the backend owner: the 30-day log retention must be enforced on Railway (log retention setting or log drain), not just stated. Human/agent task, tracked in SUBMISSION-CHECKLIST.md.
 
-Phase 12 is in 1.0 scope, so Purchases > Purchase History is declared in 1.0 (add the manifest entry; see the commented block in `PrivacyInfo.proposed.xcprivacy`).
+Phase 12 is implemented and in 1.0 scope, so Purchases > Purchase History is declared in 1.0. The manifest entry is added to `mobile/ios/App/App/PrivacyInfo.xcprivacy` in plan 12-15 (see the block in `PrivacyInfo.proposed.xcprivacy`); if 12-15 recorded the wiring as human_needed, the manifest entry is still PENDING and must be added before archive.
 
 ## Open questions for the owner
 

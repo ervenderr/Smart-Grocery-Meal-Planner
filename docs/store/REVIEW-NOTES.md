@@ -38,11 +38,19 @@ The demo account has onboarding completed and is pre-populated:
 - The demo account has NOT given AI consent. The first time an AI feature is used, the "Use AI features?" consent sheet is shown by design. Accepting enables AI suggestions; declining leaves the rest of the app fully usable.
 - AI responses carry an "AI-generated" badge, a health/nutrition disclaimer, and a "Report suggestion" action.
 - AI-generated content is always labelled. Only ingredient names, quantities and dietary tags are sent to the AI provider; no name, email or address.
-- Each user has a daily AI request limit (default 20). Hitting it shows a friendly message.
+- Each user has a daily AI request limit (default 20; 40 per day plus 600 per month with Kumaun Full). Hitting it shows a friendly message.
+
+## In-app purchase (Kumaun Full)
+
+- Kumaun Full is a one-time, non-consumable unlock (product `app.kitcha.mobile.full`). No subscription.
+- Test path: sign in with the demo account, add pantry items until the 26th (the free tier holds 25), or go to Settings > Kumaun Full. Tap Unlock, complete the purchase, then try Restore Purchases (also under Settings > Kumaun Full).
+- Purchases are verified server-side (signed transaction checked against Apple's root certificate; refunds arrive through App Store Server Notifications). Sandbox purchases are accepted so you can test in review.
+- Free features stay free: barcode scanning, expiry reminders, recipes, meal plans and shopping lists. The unlock raises the pantry limit and the daily AI allowance.
+- The demo account is not pre-unlocked.
 
 ## Account deletion
 
-Where: Settings > Data > Delete account. The password is required to confirm, and all of the user's data is removed immediately.
+Where: Settings > Data > Delete account. The password is required to confirm, and all of the user's data is removed immediately. This does not cancel an Apple purchase (it belongs to the Apple Account).
 
 ## Legal and support URLs
 

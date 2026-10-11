@@ -38,6 +38,18 @@ Dated 2026-10-11. Starting point: Apple enrollment pending. Companion docs: LIST
 22. [H] Choose release option (manual release recommended for v1) and select the TestFlight build.
 23. [H] Final click: **Add for Review / Submit for Review**. Then monitor; reply to App Review messages quickly. [A] can draft replies.
 
+## Kumaun Full (in-app purchase) items
+
+Details and exact steps: IAP.md "Owner steps".
+
+- [ ] [H] `APPLE_APP_APPLE_ID` set on Railway (IAP.md owner step 1).
+- [ ] [H] App Store Server Notifications V2 URLs registered for Production and Sandbox (`https://<api-host>/api/v1/webhooks/app-store`) after the Railway deploy; "Request a Test Notification" returned 200.
+- [ ] [H] Sandbox tester created; sandbox purchase, delete-and-Restore Purchases, second-device unlock and refund verified on TestFlight.
+- [ ] [H+A] IAP review screenshot captured (IAP.md "Review screenshot") and uploaded; product leaves MISSING_METADATA.
+- [ ] [H] IAP attached to the 1.0 version and in Ready to Submit.
+- [ ] [H+A] Purchase History declared in the App Privacy questionnaire, and the Purchase History entry present in `mobile/ios/App/App/PrivacyInfo.xcprivacy` (PRIVACY-LABELS.md).
+- [ ] [H] In-App Purchase capability present in Xcode Signing & Capabilities; `IAP_ALLOW_XCODE_ENV` NOT set on Railway.
+
 ## iPad QA (agent-doable, simulator "Kitcha-Store-iPad-13" or any iPad 13-inch simulator)
 
 Required because iPad is supported (Apple reviews on iPad). Run on a built simulator app, with the demo account; record failures as issues for the frontend/mobile owner.
