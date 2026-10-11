@@ -42,6 +42,41 @@ npm run verify:bundle  # security and size gate on the export
 8. On first run, trust the developer profile on the phone: Settings > General > VPN and Device Management. Enable Developer Mode if prompted (Settings > Privacy and Security).
 9. Free-team builds expire after 7 days; run again from Xcode to refresh.
 
+## TestFlight release (build and upload)
+
+One-time setup (creates an Apple Distribution certificate and App Store profile through the API key, and a
+dedicated signing keychain; secrets stay in `~/.appstoreconnect/`, never in the repo):
+
+```bash
+cd mobile
+bash scripts/setup-signing.sh
+```
+
+Credentials come from `~/.appstoreconnect/env` (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_PATH` pointing at the `.p8`).
+
+Each release:
+
+```bash
+cd mobile
+bash scripts/archive-ios.sh          # release web export + archive; build number = UTC yymmddHHMM
+bash scripts/upload-testflight.sh    # export (manual Distribution signing) + upload to App Store Connect
+node scripts/asc-testflight.mjs wait # poll until VALID, then ensure the "Internal Testers" group has the owner
+```
+
+- Bump the version by editing `MARKETING_VERSION` (currently 1.0) in the Xcode project. The build number is automatic; override with `BUILD_NUMBER=...`.
+- `ITSAppUsesNonExemptEncryption` is `false` (HTTPS only, no custom crypto), so there is no export-compliance prompt.
+- Why not Apple cloud signing: exporting with `-allowProvisioningUpdates` fails with "Cloud signing permission error" for this API key, and the login keychain cannot sign headlessly (`errSecInternalComponent`). `LOCAL_SIGN=1 archive-ios.sh` signs at archive time if you prefer Xcode-managed signing.
+- The upload uses `xcodebuild -exportArchive` with `destination=upload`, authenticated with the API key.
+- The app icon (1024px, no alpha) and splash are generated from `frontend/public/kitcha-logo.svg`.
+
+### Install on iPhone and iPad (owner)
+
+1. Install the free **TestFlight** app from the App Store on each device, signed in with the Apple ID `ervenidjad12@gmail.com`.
+2. Open TestFlight. Kumaun appears under Apps (internal testers get builds without review); if it does not, accept the invitation email from App Store Connect / TestFlight first.
+3. Tap **Install** (or Update). Open Kumaun from the home screen.
+4. Repeat on the iPad: iPad runs the same iPhone+iPad build.
+5. Builds expire 90 days after upload. Each new upload shows up as an update.
+
 ## Real-device checklist (human_needed)
 
 - [ ] Native barcode scan of a real product
