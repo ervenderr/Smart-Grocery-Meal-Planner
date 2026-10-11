@@ -3,6 +3,7 @@ import type { Transport } from '../transport';
 import { nextDelayMs } from './backoff';
 import { classify, type TransportFailure } from './classify-error';
 import type { ExecutorRegistry } from './executors';
+import { IN_DOUBT_CODE } from './fold';
 import type { LastError, OutboxOp } from './op-types';
 import type { OutboxStore } from './store';
 
@@ -88,7 +89,9 @@ export function createDrainWorker(deps: DrainDeps): DrainWorker {
         return true;
       case 'retry': {
         const at = now() + nextDelayMs(op.attempts, { retryAfterMs: outcome.retryAfterMs });
-        const error: LastError = { reason: 'transient', ...(failure.status !== undefined ? { status: failure.status } : {}), ...(failure.code !== undefined ? { code: failure.code } : {}) };
+        // A timeout may have reached the server: record it as in doubt so refreshes replay it first.
+        const code = failure.timeout ? IN_DOUBT_CODE : failure.code;
+        const error: LastError = { reason: 'transient', ...(failure.status !== undefined ? { status: failure.status } : {}), ...(code !== undefined ? { code } : {}) };
         await deps.store.scheduleRetry(op.seq, error, at, outcome.countsAttempt);
         emit({ type: 'retry-scheduled', op, at });
         if (failure.network || failure.timeout) {

@@ -50,6 +50,16 @@ function foldShoppingOp(list: ShoppingList, op: OutboxOp): ShoppingList {
   }
 }
 
+/** Marks an op whose request may have reached the server without a response (timeout / killed in flight). */
+export const IN_DOUBT_CODE = 'IN_DOUBT';
+const IN_DOUBT_CODES = new Set([IN_DOUBT_CODE, 'IDEMPOTENCY_IN_FLIGHT']);
+
+/** True when a fresh server snapshot may already include this op's effect. */
+export function isInDoubt(op: OutboxOp): boolean {
+  if (op.state === 'in_flight') return true;
+  return op.state === 'queued' && op.lastError?.code !== undefined && IN_DOUBT_CODES.has(op.lastError.code);
+}
+
 /** Re-applies every op still in the outbox (any state) over a server snapshot, in seq order. */
 export function foldShoppingList(list: ShoppingList, ops: readonly OutboxOp[]): ShoppingList {
   return [...ops].sort((a, b) => a.seq - b.seq).reduce(foldShoppingOp, list);

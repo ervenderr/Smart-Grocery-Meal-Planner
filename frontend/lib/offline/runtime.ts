@@ -15,6 +15,7 @@ import { createConnectivity, type Connectivity } from './connectivity/connectivi
 import { isForcedOffline } from './connectivity/forced-offline';
 import { createDrainWorker, type DrainEvent, type DrainWorker } from './outbox/drain';
 import { createExecutorRegistry, type Executor } from './outbox/executors';
+import { isInDoubt } from './outbox/fold';
 import type { NewOp, OpKind, OutboxOp } from './outbox/op-types';
 import { createOutboxStore, type EnqueueOpts, type OutboxStore } from './outbox/store';
 import { applyResult, type CacheWrites } from './reconcile/apply-result';
@@ -124,6 +125,13 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     const epoch = sessionEpoch;
     if (!(await connectivity.isReachable())) return 'offline';
     try {
+      // An op that may already be on the server would be folded twice over a fresh snapshot:
+      // replay it (idempotent) first, and do not apply a snapshot while any is still in doubt.
+      if ((await store.list(userId)).some(isInDoubt)) {
+        drain.kick('refresh');
+        await drain.whenIdle();
+        if ((await store.list(userId)).some(isInDoubt)) return 'skipped';
+      }
       const { snapshot, ops } = await fetchStableSnapshot(userId);
       // The user signed out or switched while fetching: never write their data into the new session.
       if (disposed || getUserId() !== userId || sessionEpoch !== epoch) return 'skipped';

@@ -1,6 +1,7 @@
 import type { SqlDb } from '../sql/types';
 import { newId } from '../ids';
 import { planEnqueue } from './coalesce';
+import { IN_DOUBT_CODE } from './fold';
 import { NewOpSchema, barrierFor, entityOf, type LastError, type NewOp, type OutboxOp } from './op-types';
 import { rowToOp, toJson } from './store-rows';
 
@@ -229,8 +230,9 @@ export function createOutboxStore({ db, now = Date.now }: { db: SqlDb; now?: () 
     resetInFlight: () =>
       mutate(async (tx) => {
         const res = await tx.run(
-          `UPDATE outbox SET state = 'queued', last_error_json = COALESCE(last_error_json, ?), updated_at = ? WHERE state = 'in_flight'`,
-          [JSON.stringify({ reason: 'transient' }), now()]
+          `UPDATE outbox SET state = 'queued', last_error_json = ?, updated_at = ? WHERE state = 'in_flight'`,
+          // Killed while in flight: the server may have applied it, so it is in doubt until replayed.
+          [JSON.stringify({ reason: 'transient', code: IN_DOUBT_CODE }), now()]
         );
         return res.changes;
       }),
