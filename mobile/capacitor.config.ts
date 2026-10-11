@@ -26,6 +26,10 @@ const config: CapacitorConfig = {
       style: 'LIGHT',
       overlaysWebView: true,
     },
+    CapacitorSQLite: {
+      iosDatabaseLocation: 'Library/CapacitorDatabase',
+      iosIsEncryption: false,
+    },
   },
 };
 
