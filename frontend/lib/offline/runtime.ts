@@ -246,6 +246,7 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     dispose() {
       disposed = true;
       drain.dispose();
+      connectivity.dispose();
       listeners.clear();
     },
   };
