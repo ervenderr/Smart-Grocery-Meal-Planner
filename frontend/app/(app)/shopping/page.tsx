@@ -73,8 +73,10 @@ export default function ShoppingPage() {
 
   const handleFinish = (input: FinishShoppingVariables) => {
     finishShopping.mutate(input, {
-      onSuccess: (result) => {
+      onSuccess: (outcome) => {
         setFinishOpen(false);
+        if (outcome.queued) return;
+        const { result } = outcome;
         const pantryToast = finishToast(result, input.addToPantry);
         if (!pantryToast) {
           toast.success(`Trip saved: ${format(result.history.totalCents)}`);

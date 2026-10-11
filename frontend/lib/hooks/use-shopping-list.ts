@@ -8,6 +8,8 @@ import { queryKeys } from '@/lib/react-query';
 import { offlineWrite, type WriteOutcome } from '@/lib/offline/facade';
 import { newId } from '@/lib/offline/ids';
 import { getOfflineRuntime } from '@/lib/offline/runtime';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { isFinishPending } from '@/lib/offline/ops/finish-ops';
 import {
   buildShoppingCreate,
   buildShoppingDelete,
@@ -26,6 +28,28 @@ import type {
   ShoppingList,
   UpdateShoppingItemInput,
 } from '@/types/shopping.types';
+
+export const FINISH_LOCK_COPY = "Your trip is still syncing. You can edit the list once it's recorded.";
+
+class FinishLockedError extends Error {
+  constructor() {
+    super(FINISH_LOCK_COPY);
+    this.name = 'FinishLockedError';
+  }
+}
+
+const isFinishLockedError = (e: unknown): boolean => e instanceof FinishLockedError;
+
+/** Native only: rejects (with a toast) while a queued finish trip has not synced yet. */
+async function assertListUnlocked(): Promise<void> {
+  const runtime = getOfflineRuntime();
+  const userId = useAuthStore.getState().user?.id;
+  if (!runtime || !userId) return;
+  if (isFinishPending(await runtime.store.list(userId))) {
+    toast.error(FINISH_LOCK_COPY);
+    throw new FinishLockedError();
+  }
+}
 
 export const SHOPPING_ITEM_MUTATION_KEY = ['shopping', 'item'] as const;
 
@@ -132,6 +156,7 @@ export function useUpdateShoppingItem() {
         })
       ),
     onMutate: async (vars) => {
+      await assertListUnlocked();
       const { itemId, patch } = vars;
       await queryClient.cancelQueries({ queryKey: key });
       const previousItem = queryClient
@@ -148,7 +173,7 @@ export function useUpdateShoppingItem() {
       queryClient.setQueryData<ShoppingList | undefined>(key, (list) =>
         revertItemPatch(list, context?.previousItem, patch)
       );
-      toast.error(getApiErrorMessage(error, "Couldn't save that change. Try again."));
+      if (!isFinishLockedError(error)) toast.error(getApiErrorMessage(error, "Couldn't save that change. Try again."));
     },
     onSettled: settle,
   });
@@ -176,6 +201,7 @@ export function useDeleteShoppingItem() {
       );
     },
     onMutate: async (vars) => {
+      await assertListUnlocked();
       const { itemId } = vars;
       await queryClient.cancelQueries({ queryKey: key });
       const current = queryClient.getQueryData<ShoppingList>(key);
@@ -194,7 +220,7 @@ export function useDeleteShoppingItem() {
           restoreItem(list, context.removed, context.index)
         );
       }
-      toast.error(getApiErrorMessage(error, "Couldn't remove that item. Try again."));
+      if (!isFinishLockedError(error)) toast.error(getApiErrorMessage(error, "Couldn't remove that item. Try again."));
     },
     onSettled: settle,
   });
@@ -217,6 +243,7 @@ export function useAddShoppingItem() {
         })
       ),
     onMutate: async (input) => {
+      await assertListUnlocked();
       // Native: show the item immediately under the id the queued op will carry.
       if (!getOfflineRuntime()) return { addedId: null };
       const id = newId();
@@ -239,7 +266,7 @@ export function useAddShoppingItem() {
           (list) => removeItem(list, addedId).list
         );
       }
-      toast.error(getApiErrorMessage(error, "Couldn't add that item. Try again."));
+      if (!isFinishLockedError(error)) toast.error(getApiErrorMessage(error, "Couldn't add that item. Try again."));
     },
     onSettled: settle,
   });
