@@ -116,6 +116,9 @@ describe('purchaseFull', () => {
     ['OfflineError', () => new OfflineError()],
     ['network error', () => new Error('Network Error')],
     ['503', () => httpError(503, 'VERIFICATION_UNAVAILABLE')],
+    ['429 verify limiter', () => httpError(429, 'ENTITLEMENT_RATE_LIMITED')],
+    ['429 api limiter', () => httpError(429)],
+    ['409 idempotency in flight', () => httpError(409, 'IDEMPOTENCY_IN_FLIGHT')],
   ])('transient verify failure (%s) is verify-pending without finish', async (_n, make) => {
     const s = setup({ verify: async () => { throw make(); } });
     expect(await purchaseFull(s.deps)).toEqual({ kind: 'verify-pending' });
@@ -125,6 +128,10 @@ describe('purchaseFull', () => {
     const s = setup({ verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); } });
     expect(await purchaseFull(s.deps)).toEqual({ kind: 'claimed-elsewhere' });
     expect(s.calls.some((c) => c.startsWith('finish'))).toBe(false);
+  });
+  it('409 with another code is still verify-failed', async () => {
+    const s = setup({ verify: async () => { throw httpError(409, 'IDEMPOTENCY_KEY_REUSED'); } });
+    expect(await purchaseFull(s.deps)).toEqual({ kind: 'verify-failed' });
   });
   it('400 maps to verify-failed', async () => {
     const s = setup({ verify: async () => { throw httpError(400, 'INVALID_TRANSACTION'); } });
@@ -172,6 +179,11 @@ describe('restorePurchases', () => {
   it('transient verify is verify-pending', async () => {
     const s = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(503); } });
     expect(await restorePurchases(s.deps)).toEqual({ kind: 'verify-pending' });
+  });
+  it('rate-limited restore is verify-pending, not failed', async () => {
+    const s = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(429, 'ENTITLEMENT_RATE_LIMITED'); } });
+    expect(await restorePurchases(s.deps)).toEqual({ kind: 'verify-pending' });
+    expect(s.calls.some((c) => c.startsWith('finish'))).toBe(false);
   });
   it('claimed elsewhere and revoked are reported', async () => {
     const c = setup({ owned: [[tx(1)]], verify: async () => { throw httpError(409, 'ENTITLEMENT_ALREADY_CLAIMED'); } });

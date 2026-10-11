@@ -43,11 +43,23 @@ function httpStatus(error: unknown): number | undefined {
   return typeof response?.status === 'number' ? response.status : undefined;
 }
 
+const IDEMPOTENCY_IN_FLIGHT = 'IDEMPOTENCY_IN_FLIGHT';
+const RATE_LIMITED = 429;
+
+/**
+ * Rate limits (429) and an in-flight duplicate of the same Idempotency-Key
+ * (409 IDEMPOTENCY_IN_FLIGHT) are retryable: the user was charged and the
+ * unfinished transaction is re-verified on the next recheck (WR-03).
+ */
 function classifyVerifyError(error: unknown): VerifyKind {
   if (isOfflineError(error)) return 'transient';
   const status = httpStatus(error);
-  if (status === undefined || status >= 500) return 'transient';
-  if (status === 409 && getApiErrorCode(error) === 'ENTITLEMENT_ALREADY_CLAIMED') return 'claimed';
+  if (status === undefined || status >= 500 || status === RATE_LIMITED) return 'transient';
+  if (status === 409) {
+    const code = getApiErrorCode(error);
+    if (code === 'ENTITLEMENT_ALREADY_CLAIMED') return 'claimed';
+    if (code === IDEMPOTENCY_IN_FLIGHT) return 'transient';
+  }
   return 'failed';
 }
 
