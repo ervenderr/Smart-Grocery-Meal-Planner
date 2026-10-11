@@ -28,6 +28,19 @@ describe('runNativeBoot', () => {
     expect(new Date(marker).toISOString()).toBe(marker);
   });
 
+  it('does not clear Keychain when the install marker cannot be persisted', async () => {
+    const { storage, backend } = setup();
+    const failing: BootStorage = {
+      ...storage,
+      setItem: () => {
+        throw new Error('quota');
+      },
+    };
+    const result = await runNativeBoot({ storage: failing, backend });
+    expect(result.firstLaunch).toBe(true);
+    expect(backend.remove).not.toHaveBeenCalled();
+  });
+
   it('marker present leaves Keychain alone', async () => {
     const { storage, backend } = setup({ [INSTALL_MARKER_KEY]: '2026-01-01T00:00:00.000Z' });
     const result = await runNativeBoot({ storage, backend });

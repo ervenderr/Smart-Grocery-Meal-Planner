@@ -50,6 +50,10 @@ async function clearKeychain(backend: SecureBackend): Promise<void> {
 /**
  * Keychain survives uninstall but WebView localStorage does not, so a missing
  * install marker means a fresh (re)install: drop stale Keychain tokens.
+ * Trade-off: WKWebView may evict localStorage under storage pressure while the
+ * app stays installed, which looks like a fresh install and signs the user out
+ * (a safe failure: re-login). A uninstall-surviving marker would need a
+ * native preferences plugin.
  * Always scrubs legacy localStorage token copies. Never throws.
  */
 export async function runNativeBoot(deps: {
@@ -61,8 +65,14 @@ export async function runNativeBoot(deps: {
 
   const firstLaunch = attempt(() => storage.getItem(INSTALL_MARKER_KEY), null) === null;
   if (firstLaunch) {
-    await clearKeychain(backend);
-    attempt(() => storage.setItem(INSTALL_MARKER_KEY, new Date().toISOString()), undefined);
+    // Write the marker FIRST and read it back. If it cannot be persisted, every
+    // launch would look like a fresh install and wipe the Keychain, so skip the wipe.
+    const markerPersisted = attempt(() => {
+      const value = new Date().toISOString();
+      storage.setItem(INSTALL_MARKER_KEY, value);
+      return storage.getItem(INSTALL_MARKER_KEY) === value;
+    }, false);
+    if (markerPersisted) await clearKeychain(backend);
   }
   for (const key of LEGACY_TOKEN_KEYS) attempt(() => storage.removeItem(key), undefined);
   scrubPersistedAuth(storage);
