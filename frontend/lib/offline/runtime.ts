@@ -87,7 +87,7 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
     onNetworkFailure: () => connectivity.reportNetworkFailure(),
     onSuccess: () => connectivity.reportSuccess(),
   });
-  const extras: Partial<Record<OpKind, Executor>> = {};
+  let extras: Readonly<Partial<Record<OpKind, Executor>>> = {};
   const defaults = createExecutorRegistry();
   const registry = { get: (kind: OpKind) => extras[kind] ?? defaults.get(kind) };
   const listeners = new Set<(e: DrainEvent) => void>();
@@ -240,10 +240,11 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
       };
     },
     registerExecutors(extra) {
-      Object.assign(extras, extra);
+      extras = { ...extras, ...extra };
     },
     applyWrites,
     dispose() {
+      detachSession();
       disposed = true;
       drain.dispose();
       connectivity.dispose();
@@ -253,11 +254,6 @@ export function createOfflineRuntime(args: CreateRuntimeArgs): OfflineRuntime {
   const detachSession = attachSessionTransitions(runtime, args, () => {
     sessionEpoch += 1;
   });
-  const baseDispose = runtime.dispose;
-  runtime.dispose = () => {
-    detachSession();
-    baseDispose();
-  };
   return runtime;
 }
 
