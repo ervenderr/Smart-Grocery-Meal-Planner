@@ -79,11 +79,17 @@ function stripQuery(href: string): string {
   return index === -1 ? href : href.slice(0, index);
 }
 
+function stripTrailingSlash(path: string): string {
+  return path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+}
+
 export function isActive(pathname: string | null, href: string, exact = false): boolean {
   if (!pathname) return false;
-  const target = stripQuery(href);
-  if (pathname === target) return true;
-  return !exact && pathname.startsWith(`${target}/`);
+  // The static export (native app) serves routes with a trailing slash.
+  const current = stripTrailingSlash(pathname);
+  const target = stripTrailingSlash(stripQuery(href));
+  if (current === target) return true;
+  return !exact && current.startsWith(`${target}/`);
 }
 
 export function isMoreActive(pathname: string | null): boolean {

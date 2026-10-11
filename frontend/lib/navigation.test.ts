@@ -51,6 +51,8 @@ describe('nav config', () => {
 describe('isActive', () => {
   it('matches exact routes', () => {
     expect(isActive('/dashboard', '/dashboard', true)).toBe(true);
+    expect(isActive('/dashboard/', '/dashboard', true)).toBe(true);
+    expect(isActive('/pantry/', '/pantry')).toBe(true);
     expect(isActive('/dashboard/x', '/dashboard', true)).toBe(false);
   });
   it('matches nested routes by segment', () => {
