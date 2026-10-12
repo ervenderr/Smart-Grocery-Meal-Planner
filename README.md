@@ -12,6 +12,8 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%2B-blue.svg)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748.svg)](https://www.prisma.io/)
 
+<img src="./docs/media/kumaun-demo.gif" width="260" alt="Animated tour of Kumaun: pantry, what can I cook, recipe, meal plan, shopping list, budget, recipes">
+
 <table>
   <tr>
     <td align="center"><img src="./docs/screenshots/mobile-dashboard.png" width="220" alt="Dashboard with bottom navigation"><br><sub><b>Dashboard</b><br>Pantry, recipes, plans, budget</sub></td>
