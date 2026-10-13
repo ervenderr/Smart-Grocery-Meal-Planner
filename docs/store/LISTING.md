@@ -66,9 +66,9 @@ OPTIONAL AI SUGGESTIONS
 - AI is off until you say yes. Before the first use, Kumaun explains what is sent (ingredient names, quantities and dietary tags only, never your name or email) and asks for your permission. You can keep using every other feature without it.
 - AI results are clearly labelled, can contain mistakes, and can be reported from inside the app.
 
-FREE TO START
-- The free version includes barcode scanning, expiry reminders, recipes, meal plans, shopping lists and up to 25 pantry items.
-- Kumaun Full is a single one-time purchase (no subscription) that removes the pantry limit and adds more AI suggestions. Purchases can be restored on any of your devices.
+PAY ONCE, USE EVERYTHING
+- One price, no subscription, no in-app purchases, no ads.
+- Barcode scanning, expiry reminders, recipes, meal plans, shopping lists, an unlimited pantry and optional AI suggestions are all included.
 
 YOUR DATA
 - You can delete your account and all of its data from Settings at any time.
@@ -99,7 +99,7 @@ Welcome to Kumaun on iPhone. Track your pantry and expiry dates, scan barcodes, 
 | Primary category | Food & Drink |
 | Secondary category | Lifestyle (optional; Productivity is the alternative) |
 | Platform | iPhone and iPad (owner decision: keep `TARGETED_DEVICE_FAMILY = "1,2"`; see iPad note below) |
-| Price | Free (with one non-consumable IAP, see IAP.md) |
+| Price | Paid upfront, USD 9.99 (decision 2026-10-13: no free tier, no in-app purchases; IAP.md is historical) |
 | Availability | All regions you can legally serve; start with Philippines plus the countries you test in. The AI provider is the env-configured OpenAI-compatible one (label default `Dahl Inference`); check its terms for the EEA/UK before enabling AI there. |
 | Copyright | `2026 <Your Legal Name>` (individual enrollment: your legal name, shown as seller) |
 | Support URL | `https://<vercel-host>/support` (exists in frontend/app/support) |
