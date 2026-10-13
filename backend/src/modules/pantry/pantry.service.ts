@@ -19,8 +19,6 @@ import { Prisma, PantryItem } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import { formatPantryItem } from "./pantry.format";
 import { notifyLowStock } from "./pantry.low-stock";
-import { assertPantryCapacity, lockPantryCap } from "./pantry.limit";
-import { config } from "../../config/env.config";
 
 export class PantryService {
   /**
@@ -49,22 +47,13 @@ export class PantryService {
       throw new AppError("Quantity must be greater than 0", 400);
     }
 
-    // Count + insert under the per-user cap lock so concurrent creates cannot
-    // push a free user past the limit (12-07).
     let result: { item: PantryItem; created: boolean };
     try {
       result = await prisma.$transaction(async (tx) => {
-        await lockPantryCap(tx, userId);
         if (id) {
           const replay = await this.findReplay(tx, userId, id);
           if (replay) return { item: replay, created: false };
         }
-        await assertPantryCapacity(
-          tx,
-          userId,
-          config.entitlements.freePantryLimit,
-          1
-        );
         const row = await tx.pantryItem.create({
           data: {
             ...(id ? { id } : {}),

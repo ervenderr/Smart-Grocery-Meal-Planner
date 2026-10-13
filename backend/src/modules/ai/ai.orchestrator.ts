@@ -10,7 +10,6 @@ import { z } from 'zod';
 import { logger } from '../../config/logger.config';
 import { aiQuotaExceededError, aiUnavailableError } from './ai.errors';
 import { getAiDeps } from './ai.deps';
-import { isEntitled } from '../entitlements/entitlement-status';
 import { nextUtcMonthStart, resolveUserLimits, utcMonthStart } from './ai-limits';
 import { buildCacheKey } from './ai-cache-key';
 import { getCachedSafe, pruneExpired, setCachedSafe } from './ai-cache.repository';
@@ -131,20 +130,10 @@ interface Reservation {
   readonly month: string;
 }
 
-/** Server-side tier lookup; any failure degrades to the free limits (never a 500). */
-async function entitledOrFree(userId: string): Promise<boolean> {
-  try {
-    return await isEntitled(userId);
-  } catch (error) {
-    logger.warn('AI entitlement lookup failed, using free limits', { error: describeError(error) });
-    return false;
-  }
-}
-
 async function reserveOrThrow(req: AiRunRequest<unknown>, now: Date): Promise<Reservation> {
   const day = utcDay(now);
   const month = utcMonthStart(now);
-  const limits = resolveUserLimits(await entitledOrFree(req.userId), getAiDeps().limits);
+  const limits = resolveUserLimits(true, getAiDeps().limits) // paid download: every user gets the full allowance;
   try {
     const counts = await reserveQuota({
       userId: req.userId,

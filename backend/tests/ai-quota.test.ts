@@ -4,7 +4,6 @@
  */
 
 import request from 'supertest';
-import * as entitlementStatus from '../src/modules/entitlements/entitlement-status';
 import { grantTestEntitlement } from './helpers/entitlement-fixtures';
 import { createApp } from '../src/app';
 import { prisma } from '../src/config/database.config';
@@ -162,7 +161,7 @@ describe('quota over HTTP', () => {
 
   it('lets the same user call again after the UTC day rolls over', async () => {
     const day = '2031-03-05';
-    useDay(day, { userDaily: 1, globalDaily: 10 });
+    useDay(day, { paidUserDaily: 1, globalDaily: 10 });
     const a = uniqueName('roll');
     const { token } = await newUser([a]);
     fetchSpy.mockImplementation(async () => chatCompletion(recipeReply(a)));
@@ -170,7 +169,7 @@ describe('quota over HTTP', () => {
     expect((await suggest(token, { maxPrepTime: 1 })).status).toBe(200);
     expect((await suggest(token, { maxPrepTime: 2 })).status).toBe(429);
 
-    useDay('2031-03-06', { userDaily: 1, globalDaily: 10 });
+    useDay('2031-03-06', { paidUserDaily: 1, globalDaily: 10 });
     expect((await suggest(token, { maxPrepTime: 3 })).status).toBe(200);
   });
 });
@@ -308,14 +307,14 @@ describe('Monthly scope', () => {
 describe('Entitlement-aware limits over HTTP', () => {
   const okFetch = (a: string) => async () => chatCompletion(recipeReply(a));
 
-  it('free user is limited by userDaily even when paidUserDaily is higher', async () => {
+  it('every user gets paidUserDaily without any entitlement (paid download)', async () => {
     useDay('2045-05-02', { userDaily: 1, paidUserDaily: 3, globalDaily: 100, paidMonthly: 600 });
-    const a = uniqueName('free');
+    const a = uniqueName('everyone');
     const { token } = await newUser([a]);
     fetchSpy.mockImplementation(okFetch(a));
 
-    expect((await suggest(token, { maxPrepTime: 1 })).status).toBe(200);
-    const blocked = await suggest(token, { maxPrepTime: 2 });
+    for (const n of [1, 2, 3]) expect((await suggest(token, { maxPrepTime: n })).status).toBe(200);
+    const blocked = await suggest(token, { maxPrepTime: 4 });
     expect(blocked.status).toBe(429);
     expect(blocked.body.quota.scope).toBe('user');
   });
@@ -368,18 +367,5 @@ describe('Entitlement-aware limits over HTTP', () => {
     expect((await suggest(token)).status).toBe(503);
     expect(await count(`usermonth:${userId}`, '2045-05-01')).toBe(0);
     expect(await count(`user:${userId}`, day)).toBe(0);
-  });
-
-  it('falls back to free limits when the entitlement lookup throws', async () => {
-    useDay('2045-05-06', { userDaily: 1, paidUserDaily: 5, globalDaily: 100, paidMonthly: 600 });
-    const a = uniqueName('lookup');
-    const { token } = await newUser([a]);
-    fetchSpy.mockImplementation(okFetch(a));
-    jest.spyOn(entitlementStatus, 'isEntitled').mockRejectedValue(new Error('db down'));
-
-    expect((await suggest(token, { maxPrepTime: 1 })).status).toBe(200);
-    const blocked = await suggest(token, { maxPrepTime: 2 });
-    expect(blocked.status).toBe(429);
-    expect(blocked.body.quota.scope).toBe('user');
   });
 });

@@ -6,8 +6,6 @@
 
 import type { Prisma } from '@prisma/client';
 import { lockUserPantry } from '../pantry/pantry.lock';
-import { assertPantryCapacity, lockPantryCap } from '../pantry/pantry.limit';
-import { config } from '../../config/env.config';
 import { planPantryMerge } from './shopping-pantry';
 import type { CheckedItem } from './shopping-pantry';
 
@@ -47,18 +45,6 @@ export async function applyPantryMergeInTx(
       todayUtc: utcMidnight(new Date()),
     });
     if (plan.updates.length === 0 && plan.creates.length === 0) return { added: 0, merged: 0 };
-
-    // Free-tier cap (12-07): checked before any write so a 403 leaves the
-    // finish transaction with nothing to roll back but the list state.
-    if (plan.creates.length > 0) {
-      await lockPantryCap(tx, userId);
-      await assertPantryCapacity(
-        tx,
-        userId,
-        config.entitlements.freePantryLimit,
-        plan.creates.length,
-      );
-    }
 
     for (const u of plan.updates) {
       await tx.pantryItem.updateMany({

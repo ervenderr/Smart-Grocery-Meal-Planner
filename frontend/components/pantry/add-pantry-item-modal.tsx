@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ScanBarcode } from 'lucide-react';
+import { ScanBarcode } from 'lucide-react';
 import { pantryApi } from '@/lib/api/pantry';
 import { useQueryClient } from '@tanstack/react-query';
 import { PANTRY_ALL_KEY } from '@/lib/offline/cache/cache-keys';
@@ -18,7 +18,6 @@ import { newId } from '@/lib/offline/ids';
 import { buildPantryCreate } from '@/lib/offline/ops/pantry-ops';
 import { getOfflineRuntime } from '@/lib/offline/runtime';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { usePantryAddGate } from '@/lib/hooks/use-pantry-add-gate';
 import { ScanSheet } from '@/components/pantry/scan/scan-sheet';
 import { mergeScanIntoForm } from '@/lib/scan/merge-scan';
 import { prefillFromOwnItem, prefillFromProduct } from '@/lib/scan/prefill';
@@ -115,7 +114,6 @@ export function AddPantryItemModal({
   const [offlineScan, setOfflineScan] = useState(false);
   const [scanAttribution, setScanAttribution] = useState<FoodAttribution | null>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
-  const gate = usePantryAddGate();
 
   const {
     register,
@@ -183,12 +181,7 @@ export function AddPantryItemModal({
     else toast("We don't know this product yet. Barcode saved, add the details yourself.");
   };
 
-  const retrySubmit = () => void handleSubmit(onSubmit)();
-
   const onSubmit = async (data: PantryItemFormData) => {
-    // At the free limit: keep the form and its data; nothing is queued or reset.
-    if (gate.intercept(submitRef.current, retrySubmit)) return;
-    gate.clearLimitError();
     setIsLoading(true);
 
     try {
@@ -231,7 +224,6 @@ export function AddPantryItemModal({
       if (outcome.mode === 'direct') onSuccess();
       onClose();
     } catch (error: any) {
-      if (gate.handleError(error, submitRef.current, retrySubmit)) return;
       console.error('Add pantry item error:', error);
       const errorMessage =
         error?.response?.data?.message || 'Failed to add item. Please try again.';
@@ -246,7 +238,6 @@ export function AddPantryItemModal({
       reset();
       setOfflineScan(false);
       setScanAttribution(null);
-      gate.clearLimitError();
       onClose();
     }
   };
@@ -255,7 +246,6 @@ export function AddPantryItemModal({
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Pantry Item" size="lg">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        onChange={gate.clearLimitError}
         className="space-y-6"
       >
         {headerSlot}
@@ -427,16 +417,6 @@ export function AddPantryItemModal({
             {errors.notes && <p className="mt-1 text-sm text-red-500">{errors.notes.message}</p>}
           </div>
         </div>
-
-        {gate.limitError && (
-          <div
-            role="alert"
-            className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-800"
-          >
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <p>{gate.limitError}</p>
-          </div>
-        )}
 
         {/* Actions */}
         <div className="pb-safe flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
